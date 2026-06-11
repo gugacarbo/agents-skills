@@ -1,8 +1,13 @@
 *
 !.gitignore
+!AGENTS.md
 !README.md
 !skills.sh
-!commit-changes/
-!commit-changes/**
 !.scripts/
 !.scripts/**
+
+# --- --- SKILLS --- ---
+
+!commit-changes/**
+!skill-creator/
+!skill-creator/AGENTS.md
