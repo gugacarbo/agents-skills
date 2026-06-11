@@ -2,5 +2,6 @@
 !.gitignore
 !README.md
 !skills.sh
-!commit-changes
+!commit-changes/
+!commit-changes/SKILL.md
 !.scripts/*
