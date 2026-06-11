@@ -140,6 +140,20 @@ test_global_flag_prompts_even_with_yes() {
   assert_contains "global"
 }
 
+test_confirmation_reads_from_terminal_when_stdin_is_pipe() {
+  local tmp
+  tmp=$(mktemp -d)
+  mkdir -p "$tmp/home" "$tmp/work"
+  printf 'y\n' >"$tmp/tty-input"
+
+  (
+    cd "$tmp/work"
+    run_capture "$tmp/output.log" env HOME="$tmp/home" AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" "$INSTALLER" --global < /dev/null
+  )
+
+  assert_exists "$tmp/home/.agents/skills/$FIXTURE_SKILL/SKILL.md"
+}
+
 main() {
   trap cleanup_fixture_skill EXIT
   setup_fixture_skill
@@ -152,6 +166,7 @@ main() {
   test_repo_flag_yes_installs_local_default
   test_global_fallback_still_requires_confirmation_with_yes
   test_global_flag_prompts_even_with_yes
+  test_confirmation_reads_from_terminal_when_stdin_is_pipe
 
   printf 'PASS: install.sh\n'
 }

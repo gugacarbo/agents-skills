@@ -54,6 +54,10 @@ error() {
   log_line ERROR 31 "$@" >&2
 }
 
+read_reply_from() {
+  IFS= read -r reply <"$1"
+}
+
 usage() {
   cat <<'EOF'
 Uso: ./.scripts/install.sh [opcoes]
@@ -110,10 +114,13 @@ find_repo_root() {
 
 confirm() {
   prompt_message=$1
+  prompt_input=${AGENTS_SKILLS_PROMPT_INPUT:-/dev/tty}
 
   printf '%s %s [y/N]: ' "$(color 36 '[PROMPT]')" "$prompt_message"
 
-  if ! IFS= read -r reply; then
+  if read_reply_from "$prompt_input" 2>/dev/null; then
+    :
+  elif ! IFS= read -r reply; then
     printf '\n'
     return 1
   fi
