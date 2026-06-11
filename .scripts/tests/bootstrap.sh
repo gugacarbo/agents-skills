@@ -59,6 +59,33 @@ test_bootstrap_uses_archive_and_runs_install() {
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
 }
 
+test_bootstrap_uses_archive_and_runs_update() {
+  local tmp archive_root archive_path target
+  tmp=$(mktemp -d)
+  archive_root="$tmp/archive-src/agents-skills-main"
+  archive_path="$tmp/agents-skills-main.tar.gz"
+  target="$tmp/custom-skills"
+
+  mkdir -p "$archive_root" "$target/$FIXTURE_SKILL"
+  cp -R "$REPO_ROOT/.scripts" "$archive_root/.scripts"
+  cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
+  mkdir -p "$archive_root/$FIXTURE_SKILL"
+  printf '%s\n' '---' 'name: sample-skill' '---' 'version: remote' >"$archive_root/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' 'version: local' >"$target/$FIXTURE_SKILL/SKILL.md"
+
+  tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
+
+  (
+    cd "$tmp"
+    cat "$ORCHESTRATOR" | \
+    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
+    AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
+      sh -s -- update --path "$target" --yes >"$tmp/output-update.log" 2>&1
+  )
+
+  grep -q 'version: remote' "$target/$FIXTURE_SKILL/SKILL.md"
+}
+
 test_bootstrap_missing_command_does_not_loop() {
   local tmp archive_root archive_path status download_count
   tmp=$(mktemp -d)
@@ -96,6 +123,7 @@ main() {
   assert_exists "$ORCHESTRATOR"
 
   test_bootstrap_uses_archive_and_runs_install
+  test_bootstrap_uses_archive_and_runs_update
   test_bootstrap_missing_command_does_not_loop
 
   printf 'PASS: bootstrap.sh\n'

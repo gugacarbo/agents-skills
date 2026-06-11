@@ -14,6 +14,12 @@ Com argumentos:
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install --global
 ```
 
+Atualizar uma instalacao existente:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- update --global
+```
+
 Exemplos:
 
 ```sh
@@ -23,4 +29,8 @@ Exemplos:
 ./skills.sh install --global
 ./skills.sh install --init --path ~/.agents/skills
 ./skills.sh install --instructions --path ~/.agents/skills
+./skills.sh update
+./skills.sh update --yes
+./skills.sh update --path ~/.agents/skills
+./skills.sh update --global
 ```

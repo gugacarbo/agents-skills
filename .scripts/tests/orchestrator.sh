@@ -47,14 +47,38 @@ test_install_subcommand_delegates_to_inner_script() {
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
 }
 
+test_update_subcommand_delegates_to_inner_script() {
+  local tmp archive_root archive_path target
+  tmp=$(mktemp -d)
+  archive_root="$tmp/archive-src/agents-skills-main"
+  archive_path="$tmp/agents-skills-main.tar.gz"
+  target="$tmp/custom-skills"
+
+  mkdir -p "$archive_root/$FIXTURE_SKILL" "$archive_root/.scripts" "$target/$FIXTURE_SKILL" "$tmp/work"
+  printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' 'version: remote' >"$archive_root/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/skills.sh"
+  printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/.scripts/install.sh"
+  printf '%s\n' 'version: local' >"$target/$FIXTURE_SKILL/SKILL.md"
+  tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
+
+  (
+    cd "$tmp/work"
+    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" "$ORCHESTRATOR" update --path "$target" --yes >"$tmp/output.log" 2>&1
+  )
+
+  grep -q 'version: remote' "$target/$FIXTURE_SKILL/SKILL.md"
+}
+
 main() {
   trap cleanup_fixture_skill EXIT
   setup_fixture_skill
 
   assert_exists "$REPO_ROOT/.scripts/install.sh"
+  assert_exists "$REPO_ROOT/.scripts/update.sh"
   assert_exists "$ORCHESTRATOR"
 
   test_install_subcommand_delegates_to_inner_script
+  test_update_subcommand_delegates_to_inner_script
 
   printf 'PASS: orchestrator.sh\n'
 }

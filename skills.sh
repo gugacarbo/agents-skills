@@ -65,6 +65,8 @@ $(list_commands | sed 's/^/  - /')
 Exemplos:
   ./skills.sh install
   ./skills.sh install --path ~/.codex/skills
+  ./skills.sh update
+  ./skills.sh update --yes
 EOF
 }
 
