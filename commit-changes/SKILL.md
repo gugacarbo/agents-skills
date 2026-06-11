@@ -17,6 +17,16 @@ Use this skill when the user clearly wants git commit work done, not when they o
 - Do not discard, reset, or revert user changes to make the commit easier.
 - Do not create sidecar files inside the user's repo unless the task itself requires them.
 
+## Delegation Preference
+
+- Prefer dispatching a subagent for the preparatory parts of this skill when that capability is available.
+- When the platform allows it, prefer a model that is cheaper or weaker than the main agent for that subagent run.
+- When the platform allows it, prefer `reasoning effort: low` by default and increase only to `medium` when the diff is ambiguous, the commit grouping is unclear, or hook failures need more careful analysis.
+- Avoid `reasoning effort: high` by default for this skill unless the user explicitly asks for deeper analysis or the available options make that unavoidable.
+- Good subagent tasks include inspecting the working tree, proposing commit groups, drafting Conventional Commit messages, and identifying likely `AGENTS.md` updates.
+- If no subagent is available, no model or effort controls exist, or the task requires especially careful local git state handling, continue inline without blocking on delegation.
+- Keep final staging, `git commit`, and post-commit verification sequential and preferably in the main agent so the write path stays easy to audit.
+
 ## Do Not Use
 
 Do not load this skill for:
@@ -228,6 +238,7 @@ git commit -m "<type>(<scope>): <subject>" -m "<body>"
 
 Respect intentional staging when it already expresses the grouping cleanly. Do not blindly `git add .` unless the user's request and the diff make that the correct scope.
 Execute multi-commit plans strictly sequentially. Never overlap `git add` or `git commit` commands, never background them, and never prepare the next commit until the previous one is fully complete and verified.
+Even when earlier analysis was delegated, keep this final write path in the main agent unless the user explicitly wants a different execution model.
 
 ### 8. Handle Hook Failures Carefully
 

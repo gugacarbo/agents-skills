@@ -27,6 +27,7 @@ main() {
   assert_not_ignored "AGENTS.md"
   assert_not_ignored ".scripts/AGENTS.md"
   assert_not_ignored ".scripts/README.md"
+  assert_not_ignored "commit-changes/SKILL.md"
   assert_not_ignored ".scripts/install.sh"
   assert_not_ignored ".scripts/update.sh"
   assert_not_ignored ".scripts/tests/install.sh"
