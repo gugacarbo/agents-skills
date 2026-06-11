@@ -5,8 +5,22 @@ set -eu
 SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
-INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/.scripts
-LOCAL_INSTALL_SCRIPT=$INTERNAL_SCRIPTS_DIR/install.sh
+SCRIPT_BASENAME=${0##*/}
+
+case "$SCRIPT_BASENAME" in
+  sh|dash)
+    IS_STREAMED=1
+    ;;
+  *)
+    IS_STREAMED=0
+    ;;
+esac
+
+if [ "$IS_STREAMED" -eq 1 ]; then
+  INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/.agents-skills-streamed-bootstrap
+else
+  INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/.scripts
+fi
 
 AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}
 AGENTS_SKILLS_REPO=${AGENTS_SKILLS_REPO:-agents-skills}
@@ -94,7 +108,7 @@ bootstrap_from_archive() {
   [ -f "$extracted_root/skills.sh" ] || die "Arquivo skills.sh nao encontrado no pacote baixado"
 
   printf '%s %s\n' "$(color 34 '[INFO]')" "Executando comando $command_name a partir do pacote baixado"
-  AGENTS_SKILLS_ARCHIVE_URL_FORCE='' sh "$extracted_root/skills.sh" "$command_name" "$@"
+  AGENTS_SKILLS_BOOTSTRAPPED=1 sh "$extracted_root/skills.sh" "$command_name" "$@"
 }
 
 if [ $# -eq 0 ]; then
@@ -115,6 +129,10 @@ shift
 COMMAND_SCRIPT=$INTERNAL_SCRIPTS_DIR/$COMMAND.sh
 
 if [ ! -f "$COMMAND_SCRIPT" ]; then
+  if [ "${AGENTS_SKILLS_BOOTSTRAPPED:-0}" = "1" ]; then
+    die "Comando $COMMAND nao encontrado no pacote baixado"
+  fi
+
   bootstrap_from_archive "$COMMAND" "$@"
   exit 0
 fi

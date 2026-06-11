@@ -9,7 +9,8 @@ REPO_ROOT=$(
   CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
 )
 ORCHESTRATOR="$REPO_ROOT/skills.sh"
-FIXTURE_SKILL="commit-changes"
+FIXTURE_SKILL="orchestrator-test-fixture-skill"
+FIXTURE_DIR="$REPO_ROOT/$FIXTURE_SKILL"
 
 fail() {
   printf 'FAIL: %s\n' "$1" >&2
@@ -22,6 +23,15 @@ assert_exists() {
   if [ ! -e "$path" ]; then
     fail "expected path to exist: $path"
   fi
+}
+
+setup_fixture_skill() {
+  mkdir -p "$FIXTURE_DIR"
+  printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' >"$FIXTURE_DIR/SKILL.md"
+}
+
+cleanup_fixture_skill() {
+  rm -rf "$FIXTURE_DIR"
 }
 
 test_install_subcommand_delegates_to_inner_script() {
@@ -38,6 +48,9 @@ test_install_subcommand_delegates_to_inner_script() {
 }
 
 main() {
+  trap cleanup_fixture_skill EXIT
+  setup_fixture_skill
+
   assert_exists "$REPO_ROOT/.scripts/install.sh"
   assert_exists "$ORCHESTRATOR"
 

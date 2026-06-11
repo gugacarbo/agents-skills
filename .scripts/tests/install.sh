@@ -9,7 +9,8 @@ REPO_ROOT=$(
   CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
 )
 INSTALLER="$REPO_ROOT/.scripts/install.sh"
-FIXTURE_SKILL="commit-changes"
+FIXTURE_SKILL="install-test-fixture-skill"
+FIXTURE_DIR="$REPO_ROOT/$FIXTURE_SKILL"
 
 LAST_OUTPUT=''
 
@@ -56,6 +57,15 @@ run_capture() {
 
   LAST_OUTPUT=$(cat "$output_file")
   return "$status"
+}
+
+setup_fixture_skill() {
+  mkdir -p "$FIXTURE_DIR"
+  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$FIXTURE_DIR/SKILL.md"
+}
+
+cleanup_fixture_skill() {
+  rm -rf "$FIXTURE_DIR"
 }
 
 test_explicit_path_installs_to_target() {
@@ -131,6 +141,9 @@ test_global_flag_prompts_even_with_yes() {
 }
 
 main() {
+  trap cleanup_fixture_skill EXIT
+  setup_fixture_skill
+
   assert_exists "$REPO_ROOT/$FIXTURE_SKILL/SKILL.md"
   assert_exists "$INSTALLER"
 
