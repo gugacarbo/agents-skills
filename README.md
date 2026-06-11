@@ -21,4 +21,6 @@ Exemplos:
 ./skills.sh install --yes
 ./skills.sh install --path ~/.codex/skills
 ./skills.sh install --global
+./skills.sh install --init --path ~/.agents/skills
+./skills.sh install --instructions --path ~/.agents/skills
 ```

@@ -9,8 +9,15 @@ SKILLS_REPO_ROOT=$(
   CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
 )
 
+AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}
+AGENTS_SKILLS_REPO=${AGENTS_SKILLS_REPO:-agents-skills}
+AGENTS_SKILLS_REF=${AGENTS_SKILLS_REF:-main}
+AGENTS_SKILLS_REPO_URL=${AGENTS_SKILLS_REPO_URL:-https://github.com/$AGENTS_SKILLS_OWNER/$AGENTS_SKILLS_REPO.git}
+
 YES=0
 USE_GLOBAL=0
+USE_INIT=0
+USE_INSTRUCTIONS=0
 TARGET_PATH=''
 
 if [ -t 1 ] && [ -z "${NO_COLOR-}" ]; then
@@ -65,6 +72,8 @@ Uso: ./.scripts/install.sh [opcoes]
 Opcoes:
   -p, --path PATH   Instala as skills no PATH informado
   -g, --global      Usa ~/.agents/skills como primeira escolha
+      --init        Clona o repositorio de skills no destino (em vez de copiar)
+      --instructions  Copia README.md do repositorio para o destino
   -y, --yes         Aprova automaticamente apenas a instalacao local do repo
   -h, --help        Mostra esta ajuda
 EOF
@@ -166,6 +175,99 @@ copy_skills() {
   success "Instalacao concluida com $copied_count skill(s)"
 }
 
+copy_instructions() {
+  destination=$1
+  source_readme=$SKILLS_REPO_ROOT/README.md
+  dest_readme=$destination/README.md
+
+  [ -f "$source_readme" ] || die "README.md nao encontrado em $SKILLS_REPO_ROOT"
+
+  mkdir -p "$destination"
+
+  if [ -e "$dest_readme" ]; then
+    warn "README.md ja existe em $destination; mantendo arquivo existente"
+    return 0
+  fi
+
+  cp "$source_readme" "$dest_readme"
+  success "README.md copiado para $destination"
+}
+
+dir_is_nonempty() {
+  [ -d "$1" ] && [ -n "$(ls -A "$1" 2>/dev/null)" ]
+}
+
+merge_without_overwrite() {
+  source_dir=$1
+  destination_dir=$2
+
+  mkdir -p "$destination_dir"
+
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --ignore-existing "$source_dir/" "$destination_dir/"
+    return 0
+  fi
+
+  if cp -Rn "$source_dir/." "$destination_dir/." 2>/dev/null; then
+    return 0
+  fi
+
+  die "Nao foi possivel mesclar arquivos sem sobrescrever (instale rsync ou use cp GNU)"
+}
+
+merge_clone_into_nonempty() {
+  destination=$1
+  tmp_dir=$(mktemp -d)
+  checkout_dir=$tmp_dir/checkout
+
+  cleanup() {
+    rm -rf "$tmp_dir"
+  }
+
+  trap cleanup EXIT INT TERM
+
+  info "Clonando $AGENTS_SKILLS_REPO_URL (branch $AGENTS_SKILLS_REF) para mesclar em $destination"
+  git clone --branch "$AGENTS_SKILLS_REF" --single-branch --depth 1 "$AGENTS_SKILLS_REPO_URL" "$checkout_dir"
+
+  info "Mesclando arquivos do repositorio em $destination sem sobrescrever existentes"
+  merge_without_overwrite "$checkout_dir" "$destination"
+
+  if [ ! -d "$destination/.git" ]; then
+    cp -R "$checkout_dir/.git" "$destination/.git"
+    success "Repositorio git inicializado em $destination (arquivos existentes preservados na worktree)"
+  else
+    warn "Destino ja possui .git; mantendo o repositorio git existente"
+    success "Arquivos do repositorio de skills mesclados em $destination"
+  fi
+}
+
+clone_skills_repo() {
+  destination=$1
+
+  command -v git >/dev/null 2>&1 || die "git eh necessario para --init"
+
+  if same_dir "$destination" "$SKILLS_REPO_ROOT"; then
+    die "Destino igual ao repositorio atual; use install sem --init para copiar skills"
+  fi
+
+  if dir_is_nonempty "$destination"; then
+    if [ "$YES" -eq 1 ]; then
+      info "Flag --yes aplicada; mesclando repositorio em $destination mantendo arquivos existentes"
+    elif ! confirm "Destino $destination ja contem arquivos. Continuar mesclando o repositorio de skills e mantendo os arquivos existentes na worktree?"; then
+      die "Instalacao cancelada pelo usuario"
+    fi
+
+    merge_clone_into_nonempty "$destination"
+    return 0
+  fi
+
+  mkdir -p "$destination"
+
+  info "Clonando $AGENTS_SKILLS_REPO_URL (branch $AGENTS_SKILLS_REF) em $destination"
+  git clone --branch "$AGENTS_SKILLS_REF" --single-branch --depth 1 "$AGENTS_SKILLS_REPO_URL" "$destination"
+  success "Repositorio clonado em $destination"
+}
+
 while [ $# -gt 0 ]; do
   case "$1" in
     -p|--path)
@@ -175,6 +277,12 @@ while [ $# -gt 0 ]; do
       ;;
     -g|--global)
       USE_GLOBAL=1
+      ;;
+    --init)
+      USE_INIT=1
+      ;;
+    --instructions)
+      USE_INSTRUCTIONS=1
       ;;
     -y|--yes)
       YES=1
@@ -190,6 +298,10 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+if [ "$USE_INIT" -eq 1 ]; then
+  info "Flag --init detectada; o destino sera um git clone do repositorio de skills"
+fi
 
 GLOBAL_TARGET=$(expand_path "~/.agents/skills")
 CURRENT_DIR=$PWD
@@ -215,22 +327,23 @@ elif [ -n "$CURRENT_REPO_ROOT" ]; then
   TARGET_KIND=repo-local
   info "Repositorio git detectado em $CURRENT_REPO_ROOT"
 else
-  INSTALL_TARGET=$GLOBAL_TARGET
-  TARGET_KIND=global-fallback
+  INSTALL_TARGET=$CURRENT_DIR
+  TARGET_KIND=cwd-prompt
   warn "Nenhum repo git detectado e a pasta atual nao parece ser skills"
+  info "Confirme se deseja instalar no diretorio atual ou use --global / --path"
 fi
 
 case "$TARGET_KIND" in
   explicit|cwd-skills)
     ;;
-  repo-local)
+  repo-local|cwd-prompt)
     if [ "$YES" -eq 1 ]; then
-      info "Flag --yes aplicada; aprovando instalacao local em $INSTALL_TARGET"
+      info "Flag --yes aplicada; aprovando instalacao em $INSTALL_TARGET"
     elif ! confirm "Instalar as skills em $INSTALL_TARGET?"; then
       die "Instalacao cancelada pelo usuario"
     fi
     ;;
-  global|global-fallback)
+  global)
     if [ "$YES" -eq 1 ]; then
       warn "A flag --yes nao pula confirmacao para instalacao global"
     fi
@@ -244,4 +357,12 @@ case "$TARGET_KIND" in
     ;;
 esac
 
-copy_skills "$INSTALL_TARGET"
+if [ "$USE_INIT" -eq 1 ]; then
+  clone_skills_repo "$INSTALL_TARGET"
+else
+  copy_skills "$INSTALL_TARGET"
+fi
+
+if [ "$USE_INSTRUCTIONS" -eq 1 ]; then
+  copy_instructions "$INSTALL_TARGET"
+fi
