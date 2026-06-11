@@ -3,5 +3,6 @@
 !README.md
 !skills.sh
 !commit-changes/
-!commit-changes/SKILL.md
-!.scripts/*
+!commit-changes/**
+!.scripts/
+!.scripts/**
