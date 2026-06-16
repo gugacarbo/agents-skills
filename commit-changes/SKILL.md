@@ -14,6 +14,7 @@ Use this skill when the user clearly wants git commit work done, not when they o
 - Split unrelated work into separate commits when the separation is clear and safe.
 - Keep implementation and its tests together.
 - Respect the user's scope when they name files or directories.
+- When no path is named, infer the narrowest safe scope from the current conversation before considering the whole worktree.
 - Do not discard, reset, or revert user changes to make the commit easier.
 - Do not create sidecar files inside the user's repo unless the task itself requires them.
 
@@ -41,11 +42,12 @@ Do not load this skill for:
 
 ### 1. Parse Intent and Scope
 
-Extract three things from the user's request:
+Extract four things from the user's request and recent conversation:
 
 1. Whether they are explicitly asking to create a commit
 2. Whether they scoped the commit to specific paths
-3. Whether they opted out of AGENTS updates with phrases like `skip AGENTS.md`, `don't update AGENTS.md`, or `commit only`
+3. Whether they opted into the entire worktree with scope phrases like `all`, `--all`, `everything`, `tudo`, or `worktree inteira`
+4. Whether they opted out of AGENTS updates with phrases like `skip AGENTS.md`, `don't update AGENTS.md`, or `commit only`
 
 Path examples:
 
@@ -54,6 +56,10 @@ Path examples:
 - `commit only src/routes/api.ts`
 
 If the user names paths, commit only those paths. If a path does not exist or has no changes, stop and say so.
+
+If the user does not name paths but the conversation history points to a specific execution, fix, test run, generated output, or task you just performed, treat that as the commit scope. Commit only files plausibly related to that execution, and leave unrelated worktree changes untouched. The whole worktree is only the default when the user explicitly asks for all changes or when inspection shows every changed file belongs to the same requested concern.
+
+Treat `all`, `--all`, `everything`, `todos`, `tudo`, `worktree inteira`, and similar wording as an explicit request to consider every changed file in the worktree only when they are used as the commit scope. Casual phrases like `all tests pass` or `ta tudo certo, commit` are not whole-worktree requests. Even then, still split unrelated concerns into separate commits when the boundaries are clear.
 
 ### 2. Inspect the Working Tree
 
@@ -72,6 +78,8 @@ Also check staged changes when needed:
 ```bash
 git diff --cached -- <scope paths if provided>
 ```
+
+When scope is inferred from conversation history, first list all changed files, then inspect only the candidate files related to that execution. Do not expand to unrelated files merely because they are present in `git status`.
 
 Before going further, stop and escalate if you find:
 
@@ -236,7 +244,7 @@ If the commit needs a body:
 git commit -m "<type>(<scope>): <subject>" -m "<body>"
 ```
 
-Respect intentional staging when it already expresses the grouping cleanly. Do not blindly `git add .` unless the user's request and the diff make that the correct scope.
+Respect intentional staging when it already expresses the grouping cleanly. Do not blindly `git add .` unless the user explicitly requested all worktree changes and the diff makes that the correct scope.
 Execute multi-commit plans strictly sequentially. Never overlap `git add` or `git commit` commands, never background them, and never prepare the next commit until the previous one is fully complete and verified.
 Even when earlier analysis was delegated, keep this final write path in the main agent unless the user explicitly wants a different execution model.
 
@@ -272,6 +280,17 @@ Never solve hook failures by discarding changes with commands like:
 - If the path is valid, keep both analysis and staging inside that scope
 - If the user names multiple paths, commit only those paths
 
+### Conversation-Scoped Requests
+
+- If the user says only `commit`, `commit this`, `commit the fix`, `commita isso`, or similar after a specific implementation or command run, infer the scope from that recent work instead of committing the whole worktree
+- If unrelated modified files exist outside that inferred scope, mention they were left untouched
+- If the recent execution touched mixed concerns and the correct scope is not clear from file boundaries, pause and explain the ambiguity
+
+### Whole-Worktree Requests
+
+- If the user uses `all`, `--all`, `everything`, `todos`, `tudo`, `worktree inteira`, or similar as the commit scope, consider every changed file in the worktree
+- `--all` authorizes considering every changed file, but it does not authorize destructive cleanup or collapsing unrelated work into one commit
+
 ### Mixed Staged and Unstaged State
 
 - If staged files already represent a clean commit boundary, prefer respecting that grouping
@@ -304,7 +323,7 @@ Then execute the commit without asking an extra confirmation question.
 
 User: `commit my changes`
 
-Diff contains auth work, button styling, and README edits.
+Diff contains auth work, button styling, and README edits, and the recent conversation was about all of those changes.
 
 Response plan:
 
@@ -324,7 +343,26 @@ Files: README.md
 Message: docs: update auth setup guide
 ```
 
-### Example 3: Ambiguous mixed file
+### Example 3: Conversation-scoped commit
+
+User: `commit`
+
+Recent conversation was an execution that updated only `commit-changes/SKILL.md`. The worktree also contains unrelated local edits in `skill-creator/`.
+
+Response plan:
+
+```text
+## Commits to Execute (1)
+
+### Commit 1/1
+Files: commit-changes/SKILL.md
+Message: docs(commit-changes): narrow default commit scope
+AGENTS: none
+
+Left untouched: skill-creator/
+```
+
+### Example 4: Ambiguous mixed file
 
 User: `commit my changes`
 
@@ -335,7 +373,7 @@ Do not pretend the split is obvious. Explain that the file mixes concerns and su
 - committing it as one honest commit, or
 - using `git add -p` with user guidance if they want separate history
 
-### Example 4: AGENTS update needed
+### Example 5: AGENTS update needed
 
 User: `commit payments feature`
 
