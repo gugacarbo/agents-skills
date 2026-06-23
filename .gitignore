@@ -11,4 +11,7 @@
 !commit-changes/
 !commit-changes/**
 !skill-creator/
-!skill-creator/AGENTS.md
+!skill-creator/**
+!brainstorming/
+!brainstorming/**
+
