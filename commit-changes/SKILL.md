@@ -127,17 +127,17 @@ Use Conventional Commits:
 
 Choose the smallest honest type:
 
-| Type | Use for |
-| --- | --- |
-| `feat` | new user-facing or developer-facing behavior |
-| `fix` | bug fixes |
-| `refactor` | structure changes without behavior change |
-| `docs` | documentation-only changes |
-| `test` | tests added or updated without product code changes |
-| `style` | formatting or styling with no logic change |
-| `chore` | maintenance, config, tooling, dependencies |
-| `perf` | measurable performance improvements |
-| `build` | CI, build, release, packaging changes |
+| Type       | Use for                                             |
+| ---------- | --------------------------------------------------- |
+| `feat`     | new user-facing or developer-facing behavior        |
+| `fix`      | bug fixes                                           |
+| `refactor` | structure changes without behavior change           |
+| `docs`     | documentation-only changes                          |
+| `test`     | tests added or updated without product code changes |
+| `style`    | formatting or styling with no logic change          |
+| `chore`    | maintenance, config, tooling, dependencies          |
+| `perf`     | measurable performance improvements                 |
+| `build`    | CI, build, release, packaging changes               |
 
 Scope should usually come from the touched area, for example `auth`, `api`, `ui`, `deps`, or `ci`. Use no scope only when a scope would be fake or less clear than the unsuffixed message.
 
