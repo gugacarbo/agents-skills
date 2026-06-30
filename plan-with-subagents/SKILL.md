@@ -201,7 +201,7 @@ Track progress in a durable file that survives context compaction:
 .plan/progress.md
 ```
 
-Format: see `templates/progress-ledger-template.md`
+Format: see `templates/prompts/progress-ledger-template.md`
 
 After context compaction, trust the ledger and `git log` over your own recollection. Never re-dispatch a task the ledger marks complete.
 
