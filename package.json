@@ -1,0 +1,22 @@
+{
+	"name": "skills",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"format:md": "pnpx prettier --write \"**/*.{md,mdx}\" --log-level=warn --no-error-on-unmatched-pattern  --cache",
+		"format:ts": "pnpx @biomejs/biome check --write .",
+		"format": "pnpm format:md && pnpm format:ts"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "^11.5.0",
+			"onFail": "download"
+		}
+	},
+	"type": "module"
+}

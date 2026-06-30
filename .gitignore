@@ -5,6 +5,8 @@
 !skills.sh
 !.scripts/
 !.scripts/**
+!biome.json
+!package.json
 
 # --- --- SKILLS --- ---
 
