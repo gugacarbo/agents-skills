@@ -38,7 +38,7 @@ Have a feature idea or requirements for a multi-step task?
 Phase 1: BRAINSTORM   Refine the idea into requirements and design decisions
 Phase 2: SPEC          Write the feature spec, get user approval
 Phase 3: PLAN          Write the implementation plan (same numbering as spec)
-Phase 4: DECOMPOSE     Break plan into atomic tasks with briefs
+Phase 4: DECOMPOSE     Break plan into atomic tasks with a JSON registry
 Phase 5: DISPATCH      Send subagents (sequential or parallel)
 Phase 6: REVIEW        Spec compliance + code quality gates
 Phase 7: INTEGRATE     Merge results, final review, finish
@@ -60,9 +60,23 @@ Use the **brainstorming** skill to refine the idea into a spec. Flow:
 
 Do NOT proceed to Phase 2 (SPEC) until the brainstorming skill has been invoked and its outputs are available.
 
+### Fallback When Brainstorming Skill Is Unavailable
+
+If the **brainstorming** skill is not present in the workspace, do **not** treat this as permission to skip Phase 1. Perform a lightweight manual brainstorm:
+
+1. **Quick assessment** — Based on the user's request, identify the core problem, the goal, and the likely scope (3-5 sentences).
+2. **Clarifying questions** — Ask the user 2-5 focused questions to surface requirements, constraints, non-goals, and design preferences. Examples:
+   - What is the most important outcome for you?
+   - Are there any constraints (time, budget, tech stack, dependencies)?
+   - What is explicitly out of scope?
+   - Are there existing patterns, code, or specs this should align with?
+   - Who will use or consume the result?
+3. **Capture outputs** — Summarize the answers into requirements, constraints, non-goals, and design decisions.
+4. **Proceed only after confirmation** — Present the summary to the user and confirm before moving to Phase 2.
+
 ---
 
-## Phase 2: Write the Spec
+## Phase 2: Writing the Spec
 
 Before any planning or code, capture what you're building in a spec document. The spec is the contract between the user and the implementation — every task in the plan must trace back to it.
 
@@ -137,7 +151,7 @@ Do NOT proceed to Phase 3 (planning) until the spec is approved. If changes are 
 
 ---
 
-## Phase 3: Write the Plan
+## Phase 3: Writing the Plan
 
 **Announce:** "I'm using the super-planning skill to create and execute this implementation plan."
 
@@ -149,7 +163,7 @@ Every plan MUST start with the header defined in `templates/plan-template.md`. K
 
 - **Global Constraints** bind every task without repetition. Copy version floors, naming conventions, platform requirements, and dependency limits verbatim from the spec so each subagent inherits them automatically.
 - **File Structure** must be mapped before defining tasks. See the template for details on decomposition and file responsibility.
-- **Task Structure** follows the template in `templates/task-template.md`. The **Interfaces** block (Consumes/Produces) is critical for parallel dispatch: implementers see only their own task brief, so they learn about neighboring tasks' APIs through these declarations. Without exact signatures, parallel tasks will produce incompatible interfaces.
+- **Task Structure** follows the template in `templates/tasks/task-template.md`. The **Interfaces** block (Consumes/Produces) is critical for parallel dispatch: implementers see only their own task brief, so they learn about neighboring tasks' APIs through these declarations. Without exact signatures, parallel tasks will produce incompatible interfaces.
 
 ### Task Right-Sizing
 
@@ -198,39 +212,86 @@ If the user chose parallel dispatch during decomposition, default to subagent-dr
 
 ## Phase 4: Decompose into Tasks
 
-Before dispatching any subagent, extract each task into a **brief file** and a **report file contract**:
+Before dispatching any subagent, generate the task directory and a single machine-readable registry that is the source of truth for every task:
 
-### Task Brief
+### Task Registry (JSON)
 
-Extract the full task text (everything from `### Task N` to the end of that task) into a uniquely named file:
-
-```
-.plan/task-N-brief.md
-```
-
-The brief is the subagent's single source of requirements. It contains the exact values, code, and acceptance criteria.
-
-### Report Contract
-
-Name the subagent's report file after the brief:
+Create the registry in the plan's task directory:
 
 ```
-.plan/task-N-report.md
+docs/tasks/{NNNN-<feature-name>}/tasks.json
 ```
 
-The subagent writes their full report there and returns only: status, commits, one-line test summary, and concerns.
+Replace `{NNNN-<feature-name>}` with the same plan reference used in `docs/plans/NNNN-<feature-name>.md`. Example for plan `docs/plans/0003-auth-middleware.md`:
+
+```
+docs/tasks/0003-auth-middleware/tasks.json
+```
+
+The registry is the implementer's single source of requirements. It contains the exact values, code, and acceptance criteria.
+
+Structure and field definitions: see `templates/tasks/tasks.json`.
+
+The registry must contain:
+
+- `title` — feature name
+- `description` — one-sentence feature description
+- `tasks` — array of all tasks with the following fields:
+  - `id` — format `Task-[batch]-[NNNN]`, e.g. `Task-A-0001`
+  - `title` — short task title
+  - `description` — what the task does
+  - `dependencies` — array of task `id`s this task depends on (empty if none)
+  - `acceptanceCriteria` — concrete, verifiable criteria
+  - `batch` — execution batch: `A`, `B`, `C`, or `D` (foundation → core → surface)
+  - `status` — `pending` | `in-progress` | `failed` | `blocked` | `completed`
+  - `filesTouched` — files the task is expected to create or modify
+  - `files` — `{ created: [...], modified: [...], deleted: [...] }`
+  - `interfaces` — `{ consumes: [...], produces: [...] }` with exact signatures
+  - `requirements` — array of requirements this task must fulfill
+  - `steps` — array of work steps, each with `order`, `title`, `command` (optional), `expectedResult` (optional), and `codeExample` (optional)
+  - `notes` — implementation guidance and additional context
+
+**Rules for batches:**
+
+- `A` — foundation: infrastructure, types, shared utilities, config
+- `B` — core: primary business logic that depends on foundation
+- `C` — surface: UI, API endpoints, integration tests, wiring
+- `D` — final: final review, cleanup, documentation, merge preparation
+
+**Rules for status:**
+
+- Set all tasks to `pending` when creating the registry
+- Update status after each dispatch/review cycle
+- A task cannot move to `completed` until its review is clean
 
 ### Progress Ledger
 
-Track progress in a durable file that survives context compaction:
+Track progress in a durable file that survives context compaction, also under the same task directory:
 
 ```
-.plan/progress.md
+docs/tasks/{NNNN-<feature-name>}/progress.md
 ```
 
-Format: see `prompts/progress-ledger-template.md`
+Example:
+
+```
+docs/tasks/0003-auth-middleware/progress.md
+```
+
+Format: see `templates/progress-ledger-template.md`
 
 After context compaction, trust the ledger and `git log` over your own recollection. Never re-dispatch a task the ledger marks complete.
+
+### Task Directory Templates
+
+Use the following templates when creating the task directory files:
+
+- **Task registry:** `templates/tasks/tasks.json`
+  - Machine-readable source of truth for the full decomposition. Contains each task's requirements, files, interfaces, steps, acceptance criteria, and notes.
+- **Progress ledger:** `templates/progress-ledger-template.md`
+  - Tracks each task's status, commits, and review outcome.
+
+Apply the templates literally: the JSON registry is the single source of requirements, and the progress ledger is updated after every dispatch/review cycle.
 
 ---
 
@@ -250,7 +311,7 @@ Use the least powerful model that can handle each role:
 
 **Always specify the model explicitly** when dispatching. An omitted model inherits the session's model — often the most expensive — which defeats this section.
 
-**Turn count beats token price.** The cheapest models take 2-3× more turns on multi-step work, costing more overall. Use standard as the floor for reviewers and for implementers working from prose descriptions. Reserve the cheapest tier for implementers whose task brief contains the complete code to write.
+**Turn count beats token price.** The cheapest models take 2-3× more turns on multi-step work, costing more overall. Use standard as the floor for reviewers and for implementers working from prose descriptions. Reserve the cheapest tier for implementers whose task JSON entry contains the complete code to write.
 
 ### Constructing the Dispatch Prompt
 
@@ -273,7 +334,7 @@ A dispatch prompt contains exactly five things — nothing more:
 
 For each task:
 
-1. Extract task brief to `.plan/task-N-brief.md`
+1. Extract task brief to `docs/tasks/{NNNN-<feature-name>}/task-N-brief.md`
 2. Dispatch one implementer subagent with brief + report paths + scene-setting context
 3. If the subagent asks questions, answer before letting it proceed
 4. When the subagent returns, generate a review package and dispatch a reviewer
@@ -369,8 +430,8 @@ Before dispatching any subagent, verify:
 
 1. **Repository state:** Clean working tree, correct base branch checked out
 2. **Tooling available:** Test runner, linter, and build commands are accessible and work
-3. **Brief files written:** All task briefs exist at `.plan/task-N-brief.md`
-4. **Progress ledger initialized:** `.plan/progress.md` exists with all tasks listed as pending
+3. **Brief files written:** All task briefs exist at `docs/tasks/{NNNN-<feature-name>}/task-N-brief.md`
+4. **Progress ledger initialized:** `docs/tasks/{NNNN-<feature-name>}/progress.md` exists with all tasks listed as pending
 
 If any check fails, fix it before dispatching. A subagent dispatched into a dirty repo or broken test environment will waste context.
 

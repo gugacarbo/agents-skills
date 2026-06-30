@@ -1,0 +1,49 @@
+{
+  "title": "[Feature Name]",
+  "description": "[Feature description title/intro]",
+  "tasks": [
+    {
+      "id": "Task-A-0001",
+      "title": "[Task title]",
+      "description": "[Task description]",
+      "dependencies": [
+        "Task-A-0001"
+      ],
+      "batch": "A",
+      "status": "pending",  // pending | in-progress | failed | blocked | completed
+      "tryCount": 0,        // Number of attempts made to complete this task, max 3
+      "acceptanceCriteria": [
+        "Requirement this task must fulfill.",
+        "Second requirement.",
+        "Edge case to handle.",
+        "Concrete, verifiable criterions"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Analyze existing code or context",
+          "description": "Read the relevant files and understand the current state before making changes.",
+          "command": null,
+          "expectedResult": null,
+          "codeExample": null
+        }
+      ],
+      "files": {
+        "created": [
+          "path/to/new/file.py"
+        ],
+        "modified": [
+          "path/to/existing.py:123-145"
+        ],
+        "deleted": [
+          "path/to/obsolete/file.py"
+        ]
+      },
+      "notes": [
+        "Ask before guessing if anything is unclear.",
+        "Follow the file structure and codebase patterns from the plan.",
+        "Stop and escalate with BLOCKED / NEEDS_CONTEXT if the task grows beyond the defined scope."
+      ]
+    }
+  ]
+}
