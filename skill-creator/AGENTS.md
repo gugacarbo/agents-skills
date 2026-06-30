@@ -21,14 +21,14 @@ skill-creator/
 
 ## WHERE TO LOOK
 
-| Task | Location | Notes |
-| --- | --- | --- |
-| Main workflow | `SKILL.md` | Explains capture, drafting, eval loop, and description improvement. |
-| Parse skill metadata | `scripts/utils.py` | `parse_skill_md()` handles YAML frontmatter. |
-| Trigger evals | `scripts/run_eval.py` | Spawns `claude -p`, creates temporary `.claude/commands` files, removes `CLAUDECODE`. |
-| Benchmark aggregation | `scripts/aggregate_benchmark.py` | Summarizes repeated eval runs. |
-| Report generation | `scripts/generate_report.py`, `eval-viewer/generate_review.py` | Produces human-reviewable output. |
-| Eval schema | `references/schemas.md` | Read before changing eval JSON shape. |
+| Task                  | Location                                                       | Notes                                                                                 |
+| --------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Main workflow         | `SKILL.md`                                                     | Explains capture, drafting, eval loop, and description improvement.                   |
+| Parse skill metadata  | `scripts/utils.py`                                             | `parse_skill_md()` handles YAML frontmatter.                                          |
+| Trigger evals         | `scripts/run_eval.py`                                          | Spawns `claude -p`, creates temporary `.claude/commands` files, removes `CLAUDECODE`. |
+| Benchmark aggregation | `scripts/aggregate_benchmark.py`                               | Summarizes repeated eval runs.                                                        |
+| Report generation     | `scripts/generate_report.py`, `eval-viewer/generate_review.py` | Produces human-reviewable output.                                                     |
+| Eval schema           | `references/schemas.md`                                        | Read before changing eval JSON shape.                                                 |
 
 ## CONVENTIONS
 
