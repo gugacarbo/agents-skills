@@ -9,14 +9,14 @@
 
 ## WHERE TO LOOK
 
-| Task | Location | Notes |
-| --- | --- | --- |
-| Install destination rules | `install.sh` | Handles `--path`, `--global`, cwd named `skills`, repo-local fallback, and prompts. |
-| Clone/merge install mode | `install.sh` | `--init` clones repo; non-empty destinations merge without overwriting. |
-| README copy option | `install.sh` | `--instructions` preserves existing target README. |
-| Update comparison | `update.sh` | Downloads archive, compares remote files to local target, then prompts before overwrite. |
-| Curl bootstrap coverage | `tests/bootstrap.sh` | Pipes root `skills.sh` into `sh -s -- install/update`. |
-| Prompt edge cases | `tests/install.sh`, `tests/update.sh` | Use `AGENTS_SKILLS_PROMPT_INPUT` with stdin redirected. |
+| Task                      | Location                              | Notes                                                                                    |
+| ------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Install destination rules | `install.sh`                          | Handles `--path`, `--global`, cwd named `skills`, repo-local fallback, and prompts.      |
+| Clone/merge install mode  | `install.sh`                          | `--init` clones repo; non-empty destinations merge without overwriting.                  |
+| README copy option        | `install.sh`                          | `--instructions` preserves existing target README.                                       |
+| Update comparison         | `update.sh`                           | Downloads archive, compares remote files to local target, then prompts before overwrite. |
+| Curl bootstrap coverage   | `tests/bootstrap.sh`                  | Pipes root `skills.sh` into `sh -s -- install/update`.                                   |
+| Prompt edge cases         | `tests/install.sh`, `tests/update.sh` | Use `AGENTS_SKILLS_PROMPT_INPUT` with stdin redirected.                                  |
 
 ## CONVENTIONS
 
