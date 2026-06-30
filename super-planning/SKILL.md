@@ -1,5 +1,5 @@
 ---
-name: plan-with-subagents
+name: super-planning
 description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature spec or requirements for a multi-step task, before touching code. Covers plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression."
 ---
 
@@ -15,11 +15,11 @@ Create implementation plans decomposed into tasks and execute them via subagents
 
 ```
 Have a feature idea or requirements for a multi-step task?
-├─ No → Use the brainstorming skill first, then come back
+├─ No → Start at Phase 1 (BRAINSTORM)
 ├─ Yes → Is there already an approved spec in docs/specs/?
-│   ├─ Yes → Skip to Phase 1 (PLAN), reference the spec number
-│   └─ No → Start at Phase 0 (SPEC), write the spec first
-│       └─ After spec approval → Phase 1 (PLAN)
+│   ├─ Yes → Skip to Phase 3 (PLAN), reference the spec number
+│   └─ No → Start at Phase 2 (SPEC), write the spec first
+│       └─ After spec approval → Phase 3 (PLAN)
 │           └─ Are tasks mostly independent of each other?
 │               ├─ Yes → Can they run in parallel without file conflicts?
 │               │   ├─ Yes → PARALLEL MODE (dispatch all in one message)
@@ -35,17 +35,34 @@ Have a feature idea or requirements for a multi-step task?
 ## The Workflow
 
 ```
-Phase 0: SPEC          Write the feature spec, get user approval
-Phase 1: PLAN          Write the implementation plan (same numbering as spec)
-Phase 2: DECOMPOSE     Break plan into atomic tasks with briefs
-Phase 3: DISPATCH      Send subagents (sequential or parallel)
-Phase 4: REVIEW        Spec compliance + code quality gates
-Phase 5: INTEGRATE     Merge results, final review, finish
+Phase 1: BRAINSTORM   Refine the idea into requirements and design decisions
+Phase 2: SPEC          Write the feature spec, get user approval
+Phase 3: PLAN          Write the implementation plan (same numbering as spec)
+Phase 4: DECOMPOSE     Break plan into atomic tasks with briefs
+Phase 5: DISPATCH      Send subagents (sequential or parallel)
+Phase 6: REVIEW        Spec compliance + code quality gates
+Phase 7: INTEGRATE     Merge results, final review, finish
 ```
 
 ---
 
-## Phase 0: Write the Spec
+## Phase 1: Brainstorm
+
+<HARD-GATE>
+You MUST invoke the brainstorming skill before writing the spec. Do not skip this step, even if the feature seems simple or well-understood.
+</HARD-GATE>
+
+Use the **brainstorming** skill to refine the idea into a spec. Flow:
+
+1. **Invoke the brainstorming skill** — present the feature idea and let it guide the exploration
+2. **Collect outputs** — the brainstorming skill produces requirements, constraints, non-goals, and design decisions
+3. **Carry the outputs into the spec** — use the brainstorming results as the foundation for the spec summary (next phase)
+
+Do NOT proceed to Phase 2 (SPEC) until the brainstorming skill has been invoked and its outputs are available.
+
+---
+
+## Phase 2: Write the Spec
 
 Before any planning or code, capture what you're building in a spec document. The spec is the contract between the user and the implementation — every task in the plan must trace back to it.
 
@@ -107,28 +124,32 @@ Before writing the spec file:
    - Non-goals (what's out of scope)
    - Architecture approach (1-2 sentences)
    - Open questions (if any)
-2. **Ask the user** for approval using the question/ask tool. Use the prompt template at `templates/prompts/pre-write-approval.md`
+2. **Ask the user** for approval using the question/ask tool. Use the prompt template at `prompts/pre-write-approval.md`
 
 3. **If approved:** Write the spec file
 4. **If changes requested:** Incorporate the feedback and present the summary again
 
 ### Post-Write Approval Gate
 
-After writing the spec file, ask the user to review it before proceeding to planning. Use the prompt template at `templates/prompts/post-write-approval.md`
+After writing the spec file, ask the user to review it before proceeding to planning. Use the prompt template at `prompts/post-write-approval.md`
 
-Do NOT proceed to Phase 1 (planning) until the spec is approved. If changes are requested, update the spec and ask again.
+Do NOT proceed to Phase 3 (planning) until the spec is approved. If changes are requested, update the spec and ask again.
 
 ---
 
-## Phase 1: Write the Plan
+## Phase 3: Write the Plan
 
-**Announce:** "I'm using the plan-with-subagents skill to create and execute this implementation plan."
+**Announce:** "I'm using the super-planning skill to create and execute this implementation plan."
 
 **Save plans to:** `docs/plans/NNNN-<feature-name>.md` (same number as the spec)
 
 ### Plan Structure
 
-Every plan MUST start with the header defined in `templates/plan-header-template.md`.
+Every plan MUST start with the header defined in `templates/plan-template.md`. Key points:
+
+- **Global Constraints** bind every task without repetition. Copy version floors, naming conventions, platform requirements, and dependency limits verbatim from the spec so each subagent inherits them automatically.
+- **File Structure** must be mapped before defining tasks. See the template for details on decomposition and file responsibility.
+- **Task Structure** follows the template in `templates/task-template.md`. The **Interfaces** block (Consumes/Produces) is critical for parallel dispatch: implementers see only their own task brief, so they learn about neighboring tasks' APIs through these declarations. Without exact signatures, parallel tasks will produce incompatible interfaces.
 
 ### Task Right-Sizing
 
@@ -140,10 +161,6 @@ A task is the smallest unit that carries its own test cycle and is worth a fresh
 - Target 2-5 minutes of subagent work per task
 - Each step within a task is ONE action (write test, run test, implement, verify, commit)
 
-### Task Structure
-
-Each task in the plan follows the template at `templates/task-template.md`.
-
 ### No Placeholders
 
 These are **plan failures** — never write them:
@@ -153,6 +170,7 @@ These are **plan failures** — never write them:
 - "Write tests for the above" (without actual test code)
 - "Similar to Task N" (repeat the code — the subagent may read tasks out of order)
 - Steps that describe what to do without showing how
+- References to types, functions, or methods not defined in any task
 
 ### Scope Check
 
@@ -167,9 +185,18 @@ After writing the complete plan, check it yourself:
 3. **Type consistency:** Do signatures in later tasks match what earlier tasks define?
 4. **Dependency order:** Can tasks in the same wave run without file conflicts?
 
+### Execution Handoff
+
+After saving the plan, offer the user an execution choice:
+
+1. **Subagent-Driven (recommended)** — Fresh subagent per task, review between tasks, fast iteration
+2. **Sequential** — Execute tasks one at a time with review after each
+
+If the user chose parallel dispatch during decomposition, default to subagent-driven with parallel waves.
+
 ---
 
-## Phase 2: Decompose into Tasks
+## Phase 4: Decompose into Tasks
 
 Before dispatching any subagent, extract each task into a **brief file** and a **report file contract**:
 
@@ -201,13 +228,13 @@ Track progress in a durable file that survives context compaction:
 .plan/progress.md
 ```
 
-Format: see `templates/prompts/progress-ledger-template.md`
+Format: see `prompts/progress-ledger-template.md`
 
 After context compaction, trust the ledger and `git log` over your own recollection. Never re-dispatch a task the ledger marks complete.
 
 ---
 
-## Phase 3: Dispatch Subagents
+## Phase 5: Dispatch Subagents
 
 ### Model Selection
 
@@ -269,6 +296,84 @@ For independent tasks with no file conflicts:
 
 **Worktree isolation for parallel mode:** When the platform supports it, use `isolation: "worktree"` so each parallel subagent works in its own git worktree. This prevents index-lock races and file conflicts.
 
+**Practical limit:** Dispatch 2-4 subagents per wave. More than that adds coordination overhead that outweighs the parallelism gains. If you have 8 independent tasks, use 2-3 waves of 3 rather than one wave of 8.
+
+### Wave-Based Execution
+
+When tasks have partial dependencies, organize them into waves:
+
+1. **Foundation wave** — infrastructure, types, shared utilities (must complete first)
+2. **Core wave** — primary business logic (may depend on foundation)
+3. **Surface wave** — UI, API endpoints, integration tests (depends on core)
+
+Tasks within a wave can run in parallel if they don't conflict on files. Waves run sequentially. Each wave boundary is a natural checkpoint for integration testing.
+
+### Common Mistakes in Dispatch Prompts
+
+| Mistake                                          | Fix                                                  |
+| ------------------------------------------------ | ---------------------------------------------------- |
+| Too broad: "Fix all the tests"                   | Focused: "Fix agent-tool-abort.test.ts failures"     |
+| No context: "Fix the race condition"             | Paste error messages and test names                  |
+| No constraints: Agent refactors everything       | "Do NOT change production code" or "Fix tests only"  |
+| Vague output: "Fix it"                           | "Return summary of root cause and changes"           |
+| Pasting the whole plan into dispatch             | Hand only the task brief — that's what it's for      |
+| Accumulating prior summaries in later dispatches | Each dispatch is self-contained; never carry forward |
+
+### When NOT to Use Parallel Mode
+
+Parallel dispatch is not always the right choice. Use sequential when:
+
+- **Failures are related** — fixing one might fix others; investigate together first
+- **Need full system context** — understanding requires seeing the entire system
+- **Exploratory debugging** — you don't yet know what's broken
+- **Shared state** — tasks modify the same database tables or global config
+- **Uncertain file isolation** — you're not sure tasks can avoid touching the same files
+
+When in doubt, run sequentially. Parallel mode is an optimization, not a default.
+
+**Practical limit:** Effective parallel dispatch caps at 2-4 subagents. Beyond that, coordination overhead and integration risk outweigh speed gains. If you have more independent tasks, batch them into sequential waves of 2-4.
+
+### Scope Violation Detection
+
+After each subagent returns, check that its changes stay within the declared scope:
+
+- **File scope:** If a task declares specific files in its Files block, the resulting commit should not touch files outside that list (infrastructure files like `package.json` or lockfiles are acceptable)
+- **If scope is violated:** Reject the task, re-dispatch with tighter constraints or a smaller scope
+
+### Spawning Scale
+
+Choose the right isolation level for the number of parallel subagents:
+
+| Scale                                         | Isolation                           | Use Case                    |
+| --------------------------------------------- | ----------------------------------- | --------------------------- |
+| **Virtual File Isolation** (2-4 subagents)    | Same process, explicit file passing | Context management          |
+| **Git Worktree Isolation** (10-100 subagents) | Filesystem-level, git worktrees     | Code migrations             |
+| **Cloud Worker Spawning** (100+ agents)       | Container/VM isolation              | Enterprise-scale processing |
+
+**Trade-offs:** More parallelism = faster wall time but higher coordination cost, increased token spend, harder debugging, and risk of merge conflicts. Start with 2-4 parallel subagents and scale up only when the tasks are truly independent.
+
+### Implementer Guidance
+
+When constructing dispatch prompts for implementers, include the expectations from `prompts/implementer-guidance.md`. Key points:
+
+- **Ask before starting** if anything is unclear — don't guess
+- **Follow the plan's file structure** and established codebase patterns
+- **Stop and escalate** (BLOCKED / NEEDS_CONTEXT) when in over your head
+- **Self-review** before reporting: completeness, quality, discipline (YAGNI), testing
+- **TDD evidence** when required: show RED then GREEN, not just "tests pass"
+- **Scope violation detection:** verify commits stay within the task's declared Files section
+
+### Pre-Flight Checks
+
+Before dispatching any subagent, verify:
+
+1. **Repository state:** Clean working tree, correct base branch checked out
+2. **Tooling available:** Test runner, linter, and build commands are accessible and work
+3. **Brief files written:** All task briefs exist at `.plan/task-N-brief.md`
+4. **Progress ledger initialized:** `.plan/progress.md` exists with all tasks listed as pending
+
+If any check fails, fix it before dispatching. A subagent dispatched into a dirty repo or broken test environment will waste context.
+
 ### Subagent Status Handling
 
 Subagents report one of four statuses:
@@ -284,7 +389,7 @@ Subagents report one of four statuses:
 
 ---
 
-## Phase 4: Review Gates
+## Phase 6: Review Gates
 
 Two-stage review after each task (or after all tasks in parallel mode):
 
@@ -325,6 +430,17 @@ The reviewer gets three things:
 
 **Do NOT** skip review. Both spec compliance AND code quality are required. Self-review by the implementer does not replace an independent review.
 
+### Reviewer Guidance
+
+When dispatching a reviewer, include the expectations and output format defined in `prompts/reviewer-guidance.md`. Key principles:
+
+- **Do Not Trust the Report:** Treat the implementer's report as unverified claims; verify against the diff
+- **Scope-Limited:** Only review the task's changes, not the whole branch
+- **Tests:** Don't re-run the suite; run a test only when reading the code raises a specific doubt
+- **Calibrated Severity:** Critical = must fix before proceeding, Important = blocks merge, Minor = nice to have
+- **Strengths:** Capture what's well done, not just issues
+- **Every finding** needs a concrete `file:line` location, what's wrong, why it matters, and how to fix it
+
 ### Handling Review Findings
 
 | Severity      | Meaning                    | Action                                                    |
@@ -337,7 +453,7 @@ For the final whole-branch review, dispatch ONE fix subagent with ALL findings �
 
 ---
 
-## Phase 5: Integrate and Finish
+## Phase 7: Integrate and Finish
 
 After all tasks are reviewed and complete:
 
@@ -363,12 +479,40 @@ Everything you paste into a dispatch prompt — and everything a subagent prints
 
 ### Compressed Output
 
-When the platform supports it, configure subagents to return compressed output:
+When the platform supports it, configure subagents to return compressed output (~60% less context than prose). Use role-specific formats:
+
+**Implementer output:**
+
+```
+<path:line-range> — <change in ≤10 words>.
+verified: <re-read OK | mismatch @ path:line>.
+```
+
+Or one of: `too-big.` / `needs-confirm.` / `ambiguous.` / `regressed.` (terminal first token).
+
+**Reviewer output:**
+
+```
+path:line: <emoji> <severity>: <problem>. <fix>.
+totals: N🔴 N🟡 N🔵 N❓
+```
+
+Or `No issues.` Findings sorted file → line ascending. Emoji severity: 🔴 Critical, 🟡 Important, 🔵 Minor, ❓ Cannot verify.
+
+**Investigator output:**
+
+```
+<path:line> — `symbol` — short note
+totals: <counts>.
+```
+
+Or `No match.` Always file-path-first, line-number-attached, backticked symbols.
+
+**General principles:**
 
 - Structured formats over prose
-- `path:line — symbol — short note` instead of paragraphs
 - One-line verdicts instead of explanations
-- Emoji severity markers: 🔴 Critical, 🟡 Important, 🔵 Minor
+- Each subagent's report file holds the detail; the controller gets only the structured summary
 
 ### Narration Discipline
 
@@ -415,6 +559,8 @@ When in doubt, run sequentially. Parallel mode is an optimization, not a default
 - Dispatch a task reviewer without a diff file
 - Move to the next task while the review has open Critical/Important issues
 - Re-dispatch a task the progress ledger already marks complete
+- Start implementation on main/master without explicit user consent
+- Tell a reviewer what not to flag (the reviewer's job is independent assessment)
 
 **If a subagent asks questions:** Answer clearly. Provide context. Don't rush them.
 
@@ -430,21 +576,23 @@ When in doubt, run sequentially. Parallel mode is an optimization, not a default
 | ------------------ | ---------------------------------------------------------------------- |
 | **brainstorming**  | Before this skill — refine the idea into a spec first                  |
 | **commit-changes** | After this skill — commit the final changes                            |
-| **writing-plans**  | Alternative to Phase 1 — use if you prefer the superpowers plan format |
+| **writing-plans**  | Alternative to Phase 3 — use if you prefer the superpowers plan format |
 
 ---
 
-## References
+## Sources
 
-The following references informed this skill and contain deeper details on specific patterns:
+Key patterns in this skill were consolidated from:
 
-| Reference                                   | Key Contribution                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `references/writing-plans.md`               | Plan structure, task sizing, no-placeholders rule, self-review checklist                    |
-| `references/subagent-driven-development.md` | Fresh subagent per task, two-stage review, status signals, progress ledger, model selection |
-| `references/dispatching-parallel-agents.md` | When/how to dispatch parallel subagents, independence criteria, agent prompt structure      |
-| `references/executing-plans.md`             | Sequential execution with checkpoints, when to stop and ask for help                        |
-| `references/cavecrew.md`                    | Compressed output format for subagents, ~60% context reduction per delegation               |
-| `references/implementer-prompt.md`          | Template for constructing implementer subagent prompts                                      |
-| `references/task-reviewer-prompt.md`        | Template for constructing reviewer subagent prompts                                         |
-| `references/sub-agent-spawning.md`          | Declarative subagent configuration, virtual file isolation, parallel delegation patterns    |
+| Source                                                | Key Contribution                                                                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| obra/superpowers `writing-plans`                      | Plan structure, task sizing, no-placeholders rule, self-review checklist, file structure, global constraints, interfaces block |
+| obra/superpowers `subagent-driven-development`        | Fresh subagent per task, two-stage review, status signals, progress ledger, model selection, never start on main/master        |
+| obra/superpowers `dispatching-parallel-agents`        | When/how to dispatch parallel subagents, independence criteria, common dispatch mistakes                                       |
+| obra/superpowers `executing-plans`                    | Sequential execution with checkpoints, when to stop and ask for help                                                           |
+| juliusbrussee/caveman (cavecrew)                      | Compressed output format per subagent role, ~60% context reduction per delegation                                              |
+| obra/superpowers `implementer-prompt`                 | Template for implementer dispatch: before-you-begin, code organization, escalation, self-review                                |
+| obra/superpowers `task-reviewer-prompt`               | Template for reviewer dispatch: do-not-trust-report, scope-limited, calibrated severity, output format                         |
+| nibzard/awesome-agentic-patterns `sub-agent-spawning` | Three scales of spawning, practical 2-4 limit, trade-offs of parallelism                                                       |
+| kaicianflone/parallel-orchestrate                     | Wave-based execution, pre-flight checks, scope violation detection                                                             |
+| `references/parallel-orchestrate.md`                  | Wave-based execution, pre-flight checks, scope violation detection, checkpoint recovery                                        |

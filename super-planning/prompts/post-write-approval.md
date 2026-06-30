@@ -10,4 +10,4 @@ Options:
   - "Needs changes — [free text field for user to describe what to change]"
 ```
 
-Do NOT proceed to Phase 1 (planning) until the spec is approved. If changes are requested, update the spec and ask again. Loop until approved.
+Do NOT proceed to Phase 3 (planning) until the spec is approved. If changes are requested, update the spec and ask again. Loop until approved.
