@@ -107,14 +107,14 @@ Before writing the spec file:
    - Non-goals (what's out of scope)
    - Architecture approach (1-2 sentences)
    - Open questions (if any)
-2. **Ask the user** for approval using the question/ask tool. Use the prompt template at `templates/pre-write-approval.md`
+2. **Ask the user** for approval using the question/ask tool. Use the prompt template at `templates/prompts/pre-write-approval.md`
 
 3. **If approved:** Write the spec file
 4. **If changes requested:** Incorporate the feedback and present the summary again
 
 ### Post-Write Approval Gate
 
-After writing the spec file, ask the user to review it before proceeding to planning. Use the prompt template at `templates/post-write-approval.md`
+After writing the spec file, ask the user to review it before proceeding to planning. Use the prompt template at `templates/prompts/post-write-approval.md`
 
 Do NOT proceed to Phase 1 (planning) until the spec is approved. If changes are requested, update the spec and ask again.
 
