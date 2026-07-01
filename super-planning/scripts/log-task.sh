@@ -2,8 +2,9 @@
 set -euo pipefail
 
 # Append-only task progress logger with file locking.
+#
 # Usage:
-#   log-task.sh \
+#   scripts/log-task.sh \
 #     --plan 0003-auth-middleware \
 #     --task Task-A-0001 \
 #     --event started|completed|failed|blocked \
@@ -11,7 +12,11 @@ set -euo pipefail
 #     [--max-tries 3] \
 #     [--message "optional message"]
 #
-# The log file is docs/tasks/<plan>/progress.log
+# The log file is written to <workspace-root>/docs/tasks/<plan>/progress.log,
+# where <workspace-root> is auto-detected by walking up from the script location
+# until a project marker (.git, package.json, pyproject.toml, Cargo.toml,
+# go.mod, or AGENTS.md) is found. The script itself typically lives at
+# .agents/skills/super-planning/scripts/log-task.sh inside the workspace.
 
 PLAN=""
 TASK=""
@@ -65,12 +70,37 @@ case "$EVENT" in
   started|completed|failed|blocked)
     ;;
   *)
-    echo "Invalid event: $EVENT"
+    echo "Invalid event: $EVENT" >&2
     usage
     ;;
 esac
 
-TASKS_DIR="${AGENTS_SKILLS_TASKS_DIR:-docs/tasks}"
+find_workspace_root() {
+  local start_dir="${1:-$PWD}"
+  local dir="$start_dir"
+
+  # Allow override via environment variable
+  if [[ -n "${WORKSPACE_ROOT:-}" ]]; then
+    printf '%s\n' "$WORKSPACE_ROOT"
+    return 0
+  fi
+
+  while [[ "$dir" != "/" ]]; do
+    for marker in .git package.json pyproject.toml Cargo.toml go.mod AGENTS.md; do
+      if [[ -e "$dir/$marker" ]]; then
+        printf '%s\n' "$dir"
+        return 0
+      fi
+    done
+    dir="$(dirname "$dir")"
+  done
+
+  # Fall back to start_dir if nothing found
+  printf '%s\n' "$start_dir"
+}
+
+WORKSPACE_ROOT="$(find_workspace_root "$PWD")"
+TASKS_DIR="${AGENTS_SKILLS_TASKS_DIR:-$WORKSPACE_ROOT/docs/tasks}"
 LOG_DIR="$TASKS_DIR/$PLAN"
 LOG_FILE="$LOG_DIR/progress.log"
 
@@ -96,7 +126,7 @@ max_tries() {
 
 message_json() {
   if [[ -n "$MESSAGE" ]]; then
-    printf '%s' "$(jq -R -s . <<< "$MESSAGE" || printf '"%s"' "$MESSAGE")"
+    printf '%s' "$(jq -R -s . <<< "$MESSAGE" 2>/dev/null || printf '"%s"' "$MESSAGE")"
   else
     printf 'null'
   fi

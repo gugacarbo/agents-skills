@@ -178,21 +178,21 @@ Generate `docs/tasks/{NNNN-<feature-name>}/tasks.json` while writing the plan. T
 
 Each task entry must include:
 
-| Field | Required | Description |
-| ----- | -------- | ----------- |
-| `id` | Yes | `Task-[batch]-[NNNN]`, e.g. `Task-A-0001` |
-| `title` | Yes | Short, actionable title |
-| `description` | Yes | What this task does and why |
-| `dependencies` | Yes | Array of `id`s this task depends on; empty if none |
-| `batch` | Yes | Execution batch: `A` (foundation), `B` (core), `C` (surface), `D` (final) |
-| `status` | Yes | Start as `pending` |
-| `acceptanceCriteria` | Yes | Verifiable criteria for completion |
-| `filesTouched` | Yes | All files expected to be created/modified/deleted |
-| `files` | Yes | `{ created: [...], modified: [...], deleted: [...] }` |
-| `interfaces` | Yes | `{ consumes: [...], produces: [...] }` with exact signatures |
-| `requirements` | Yes | Requirements from the spec this task fulfills |
-| `steps` | Yes | Work steps: `order`, `title`, `command` (optional), `expectedResult` (optional), `codeExample` (optional) |
-| `notes` | No | Implementation guidance and edge cases |
+| Field                | Required | Description                                                                                               |
+| -------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `id`                 | Yes      | `Task-[batch]-[NNNN]`, e.g. `Task-A-0001`                                                                 |
+| `title`              | Yes      | Short, actionable title                                                                                   |
+| `description`        | Yes      | What this task does and why                                                                               |
+| `dependencies`       | Yes      | Array of `id`s this task depends on; empty if none                                                        |
+| `batch`              | Yes      | Execution batch: `A` (foundation), `B` (core), `C` (surface), `D` (final)                                 |
+| `status`             | Yes      | Start as `pending`                                                                                        |
+| `acceptanceCriteria` | Yes      | Verifiable criteria for completion                                                                        |
+| `filesTouched`       | Yes      | All files expected to be created/modified/deleted                                                         |
+| `files`              | Yes      | `{ created: [...], modified: [...], deleted: [...] }`                                                     |
+| `interfaces`         | Yes      | `{ consumes: [...], produces: [...] }` with exact signatures                                              |
+| `requirements`       | Yes      | Requirements from the spec this task fulfills                                                             |
+| `steps`              | Yes      | Work steps: `order`, `title`, `command` (optional), `expectedResult` (optional), `codeExample` (optional) |
+| `notes`              | No       | Implementation guidance and edge cases                                                                    |
 
 ### Batches and Waves
 
@@ -373,6 +373,8 @@ A dispatch prompt contains exactly five things — nothing more:
 3. **Interfaces and decisions** from earlier tasks that the JSON entry cannot know
 4. **Your resolution** of any ambiguity you noticed in the task entry
 5. **The report-file path** and report contract
+
+Use the minimal template at `prompts/worker-prompt-template.md` as the starting point. Copy it, fill the placeholders, and dispatch.
 
 **Do NOT:**
 
