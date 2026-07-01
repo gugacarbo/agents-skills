@@ -126,7 +126,17 @@ max_tries() {
 
 message_json() {
   if [[ -n "$MESSAGE" ]]; then
-    printf '%s' "$(jq -R -s . <<< "$MESSAGE" 2>/dev/null || printf '"%s"' "$MESSAGE")"
+    if command -v jq >/dev/null 2>&1; then
+      printf '%s' "$(jq -R -s . <<< "$MESSAGE")"
+    else
+      # Safe manual JSON escape for the message string.
+      local escaped="${MESSAGE//\\/\\\\}"
+      escaped="${escaped//\"/\\\"}"
+      escaped="${escaped//$'\r'/}"
+      escaped="${escaped//$'\n'/\\n}"
+      escaped="${escaped//$'\t'/\\t}"
+      printf '"%s"' "$escaped"
+    fi
   else
     printf 'null'
   fi

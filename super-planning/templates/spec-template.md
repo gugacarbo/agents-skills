@@ -1,12 +1,17 @@
 ---
-status: draft # draft | accepted | implemented | deprecated
+status: draft
+# allowed values: draft | accepted | implemented | deprecated
+# do not skip states; only move to implemented after Phase 7 closes.
 date: YYYY-MM-DD
-builds-on: [] # ADRs this spec relies on. The spec CONSUMES decisions, it does not redefine them.
-implemented-by: [] # real paths (code, migrations, functions) — filled in at close
+builds-on: []
+# List ADRs/decisions this spec relies on. The spec CONSUMES decisions;
+# it does not redefine them here.
+implemented-by: []
+# Filled in at close: real paths (code, migrations, functions) that deliver this spec.
 ---
 
-<!-- id is DERIVED from the filename (docs/specs/NNNN-title-kebab.md → SPEC-NNNN);
-     title is DERIVED from the H1 below. -->
+<!-- id is DERIVED from the filename: docs/specs/NNNN-title-kebab.md → SPEC-NNNN
+     title is DERIVED from the H1 below -->
 
 # <one-sentence behavior — becomes the derived title>
 

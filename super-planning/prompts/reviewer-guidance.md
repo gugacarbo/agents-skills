@@ -30,7 +30,7 @@ Every finding needs a concrete `file:line` location, what's wrong, why it matter
 
 The reviewer gets exactly three things:
 
-1. **The task brief file** (same one the implementer used)
+1. **The task entry** from `tasks.json` (same one the implementer used)
 2. **The implementer's report file**
 3. **The review package** (diff file generated via git)
 
@@ -64,7 +64,7 @@ For each issue: file:line, what's wrong, why it matters, how to fix.
 
 - Open-ended directives like "check all uses"
 - Instructions to ignore or not flag specific issues
-- The entire plan file (only their task's brief)
+- The entire plan file (only their task entry from tasks.json)
 
 ## Compressed Reviewer Output
 

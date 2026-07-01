@@ -1,32 +1,36 @@
 {
   "title": "[Feature Name]",
-  "description": "[Feature description title/intro]",
+  "description": "[Feature description — one sentence]",
   "tasks": [
     {
       "id": "Task-A-0001",
-      "title": "[Task title]",
-      "description": "[Task description]",
-      "dependencies": [
-        "Task-A-0001"
-      ],
+      "title": "[Short, actionable title]",
+      "description": "[What this task does and why]",
+      "dependencies": [],
       "batch": "A",
-      "status": "pending",  // pending | in-progress | failed | blocked | completed
-      "tryCount": 0,        // Number of attempts made to complete this task, max 3
+      "status": "pending",
+      "tryCount": 1,
       "acceptanceCriteria": [
-        "Requirement this task must fulfill.",
-        "Second requirement.",
-        "Edge case to handle.",
-        "Concrete, verifiable criterions"
+        "Concrete, verifiable criterion this task must fulfill.",
+        "Second criterion.",
+        "Edge case to handle."
+      ],
+      "requirements": [
+        "REQ-1 from the spec this task fulfills.",
+        "REQ-2 from the spec this task fulfills."
       ],
       "steps": [
         {
           "order": 1,
-          "title": "Analyze existing code or context",
-          "description": "Read the relevant files and understand the current state before making changes.",
+          "title": "[Step title]",
+          "description": "[What to do in this step]",
           "command": null,
           "expectedResult": null,
           "codeExample": null
         }
+      ],
+      "filesTouched": [
+        "path/to/file.py"
       ],
       "files": {
         "created": [
@@ -35,8 +39,14 @@
         "modified": [
           "path/to/existing.py:123-145"
         ],
-        "deleted": [
-          "path/to/obsolete/file.py"
+        "deleted": []
+      },
+      "interfaces": {
+        "consumes": [
+          "import { someFunction } from './dependency'"
+        ],
+        "produces": [
+          "export function newFunction(): ReturnType"
         ]
       },
       "notes": [

@@ -3,13 +3,15 @@ name: super-planning
 description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature spec or requirements for a multi-step task, before touching code. Covers plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression."
 ---
 
-# Plan With Subagents
+# super-planning
 
 Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent.
 
-**Why subagents:** You delegate tasks to agents with isolated context. By crafting their instructions precisely, they stay focused. They never inherit your session's context or history. This preserves your own context for coordination work and prevents context pollution between tasks.
+**Why subagents:** You delegate tasks to agents with isolated context. By crafting their instructions precisely, they stay focused. They do not inherit your session's context or history. This preserves your own context for coordination work and prevents context pollution between tasks.
 
 **Core principle:** Fresh subagent per task + review gates + file-based handoffs = high quality, low context, fast iteration.
+
+**Scope of this skill:** Use `super-planning` for implementation planning and execution. Use the `brainstorming` skill upstream for refining requirements. Use the `commit-changes` skill downstream for committing final work.
 
 ## When to Use
 
@@ -111,7 +113,15 @@ docs/plans/0003-auth-middleware.md          ← the plan (same number)
 
 ### Default Spec Format
 
-If no workspace pattern is found, use the template at `templates/spec-template.md`.
+If no workspace pattern is found, use the template at `templates/spec-template.md`. Key sections to fill in:
+
+- **Objective** — what the user/system can do once this is implemented
+- **Flow** — step-by-step observable behavior (happy path + key branches)
+- **Contract** — inputs, outputs, formats, guarantees (API events, UI, data shapes)
+- **Edge cases** — enumerated and decided using the EARS pattern (WHEN ⟨trigger⟩ the system MUST ⟨response⟩). Undecided cases go to Open questions, not here
+- **Open questions** — each item blocks an implementation point; the agent must not improvise on an open question
+- **Definition of Done** — runnable commands with binary pass/fail criteria
+- **Human review** — what requires human eyes and is NOT in the agent loop
 
 ### Spec Numbering
 
@@ -149,6 +159,23 @@ After writing the spec file, ask the user to review it before proceeding to plan
 
 Do NOT proceed to Phase 3 (planning) until the spec is approved. If changes are requested, update the spec and ask again.
 
+### Spec Status Lifecycle
+
+The spec `status` frontmatter field tracks where the spec is in its lifecycle:
+
+| Status        | When                                                                                           |
+| ------------- | ---------------------------------------------------------------------------------------------- |
+| `draft`       | Initial state. Set when the spec file is created.                                             |
+| `accepted`    | User has reviewed and approved the spec (after Post-Write Approval Gate). Transition immediately. |
+| `implemented` | All tasks are complete, final review is clean, and the spec's Definition of Done passes.        |
+| `deprecated`  | The spec is no longer relevant (superseded, cancelled, or replaced by a newer spec).            |
+
+Transition rules:
+- Only move to `accepted` after the Post-Write Approval Gate passes.
+- Only move to `implemented` after Phase 7 completes and the spec's DoD commands run green.
+- Update the `implemented-by` field when transitioning to `implemented` — list the real paths (code, migrations, functions) that deliver the spec.
+- Never skip states. A spec cannot jump from `draft` to `implemented`.
+
 ---
 
 ## Phase 3: Writing the Plan
@@ -166,33 +193,9 @@ Start from `templates/plan-template.md`. The plan file must contain:
 1. **Header** — goal, architecture summary, tech stack
 2. **Global Constraints** — copied verbatim from the spec. Every task inherits these implicitly, so do not repeat them inside tasks.
 3. **File Structure** — map of files/modules the plan will touch, with clear ownership per task
-4. **Task Registry (JSON)** — a complete `tasks.json` embedded or referenced as the single source of truth for tasks
+4. **Task Registry reference** — a note pointing to the `tasks.json` that Phase 4 will produce
 
-The plan is **not** a collection of narrative sections. The executable part of the plan lives in the `tasks.json` registry.
-
-### Creating the Task Registry
-
-Generate `docs/tasks/{NNNN-<feature-name>}/tasks.json` while writing the plan. This file is the source of truth for the decomposition. Use `templates/tasks-template.json` as the schema.
-
-**Ownership rule:** Only the orchestrator (the agent running this skill) may write or modify `tasks.json`. Implementer and reviewer subagents must not edit it. The orchestrator updates the registry after every subagent interaction — dispatch, report, review, or status change.
-
-Each task entry must include:
-
-| Field                | Required | Description                                                                                               |
-| -------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `id`                 | Yes      | `Task-[batch]-[NNNN]`, e.g. `Task-A-0001`                                                                 |
-| `title`              | Yes      | Short, actionable title                                                                                   |
-| `description`        | Yes      | What this task does and why                                                                               |
-| `dependencies`       | Yes      | Array of `id`s this task depends on; empty if none                                                        |
-| `batch`              | Yes      | Execution batch: `A` (foundation), `B` (core), `C` (surface), `D` (final)                                 |
-| `status`             | Yes      | Start as `pending`                                                                                        |
-| `acceptanceCriteria` | Yes      | Verifiable criteria for completion                                                                        |
-| `filesTouched`       | Yes      | All files expected to be created/modified/deleted                                                         |
-| `files`              | Yes      | `{ created: [...], modified: [...], deleted: [...] }`                                                     |
-| `interfaces`         | Yes      | `{ consumes: [...], produces: [...] }` with exact signatures                                              |
-| `requirements`       | Yes      | Requirements from the spec this task fulfills                                                             |
-| `steps`              | Yes      | Work steps: `order`, `title`, `command` (optional), `expectedResult` (optional), `codeExample` (optional) |
-| `notes`              | No       | Implementation guidance and edge cases                                                                    |
+The plan is **not** a collection of narrative sections. The executable part of the plan lives in the `tasks.json` registry created in Phase 4. The plan file itself provides context and constraints; the tasks.json provides the executable specification.
 
 ### Batches and Waves
 
@@ -278,33 +281,7 @@ docs/tasks/0003-auth-middleware/tasks.json
 
 The registry is the implementer's single source of requirements. It contains the exact values, code, and acceptance criteria.
 
-Structure and field definitions: see `templates/tasks-template.json`.
-
-The registry must contain:
-
-- `title` — feature name
-- `description` — one-sentence feature description
-- `tasks` — array of all tasks with the following fields:
-  - `id` — format `Task-[batch]-[NNNN]`, e.g. `Task-A-0001`
-  - `title` — short task title
-  - `description` — what the task does
-  - `dependencies` — array of task `id`s this task depends on (empty if none)
-  - `acceptanceCriteria` — concrete, verifiable criteria
-  - `batch` — execution batch: `A`, `B`, `C`, or `D` (foundation → core → surface)
-  - `status` — `pending` | `in-progress` | `failed` | `blocked` | `completed`
-  - `filesTouched` — files the task is expected to create or modify
-  - `files` — `{ created: [...], modified: [...], deleted: [...] }`
-  - `interfaces` — `{ consumes: [...], produces: [...] }` with exact signatures
-  - `requirements` — array of requirements this task must fulfill
-  - `steps` — array of work steps, each with `order`, `title`, `command` (optional), `expectedResult` (optional), and `codeExample` (optional)
-  - `notes` — implementation guidance and additional context
-
-**Rules for batches:**
-
-- `A` — foundation: infrastructure, types, shared utilities, config
-- `B` — core: primary business logic that depends on foundation
-- `C` — surface: UI, API endpoints, integration tests, wiring
-- `D` — final: final review, cleanup, documentation, merge preparation
+Structure and field definitions: see `templates/tasks-template.json`. All fields marked as required in the template must be present.
 
 **Rules for status:**
 
@@ -342,7 +319,26 @@ scripts/log-task.sh \\
 
 Subagents must log events at minimum for: `started`, `completed`, `failed`, `blocked`.
 
-After context compaction, trust the log and `git log` over your own recollection. Never re-dispatch a task the log marks complete.
+### Progress Ledger
+
+Create a progress ledger alongside the log for human-readable task tracking. Save it at:
+
+```
+docs/tasks/{NNNN-<feature-name>}/progress-ledger.md
+```
+
+Use the template at `templates/progress-ledger-template.md`. The ledger is a markdown table with columns: Task, Status, Commits, Report File, Review.
+
+**When to update the ledger:**
+
+- **After creating tasks.json** — initialize with all tasks set to ⏳ pending
+- **After dispatching a subagent** — set status to 🔄 in progress
+- **After review completes cleanly** — set status to ✅ complete, record commit range
+- **After review finds issues** — set status to 🔁 needs-fix, record findings
+- **After a subagent is BLOCKED** — set status to ❌ blocked
+- **In Phase 7** — final status update for all tasks
+
+The ledger survives context compaction. After context compaction, trust the ledger, the progress log, and `git log` over your own recollection. Never re-dispatch a task the ledger or log marks complete.
 
 ---
 
@@ -376,6 +372,22 @@ A dispatch prompt contains exactly five things — nothing more:
 
 Use the minimal template at `prompts/worker-prompt-template.md` as the starting point. Copy it, fill the placeholders, and dispatch.
 
+### Report File Convention
+
+Every implementer must write a full report to a file in the task directory. The orchestrator decides the exact path, but the default convention is:
+
+```
+docs/tasks/{NNNN-<feature-name>}/task-{task-id}-report.md
+```
+
+Example for task `Task-A-0001` under plan `0003-auth-middleware`:
+
+```
+docs/tasks/0003-auth-middleware/task-Task-A-0001-report.md
+```
+
+The subagent returns only a one-line status to the orchestrator. Detail lives in the report file.
+
 **Do NOT:**
 
 - Paste the entire plan into every dispatch (that's the context bloat this skill exists to prevent)
@@ -398,7 +410,7 @@ For each task:
 
 For independent tasks with no file conflicts:
 
-1. Extract all task briefs at once
+1. Extract all task entries from tasks.json at once
 2. Dispatch ALL subagents in ONE message (parallel tool calls)
 3. Wait for all to return
 4. Review all results
@@ -430,7 +442,7 @@ Tasks within a wave can run in parallel if they don't conflict on files. Waves r
 | No context: "Fix the race condition"             | Paste error messages and test names                  |
 | No constraints: Agent refactors everything       | "Do NOT change production code" or "Fix tests only"  |
 | Vague output: "Fix it"                           | "Return summary of root cause and changes"           |
-| Pasting the whole plan into dispatch             | Hand only the task brief — that's what it's for      |
+| Pasting the whole plan into dispatch             | Hand only the task entry from tasks.json              |
 | Accumulating prior summaries in later dispatches | Each dispatch is self-contained; never carry forward |
 
 ### When NOT to Use Parallel Mode
@@ -477,14 +489,25 @@ When constructing dispatch prompts for implementers, include the expectations fr
 - **TDD evidence** when required: show RED then GREEN, not just "tests pass"
 - **Scope violation detection:** verify commits stay within the task's declared Files section
 
+### Investigator Guidance
+
+When you need to locate symbols, trace dependencies, verify facts, or explore the codebase without making changes, dispatch an investigator subagent instead of an implementer. Use an investigator when:
+
+- A reviewer flags a concern that requires checking other parts of the codebase
+- You need to verify that an interface contract matches what a consuming task expects
+- You need to trace the impact of a proposed change before dispatching an implementer
+- A subagent returns BLOCKED and you need to gather context before re-dispatching
+
+An investigator is **read-only** — it must not modify any files. It returns a structured summary using the investigator compressed output format (see Context Compression below). Use a standard model for investigators.
+
 ### Pre-Flight Checks
 
 Before dispatching any subagent, verify:
 
 1. **Repository state:** Clean working tree, correct base branch checked out
 2. **Tooling available:** Test runner, linter, and build commands are accessible and work
-3. **Brief files written:** All task briefs exist at `docs/tasks/{NNNN-<feature-name>}/task-N-brief.md`
-4. **Progress log initialized:** `docs/tasks/{NNNN-<feature-name>}/progress.txt` exists and is empty; `log-task.sh` is present and executable
+3. **Task registry written:** `docs/tasks/{NNNN-<feature-name>}/tasks.json` exists with all tasks defined and set to `pending`
+4. **Progress log initialized:** `docs/tasks/{NNNN-<feature-name>}/progress.log` exists and is empty; `log-task.sh` is present and executable
 
 If any check fails, fix it before dispatching. A subagent dispatched into a dirty repo or broken test environment will waste context.
 
@@ -500,6 +523,21 @@ Subagents report one of four statuses:
 | **BLOCKED**            | Cannot complete the task       | Assess: provide context (re-dispatch), upgrade model, break into smaller tasks, or escalate to user |
 
 **Never** ignore an escalation or force the same model to retry without changes.
+
+### Branch Strategy
+
+Never start implementation on `main` or `master` without explicit user consent. Create a feature branch for the plan:
+
+- **Branch name:** Use the plan number and name: `NNNN-<feature-name>` (e.g., `0003-auth-middleware`)
+- **Base branch:** Check out from the default branch (usually `main` or `master`)
+- **Parallel subagents:** When using worktree isolation, each subagent works on a branch derived from the feature branch (e.g., `0003-auth-middleware/Task-A-0001`)
+- **Integration:** After each task review, merge the task branch into the feature branch. After Phase 7, the feature branch is ready for a PR or merge
+
+If the user does not specify a branch strategy, propose one before Phase 5 dispatch.
+
+### Error Recovery
+
+See the **Error Recovery** section below for the full retry process, failure categories, and task status transitions.
 
 ---
 
@@ -532,7 +570,7 @@ Is it well-built?
 
 The reviewer gets three things:
 
-1. The task brief file (same one the implementer used)
+1. The task entry from `tasks.json` (same one the implementer used)
 2. The implementer's report file
 3. The review package (diff file generated via git)
 
@@ -540,7 +578,7 @@ The reviewer gets three things:
 
 - Open-ended directives like "check all uses"
 - Instructions to ignore or not flag specific issues
-- The entire plan file (only their task's brief)
+- The entire plan file (only their task's entry from `tasks.json`)
 
 **Do NOT** skip review. Both spec compliance AND code quality are required. Self-review by the implementer does not replace an independent review.
 
@@ -587,40 +625,22 @@ Subagent tool results get injected verbatim into your context. Across many deleg
 
 Everything you paste into a dispatch prompt — and everything a subagent prints back — stays resident in your context for the rest of the session. Hand artifacts over as files instead:
 
-- **Task brief** → file (subagent reads it, you don't carry it)
+- **Task entry** → `tasks.json` (subagent reads its entry, you don't carry it)
 - **Report** → file (subagent writes it, you get a one-line summary)
 - **Review package** → file (reviewer reads the diff from a file, you don't paste it)
 
 ### Compressed Output
 
-When the platform supports it, configure subagents to return compressed output (~60% less context than prose). Use role-specific formats:
+When the platform supports it, configure subagents to return compressed output (~60% less context than prose). Use the role-specific formats defined in the dispatch prompt templates:
 
-**Implementer output:**
-
-```
-<path:line-range> — <change in ≤10 words>.
-verified: <re-read OK | mismatch @ path:line>.
-```
-
-Or one of: `too-big.` / `needs-confirm.` / `ambiguous.` / `regressed.` (terminal first token).
-
-**Reviewer output:**
-
-```
-path:line: <emoji> <severity>: <problem>. <fix>.
-totals: N🔴 N🟡 N🔵 N❓
-```
-
-Or `No issues.` Findings sorted file → line ascending. Emoji severity: 🔴 Critical, 🟡 Important, 🔵 Minor, ❓ Cannot verify.
-
-**Investigator output:**
-
-```
-<path:line> — `symbol` — short note
-totals: <counts>.
-```
-
-Or `No match.` Always file-path-first, line-number-attached, backticked symbols.
+- **Implementer output:** see `prompts/implementer-guidance.md` → Compressed Output Format
+- **Reviewer output:** see `prompts/reviewer-guidance.md` → Compressed Reviewer Output
+- **Investigator output:** used when dispatching an investigation subagent to locate symbols, trace dependencies, or verify facts:
+  ```
+  <path:line> — `symbol` — short note
+  totals: <counts>.
+  ```
+  Or `No match.` Always file-path-first, line-number-attached, backticked symbols.
 
 **General principles:**
 
@@ -646,16 +666,87 @@ Do not pause to check in between tasks. Execute all tasks from the plan without 
 
 ---
 
-## Dependency Analysis for Parallel Mode
+## Error Recovery
 
-Before dispatching in parallel, analyze task dependencies:
+When a subagent fails or gets blocked, follow a structured retry process:
 
-1. **File conflicts:** Two tasks must not write the same file
-2. **API dependencies:** Task B consumes what Task A produces → sequential
-3. **Shared state:** Tasks modifying shared database tables or global config → sequential
-4. **Independent modules:** Tasks touching different files with no shared interfaces → parallel
+### Retry Limits
 
-When in doubt, run sequentially. Parallel mode is an optimization, not a default.
+Each task has a `tryCount` in `tasks.json`. The default maximum is **3 attempts**. After 3 failures on the same task:
+
+1. **Stop retrying** — do not dispatch a 4th attempt with the same approach
+2. **Assess the root cause** — re-read the task entry, the subagent's report, and the diff
+3. **Change something before re-dispatching:**
+   - **More context** — add missing information to the task entry or dispatch prompt
+   - **Better model** — upgrade from cheap to standard, or standard to capable
+   - **Smaller scope** — split the task into two or more smaller tasks
+   - **Different approach** — rewrite the steps in the task entry
+4. **If none of these help** — escalate to the user with a clear description of what failed and what was tried
+
+### Failure Categories
+
+| Failure Type | Response |
+|---|---|
+| Lint/type errors | Fix in same task, re-dispatch |
+| Test failures | Fix in same task, re-dispatch |
+| Scope violation | Reject, re-dispatch with tighter constraints |
+| BLOCKED (missing context) | Provide context, re-dispatch |
+| BLOCKED (architectural decision) | Escalate to user |
+| Repeated failures (3+) | Assess root cause, change approach or split task |
+
+### Task Status Transitions
+
+```
+pending → in-progress → completed (after clean review)
+pending → in-progress → failed → in-progress (retry with fixes)
+pending → in-progress → blocked → in-progress (after context provided)
+                                            → split into smaller tasks
+                                            → escalated to user
+```
+
+A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `tasks.json` after every state change.
+
+---
+
+## Plan Modification
+
+During implementation, you may need to modify the plan. Follow these rules:
+
+### Adding Tasks
+
+When a gap is discovered during implementation:
+
+1. Add the new task to `tasks.json` with the next available ID and appropriate batch
+2. Set its `dependencies` to any tasks it depends on
+3. Update the plan file's File Structure section if the new task touches files not previously listed
+4. Dispatch the new task in the next wave
+
+### Removing Tasks
+
+When a task becomes unnecessary:
+
+1. Set its status to a terminal state (do not delete it — keep the record)
+2. Update any tasks that depended on it
+3. Record the removal in the progress log
+
+### Changing Task Dependencies
+
+When dependencies change mid-flight:
+
+1. Update `dependencies` in the affected task entries
+2. If a task was in a later batch but now depends on a task in the same batch, move it to the next batch
+3. Do not change batch assignments of tasks that are already `in-progress` or `completed`
+
+### When the Spec Changes
+
+If the user requests a spec change during implementation:
+
+1. **Pause dispatching** — do not start new tasks that may be affected
+2. **Assess impact** — which tasks are affected? Which are already complete?
+3. **Update the spec** — incorporate the change and re-approve with the user
+4. **Update the plan and `tasks.json`** — modify affected tasks, add new tasks if needed
+5. **Re-review completed tasks** — if a spec change affects already-completed work, flag it for re-review
+6. **Resume dispatching** — continue from where you left off
 
 ---
 
@@ -666,7 +757,7 @@ When in doubt, run sequentially. Parallel mode is an optimization, not a default
 - Skip task review, or accept a report missing either verdict (spec compliance AND code quality are both required)
 - Proceed with unfixed Critical/Important issues
 - Dispatch multiple implementation subagents in parallel without file isolation
-- Make a subagent read the whole plan file (hand it its task brief instead)
+- Make a subagent read the whole plan file (hand it its task entry from tasks.json instead)
 - Skip scene-setting context (subagent needs to understand where its task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance
@@ -690,7 +781,7 @@ When in doubt, run sequentially. Parallel mode is an optimization, not a default
 | ------------------ | ---------------------------------------------------------------------- |
 | **brainstorming**  | Before this skill — refine the idea into a spec first                  |
 | **commit-changes** | After this skill — commit the final changes                            |
-| **writing-plans**  | Alternative to Phase 3 — use if you prefer the superpowers plan format |
+| **plan-with-subagents** | This skill itself — use for any implementation plan that delegates work to subagents |
 
 ---
 
@@ -708,5 +799,4 @@ Key patterns in this skill were consolidated from:
 | obra/superpowers `implementer-prompt`                 | Template for implementer dispatch: before-you-begin, code organization, escalation, self-review                                |
 | obra/superpowers `task-reviewer-prompt`               | Template for reviewer dispatch: do-not-trust-report, scope-limited, calibrated severity, output format                         |
 | nibzard/awesome-agentic-patterns `sub-agent-spawning` | Three scales of spawning, practical 2-4 limit, trade-offs of parallelism                                                       |
-| kaicianflone/parallel-orchestrate                     | Wave-based execution, pre-flight checks, scope violation detection                                                             |
-| `references/parallel-orchestrate.md`                  | Wave-based execution, pre-flight checks, scope violation detection, checkpoint recovery                                        |
+| kaicianflone/parallel-orchestrate                     | Wave-based execution, pre-flight checks, scope violation detection, checkpoint recovery                                       |

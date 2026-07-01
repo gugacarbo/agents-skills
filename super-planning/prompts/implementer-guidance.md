@@ -4,7 +4,7 @@ Include these expectations when constructing dispatch prompts for implementers.
 
 ## Before Starting Work
 
-If anything in the brief is unclear — requirements, approach, dependencies, assumptions — ask questions before proceeding. Don't guess or make assumptions.
+If anything in your task entry from `tasks.json` is unclear — requirements, approach, dependencies, assumptions — ask questions before proceeding. Don't guess or make assumptions.
 
 ## Task Registry (`tasks.json`)
 
@@ -75,7 +75,7 @@ Call the script at minimum for these events:
 Example:
 
 ```bash
-.scripts/log-task.sh \
+bash .agents/skills/super-planning/scripts/log-task.sh \
   --plan 0003-auth-middleware \
   --task Task-A-0001 \
   --event started \

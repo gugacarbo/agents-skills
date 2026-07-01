@@ -8,20 +8,19 @@ Create implementation plans decomposed into tasks and execute them via subagents
 
 ```mermaid
 flowchart TD
-    A{Trivial task?} -->|Yes| B[Just do it inline,<br/>no skill needed]
-    B --> L[End]
-    A -->|No| C{Feature idea or<br/>multi-step task?}
-    C -->|No| L
-    C -->|Yes| D{Approved spec in<br/>docs/specs/?}
+    START{Feature idea or<br/>multi-step task?}
+    START -->|No| L{Single trivial task?}
+    L -->|Yes| L1[Just do it inline,<br/>no skill needed]
+    L -->|No| L2[End — no work to plan]
+    START -->|Yes| D{Approved spec in<br/>docs/specs/?}
     D -->|Yes| E[Skip to Phase 3:<br/>PLAN]
-    D -->|No| F[Start at Phase 2:<br/>SPEC<br/>write the spec first]
+    D -->|No| F[Phase 1: BRAINSTORM<br/>then Phase 2: SPEC]
     F -->|After spec approval| G[Phase 3: PLAN]
     G --> H{Tasks mostly<br/>independent?}
     H -->|Yes| I{Can run in parallel<br/>without file conflicts?}
     I -->|Yes| J[PARALLEL MODE<br/>dispatch all in one message]
     I -->|No| K[SEQUENTIAL MODE<br/>one at a time, review after each]
     H -->|No| K
-
 ```
 
 ### 7-Phase Workflow
@@ -211,17 +210,14 @@ flowchart TB
             PLAN[NNNN-<feature-name>.md<br/>Plan - linked to spec by number]
         end
         subgraph tasks/NNNN-<feature-name>/
-            BRIEF1[task-1-brief.md<br/>Subagent requirements]
-            REPORT1[task-1-report.md<br/>Subagent output]
-            BRIEF2[task-2-brief.md]
-            REPORT2[task-2-report.md]
-            PROGRESS[progress.md<br/>Shared progress tracker]
-            TASKS[tasks.json<br/>Machine-readable registry]
+            TASKS[tasks.json<br/>Machine-readable registry<br/>Single source of truth]
+            REPORT1[task-Task-X-0001-report.md<br/>Subagent output]
+            REPORT2[task-Task-X-0002-report.md<br/>Subagent output]
+            PROGRESS[progress.log<br/>Shared progress tracker]
         end
     end
     SPEC --> PLAN
-    PLAN --> BRIEF1
-    PLAN --> BRIEF2
+    PLAN --> TASKS
 ```
 
 ### When to Use Sequential vs Parallel
@@ -251,9 +247,9 @@ flowchart
     F1 -->|Yes| F2{Tooling available<br/>test runner<br/>linter<br/>build commands?}
     FIX1 --> F1
     F2 -->|No| FIX2[Fix tooling]
-    F2 -->|Yes| F3{Brief files written<br/>task-N-brief.md<br/>all exist?}
+    F2 -->|Yes| F3{tasks.json written<br/>all tasks defined?}
     FIX2 --> F2
-    F3 -->|No| FIX3[Write brief files]
+    F3 -->|No| FIX3[Write tasks.json]
     F3 -->|Yes| F4{Progress ledger initialized<br/>all tasks pending?}
     FIX3 --> F3
     F4 -->|No| FIX4[Initialize progress ledger]
@@ -268,37 +264,27 @@ flowchart
 | Phase 1: Brainstorm | Requirements, constraints, design decisions            | HARD: must invoke brainstorming skill  |
 | Phase 2: Spec       | `docs/specs/NNNN-<name>-spec.md`                       | User approval (pre-write + post-write) |
 | Phase 3: Plan       | `docs/plans/NNNN-<name>.md`                            | Self-review checklist                  |
-| Phase 4: Decompose  | `docs/tasks/NNNN-<name>/task-N-brief.md`, `tasks.json` | Tasks linked to plan number            |
+| Phase 4: Decompose  | `docs/tasks/NNNN-<name>/tasks.json`                     | Tasks linked to plan number            |
 | Phase 5: Dispatch   | Subagent work                                          | Pre-flight checks                      |
 | Phase 6: Review     | Two-stage review                                       | Critical/Important must be fixed       |
 | Phase 7: Integrate  | Final review, merge prep                               | Full test suite passes                 |
 
-## Red Flags (Never Do)
+## Red Flags
 
-- ❌ Skip task review or accept a report missing verdict
-- ❌ Proceed with unfixed Critical/Important issues
-- ❌ Dispatch multiple implementers in parallel without file isolation
-- ❌ Make a subagent read the whole plan (hand it its brief instead)
-- ❌ Skip scene-setting context
-- ❌ Ignore subagent questions
-- ❌ Accept "close enough" on spec compliance
-- ❌ Dispatch a reviewer without a diff file
-- ❌ Move to next task while review has open Critical/Important issues
-- ❌ Re-dispatch a task the progress ledger marks complete
-- ❌ Start implementation on main/master without explicit user consent
-- ❌ Tell a reviewer what not to flag
+See the full list in `SKILL.md` → **Red Flags** section. Key rules:
+
+- Never skip review or accept "close enough" on spec compliance
+- Never dispatch parallel subagents without file isolation
+- Never start implementation on main/master without explicit consent
+- Never re-dispatch a task the progress log or ledger marks complete
 
 ## Subagent Model Selection
 
-| Role                                                               | Model                                                | Why                                                           |
-| ------------------------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------- |
-| Mechanical implementation (isolated, clear spec, 1-2 files)        | Cheap/fast                                           | Most implementation is mechanical when plan is well-specified |
-| Integration and judgment (multi-file, pattern matching, debugging) | Standard                                             | Needs context awareness across files                          |
-| Architecture and design                                            | Most capable                                         | Requires broad reasoning                                      |
-| Task review                                                        | Standard for small diffs, capable for subtle changes | Review is judgment work                                       |
-| Final whole-branch review                                          | Most capable                                         | High-stakes, broad scope                                      |
+See the model selection table and strategy in SKILL.md Phase 5.
 
 ## Context Compression
+
+See SKILL.md for compressed output formats per role (implementer, reviewer, investigator).
 
 ```mermaid
 flowchart LR
@@ -308,7 +294,7 @@ flowchart LR
     end
 
     subgraph With Compression
-        C[Controller] -->|brief file path| D[Subagent]
+        C[Controller] -->|task entry path| D[Subagent]
         D -->|report file path| E[Report file written]
         D -->|one-line summary| C
     end
