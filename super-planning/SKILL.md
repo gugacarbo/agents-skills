@@ -1,6 +1,7 @@
 ---
 name: super-planning
 description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature spec or requirements for a multi-step task, before touching code. Covers plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression."
+user-invocable: true
 ---
 
 # super-planning
@@ -51,7 +52,7 @@ Have a feature idea or requirements for a multi-step task?
 - **Sequential mode:** one implementer + one reviewer per task, in order. Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously, then review together. Requires file-level isolation.
 - **File-based handoffs:** task requirements live in `tasks.json`; subagents write reports to files; progress lives in `progress.log` and `progress-ledger.md`.
-- **Never start implementation on `main`/`master`** without explicit user consent.
+- **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 
 ## Outputs & Conventions
