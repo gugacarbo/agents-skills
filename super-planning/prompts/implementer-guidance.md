@@ -6,6 +6,12 @@ Include these expectations when constructing dispatch prompts for implementers.
 
 If anything in the brief is unclear — requirements, approach, dependencies, assumptions — ask questions before proceeding. Don't guess or make assumptions.
 
+## Task Registry (`tasks.json`)
+
+- Do **not** create, modify, or delete the `tasks.json` registry file. It is owned and updated by the orchestrator.
+- Read the relevant task entry from `tasks.json` as your source of requirements.
+- Report status and outcomes in your report file; the orchestrator will update `tasks.json` based on your report.
+
 ## Code Organization
 
 - Follow the file structure defined in the plan
@@ -54,6 +60,29 @@ Write your full report to the report file path provided in the dispatch prompt:
 - Files changed
 - Self-review findings (if any)
 - Any issues or concerns
+
+## Progress Logging
+
+You must log task lifecycle events using the helper script provided by the orchestrator. Do **not** write to `progress.log` directly.
+
+Call the script at minimum for these events:
+
+- `started` — when you begin working on the task
+- `completed` — when the task passes acceptance criteria
+- `failed` — when the task fails and cannot proceed without intervention
+- `blocked` — when you cannot continue and need context/help
+
+Example:
+
+```bash
+.scripts/log-task.sh \
+  --plan 0003-auth-middleware \
+  --task Task-A-0001 \
+  --event started \
+  --try 1 \
+  --max-tries 3 \
+  --message "Beginning implementation"
+```
 
 Then report back with ONLY (under 15 lines — detail lives in the report file):
 

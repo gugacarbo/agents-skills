@@ -1,0 +1,42 @@
+# Task Progress Log
+
+This file is append-only. Each line is a single event written by subagents via `templates/log-task.sh`.
+
+## Event Format
+
+```
+[ISO_TIMESTAMP] STATUS task_id=<id> try=<current>/<max> message="<human-readable note>" [extra_key=value ...]
+```
+
+## Supported Statuses
+
+- `STARTED`   — subagent began working on the task
+- `COMPLETED` — subagent finished the task and all acceptance criteria are met
+- `FAILED`    — subagent encountered an error and will retry (if retries remain)
+- `BLOCKED`   — subagent cannot proceed without external input or decision
+
+## Example Log
+
+```
+[2026-06-30T20:15:10Z] STARTED   task_id=Task-A-0001 try=1/3 message="Initializing task environment"
+[2026-06-30T20:15:45Z] COMPLETED task_id=Task-A-0001 try=1/3 message="Tests pass, files committed"
+[2026-06-30T20:16:02Z] STARTED   task_id=Task-B-0001 try=1/3 message="Starting core implementation"
+[2026-06-30T20:17:30Z] FAILED    task_id=Task-B-0001 try=1/3 message="Lint errors in src/core.py"
+[2026-06-30T20:18:05Z] STARTED   task_id=Task-B-0001 try=2/3 message="Retrying after lint fixes"
+[2026-06-30T20:19:12Z] BLOCKED   task_id=Task-B-0001 try=2/3 message="Needs decision on error handling approach"
+```
+
+## Location
+
+Save the log in the task directory alongside `tasks.json`:
+
+```
+docs/tasks/{NNNN-<feature-name>}/progress.log
+```
+
+## Rules
+
+- Append only — never edit or delete existing lines.
+- One event per line.
+- Use the provided `log-task.sh` script to avoid race conditions.
+- The orchestrator agent reads this log to determine current state; keep messages concise and factual.

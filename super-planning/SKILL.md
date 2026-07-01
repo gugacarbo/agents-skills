@@ -157,13 +157,59 @@ Do NOT proceed to Phase 3 (planning) until the spec is approved. If changes are 
 
 **Save plans to:** `docs/plans/NNNN-<feature-name>.md` (same number as the spec)
 
+A plan is the bridge between the approved spec and executable tasks. It must be detailed enough that an implementer subagent can execute any task without asking clarifying questions.
+
 ### Plan Structure
 
-Every plan MUST start with the header defined in `templates/plan-template.md`. Key points:
+Start from `templates/plan-template.md`. The plan file must contain:
 
-- **Global Constraints** bind every task without repetition. Copy version floors, naming conventions, platform requirements, and dependency limits verbatim from the spec so each subagent inherits them automatically.
-- **File Structure** must be mapped before defining tasks. See the template for details on decomposition and file responsibility.
-- **Task Structure** follows the template in `templates/tasks/task-template.md`. The **Interfaces** block (Consumes/Produces) is critical for parallel dispatch: implementers see only their own task brief, so they learn about neighboring tasks' APIs through these declarations. Without exact signatures, parallel tasks will produce incompatible interfaces.
+1. **Header** — goal, architecture summary, tech stack
+2. **Global Constraints** — copied verbatim from the spec. Every task inherits these implicitly, so do not repeat them inside tasks.
+3. **File Structure** — map of files/modules the plan will touch, with clear ownership per task
+4. **Task Registry (JSON)** — a complete `tasks.json` embedded or referenced as the single source of truth for tasks
+
+The plan is **not** a collection of narrative sections. The executable part of the plan lives in the `tasks.json` registry.
+
+### Creating the Task Registry
+
+Generate `docs/tasks/{NNNN-<feature-name>}/tasks.json` while writing the plan. This file is the source of truth for the decomposition. Use `templates/tasks-template.json` as the schema.
+
+**Ownership rule:** Only the orchestrator (the agent running this skill) may write or modify `tasks.json`. Implementer and reviewer subagents must not edit it. The orchestrator updates the registry after every subagent interaction — dispatch, report, review, or status change.
+
+Each task entry must include:
+
+| Field | Required | Description |
+| ----- | -------- | ----------- |
+| `id` | Yes | `Task-[batch]-[NNNN]`, e.g. `Task-A-0001` |
+| `title` | Yes | Short, actionable title |
+| `description` | Yes | What this task does and why |
+| `dependencies` | Yes | Array of `id`s this task depends on; empty if none |
+| `batch` | Yes | Execution batch: `A` (foundation), `B` (core), `C` (surface), `D` (final) |
+| `status` | Yes | Start as `pending` |
+| `acceptanceCriteria` | Yes | Verifiable criteria for completion |
+| `filesTouched` | Yes | All files expected to be created/modified/deleted |
+| `files` | Yes | `{ created: [...], modified: [...], deleted: [...] }` |
+| `interfaces` | Yes | `{ consumes: [...], produces: [...] }` with exact signatures |
+| `requirements` | Yes | Requirements from the spec this task fulfills |
+| `steps` | Yes | Work steps: `order`, `title`, `command` (optional), `expectedResult` (optional), `codeExample` (optional) |
+| `notes` | No | Implementation guidance and edge cases |
+
+### Batches and Waves
+
+Assign each task to a batch before writing steps:
+
+- **`A` — Foundation:** infrastructure, types, shared utilities, config, database schemas
+- **`B` — Core:** primary business logic that depends on foundation tasks
+- **`C` — Surface:** UI, API endpoints, integration tests, wiring, CLI entrypoints
+- **`D` — Final:** final review, cleanup, documentation, merge preparation
+
+Rules:
+
+- A task in batch `B` can only depend on tasks in batch `A` or earlier
+- A task in batch `C` can only depend on tasks in batch `B` or earlier
+- A task in batch `D` can depend on any earlier batch
+- Tasks within the same batch can run in parallel if they have no file conflicts
+- A batch with sequential dependencies becomes a wave
 
 ### Task Right-Sizing
 
@@ -173,7 +219,7 @@ A task is the smallest unit that carries its own test cycle and is worth a fresh
 - Split only where a reviewer could meaningfully reject one task while approving its neighbor
 - Each task ends with an independently testable deliverable
 - Target 2-5 minutes of subagent work per task
-- Each step within a task is ONE action (write test, run test, implement, verify, commit)
+- Each step within a task is ONE action
 
 ### No Placeholders
 
@@ -192,16 +238,18 @@ If the spec covers multiple independent subsystems, suggest breaking into separa
 
 ### Self-Review
 
-After writing the complete plan, check it yourself:
+After writing the complete plan and tasks.json, check it yourself:
 
 1. **Spec coverage:** Can you point to a task for every requirement?
 2. **Placeholder scan:** Any TBD/TODO patterns? Fix them.
 3. **Type consistency:** Do signatures in later tasks match what earlier tasks define?
-4. **Dependency order:** Can tasks in the same wave run without file conflicts?
+4. **Dependency order:** Are dependencies acyclic and only point to earlier batches?
+5. **File conflicts:** Can tasks in the same batch run in parallel without touching the same files?
+6. **JSON validity:** Is `tasks.json` valid JSON and does it match `templates/tasks-template.json`?
 
 ### Execution Handoff
 
-After saving the plan, offer the user an execution choice:
+After saving the plan and `tasks.json`, offer the user an execution choice:
 
 1. **Subagent-Driven (recommended)** — Fresh subagent per task, review between tasks, fast iteration
 2. **Sequential** — Execute tasks one at a time with review after each
@@ -230,7 +278,7 @@ docs/tasks/0003-auth-middleware/tasks.json
 
 The registry is the implementer's single source of requirements. It contains the exact values, code, and acceptance criteria.
 
-Structure and field definitions: see `templates/tasks/tasks.json`.
+Structure and field definitions: see `templates/tasks-template.json`.
 
 The registry must contain:
 
@@ -264,34 +312,37 @@ The registry must contain:
 - Update status after each dispatch/review cycle
 - A task cannot move to `completed` until its review is clean
 
-### Progress Ledger
+### Progress Log
 
-Track progress in a durable file that survives context compaction, also under the same task directory:
+Track progress in an append-only log file that survives context compaction, also under the same task directory:
 
 ```
-docs/tasks/{NNNN-<feature-name>}/progress.md
+docs/tasks/{NNNN-<feature-name>}/progress.log
 ```
 
 Example:
 
 ```
-docs/tasks/0003-auth-middleware/progress.md
+docs/tasks/0003-auth-middleware/progress.log
 ```
 
-Format: see `templates/progress-ledger-template.md`
+Format: see `templates/progress-template.txt`
 
-After context compaction, trust the ledger and `git log` over your own recollection. Never re-dispatch a task the ledger marks complete.
+The log is append-only. Subagents must NOT write to it directly. They must call the provided helper:
 
-### Task Directory Templates
+```bash
+scripts/log-task.sh \\
+  --plan 0003-auth-middleware \
+  --task Task-A-0001 \
+  --event started \
+  --try 1 \
+  --max-tries 3 \
+  --message "Beginning implementation"
+```
 
-Use the following templates when creating the task directory files:
+Subagents must log events at minimum for: `started`, `completed`, `failed`, `blocked`.
 
-- **Task registry:** `templates/tasks/tasks.json`
-  - Machine-readable source of truth for the full decomposition. Contains each task's requirements, files, interfaces, steps, acceptance criteria, and notes.
-- **Progress ledger:** `templates/progress-ledger-template.md`
-  - Tracks each task's status, commits, and review outcome.
-
-Apply the templates literally: the JSON registry is the single source of requirements, and the progress ledger is updated after every dispatch/review cycle.
+After context compaction, trust the log and `git log` over your own recollection. Never re-dispatch a task the log marks complete.
 
 ---
 
@@ -318,9 +369,9 @@ Use the least powerful model that can handle each role:
 A dispatch prompt contains exactly five things — nothing more:
 
 1. **One line of context:** Where this task fits in the project
-2. **The brief path:** "Read this first — it is your requirements"
-3. **Interfaces and decisions** from earlier tasks that the brief cannot know
-4. **Your resolution** of any ambiguity you noticed in the brief
+2. **The task registry path:** "Read the task entry in `tasks.json` first — it is your requirements"
+3. **Interfaces and decisions** from earlier tasks that the JSON entry cannot know
+4. **Your resolution** of any ambiguity you noticed in the task entry
 5. **The report-file path** and report contract
 
 **Do NOT:**
@@ -334,12 +385,12 @@ A dispatch prompt contains exactly five things — nothing more:
 
 For each task:
 
-1. Extract task brief to `docs/tasks/{NNNN-<feature-name>}/task-N-brief.md`
-2. Dispatch one implementer subagent with brief + report paths + scene-setting context
+1. Read the task entry from `docs/tasks/{NNNN-<feature-name>}/tasks.json`
+2. Dispatch one implementer subagent with the task JSON entry + scene-setting context
 3. If the subagent asks questions, answer before letting it proceed
 4. When the subagent returns, generate a review package and dispatch a reviewer
 5. If the reviewer finds issues, dispatch a fix subagent and re-review
-6. Mark the task complete in the progress ledger
+6. Append a `completed` log entry via `log-task.sh` and update the JSON status
 
 ### Parallel Dispatch
 
@@ -351,7 +402,7 @@ For independent tasks with no file conflicts:
 4. Review all results
 5. Dispatch fix subagents for any that need fixes
 6. Integrate all changes onto the working branch
-7. Mark all tasks complete in the progress ledger
+7. Append `completed` log entries via `log-task.sh` and update the JSON status for all tasks in the wave
 
 **Critical:** Multiple dispatch calls in one response = parallel execution. One per response = sequential. The dispatch pattern controls parallelism, not the tasks themselves.
 
@@ -431,7 +482,7 @@ Before dispatching any subagent, verify:
 1. **Repository state:** Clean working tree, correct base branch checked out
 2. **Tooling available:** Test runner, linter, and build commands are accessible and work
 3. **Brief files written:** All task briefs exist at `docs/tasks/{NNNN-<feature-name>}/task-N-brief.md`
-4. **Progress ledger initialized:** `docs/tasks/{NNNN-<feature-name>}/progress.md` exists with all tasks listed as pending
+4. **Progress log initialized:** `docs/tasks/{NNNN-<feature-name>}/progress.txt` exists and is empty; `log-task.sh` is present and executable
 
 If any check fails, fix it before dispatching. A subagent dispatched into a dirty repo or broken test environment will waste context.
 

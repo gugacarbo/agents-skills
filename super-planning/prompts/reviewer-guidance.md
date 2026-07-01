@@ -2,6 +2,12 @@
 
 When dispatching a reviewer subagent, include these principles in the prompt.
 
+## Task Registry (`tasks.json`) and Progress Log
+
+- Do **not** create, modify, or delete the `tasks.json` registry file or the `progress.log` file. Both are owned and updated by the orchestrator.
+- Read the relevant task entry from `tasks.json` as your source of requirements.
+- If instructed, log your review start/completion using the orchestrator-provided helper (e.g. `scripts/log-task.sh`). Never write to `progress.log` directly.
+
 ## Core Principles
 
 **Do Not Trust the Report:** Treat the implementer's report as unverified claims. Verify claims against the diff. Design rationales in the report are claims too — judge the code on its merits.
