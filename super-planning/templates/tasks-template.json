@@ -1,59 +1,49 @@
 {
-  "title": "[Feature Name]",
-  "description": "[Feature description — one sentence]",
-  "tasks": [
-    {
-      "id": "Task-A-0001",
-      "title": "[Short, actionable title]",
-      "description": "[What this task does and why]",
-      "dependencies": [],
-      "batch": "A",
-      "status": "pending",
-      "tryCount": 1,
-      "acceptanceCriteria": [
-        "Concrete, verifiable criterion this task must fulfill.",
-        "Second criterion.",
-        "Edge case to handle."
-      ],
-      "requirements": [
-        "REQ-1 from the spec this task fulfills.",
-        "REQ-2 from the spec this task fulfills."
-      ],
-      "steps": [
-        {
-          "order": 1,
-          "title": "[Step title]",
-          "description": "[What to do in this step]",
-          "command": null,
-          "expectedResult": null,
-          "codeExample": null
-        }
-      ],
-      "filesTouched": [
-        "path/to/file.py"
-      ],
-      "files": {
-        "created": [
-          "path/to/new/file.py"
-        ],
-        "modified": [
-          "path/to/existing.py:123-145"
-        ],
-        "deleted": []
-      },
-      "interfaces": {
-        "consumes": [
-          "import { someFunction } from './dependency'"
-        ],
-        "produces": [
-          "export function newFunction(): ReturnType"
-        ]
-      },
-      "notes": [
-        "Ask before guessing if anything is unclear.",
-        "Follow the file structure and codebase patterns from the plan.",
-        "Stop and escalate with BLOCKED / NEEDS_CONTEXT if the task grows beyond the defined scope."
-      ]
-    }
-  ]
+	"title": "[Feature Name]",
+	"description": "[Feature description — one sentence]",
+	"tasks": [
+		{
+			"id": "Task-A-0001",
+			"title": "[Short, actionable title]",
+			"description": "[What this task does and why]",
+			"dependencies": [],
+			"batch": "A",
+			"status": "pending",
+			"tryCount": 1,
+			"acceptanceCriteria": [
+				"Concrete, verifiable criterion this task must fulfill.",
+				"Second criterion.",
+				"Edge case to handle."
+			],
+			"requirements": [
+				"REQ-1 from the spec this task fulfills.",
+				"REQ-2 from the spec this task fulfills."
+			],
+			"steps": [
+				{
+					"order": 1,
+					"title": "[Step title]",
+					"description": "[What to do in this step]",
+					"command": null,
+					"expectedResult": null,
+					"codeExample": null
+				}
+			],
+			"filesTouched": ["path/to/file.py"],
+			"files": {
+				"created": ["path/to/new/file.py"],
+				"modified": ["path/to/existing.py:123-145"],
+				"deleted": []
+			},
+			"interfaces": {
+				"consumes": ["import { someFunction } from './dependency'"],
+				"produces": ["export function newFunction(): ReturnType"]
+			},
+			"notes": [
+				"Ask before guessing if anything is unclear.",
+				"Follow the file structure and codebase patterns from the plan.",
+				"Stop and escalate with BLOCKED / NEEDS_CONTEXT if the task grows beyond the defined scope."
+			]
+		}
+	]
 }

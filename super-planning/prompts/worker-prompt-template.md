@@ -32,12 +32,12 @@ It is also available relative to the skill at: `.agents/skills/super-planning/sc
 
 ### Log on these events
 
-| Event flag | When |
-|---|---|
-| `started` | Right before you begin work |
-| `completed` | After your last command and self-review |
-| `failed` | After the last retry of a recoverable error |
-| `blocked` | When you cannot proceed and need help |
+| Event flag  | When                                        |
+| ----------- | ------------------------------------------- |
+| `started`   | Right before you begin work                 |
+| `completed` | After your last command and self-review     |
+| `failed`    | After the last retry of a recoverable error |
+| `blocked`   | When you cannot proceed and need help       |
 
 ### Usage
 

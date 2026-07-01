@@ -2,6 +2,8 @@
 
 Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent.
 
+> **Agent note:** Start at [`SKILL.md`](SKILL.md) for the routing entrypoint. The full decision trees below are the visual companion to that file; detailed phase instructions live in [`phases/`](phases/).
+
 ## Operation Flows
 
 ### Decision Flow: When to Use
@@ -259,15 +261,15 @@ flowchart
 
 ## Quick Reference
 
-| Phase               | Key Output                                             | Gate                                   |
-| ------------------- | ------------------------------------------------------ | -------------------------------------- |
-| Phase 1: Brainstorm | Requirements, constraints, design decisions            | HARD: must invoke brainstorming skill  |
-| Phase 2: Spec       | `docs/specs/NNNN-<name>-spec.md`                       | User approval (pre-write + post-write) |
-| Phase 3: Plan       | `docs/plans/NNNN-<name>.md`                            | Self-review checklist                  |
-| Phase 4: Decompose  | `docs/tasks/NNNN-<name>/tasks.json`                     | Tasks linked to plan number            |
-| Phase 5: Dispatch   | Subagent work                                          | Pre-flight checks                      |
-| Phase 6: Review     | Two-stage review                                       | Critical/Important must be fixed       |
-| Phase 7: Integrate  | Final review, merge prep                               | Full test suite passes                 |
+| Phase               | Key Output                                  | Gate                                   |
+| ------------------- | ------------------------------------------- | -------------------------------------- |
+| Phase 1: Brainstorm | Requirements, constraints, design decisions | HARD: must invoke brainstorming skill  |
+| Phase 2: Spec       | `docs/specs/NNNN-<name>-spec.md`            | User approval (pre-write + post-write) |
+| Phase 3: Plan       | `docs/plans/NNNN-<name>.md`                 | Self-review checklist                  |
+| Phase 4: Decompose  | `docs/tasks/NNNN-<name>/tasks.json`         | Tasks linked to plan number            |
+| Phase 5: Dispatch   | Subagent work                               | Pre-flight checks                      |
+| Phase 6: Review     | Two-stage review                            | Critical/Important must be fixed       |
+| Phase 7: Integrate  | Final review, merge prep                    | Full test suite passes                 |
 
 ## Red Flags
 

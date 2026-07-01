@@ -18,8 +18,8 @@ include this section.]
 
 ## File Structure
 
-| File/Directory | Owner Task | Notes |
-|----------------|------------|-------|
+| File/Directory | Owner Task      | Notes                                   |
+| -------------- | --------------- | --------------------------------------- |
 | `[path]`       | `[Task-X-NNNN]` | [What it contains / interface contract] |
 
 ## Task Registry
