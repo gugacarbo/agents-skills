@@ -54,6 +54,7 @@ Have a feature idea or requirements for a multi-step task?
 - **File-based handoffs:** task requirements live in `tasks.json`; subagents write reports to files; progress lives in `progress.log` and `progress-ledger.md`.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
+- **Output summary** — after creating artifacts (spec, plan, tasks.json, progress files), print a one-line summary showing each file path so the user knows what was produced. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/tasks/0001-auth/tasks.json, docs/tasks/0001-auth/progress-ledger.md`
 
 ## Outputs & Conventions
 
