@@ -25,7 +25,9 @@ include this section.]
 ## Task Registry
 
 - **Registry:** `docs/tasks/NNNN-<feature-name>/tasks.json`
-- **Progress log:** `docs/tasks/NNNN-<feature-name>/progress.log`
 - **Progress ledger:** `docs/tasks/NNNN-<feature-name>/progress-ledger.md`
+- **Task directories:** `docs/tasks/NNNN-<feature-name>/<task-id>/`
+- **Task-local logs:** `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log`
+- **Task-local logger:** `docs/tasks/NNNN-<feature-name>/<task-id>/log-task.sh`
 
 ---

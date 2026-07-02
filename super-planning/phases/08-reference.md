@@ -11,8 +11,9 @@ Subagent tool results get injected verbatim into your context. Across many deleg
 Everything you paste into a dispatch prompt — and everything a subagent prints back — stays resident in your context. Hand artifacts over as files instead:
 
 - **Task entry** → `tasks.json` (subagent reads its entry, you don't carry it)
-- **Report** → file (subagent writes it, you get a one-line summary)
-- **Review package** → file (reviewer reads the diff from a file, you don't paste it)
+- **Report** → `docs/tasks/<plan>/<task-id>/report.md` (subagent writes it, you get a one-line summary)
+- **Review package** → `docs/tasks/<plan>/<task-id>/review-package.diff.md` (reviewer reads the diff from a file, you don't paste it)
+- **Progress log/helper** → each task owns `docs/tasks/<plan>/<task-id>/progress.log` and `log-task.sh`
 
 ### Compressed Output
 
@@ -76,14 +77,14 @@ Each task has a `tryCount` in `tasks.json`. The default maximum is **3 attempts*
 ### Task Status Transitions
 
 ```
-pending → in-progress → completed (after clean review)
-pending → in-progress → failed → in-progress (retry with fixes)
-pending → in-progress → blocked → in-progress (after context provided)
-                                            → split into smaller tasks
-                                            → escalated to user
+pending → in_progress → ready_for_review → completed
+                              ├──────────→ needs_fix → in_progress
+                              └──────────→ blocked
 ```
 
 A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `tasks.json` after every state change.
+
+Implementer subagents log `ready_for_review`; only the orchestrator logs `completed`.
 
 ## Plan Modification
 
@@ -102,7 +103,7 @@ When a task becomes unnecessary:
 
 1. Set its status to a terminal state (do not delete it — keep the record)
 2. Update any tasks that depended on it
-3. Record the removal in the progress log
+3. Record the removal in the affected task's progress log, or in the ledger if the task never had a directory
 
 ### Changing Task Dependencies
 
@@ -110,7 +111,7 @@ When dependencies change mid-flight:
 
 1. Update `dependencies` in the affected task entries
 2. If a task was in a later batch but now depends on a task in the same batch, move it to the next batch
-3. Do not change batch assignments of tasks that are already `in-progress` or `completed`
+3. Do not change batch assignments of tasks that are already `in_progress` or `completed`
 
 ### When the Spec Changes
 
@@ -129,7 +130,7 @@ If the user requests a spec change during implementation:
 
 - Skip task review, or accept a report missing either verdict (spec compliance AND code quality are both required)
 - Proceed with unfixed Critical/Important issues
-- Dispatch multiple implementation subagents in parallel without file isolation
+- Dispatch multiple implementation subagents in parallel without file isolation or a platform fallback
 - Make a subagent read the whole plan file (hand it its task entry from `tasks.json` instead)
 - Skip scene-setting context (subagent needs to understand where its task fits)
 - Ignore subagent questions (answer before letting them proceed)

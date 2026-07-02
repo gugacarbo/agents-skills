@@ -15,9 +15,8 @@ implemented-by: []
 
 # <one-sentence behavior — becomes the derived title>
 
-> Shared conventions (error envelope, authorization, data access):
-> `docs/context/CONVENTIONS.md`. This spec does not repeat them — it only
-> deviates from them explicitly when necessary.
+> Shared conventions: identify any existing project conventions this spec builds on.
+> If the repo has no shared conventions document, state the relevant assumptions here.
 
 ## Objective
 
@@ -53,8 +52,8 @@ implemented-by: []
      runnable in the AGENTS.md environment. -->
 
 ```bash
-npm run typecheck                 # exit 0
-npm test -- --run <scope>         # N/N passing
+<typecheck command>               # exit 0
+<focused test command>            # N/N passing
 ```
 
 ## Human review
@@ -75,6 +74,6 @@ npm test -- --run <scope>         # N/N passing
 <!-- Close checklist (single commit):
      [ ] DoD green, evidence above
      [ ] status: implemented + implemented-by with real paths
-     [ ] new gotchas → AGENTS.md
-     [ ] new current state → relevant context chapter
-     [ ] scripts/docs-check --emit-index (regenerated READMEs) -->
+     [ ] new gotchas → project guidance if needed
+     [ ] new current state → relevant docs/context if needed
+     [ ] generated docs/indexes refreshed if the repo requires it -->

@@ -28,8 +28,8 @@ Is it well-built?
 The reviewer gets three things:
 
 1. The task entry from `tasks.json` (same one the implementer used)
-2. The implementer's report file
-3. The review package (diff file generated via git)
+2. The implementer's report file from `docs/tasks/{plan}/{task-id}/report.md`
+3. The review package from `docs/tasks/{plan}/{task-id}/review-package.diff.md`
 
 **Do NOT** give the reviewer:
 

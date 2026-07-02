@@ -12,9 +12,22 @@ Use the least powerful model that can handle each role:
 | Task review (spec compliance + quality)                            | Standard for small diffs, capable for subtle changes | Review is judgment work                                           |
 | Final whole-branch review                                          | Most capable                                         | High-stakes, broad scope                                          |
 
-**Always specify the model explicitly.** An omitted model inherits the session's model — often the most expensive — which defeats this section.
+**Specify the model explicitly when the platform supports it.** An omitted model inherits the session's model — often the most expensive — which defeats this section. If the current platform does not support explicit model selection, record that limitation in the ledger and continue with the session model.
 
 **Turn count beats token price.** The cheapest models take 2–3× more turns on multi-step work, costing more overall. Use standard as the floor for reviewers and for implementers working from prose descriptions. Reserve the cheapest tier for implementers whose task JSON entry contains the complete code to write.
+
+## Capability Adapter
+
+Before dispatching, check what the current platform actually supports:
+
+| Capability                         | Preferred behavior                              | Fallback if unavailable                                      |
+| ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| Explicit model selection           | Set the model for each role                     | Note the limitation in the ledger and use the session model  |
+| Parallel subagent dispatch         | Dispatch 2–4 isolated workers in one turn       | Run the same wave sequentially                               |
+| Worktree isolation                 | Use one worktree/branch per parallel subagent   | Do not run parallel workers that can touch overlapping files |
+| Subagent file handoff/report write | Require report/review files in the task folder  | Execute inline but still write the same files yourself       |
+
+If any preferred capability is missing, adapt the execution mode instead of pretending the capability exists.
 
 ## Constructing the Dispatch Prompt
 
@@ -33,16 +46,32 @@ Use the minimal template at [`prompts/worker-prompt-template.md`](../prompts/wor
 Every implementer must write a full report to a file in the task directory. Default convention:
 
 ```
-docs/tasks/{NNNN-<feature-name>}/task-{task-id}-report.md
+docs/tasks/{NNNN-<feature-name>}/{task-id}/report.md
 ```
 
 Example for task `Task-A-0001` under plan `0003-auth-middleware`:
 
 ```
-docs/tasks/0003-auth-middleware/task-Task-A-0001-report.md
+docs/tasks/0003-auth-middleware/Task-A-0001/report.md
 ```
 
 The subagent returns only a one-line status to the orchestrator. Detail lives in the report file.
+
+## Review Package Convention
+
+Before dispatching a reviewer, generate a review package in the task directory:
+
+```
+docs/tasks/{NNNN-<feature-name>}/{task-id}/review-package.diff.md
+```
+
+The package must include:
+
+1. Task id, plan id, base ref, head ref, and commit range
+2. `git log --oneline <base>..<head>`
+3. `git diff --stat <base>..<head>`
+4. `git diff --find-renames --find-copies --function-context <base>..<head>`
+5. Implementer-reported verification commands and results
 
 **Do NOT:**
 
@@ -56,23 +85,25 @@ The subagent returns only a one-line status to the orchestrator. Detail lives in
 For each task:
 
 1. Read the task entry from `docs/tasks/{NNNN-<feature-name>}/tasks.json`.
-2. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
-3. If the subagent asks questions, answer before letting it proceed.
-4. When the subagent returns, generate a review package and dispatch a reviewer.
-5. If the reviewer finds issues, dispatch a fix subagent and re-review.
-6. Append a `completed` log entry via [`scripts/log-task.sh`](../scripts/log-task.sh) and update the JSON status.
+2. Ensure `docs/tasks/{NNNN-<feature-name>}/{task-id}/` exists and contains an executable copy of [`scripts/log-task.sh`](../scripts/log-task.sh).
+3. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
+4. If the subagent asks questions, answer before letting it proceed.
+5. When the subagent returns DONE/DONE_WITH_CONCERNS, update `tasks.json` to `ready_for_review`, generate a review package, and dispatch a reviewer.
+6. If the reviewer finds issues, update `tasks.json` to `needs_fix`, dispatch a fix subagent, and re-review.
+7. After clean review, append a `completed` log entry with the task-local `log-task.sh` and update the JSON status to `completed`.
 
 ## Parallel Dispatch
 
 For independent tasks with no file conflicts:
 
 1. Extract all task entries from `tasks.json` at once.
-2. Dispatch ALL subagents in ONE message (parallel tool calls).
-3. Wait for all to return.
-4. Review all results.
-5. Dispatch fix subagents for any that need fixes.
-6. Integrate all changes onto the working branch.
-7. Append `completed` log entries and update the JSON status for all tasks in the wave.
+2. Ensure each task has its own directory and executable task-local `log-task.sh`.
+3. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.
+4. Wait for all to return.
+5. Mark returned tasks as `ready_for_review`, generate review packages, and review all results.
+6. Dispatch fix subagents for any that need fixes.
+7. Integrate all changes onto the working branch.
+8. After clean review, append `completed` log entries with each task-local `log-task.sh` and update the JSON status for all tasks in the wave.
 
 **Critical:** Multiple dispatch calls in one response = parallel execution. One per response = sequential. The dispatch pattern controls parallelism.
 
@@ -149,7 +180,7 @@ Before dispatching any subagent, verify:
 1. **Repository state:** clean working tree, correct base branch checked out
 2. **Tooling available:** test runner, linter, and build commands are accessible and work
 3. **Task registry written:** `tasks.json` exists with all tasks defined and set to `pending`
-4. **Progress log initialized:** `progress.log` exists and is empty; `log-task.sh` is present and executable
+4. **Task directories initialized:** every dispatch target has `docs/tasks/{plan}/{task-id}/`, an empty `progress.log`, and an executable task-local `log-task.sh`
 
 If any check fails, fix it before dispatching.
 
@@ -157,7 +188,7 @@ If any check fails, fix it before dispatching.
 
 | Status                 | Meaning                        | Action                                                                                |
 | ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------- |
-| **DONE**               | Completed, tests pass          | Proceed to review                                                                     |
+| **DONE**               | Implemented, tests pass        | Mark `ready_for_review`, generate review package, proceed to review                   |
 | **DONE_WITH_CONCERNS** | Completed but flagged doubts   | Read concerns, decide whether to address before review                                |
 | **NEEDS_CONTEXT**      | Missing information to proceed | Provide context and re-dispatch                                                       |
 | **BLOCKED**            | Cannot complete the task       | Assess: provide context, upgrade model, break into smaller tasks, or escalate to user |

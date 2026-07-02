@@ -68,14 +68,14 @@ You must log task lifecycle events using the helper script provided by the orche
 Call the script at minimum for these events:
 
 - `started` — when you begin working on the task
-- `completed` — when the task passes acceptance criteria
+- `ready_for_review` — when the task passes acceptance criteria and your self-review is done
 - `failed` — when the task fails and cannot proceed without intervention
 - `blocked` — when you cannot continue and need context/help
 
 Example:
 
 ```bash
-bash .agents/skills/super-planning/scripts/log-task.sh \
+bash /absolute/path/to/docs/tasks/0003-auth-middleware/Task-A-0001/log-task.sh \
   --plan 0003-auth-middleware \
   --task Task-A-0001 \
   --event started \

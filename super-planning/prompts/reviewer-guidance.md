@@ -4,9 +4,9 @@ When dispatching a reviewer subagent, include these principles in the prompt.
 
 ## Task Registry (`tasks.json`) and Progress Log
 
-- Do **not** create, modify, or delete the `tasks.json` registry file or the `progress.log` file. Both are owned and updated by the orchestrator.
+- Do **not** create, modify, or delete the `tasks.json` registry file or the task-local `progress.log` file. Both are owned and updated by the orchestrator.
 - Read the relevant task entry from `tasks.json` as your source of requirements.
-- If instructed, log your review start/completion using the orchestrator-provided helper (e.g. `scripts/log-task.sh`). Never write to `progress.log` directly.
+- If instructed, log your review start/completion using the task-local helper. Never write to `progress.log` directly.
 
 ## Core Principles
 
@@ -31,10 +31,10 @@ Every finding needs a concrete `file:line` location, what's wrong, why it matter
 The reviewer gets exactly three things:
 
 1. **The task entry** from `tasks.json` (same one the implementer used)
-2. **The implementer's report file**
-3. **The review package** (diff file generated via git)
+2. **The implementer's report file** from `docs/tasks/{plan}/{task-id}/report.md`
+3. **The review package** from `docs/tasks/{plan}/{task-id}/review-package.diff.md`
 
-Read the diff file once — it contains the commit list, a stat summary, and the full diff with surrounding context. Do not re-run git commands. Do not crawl the broader codebase.
+Read the review package once — it contains metadata, commit list, a stat summary, the full diff with surrounding context, and implementer-reported verification. Do not re-run git commands. Do not crawl the broader codebase.
 
 The review is read-only. Do not mutate the working tree.
 

@@ -1,29 +1,31 @@
 # Task Progress Log
 
-This file is append-only. Each line is a JSON object written by subagents via `scripts/log-task.sh`.
+This file is append-only. Each line is a JSON object written through the task-local `log-task.sh`.
 
 ## Event Format
 
 The `log-task.sh` script appends one JSON object per line:
 
 ```json
-{"timestamp":"ISO8601","task":"Task-X-NNNN","event":"started|completed|failed|blocked","try":1,"maxTries":3,"message":"human-readable note"}
+{"timestamp":"ISO8601","task":"Task-X-NNNN","event":"started|ready_for_review|failed|blocked|completed","try":1,"maxTries":3,"message":"human-readable note"}
 ```
 
 ## Supported Events
 
 - `started`   — subagent began working on the task
-- `completed` — subagent finished the task and all acceptance criteria are met
+- `ready_for_review` — implementer finished self-review and the task is ready for independent review
 - `failed`     — subagent encountered an error and will retry (if retries remain)
 - `blocked`   — subagent cannot proceed without external input or decision
+- `completed` — orchestrator completed review and accepted the task
 
-Note: event values are **lowercase**. The script only accepts `started|completed|failed|blocked`.
+Note: event values are **lowercase**. The script only accepts `started|ready_for_review|failed|blocked|completed`.
 
 ## Example Log
 
 ```json
 {"timestamp":"2026-06-30T20:15:10Z","task":"Task-A-0001","event":"started","try":1,"maxTries":3,"message":"Initializing task environment"}
-{"timestamp":"2026-06-30T20:15:45Z","task":"Task-A-0001","event":"completed","try":1,"maxTries":3,"message":"Tests pass, files committed"}
+{"timestamp":"2026-06-30T20:15:45Z","task":"Task-A-0001","event":"ready_for_review","try":1,"maxTries":3,"message":"Tests pass, files committed"}
+{"timestamp":"2026-06-30T20:15:55Z","task":"Task-A-0001","event":"completed","try":1,"maxTries":3,"message":"Review clean; accepted by orchestrator"}
 {"timestamp":"2026-06-30T20:16:02Z","task":"Task-B-0001","event":"started","try":1,"maxTries":3,"message":"Starting core implementation"}
 {"timestamp":"2026-06-30T20:17:30Z","task":"Task-B-0001","event":"failed","try":1,"maxTries":3,"message":"Lint errors in src/core.py"}
 {"timestamp":"2026-06-30T20:18:05Z","task":"Task-B-0001","event":"started","try":2,"maxTries":3,"message":"Retrying after lint fixes"}
@@ -32,15 +34,15 @@ Note: event values are **lowercase**. The script only accepts `started|completed
 
 ## Location
 
-Save the log in the task directory alongside `tasks.json`:
+Save the log in the individual task directory:
 
 ```
-docs/tasks/{NNNN-<feature-name>}/progress.log
+docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log
 ```
 
 ## Rules
 
 - Append only — never edit or delete existing lines.
-- Do not write to this file directly. Use `scripts/log-task.sh` to avoid race conditions.
+- Do not write to this file directly. Use the task-local `log-task.sh` to avoid race conditions.
 - The orchestrator agent reads this log to determine current state; keep messages concise and factual.
 - After context compaction, trust this log and `git log` over your own recollection.

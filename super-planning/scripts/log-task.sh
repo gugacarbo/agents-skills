@@ -7,16 +7,14 @@ set -euo pipefail
 #   scripts/log-task.sh \
 #     --plan 0003-auth-middleware \
 #     --task Task-A-0001 \
-#     --event started|completed|failed|blocked \
+#     --event started|ready_for_review|failed|blocked|completed \
 #     [--try 1] \
 #     [--max-tries 3] \
 #     [--message "optional message"]
 #
-# The log file is written to <workspace-root>/docs/tasks/<plan>/progress.log,
-# where <workspace-root> is auto-detected by walking up from the script location
-# until a project marker (.git, package.json, pyproject.toml, Cargo.toml,
-# go.mod, or AGENTS.md) is found. The script itself typically lives at
-# .agents/skills/super-planning/scripts/log-task.sh inside the workspace.
+# The log file is written to <workspace-root>/docs/tasks/<plan>/<task>/progress.log.
+# Prefer copying this script into each task directory and dispatching that
+# task-local copy to workers.
 
 PLAN=""
 TASK=""
@@ -26,7 +24,7 @@ MAX_TRIES=""
 MESSAGE=""
 
 usage() {
-  echo "Usage: log-task.sh --plan <plan-ref> --task <task-id> --event <started|completed|failed|blocked> [--try N] [--max-tries N] [--message \"text\"]"
+  echo "Usage: log-task.sh --plan <plan-ref> --task <task-id> --event <started|ready_for_review|failed|blocked|completed> [--try N] [--max-tries N] [--message \"text\"]"
   exit 1
 }
 
@@ -67,7 +65,7 @@ if [[ -z "$PLAN" || -z "$TASK" || -z "$EVENT" ]]; then
 fi
 
 case "$EVENT" in
-  started|completed|failed|blocked)
+  started|ready_for_review|failed|blocked|completed)
     ;;
   *)
     echo "Invalid event: $EVENT" >&2
@@ -99,9 +97,10 @@ find_workspace_root() {
   printf '%s\n' "$start_dir"
 }
 
-WORKSPACE_ROOT="$(find_workspace_root "$PWD")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ROOT="$(find_workspace_root "$SCRIPT_DIR")"
 TASKS_DIR="${AGENTS_SKILLS_TASKS_DIR:-$WORKSPACE_ROOT/docs/tasks}"
-LOG_DIR="$TASKS_DIR/$PLAN"
+LOG_DIR="${AGENTS_SKILLS_TASK_DIR:-$TASKS_DIR/$PLAN/$TASK}"
 LOG_FILE="$LOG_DIR/progress.log"
 
 mkdir -p "$LOG_DIR"
@@ -127,7 +126,7 @@ max_tries() {
 message_json() {
   if [[ -n "$MESSAGE" ]]; then
     if command -v jq >/dev/null 2>&1; then
-      printf '%s' "$(jq -R -s . <<< "$MESSAGE")"
+      printf '%s' "$MESSAGE" | jq -Rs .
     else
       # Safe manual JSON escape for the message string.
       local escaped="${MESSAGE//\\/\\\\}"

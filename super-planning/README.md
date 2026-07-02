@@ -173,9 +173,10 @@ flowchart TD
 stateDiagram-v2
     [*] --> pending
     pending --> in_progress: Dispatch
-    in_progress --> completed: Review clean
-    in_progress --> failed: Fix needed
-    failed --> in_progress: Re-dispatch
+    in_progress --> ready_for_review: Implementer done
+    ready_for_review --> completed: Review clean
+    ready_for_review --> needs_fix: Fix needed
+    needs_fix --> in_progress: Re-dispatch
     in_progress --> blocked: Cannot proceed
     blocked --> in_progress: Re-assess<br/>more context / better model / smaller scope
     pending --> cancelled: Never started
@@ -188,7 +189,7 @@ stateDiagram-v2
 ```mermaid
 flowchart TD
     S[Subagent Returns] --> ST{Status?}
-    ST -->|DONE| P[Proceed to review]
+    ST -->|DONE| P[Mark ready_for_review]
     ST -->|DONE_WITH_CONCERNS| C[Read concerns<br/>decide whether to address]
     ST -->|NEEDS_CONTEXT| CT[Provide context<br/>re-dispatch]
     ST -->|BLOCKED| B{Assess}
@@ -199,7 +200,7 @@ flowchart TD
     C --> P
     CT --> in_progress
     RD --> in_progress
-    P --> REVIEW[Review Gates]
+    P --> REVIEW[Generate review package<br/>Review Gates]
 ```
 
 ### File Handoff Structure
@@ -215,9 +216,13 @@ flowchart TB
         end
         subgraph tasks/NNNN-<feature-name>/
             TASKS[tasks.json<br/>Machine-readable registry<br/>Single source of truth]
-            REPORT1[task-Task-X-0001-report.md<br/>Subagent output]
-            REPORT2[task-Task-X-0002-report.md<br/>Subagent output]
-            PROGRESS[progress.log<br/>Shared progress tracker]
+            LEDGER[progress-ledger.md<br/>Plan progress tracker]
+            subgraph Task-A-0001/
+                REPORT1[report.md<br/>Subagent output]
+                REVIEW1[review-package.diff.md<br/>Reviewer input]
+                LOG1[progress.log<br/>Task progress]
+                HELPER1[log-task.sh<br/>Task-local logger]
+            end
         end
     end
     SPEC --> PLAN
@@ -268,7 +273,7 @@ flowchart
 | Phase 1: Brainstorm | Requirements, constraints, design decisions | HARD: complete the integrated brainstorm flow |
 | Phase 2: Spec       | `docs/specs/NNNN-<name>-spec.md`            | User approval (pre-write + post-write) |
 | Phase 3: Plan       | `docs/plans/NNNN-<name>.md`                 | Self-review checklist                  |
-| Phase 4: Decompose  | `docs/tasks/NNNN-<name>/tasks.json`         | Tasks linked to plan number            |
+| Phase 4: Decompose  | `docs/tasks/NNNN-<name>/tasks.json` + per-task directories | Tasks linked to plan number |
 | Phase 5: Dispatch   | Subagent work                               | Pre-flight checks                      |
 | Phase 6: Review     | Two-stage review                            | Critical/Important must be fixed       |
 | Phase 7: Integrate  | Final review, merge prep                    | Full test suite passes                 |
@@ -278,7 +283,7 @@ flowchart
 See the full list in `SKILL.md` → **Red Flags** section. Key rules:
 
 - Never skip review or accept "close enough" on spec compliance
-- Never dispatch parallel subagents without file isolation
+- Never dispatch parallel subagents without file isolation or a platform fallback
 - Never start implementation on main/master without explicit consent
 - Never re-dispatch a task the progress log or ledger marks complete
 

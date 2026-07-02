@@ -52,10 +52,11 @@ Have a feature idea or requirements for a multi-step task?
 
 - **Sequential mode:** one implementer + one reviewer per task, in order. Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously, then review together. Requires file-level isolation.
-- **File-based handoffs:** task requirements live in `tasks.json`; subagents write reports to files; progress lives in `progress.log` and `progress-ledger.md`.
+- **File-based handoffs:** task requirements live in `tasks.json`; each task gets its own directory for reports, review packages, local `log-task.sh`, and `progress.log`; plan progress lives in `progress-ledger.md`.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
-- **Output summary** — after creating artifacts (spec, plan, tasks.json, progress files), print a one-line summary showing each file path so the user knows what was produced. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/tasks/0001-auth/tasks.json, docs/tasks/0001-auth/progress-ledger.md`
+- **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → needs_fix|blocked|completed`. Only the orchestrator may mark `completed`, and only after review is clean.
+- **Output summary** — after creating artifacts (spec, plan, tasks.json, task directories, progress files), print a one-line summary showing each file path so the user knows what was produced. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/tasks/0001-auth/tasks.json, docs/tasks/0001-auth/Task-A-0001/log-task.sh, docs/tasks/0001-auth/progress-ledger.md`
 
 ## Outputs & Conventions
 
@@ -64,7 +65,8 @@ Have a feature idea or requirements for a multi-step task?
 | Spec            | `docs/specs/NNNN-<feature-name>-spec.md`            | [`templates/spec-template.md`](templates/spec-template.md)                       |
 | Plan            | `docs/plans/NNNN-<feature-name>.md`                 | [`templates/plan-template.md`](templates/plan-template.md)                       |
 | Task registry   | `docs/tasks/NNNN-<feature-name>/tasks.json`         | [`templates/tasks-template.json`](templates/tasks-template.json)                 |
-| Progress log    | `docs/tasks/NNNN-<feature-name>/progress.log`       | [`templates/progress-template.txt`](templates/progress-template.txt)             |
+| Task directory  | `docs/tasks/NNNN-<feature-name>/<task-id>/`         | Contains task report, review package, local logger, and task progress log        |
+| Task progress log | `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
 | Progress ledger | `docs/tasks/NNNN-<feature-name>/progress-ledger.md` | [`templates/progress-ledger-template.md`](templates/progress-ledger-template.md) |
 
 ## Prompt Library

@@ -26,16 +26,18 @@ Read the task entry in `docs/tasks/[NNNN-<feature-name>]/tasks.json` with `id: [
 
 ## Logging
 
-Use the logging script to record every state change. The script is at `[path/to/scripts/log-task.sh]`.
+Use the task-local logging script to record every state change. The script is at:
 
-It is also available relative to the skill at: `.agents/skills/super-planning/scripts/log-task.sh`.
+`docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh`
+
+The orchestrator copied it into your task directory before dispatch. Use the absolute path when running it.
 
 ### Log on these events
 
 | Event flag  | When                                        |
 | ----------- | ------------------------------------------- |
 | `started`   | Right before you begin work                 |
-| `completed` | After your last command and self-review     |
+| `ready_for_review` | After your last command and self-review |
 | `failed`    | After the last retry of a recoverable error |
 | `blocked`   | When you cannot proceed and need help       |
 
@@ -43,19 +45,19 @@ It is also available relative to the skill at: `.agents/skills/super-planning/sc
 
 ```sh
 # At the start
-bash scripts/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event started --try 1 --max-tries 3 --message "Starting implementation"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event started --try 1 --max-tries 3 --message "Starting implementation"
 
-# On success
-bash scripts/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event completed --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
+# When ready for review
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event ready_for_review --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
 
 # On failure (final retry)
-bash scripts/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
 
 # When blocked
-bash scripts/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-0003"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-0003"
 ```
 
-The script auto-detects the workspace root and appends a timestamped line to `docs/tasks/[NNNN-<feature-name>]/progress.log`. The `3 3` in the examples means `try=3`, `maxTries=3`. Adjust the try count to your actual current attempt.
+The script appends a timestamped line to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/progress.log`. Adjust the try count to your actual current attempt.
 
 ## Hard Constraints
 
@@ -68,12 +70,12 @@ The script auto-detects the workspace root and appends a timestamped line to `do
 
 Return a one-line status to the orchestrator:
 
-- `DONE` — all acceptance criteria met, code committed, log written
-- `DONE_WITH_CONCERNS` — completed but flag specific issues
+- `DONE` — all acceptance criteria met, code committed, `ready_for_review` log written
+- `DONE_WITH_CONCERNS` — implemented but flag specific issues
 - `NEEDS_CONTEXT` — describe what you need
 - `BLOCKED` — describe the blocker
 
-Then write the full report to `docs/tasks/[NNNN-<feature-name>]/task-[Task-X-NNNN]-report.md` with the following sections:
+Then write the full report to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/report.md` with the following sections:
 
 1. **What you implemented** (or what you attempted, if blocked)
 2. **What you tested** and test results

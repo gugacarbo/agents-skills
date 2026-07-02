@@ -7,8 +7,8 @@ Track task status in a durable file that survives context compaction. Update thi
 ```
 | Task | Status       | Commits          | Report File | Review                                     |
 | ---- | ------------ | ---------------- | ----------- | ------------------------------------------ |
-| T01  | ✅ complete  | abc1234..def5678 | task-T01-report.md | clean                                      |
-| T02  | 🔄 in review | ghi9012..        | task-T02-report.md | spec ✅ quality ❌ Important: magic number |
+| T01  | ✅ complete  | abc1234..def5678 | T01/report.md | clean                                      |
+| T02  | 🔎 ready for review | ghi9012.. | T02/report.md | awaiting review                            |
 | T03  | ⏳ pending   | —                | —           | —                                          |
 ```
 
@@ -16,6 +16,7 @@ Track task status in a durable file that survives context compaction. Update thi
 
 - ⏳ pending — task not yet dispatched
 - 🔄 in progress — implementer subagent is working
+- 🔎 ready for review — implementer finished and independent review is next
 - 🔄 in review — reviewer subagent is checking
 - 🔁 needs-fix — reviewer found Critical/Important issues
 - ✅ complete — spec compliance and code quality approved
@@ -26,3 +27,4 @@ Track task status in a durable file that survives context compaction. Update thi
 - After context compaction, trust this ledger and `git log` over your own recollection.
 - Never re-dispatch a task the ledger marks as ✅ complete (see SKILL.md Red Flags).
 - Record the commit range for each task so reviewers can generate diffs quickly.
+- Store per-task report, review package, progress log, and logger under `docs/tasks/<plan>/<task-id>/`.
