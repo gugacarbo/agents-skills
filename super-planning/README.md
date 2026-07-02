@@ -4,6 +4,8 @@ Create implementation plans decomposed into tasks and execute them via subagents
 
 > **Agent note:** Start at [`SKILL.md`](SKILL.md) for the routing entrypoint. The full decision trees below are the visual companion to that file; detailed phase instructions live in [`phases/`](phases/).
 
+Phase 1 now includes the full brainstorming workflow and can optionally use the embedded visual companion documented in [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md).
+
 ## Operation Flows
 
 ### Decision Flow: When to Use
@@ -263,7 +265,7 @@ flowchart
 
 | Phase               | Key Output                                  | Gate                                   |
 | ------------------- | ------------------------------------------- | -------------------------------------- |
-| Phase 1: Brainstorm | Requirements, constraints, design decisions | HARD: must invoke brainstorming skill  |
+| Phase 1: Brainstorm | Requirements, constraints, design decisions | HARD: complete the integrated brainstorm flow |
 | Phase 2: Spec       | `docs/specs/NNNN-<name>-spec.md`            | User approval (pre-write + post-write) |
 | Phase 3: Plan       | `docs/plans/NNNN-<name>.md`                 | Self-review checklist                  |
 | Phase 4: Decompose  | `docs/tasks/NNNN-<name>/tasks.json`         | Tasks linked to plan number            |

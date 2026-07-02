@@ -1,6 +1,6 @@
 ---
 name: super-planning
-description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature spec or requirements for a multi-step task, before touching code. Covers plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression."
+description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression."
 user-invocable: true
 ---
 
@@ -12,12 +12,13 @@ Create implementation plans decomposed into tasks and execute them via subagents
 
 **Core principle:** One subagent per task + review gates + file-based handoffs = high quality, low context, fast iteration.
 
-**Scope:** Use this skill for implementation planning and execution. Use `brainstorming` upstream to refine requirements; use `commit-changes` downstream to commit final work.
+**Scope:** Use this skill for end-to-end pre-implementation shaping and execution. Phase 1 includes the requirement-refinement work that used to live in `brainstorming`; use `commit-changes` downstream to commit final work.
 
 ## Quick Start
 
 1. **Announce:** "I'm using the super-planning skill to create and execute this implementation plan."
 2. **Route through the phases below** — the agent must load the referenced file before executing a phase.
+3. **If Phase 1 becomes visual:** load [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) before launching the companion.
 
 ## Phase Router
 
@@ -31,7 +32,7 @@ Create implementation plans decomposed into tasks and execute them via subagents
 | 6 — REVIEW     | Spec compliance + code quality gates                   | [`phases/06-review.md`](phases/06-review.md)         |
 | 7 — INTEGRATE  | Merge results, final review, finish                    | [`phases/07-integrate.md`](phases/07-integrate.md)   |
 
-**Always run Phase 1 first;** never skip to planning without first invoking the `brainstorming` skill (or its fallback).
+**Always run Phase 1 first** when the user starts from an idea, request, or loose requirements. Skip it only when there is already an approved spec in the repo.
 
 ## Decision Flow
 
@@ -72,6 +73,7 @@ Have a feature idea or requirements for a multi-step task?
 | ------------------------------------------------------------------------ | ----------------------------------- |
 | [`prompts/pre-write-approval.md`](prompts/pre-write-approval.md)         | Before writing the spec             |
 | [`prompts/post-write-approval.md`](prompts/post-write-approval.md)       | After writing the spec              |
+| [`prompts/spec-document-reviewer-prompt.md`](prompts/spec-document-reviewer-prompt.md) | Reviewing spec readiness |
 | [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building a subagent dispatch prompt |
 | [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Dispatching an implementer subagent |
 | [`prompts/reviewer-guidance.md`](prompts/reviewer-guidance.md)           | Dispatching a reviewer subagent     |
@@ -79,4 +81,5 @@ Have a feature idea or requirements for a multi-step task?
 ## See Also
 
 - **Full visual flows:** [`README.md`](README.md)
+- **Phase 1 visual companion:** [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md)
 - **Progress logging helper:** [`scripts/log-task.sh`](scripts/log-task.sh)

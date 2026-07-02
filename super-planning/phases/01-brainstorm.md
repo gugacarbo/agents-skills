@@ -1,24 +1,50 @@
 # Phase 1: Brainstorm
 
 <HARD-GATE>
-You MUST invoke the `brainstorming` skill before writing the spec. Do not skip this step, even if the feature seems simple or well-understood.
+Do NOT write the spec or start implementation until you have refined the idea into concrete requirements, constraints, and design decisions. Do not skip this step, even if the feature seems simple or well-understood.
 </HARD-GATE>
 
-## Flow
+Phase 1 now embeds the `brainstorming` workflow directly inside `super-planning`. Use this phase to turn a rough request into spec-ready inputs.
 
-1. **Invoke the `brainstorming` skill** — present the feature idea and let it guide exploration.
-2. **Collect outputs** — requirements, constraints, non-goals, and design decisions.
-3. **Carry the outputs into the spec** — use them as the foundation for the spec summary (Phase 2).
+## Workflow
 
-Do NOT proceed to Phase 2 until the `brainstorming` skill has been invoked and its outputs are available.
+1. **Explore project context first** — inspect the relevant files, docs, and recent changes before asking detailed questions.
+2. **Assess scope early** — if the request actually contains multiple independent systems, stop and decompose it into sub-projects before refining details.
+3. **Ask clarifying questions one at a time** — prefer multiple choice when possible; focus on purpose, constraints, success criteria, and non-goals.
+4. **Offer a visual companion only just-in-time** — only if a mockup, diagram, or visual comparison would genuinely make the next question easier to understand. If the user agrees, load [`01_1-visual-companion.md`](01_1-visual-companion.md) before launching it.
+5. **Propose 2-3 approaches** — include trade-offs, lead with your recommendation, and explain why.
+6. **Validate the direction** — make sure the user agrees with the chosen approach before carrying it into the spec.
+7. **Collect phase outputs** — requirements, constraints, assumptions, non-goals, risks, and design decisions.
+8. **Carry the outputs into the spec** — use them as the foundation for the spec summary in Phase 2.
 
-## Fallback When Brainstorming Skill Is Unavailable
+Do NOT proceed to Phase 2 until the brainstorm outputs are available.
 
-If the skill is not present, do **not** skip Phase 1. Perform a lightweight manual brainstorm. **The default behavior is to make assumptions and proceed immediately — do not wait for user confirmation.**
+## Interaction Rules
 
-1. **Quick assessment** — identify the core problem, goal, and likely scope (3–5 sentences).
-2. **Make reasonable default assumptions** — based on the user's prompt, determine the likely tech stack, scope, constraints, and design approach. Document them in the spec's assumptions section.
-3. **Proceed to Phase 2 immediately** — do NOT wait for confirmation. Write the spec with your assumptions clearly noted.
-4. **Briefly mention your assumptions** to the user in one sentence (e.g., "Assumed Node/Express with PostgreSQL — noted in spec"). This lets them correct you if needed. If the user responds with corrections, incorporate them and continue.
+- Ask only one question per message.
+- Prefer concise multiple-choice questions over broad open-ended ones.
+- Stay ruthlessly within scope; remove nice-to-haves that are not needed for the first implementation.
+- Follow existing repo patterns before proposing new abstractions.
+- If existing code structure will directly hurt the work, include only the smallest refactor needed to support the feature cleanly.
+- Present the chosen design in sections scaled to complexity and make sure the user agrees before moving on to the written spec.
 
-The reason for proceeding immediately: a spec built on documented assumptions can be corrected later, but a stalled process produces nothing. Default assumptions are better than no output.
+## Fast Path
+
+If the request is already well-defined after a quick repo review, keep Phase 1 short:
+
+1. Summarize the problem and likely scope in 3-5 sentences.
+2. Surface any assumptions that still matter.
+3. Confirm the recommended approach with the user.
+4. Move to Phase 2 once the direction is aligned.
+
+## Required Outputs
+
+Before leaving Phase 1, have enough material to write a solid spec summary:
+
+- Problem statement
+- User goal or business outcome
+- Scope and non-goals
+- Constraints and compatibility requirements
+- Chosen approach and why
+- Known risks or open questions
+- Explicit assumptions to carry into the spec

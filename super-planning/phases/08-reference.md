@@ -150,7 +150,7 @@ If the user requests a spec change during implementation:
 
 | Skill                   | When to use                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------ |
-| **brainstorming**       | Before this skill — refine the idea into a spec first                                |
+| **brainstorming**       | Optional external companion only if you want to keep a standalone brainstorm workflow |
 | **commit-changes**      | After this skill — commit the final changes                                          |
 | **plan-with-subagents** | This skill itself — use for any implementation plan that delegates work to subagents |
 
