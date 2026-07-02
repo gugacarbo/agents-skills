@@ -56,6 +56,23 @@ After writing the spec, ask the user to review it before proceeding to planning.
 
 Do NOT proceed to Phase 3 until the spec is approved. If changes are requested, update the spec and ask again.
 
+## Spec Self-Review
+
+Immediately after writing the spec, do a quick self-review before sending it to the user:
+
+1. **Placeholder scan** — remove `TODO`, `TBD`, and incomplete sections.
+2. **Internal consistency** — check that the architecture, requirements, and edge cases do not contradict each other.
+3. **Scope check** — make sure the spec is still focused enough for one implementation plan.
+4. **Ambiguity check** — if a requirement could be interpreted in multiple ways, choose one and make it explicit.
+
+Fix issues inline before asking the user to review the file.
+
+## Optional Spec Reviewer Pass
+
+When the spec is complex, high-risk, or likely to be ambiguous, dispatch a lightweight reviewer using [`prompts/spec-document-reviewer-prompt.md`](../prompts/spec-document-reviewer-prompt.md).
+
+Use that pass to catch real planning blockers, not stylistic nits. If it finds issues, fix them before the Post-Write Approval Gate.
+
 ## Spec Status Lifecycle
 
 | Status        | When                                                                      |
