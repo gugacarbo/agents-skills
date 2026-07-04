@@ -10,10 +10,10 @@ Subagent tool results get injected verbatim into your context. Across many deleg
 
 Everything you paste into a dispatch prompt — and everything a subagent prints back — stays resident in your context. Hand artifacts over as files instead:
 
-- **Task entry** → `tasks.json` (subagent reads its entry, you don't carry it)
-- **Report** → `docs/tasks/<plan>/<task-id>/report.md` (subagent writes it, you get a one-line summary)
-- **Review package** → `docs/tasks/<plan>/<task-id>/review-package.diff.md` (reviewer reads the diff from a file, you don't paste it)
-- **Progress log/helper** → each task owns `docs/tasks/<plan>/<task-id>/progress.log` and `log-task.sh`
+- **Task entry** → `super-plan.json` (subagent reads its entry, you don't carry it)
+- **Report** → `docs/tasks/<plan>/<task-id>/report.md` (materialized in Phase 6; subagent writes or returns it, you get a one-line summary)
+- **Review package** → `docs/tasks/<plan>/<task-id>/review-package.diff.md` (materialized in Phase 6; reviewer reads the diff from a file, you don't paste it)
+- **Progress log/helper** → each task owns `docs/tasks/<plan>/<task-id>/progress.log` and `log-task.sh`, both first materialized in Phase 6
 
 ### Compressed Output
 
@@ -52,7 +52,7 @@ Do not pause to check in between tasks. Execute all tasks from the plan without 
 
 ### Retry Limits
 
-Each task has a `tryCount` in `tasks.json`. The default maximum is **3 attempts**. After 3 failures on the same task:
+Each task has a `tryCount` in `super-plan.json`. The default maximum is **3 attempts**. After 3 failures on the same task:
 
 1. **Stop retrying** — do not dispatch a 4th attempt with the same approach
 2. **Assess the root cause** — re-read the task entry, the subagent's report, and the diff
@@ -82,7 +82,7 @@ pending → in_progress → ready_for_review → completed
                               └──────────→ blocked
 ```
 
-A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `tasks.json` after every state change.
+A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `super-plan.json` after every state change.
 
 Implementer subagents log `ready_for_review`; only the orchestrator logs `completed`.
 
@@ -92,10 +92,10 @@ Implementer subagents log `ready_for_review`; only the orchestrator logs `comple
 
 When a gap is discovered during implementation:
 
-1. Add the new task to `tasks.json` with the next available ID and appropriate batch
+1. Add the new task to `super-plan.json` with the next available ID, appropriate `batch`, and appropriate `phase`
 2. Set its `dependencies` to any tasks it depends on
 3. Update the plan file's File Structure section if the new task touches files not previously listed
-4. Dispatch the new task in the next wave
+4. Dispatch the new task in the next batch
 
 ### Removing Tasks
 
@@ -110,7 +110,7 @@ When a task becomes unnecessary:
 When dependencies change mid-flight:
 
 1. Update `dependencies` in the affected task entries
-2. If a task was in a later batch but now depends on a task in the same batch, move it to the next batch
+2. If a task was planned for parallel execution but now depends on a task in the same batch, move it to the next batch
 3. Do not change batch assignments of tasks that are already `in_progress` or `completed`
 
 ### When the Spec Changes
@@ -120,7 +120,7 @@ If the user requests a spec change during implementation:
 1. **Pause dispatching** — do not start new tasks that may be affected
 2. **Assess impact** — which tasks are affected? Which are already complete?
 3. **Update the spec** — incorporate the change and re-approve with the user
-4. **Update the plan and `tasks.json`** — modify affected tasks, add new tasks if needed
+4. **Update the plan and `super-plan.json`** — modify affected tasks, add new tasks if needed
 5. **Re-review completed tasks** — if a spec change affects already-completed work, flag it for re-review
 6. **Resume dispatching** — continue from where you left off
 
@@ -131,7 +131,7 @@ If the user requests a spec change during implementation:
 - Skip task review, or accept a report missing either verdict (spec compliance AND code quality are both required)
 - Proceed with unfixed Critical/Important issues
 - Dispatch multiple implementation subagents in parallel without file isolation or a platform fallback
-- Make a subagent read the whole plan file (hand it its task entry from `tasks.json` instead)
+- Make a subagent read the whole plan file (hand it its task entry from `super-plan.json` instead)
 - Skip scene-setting context (subagent needs to understand where its task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance

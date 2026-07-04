@@ -13,10 +13,11 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 .
 ├── skills.sh              # public entrypoint; also supports curl | sh bootstrap
 ├── .scripts/              # install/update command implementations and tests
-├── commit-changes/        # only currently tracked skill directory
+├── commit-changes/        # tracked skill directory
 ├── find-skills/           # local skill directory, ignored by git allowlist
 ├── init-deep/             # local skill directory, ignored by git allowlist
-└── skill-creator/         # complex local skill, mostly ignored except AGENTS.md
+├── skill-creator/         # complex local skill, mostly ignored except AGENTS.md
+└── super-planning/        # tracked planning/orchestration skill
 ```
 
 ## WHERE TO LOOK
@@ -28,7 +29,8 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Change update behavior        | `.scripts/update.sh`                        | Tests live in `.scripts/tests/update.sh` and bootstrap coverage. |
 | Validate curl bootstrap       | `.scripts/tests/bootstrap.sh`               | Uses local tarballs and `sh -s -- <command>`.                    |
 | Validate git allowlist        | `.gitignore`, `.scripts/tests/gitignore.sh` | The repo ignores everything by default.                          |
-| Work on tracked skill content | `commit-changes/SKILL.md`                   | Other skill dirs are local unless unignored.                     |
+| Work on commit skill content  | `commit-changes/SKILL.md`                   | Conventional-commit workflow skill.                              |
+| Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
 | Work on skill eval tooling    | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.            |
 
 ## CONVENTIONS

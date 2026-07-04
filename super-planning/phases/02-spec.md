@@ -46,9 +46,10 @@ Do NOT write the spec file until the user has approved the summary. This applies
 </HARD-GATE>
 
 1. **Present a summary:** problem statement (1–2 sentences), goal (1 sentence), key requirements (3–7 bullets), non-goals, architecture approach (1–2 sentences), open questions (if any).
-2. **Ask for approval** using [`prompts/pre-write-approval.md`](../prompts/pre-write-approval.md).
-3. **If approved:** write the spec file.
-4. **If changes requested:** incorporate feedback and present the summary again.
+2. **Ask for approval** using [`prompts/pre-write-approval.md`](../prompts/pre-write-approval.md). This prompt must also ask whether to create the optional brainstorming decisions file at `docs/specs/{feature_number}_{feature_name}_decisions.md`.
+3. **If approved with decisions file enabled:** write `docs/specs/{feature_number}_{feature_name}_decisions.md` from the Phase 1 outputs using [`templates/decisions-template.md`](../templates/decisions-template.md), then write the spec file.
+4. **If approved without the decisions file:** write the spec file only.
+5. **If changes requested:** incorporate feedback and present the summary again.
 
 ## Post-Write Approval Gate
 

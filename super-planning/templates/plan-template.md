@@ -1,7 +1,7 @@
 # [Feature Name] Implementation Plan
 
 > **For agentic workers:** Use subagent-driven development to implement this plan task-by-task.
-> The executable source of truth is `docs/tasks/NNNN-<feature-name>/tasks.json`.
+> The executable source of truth is `docs/tasks/NNNN-<feature-name>/super-plan.json`.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -22,12 +22,12 @@ include this section.]
 | -------------- | --------------- | --------------------------------------- |
 | `[path]`       | `[Task-X-NNNN]` | [What it contains / interface contract] |
 
-## Task Registry
+## Structured Registry
 
-- **Registry:** `docs/tasks/NNNN-<feature-name>/tasks.json`
-- **Progress ledger:** `docs/tasks/NNNN-<feature-name>/progress-ledger.md`
-- **Task directories:** `docs/tasks/NNNN-<feature-name>/<task-id>/`
-- **Task-local logs:** `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log`
-- **Task-local logger:** `docs/tasks/NNNN-<feature-name>/<task-id>/log-task.sh`
+- **Registry:** `docs/tasks/NNNN-<feature-name>/super-plan.json`
+- **Progress ledger:** `docs/tasks/NNNN-<feature-name>/progress-ledger.md` (materialized in Phase 6)
+- **Task directories:** `docs/tasks/NNNN-<feature-name>/<task-id>/` (materialized in Phase 6)
+- **Task-local logs:** `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log` (materialized in Phase 6)
+- **Task-local logger:** `docs/tasks/NNNN-<feature-name>/<task-id>/log-task.sh` (materialized in Phase 6)
 
 ---

@@ -15,7 +15,8 @@ Phase 1 now embeds the `brainstorming` workflow directly inside `super-planning`
 5. **Propose 2-3 approaches** — include trade-offs, lead with your recommendation, and explain why.
 6. **Validate the direction** — make sure the user agrees with the chosen approach before carrying it into the spec.
 7. **Collect phase outputs** — requirements, constraints, assumptions, non-goals, risks, and design decisions.
-8. **Carry the outputs into the spec** — use them as the foundation for the spec summary in Phase 2.
+8. **Offer an optional decisions file at the pre-spec gate** — when Phase 2 asks for approval before writing the spec, the user may also ask for a durable decisions file named `docs/specs/{feature_number}_{feature_name}_decisions.md`.
+9. **Carry the outputs into the spec** — use them as the foundation for the spec summary in Phase 2 and, if requested, for the optional decisions file.
 
 Do NOT proceed to Phase 2 until the brainstorm outputs are available.
 
@@ -39,7 +40,7 @@ If the request is already well-defined after a quick repo review, keep Phase 1 s
 
 ## Required Outputs
 
-Before leaving Phase 1, have enough material to write a solid spec summary:
+Before leaving Phase 1, have enough material to write a solid spec summary and, if requested, a decisions file:
 
 - Problem statement
 - User goal or business outcome
@@ -48,3 +49,4 @@ Before leaving Phase 1, have enough material to write a solid spec summary:
 - Chosen approach and why
 - Known risks or open questions
 - Explicit assumptions to carry into the spec
+- Enough context to populate `docs/specs/{feature_number}_{feature_name}_decisions.md` if the user opts in at the pre-write approval gate

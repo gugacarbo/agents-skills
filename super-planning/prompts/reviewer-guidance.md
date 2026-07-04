@@ -2,10 +2,10 @@
 
 When dispatching a reviewer subagent, include these principles in the prompt.
 
-## Task Registry (`tasks.json`) and Progress Log
+## Task Registry (`super-plan.json`) and Progress Log
 
-- Do **not** create, modify, or delete the `tasks.json` registry file or the task-local `progress.log` file. Both are owned and updated by the orchestrator.
-- Read the relevant task entry from `tasks.json` as your source of requirements.
+- Do **not** create, modify, or delete the `super-plan.json` registry file or the task-local `progress.log` file. Both are owned and updated by the orchestrator.
+- Read the relevant task entry from `super-plan.json` as your source of requirements.
 - If instructed, log your review start/completion using the task-local helper. Never write to `progress.log` directly.
 
 ## Core Principles
@@ -30,9 +30,11 @@ Every finding needs a concrete `file:line` location, what's wrong, why it matter
 
 The reviewer gets exactly three things:
 
-1. **The task entry** from `tasks.json` (same one the implementer used)
+1. **The task entry** from `super-plan.json` (same one the implementer used)
 2. **The implementer's report file** from `docs/tasks/{plan}/{task-id}/report.md`
 3. **The review package** from `docs/tasks/{plan}/{task-id}/review-package.diff.md`
+
+These task artifact files are first materialized in Phase 6.
 
 Read the review package once — it contains metadata, commit list, a stat summary, the full diff with surrounding context, and implementer-reported verification. Do not re-run git commands. Do not crawl the broader codebase.
 
@@ -64,7 +66,7 @@ For each issue: file:line, what's wrong, why it matters, how to fix.
 
 - Open-ended directives like "check all uses"
 - Instructions to ignore or not flag specific issues
-- The entire plan file (only their task entry from tasks.json)
+- The entire plan file (only their task entry from `super-plan.json`)
 
 ## Compressed Reviewer Output
 

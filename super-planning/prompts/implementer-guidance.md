@@ -4,13 +4,13 @@ Include these expectations when constructing dispatch prompts for implementers.
 
 ## Before Starting Work
 
-If anything in your task entry from `tasks.json` is unclear — requirements, approach, dependencies, assumptions — ask questions before proceeding. Don't guess or make assumptions.
+If anything in your task entry from `super-plan.json` is unclear — requirements, approach, dependencies, assumptions — ask questions before proceeding. Don't guess or make assumptions.
 
-## Task Registry (`tasks.json`)
+## Task Registry (`super-plan.json`)
 
-- Do **not** create, modify, or delete the `tasks.json` registry file. It is owned and updated by the orchestrator.
-- Read the relevant task entry from `tasks.json` as your source of requirements.
-- Report status and outcomes in your report file; the orchestrator will update `tasks.json` based on your report.
+- Do **not** create, modify, or delete the `super-plan.json` registry file. It is owned and updated by the orchestrator.
+- Read the relevant task entry from `super-plan.json` as your source of requirements.
+- Report status and outcomes in your report file; the orchestrator will update `super-plan.json` based on your report.
 
 ## Code Organization
 
@@ -52,7 +52,7 @@ Or one of: `too-big.` / `needs-confirm.` / `ambiguous.` / `regressed.` (terminal
 
 ## Report Format
 
-Write your full report to the report file path provided in the dispatch prompt:
+Write your full report to the report file path provided in the dispatch prompt, or return that content for Phase 6 persistence if the task artifact directory has not been materialized yet:
 
 - What you implemented (or what you attempted, if blocked)
 - What you tested and test results

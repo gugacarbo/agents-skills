@@ -6,7 +6,7 @@ description: Minimal dispatch prompt template for subagents. Copy, fill the plac
 # Worker Dispatch Prompt
 
 > Copy this file, fill the placeholders, and pass to a subagent.
-> This template is intentionally minimal — the subagent reads `tasks.json` for the rest.
+> This template is intentionally minimal — the subagent reads `super-plan.json` for the rest.
 
 ---
 
@@ -22,7 +22,7 @@ All file operations must use absolute paths.
 
 ## Your Task
 
-Read the task entry in `docs/tasks/[NNNN-<feature-name>]/tasks.json` with `id: [Task-X-NNNN]`. That entry contains the complete requirements: files, interfaces, requirements, steps, acceptanceCriteria, and notes. You do not need to read any other file in the plan to do your work.
+Read the task entry in `docs/tasks/[NNNN-<feature-name>]/super-plan.json` with `id: [Task-X-NNNN]`. That entry contains the complete requirements: files, interfaces, requirements, steps, acceptanceCriteria, and notes. You do not need to read any other file in the plan to do your work.
 
 ## Logging
 
@@ -30,7 +30,7 @@ Use the task-local logging script to record every state change. The script is at
 
 `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh`
 
-The orchestrator copied it into your task directory before dispatch. Use the absolute path when running it.
+If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. If not, return your status and report content so the orchestrator can persist them during Phase 6.
 
 ### Log on these events
 
@@ -57,11 +57,11 @@ bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.s
 bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-0003"
 ```
 
-The script appends a timestamped line to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/progress.log`. Adjust the try count to your actual current attempt.
+When present, the script appends a timestamped line to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/progress.log`. Adjust the try count to your actual current attempt.
 
 ## Hard Constraints
 
-- Do **not** edit `docs/tasks/[NNNN-<feature-name>]/tasks.json`. The orchestrator owns that file.
+- Do **not** edit `docs/tasks/[NNNN-<feature-name>]/super-plan.json`. The orchestrator owns that file.
 - Stay within the `filesTouched` and `files` block from your task entry.
 - Do not run the full test suite unless your task entry requires it.
 - Do not read the rest of the plan. You have everything you need in your task entry.
@@ -75,7 +75,7 @@ Return a one-line status to the orchestrator:
 - `NEEDS_CONTEXT` — describe what you need
 - `BLOCKED` — describe the blocker
 
-Then write the full report to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/report.md` with the following sections:
+Then write or return the full report for `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/report.md` with the following sections:
 
 1. **What you implemented** (or what you attempted, if blocked)
 2. **What you tested** and test results

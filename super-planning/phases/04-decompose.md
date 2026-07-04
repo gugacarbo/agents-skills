@@ -1,24 +1,52 @@
 # Phase 4: Decompose into Tasks
 
-Before dispatching any subagent, generate the task directory and a single machine-readable registry that is the source of truth for every task.
+Before dispatching any subagent, generate a single machine-readable registry that is the source of truth for the plan and every task.
 
-## Task Registry (JSON)
+## Unified Registry (`super-plan.json`)
 
-Create the registry in the plan's task directory:
+Create the registry in the plan's task directory with [`scripts/super-plan.sh`](../scripts/super-plan.sh):
 
 ```
-docs/tasks/{NNNN-<feature-name>}/tasks.json
+docs/tasks/{NNNN-<feature-name>}/super-plan.json
 ```
 
 Example for plan `docs/plans/0003-auth-middleware.md`:
 
 ```
-docs/tasks/0003-auth-middleware/tasks.json
+docs/tasks/0003-auth-middleware/super-plan.json
 ```
 
-The registry is the implementer's single source of requirements. It contains the exact values, code, and acceptance criteria.
+The generator script materializes the file from the separate interface contract at [`interfaces/super-plan.schema.json`](../interfaces/super-plan.schema.json).
 
-Structure and field definitions: see [`templates/tasks-template.json`](../templates/tasks-template.json). All required fields must be present.
+`super-plan.json` is the orchestrator-owned structured source of truth. It combines:
+
+- plan governance and execution settings that used to live in `plan.json`
+- requirements coverage and plan metadata
+- the executable task registry that used to live in `tasks.json`
+
+Run the generator first, then fill in the resulting file:
+
+```bash
+sh /absolute/path/to/super-planning/scripts/super-plan.sh \
+  --plan-id 0003-auth-middleware \
+  --feature-name auth-middleware \
+  --spec docs/specs/0003-auth-middleware-spec.md \
+  --plan docs/plans/0003-auth-middleware.md \
+  --output docs/tasks/0003-auth-middleware/super-plan.json
+```
+
+Structure and field definitions live in [`interfaces/super-plan.schema.json`](../interfaces/super-plan.schema.json). All required fields must be present, including:
+
+- `source.spec` and `source.plan`
+- `goal`, `architectureSummary`, `techStack`
+- `globalConstraints`, `fileStructure`, `requirementsChecklist`
+- `taskDirectory`, `executionMode`, `branchStrategy`, `worktree`
+- `tasks`
+
+Each task entry must still include:
+
+- `batch` — execution batch label such as `A`, `B`, `C`
+- `phase` — work classification such as `foundation`, `core`, `surface`, `final`
 
 **Rules for status:**
 
@@ -27,66 +55,17 @@ Structure and field definitions: see [`templates/tasks-template.json`](../templa
 - Use only these status values: `pending`, `in_progress`, `ready_for_review`, `needs_fix`, `blocked`, `completed`.
 - A task cannot move to `completed` until its review is clean.
 
-## Per-Task Directories
+**Ownership rule:** Subagents must not edit `super-plan.json`. Only the orchestrator updates it.
 
-For every task, create a task-specific directory under the plan directory:
+## Deferred Task Artifacts
 
-```
-docs/tasks/{NNNN-<feature-name>}/{task-id}/
-```
+Do not create per-task directories, `progress.log`, or `progress-ledger.md` in Phase 4.
 
-Example:
+Phase 4 only defines the executable registry in `super-plan.json`. Phase 6 is responsible for materializing:
 
-```
-docs/tasks/0003-auth-middleware/Task-A-0001/
-```
+- `docs/tasks/{NNNN-<feature-name>}/{task-id}/`
+- `docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log`
+- `docs/tasks/{NNNN-<feature-name>}/{task-id}/log-task.sh`
+- `docs/tasks/{NNNN-<feature-name>}/progress-ledger.md`
 
-Each task directory contains the task's report, review package, local logging helper, and append-only progress log.
-
-## Progress Log
-
-Track progress in an append-only log file inside the task's own directory:
-
-```
-docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log
-```
-
-Format: see [`templates/progress-template.txt`](../templates/progress-template.txt).
-
-The log is append-only. Subagents must NOT write to it directly. Copy [`scripts/log-task.sh`](../scripts/log-task.sh) into each task directory as `log-task.sh`, make it executable, and dispatch the subagent with the absolute path to that local helper:
-
-```bash
-bash /absolute/path/to/docs/tasks/0003-auth-middleware/Task-A-0001/log-task.sh \
-  --plan 0003-auth-middleware \
-  --task Task-A-0001 \
-  --event started \
-  --try 1 \
-  --max-tries 3 \
-  --message "Beginning implementation"
-```
-
-Subagents must log events at minimum for: `started`, `ready_for_review`, `failed`, `blocked`.
-
-Only the orchestrator logs `completed`, after both spec compliance and code quality review are clean.
-
-## Progress Ledger
-
-Create a human-readable markdown table at:
-
-```
-docs/tasks/{NNNN-<feature-name>}/progress-ledger.md
-```
-
-Use [`templates/progress-ledger-template.md`](../templates/progress-ledger-template.md). Columns: Task, Status, Commits, Report File, Review.
-
-**When to update the ledger:**
-
-- **After creating tasks.json** — initialize all tasks as ⏳ pending
-- **After dispatching a subagent** — set status to 🔄 in progress
-- **After implementer returns DONE/DONE_WITH_CONCERNS** — set status to 🔎 ready_for_review
-- **After review completes cleanly** — set status to ✅ complete, record commit range
-- **After review finds issues** — set status to 🔁 needs-fix, record findings
-- **After a subagent is BLOCKED** — set status to ❌ blocked
-- **In Phase 7** — final status update for all tasks
-
-The ledger survives context compaction. After compaction, trust the ledger, the progress log, and `git log` over your own recollection. Never re-dispatch a task the ledger or log marks complete.
+Until then, treat those paths as planned artifact locations owned by later phases.

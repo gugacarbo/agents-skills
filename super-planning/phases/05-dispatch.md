@@ -12,7 +12,7 @@ Use the least powerful model that can handle each role:
 | Task review (spec compliance + quality)                            | Standard for small diffs, capable for subtle changes | Review is judgment work                                           |
 | Final whole-branch review                                          | Most capable                                         | High-stakes, broad scope                                          |
 
-**Specify the model explicitly when the platform supports it.** An omitted model inherits the session's model — often the most expensive — which defeats this section. If the current platform does not support explicit model selection, record that limitation in the ledger and continue with the session model.
+**Specify the model explicitly when the platform supports it.** An omitted model inherits the session's model — often the most expensive — which defeats this section. If the current platform does not support explicit model selection, record that limitation in `super-plan.json` and copy it into the ledger once Phase 6 materializes it.
 
 **Turn count beats token price.** The cheapest models take 2–3× more turns on multi-step work, costing more overall. Use standard as the floor for reviewers and for implementers working from prose descriptions. Reserve the cheapest tier for implementers whose task JSON entry contains the complete code to write.
 
@@ -22,7 +22,7 @@ Before dispatching, check what the current platform actually supports:
 
 | Capability                         | Preferred behavior                              | Fallback if unavailable                                      |
 | ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
-| Explicit model selection           | Set the model for each role                     | Note the limitation in the ledger and use the session model  |
+| Explicit model selection           | Set the model for each role                     | Note the limitation in `super-plan.json` and use the session model  |
 | Parallel subagent dispatch         | Dispatch 2–4 isolated workers in one turn       | Run the same wave sequentially                               |
 | Worktree isolation                 | Use one worktree/branch per parallel subagent   | Do not run parallel workers that can touch overlapping files |
 | Subagent file handoff/report write | Require report/review files in the task folder  | Execute inline but still write the same files yourself       |
@@ -34,7 +34,7 @@ If any preferred capability is missing, adapt the execution mode instead of pret
 A dispatch prompt contains exactly five things — nothing more:
 
 1. **One line of context:** where this task fits in the project
-2. **The task registry path:** "Read the task entry in `tasks.json` first — it is your requirements"
+2. **The registry path:** "Read the task entry in `super-plan.json` first — it is your requirements"
 3. **Interfaces and decisions** from earlier tasks that the JSON entry cannot know
 4. **Your resolution** of any ambiguity you noticed in the task entry
 5. **The report-file path** and report contract
@@ -43,7 +43,7 @@ Use the minimal template at [`prompts/worker-prompt-template.md`](../prompts/wor
 
 ## Report File Convention
 
-Every implementer must write a full report to a file in the task directory. Default convention:
+Every implementer is expected to produce a full report that will live in the task directory once Phase 6 materializes task artifacts. Default convention:
 
 ```
 docs/tasks/{NNNN-<feature-name>}/{task-id}/report.md
@@ -55,11 +55,21 @@ Example for task `Task-A-0001` under plan `0003-auth-middleware`:
 docs/tasks/0003-auth-middleware/Task-A-0001/report.md
 ```
 
-The subagent returns only a one-line status to the orchestrator. Detail lives in the report file.
+The subagent returns only a one-line status to the orchestrator. Detail belongs in the report file once persisted.
+
+## What Phase 5 Must Not Create
+
+Phase 5 does **not** create:
+
+- task directories
+- `progress-ledger.md`
+- task-local logging files such as `log-task.sh` or `progress.log`
+
+Those artifacts are materialized in Phase 6 before review and persistence work begins.
 
 ## Review Package Convention
 
-Before dispatching a reviewer, generate a review package in the task directory:
+Before dispatching a reviewer, generate a review package in the task directory once Phase 6 has materialized it:
 
 ```
 docs/tasks/{NNNN-<feature-name>}/{task-id}/review-package.diff.md
@@ -84,42 +94,42 @@ The package must include:
 
 For each task:
 
-1. Read the task entry from `docs/tasks/{NNNN-<feature-name>}/tasks.json`.
-2. Ensure `docs/tasks/{NNNN-<feature-name>}/{task-id}/` exists and contains an executable copy of [`scripts/log-task.sh`](../scripts/log-task.sh).
+1. Read the task entry from `docs/tasks/{NNNN-<feature-name>}/super-plan.json`.
+2. Do **not** create task directories or the progress ledger in this phase.
 3. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
 4. If the subagent asks questions, answer before letting it proceed.
-5. When the subagent returns DONE/DONE_WITH_CONCERNS, update `tasks.json` to `ready_for_review`, generate a review package, and dispatch a reviewer.
-6. If the reviewer finds issues, update `tasks.json` to `needs_fix`, dispatch a fix subagent, and re-review.
-7. After clean review, append a `completed` log entry with the task-local `log-task.sh` and update the JSON status to `completed`.
+5. When the subagent returns DONE/DONE_WITH_CONCERNS, update `super-plan.json` to `ready_for_review` and hand off to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
+6. If the reviewer later finds issues, update `super-plan.json` to `needs_fix`, dispatch a fix subagent, and re-review through Phase 6.
+7. After clean review in Phase 6, append a `completed` log entry with the task-local `log-task.sh` and update the JSON status to `completed`.
 
 ## Parallel Dispatch
 
 For independent tasks with no file conflicts:
 
-1. Extract all task entries from `tasks.json` at once.
-2. Ensure each task has its own directory and executable task-local `log-task.sh`.
+1. Extract all task entries from `super-plan.json` at once.
+2. Do **not** create task directories or the progress ledger in this phase.
 3. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.
 4. Wait for all to return.
-5. Mark returned tasks as `ready_for_review`, generate review packages, and review all results.
+5. Mark returned tasks as `ready_for_review` and hand them off to Phase 6 for artifact materialization, review package generation, and review.
 6. Dispatch fix subagents for any that need fixes.
 7. Integrate all changes onto the working branch.
-8. After clean review, append `completed` log entries with each task-local `log-task.sh` and update the JSON status for all tasks in the wave.
+8. After clean review in Phase 6, append `completed` log entries with each task-local `log-task.sh` and update the JSON status for all tasks in the batch.
 
 **Critical:** Multiple dispatch calls in one response = parallel execution. One per response = sequential. The dispatch pattern controls parallelism.
 
 **Worktree isolation for parallel mode:** When the platform supports it, use `isolation: "worktree"` so each parallel subagent works in its own git worktree. This prevents index-lock races and file conflicts.
 
-**Practical limit:** Dispatch 2–4 subagents per wave. More than that adds coordination overhead. If you have 8 independent tasks, use 2–3 waves of 3 rather than one wave of 8.
+**Practical limit:** Dispatch 2–4 subagents per batch. More than that adds coordination overhead. If you have 8 independent tasks, use 2–3 batches of 3 rather than one batch of 8.
 
-## Wave-Based Execution
+## Batch-Based Execution
 
-When tasks have partial dependencies, organize them into waves:
+When tasks have partial dependencies, organize them into execution batches:
 
-1. **Foundation wave** — infrastructure, types, shared utilities (must complete first)
-2. **Core wave** — primary business logic (may depend on foundation)
-3. **Surface wave** — UI, API endpoints, integration tests (depends on core)
+1. Group tasks that should run in parallel under the same `batch` label.
+2. Move dependent tasks to a later `batch`.
+3. Use the task `phase` field to describe whether the work is `foundation`, `core`, `surface`, or `final`.
 
-Tasks within a wave can run in parallel if they don't conflict on files. Waves run sequentially. Each wave boundary is a natural checkpoint for integration testing.
+Tasks within a batch can run in parallel if they don't conflict on files and do not depend on each other. Batches run sequentially. Each batch boundary is a natural checkpoint for integration testing.
 
 ## Common Mistakes in Dispatch Prompts
 
@@ -129,7 +139,7 @@ Tasks within a wave can run in parallel if they don't conflict on files. Waves r
 | No context: "Fix the race condition"             | Paste error messages and test names                 |
 | No constraints: agent refactors everything       | "Do NOT change production code" or "Fix tests only" |
 | Vague output: "Fix it"                           | "Return summary of root cause and changes"          |
-| Pasting the whole plan into dispatch             | Hand only the task entry from `tasks.json`          |
+| Pasting the whole plan into dispatch             | Hand only the task entry from `super-plan.json`     |
 | Accumulating prior summaries in later dispatches | Each dispatch is self-contained                     |
 
 ## When NOT to Use Parallel Mode
@@ -179,8 +189,7 @@ Before dispatching any subagent, verify:
 
 1. **Repository state:** clean working tree, correct base branch checked out
 2. **Tooling available:** test runner, linter, and build commands are accessible and work
-3. **Task registry written:** `tasks.json` exists with all tasks defined and set to `pending`
-4. **Task directories initialized:** every dispatch target has `docs/tasks/{plan}/{task-id}/`, an empty `progress.log`, and an executable task-local `log-task.sh`
+3. **Structured registry written:** `super-plan.json` exists with all tasks defined and set to `pending`
 
 If any check fails, fix it before dispatching.
 

@@ -1,6 +1,6 @@
 ---
 name: super-planning
-description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression."
+description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression. If the user invokes `/super-planning <phase>`, start from that phase and continue forward from there."
 user-invocable: true
 ---
 
@@ -14,11 +14,34 @@ Create implementation plans decomposed into tasks and execute them via subagents
 
 **Scope:** Use this skill for end-to-end pre-implementation shaping and execution. Phase 1 includes the requirement-refinement work that used to live in `brainstorming`; use `commit-changes` downstream to commit final work.
 
+## Phase Entry Router
+
+Treat this file as an explicit, expandable router for entry phases.
+
+| Invocation | Entry Phase | Behavior | Load This First |
+| ---------- | ----------- | -------- | --------------- |
+| `/super-planning` | `default` | Run the standard end-to-end workflow. Start at Phase 1 unless there is already an approved spec in the repo. | This file, then follow the phase router below |
+| `/super-planning brainstorm` | `brainstorm` | Start at Phase 1 and continue forward from there. | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
+| `/super-planning spec` | `spec` | Start at Phase 2 and continue forward from there. Use only when brainstorm outputs already exist or the request is already well-defined enough to write the spec. | [`phases/02-spec.md`](phases/02-spec.md) |
+| `/super-planning plan` | `plan` | Start at Phase 3 and continue forward from there. Use only when there is already an approved spec. | [`phases/03-plan.md`](phases/03-plan.md) |
+| `/super-planning decompose` | `decompose` | Start at Phase 4 and continue forward from there. Use only when the implementation plan already exists. | [`phases/04-decompose.md`](phases/04-decompose.md) |
+| `/super-planning dispatch` | `dispatch` | Start at Phase 5 and continue forward from there. Use only when tasks are already decomposed and ready to execute. | [`phases/05-dispatch.md`](phases/05-dispatch.md) |
+| `/super-planning review` | `review` | Start at Phase 6 and continue forward from there. Use only when implementation outputs already exist and are ready for review gates. | [`phases/06-review.md`](phases/06-review.md) |
+| `/super-planning integrate` | `integrate` | Start at Phase 7 and continue forward from there. Use only when reviewed outputs are ready to merge and finish. | [`phases/07-integrate.md`](phases/07-integrate.md) |
+
+**Routing rule:** If no subcommand is provided, always choose `default`.
+
+**Forward-only rule:** When a phase name is provided, start at that phase and execute the remaining phases in order unless the user explicitly asks to stop earlier.
+
+**Expansion rule:** Add new entry points to this table with four things only: invocation, entry phase, behavior, and the file to load first. Keep the default behavior unchanged unless the user explicitly asks for a different default.
+
 ## Quick Start
 
-1. **Announce:** "I'm using the super-planning skill to create and execute this implementation plan."
-2. **Route through the phases below** — the agent must load the referenced file before executing a phase.
-3. **If Phase 1 becomes visual:** load [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) before launching the companion.
+1. **Announce the selected entry phase:** for example, "I'm using the super-planning skill starting at Phase 3: PLAN."
+2. **Resolve the entry through the router above** before loading any phase file.
+3. **Load the matching phase file first**, then continue through the remaining phases in order.
+4. **Default entry:** if no subcommand is provided, use the normal workflow selection and start at Phase 1 unless there is already an approved spec.
+5. **If Phase 1 becomes visual:** load [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) before launching the companion.
 
 ## Phase Router
 
@@ -27,12 +50,12 @@ Create implementation plans decomposed into tasks and execute them via subagents
 | 1 — BRAINSTORM | Refine the idea into requirements and design decisions | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
 | 2 — SPEC       | Write the feature spec and get user approval           | [`phases/02-spec.md`](phases/02-spec.md)             |
 | 3 — PLAN       | Write the implementation plan                          | [`phases/03-plan.md`](phases/03-plan.md)             |
-| 4 — DECOMPOSE  | Break the plan into atomic tasks in a JSON registry    | [`phases/04-decompose.md`](phases/04-decompose.md)   |
+| 4 — DECOMPOSE  | Fill `super-plan.json` with atomic tasks and task-state metadata | [`phases/04-decompose.md`](phases/04-decompose.md)   |
 | 5 — DISPATCH   | Send subagents (sequential or parallel)                | [`phases/05-dispatch.md`](phases/05-dispatch.md)     |
 | 6 — REVIEW     | Spec compliance + code quality gates                   | [`phases/06-review.md`](phases/06-review.md)         |
 | 7 — INTEGRATE  | Merge results, final review, finish                    | [`phases/07-integrate.md`](phases/07-integrate.md)   |
 
-**Always run Phase 1 first** when the user starts from an idea, request, or loose requirements. Skip it only when there is already an approved spec in the repo.
+**Default rule:** Always run Phase 1 first when the user starts from an idea, request, or loose requirements. Skip it only when there is already an approved spec in the repo or when the user explicitly invoked a later phase.
 
 ## Decision Flow
 
@@ -52,19 +75,20 @@ Have a feature idea or requirements for a multi-step task?
 
 - **Sequential mode:** one implementer + one reviewer per task, in order. Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously, then review together. Requires file-level isolation.
-- **File-based handoffs:** task requirements live in `tasks.json`; each task gets its own directory for reports, review packages, local `log-task.sh`, and `progress.log`; plan progress lives in `progress-ledger.md`.
+- **File-based handoffs:** task requirements live in `super-plan.json`; Phase 6 materializes each task directory plus task-local artifacts such as `report.md`, `review-package.diff.md`, `log-task.sh`, and `progress.log`; plan progress lives in `progress-ledger.md`, also first materialized in Phase 6.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 - **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → needs_fix|blocked|completed`. Only the orchestrator may mark `completed`, and only after review is clean.
-- **Output summary** — after creating artifacts (spec, plan, tasks.json, task directories, progress files), print a one-line summary showing each file path so the user knows what was produced. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/tasks/0001-auth/tasks.json, docs/tasks/0001-auth/Task-A-0001/log-task.sh, docs/tasks/0001-auth/progress-ledger.md`
+- **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/tasks/0001-auth/super-plan.json, docs/tasks/0001-auth/Task-A-0001/log-task.sh, docs/tasks/0001-auth/progress-ledger.md`
 
 ## Outputs & Conventions
 
 | Artifact        | Path                                                | Template                                                                         |
 | --------------- | --------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Brainstorm decisions (optional) | `docs/specs/{feature_number}_{feature_name}_decisions.md` | [`templates/decisions-template.md`](templates/decisions-template.md) |
 | Spec            | `docs/specs/NNNN-<feature-name>-spec.md`            | [`templates/spec-template.md`](templates/spec-template.md)                       |
 | Plan            | `docs/plans/NNNN-<feature-name>.md`                 | [`templates/plan-template.md`](templates/plan-template.md)                       |
-| Task registry   | `docs/tasks/NNNN-<feature-name>/tasks.json`         | [`templates/tasks-template.json`](templates/tasks-template.json)                 |
+| Super plan      | `docs/tasks/NNNN-<feature-name>/super-plan.json`    | Generated by [`scripts/super-plan.sh`](scripts/super-plan.sh) from [`interfaces/super-plan.schema.json`](interfaces/super-plan.schema.json) |
 | Task directory  | `docs/tasks/NNNN-<feature-name>/<task-id>/`         | Contains task report, review package, local logger, and task progress log        |
 | Task progress log | `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
 | Progress ledger | `docs/tasks/NNNN-<feature-name>/progress-ledger.md` | [`templates/progress-ledger-template.md`](templates/progress-ledger-template.md) |
@@ -84,4 +108,6 @@ Have a feature idea or requirements for a multi-step task?
 
 - **Full visual flows:** [`README.md`](README.md)
 - **Phase 1 visual companion:** [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md)
+- **Super-plan generator:** [`scripts/super-plan.sh`](scripts/super-plan.sh)
+- **Super-plan interface:** [`interfaces/super-plan.schema.json`](interfaces/super-plan.schema.json)
 - **Progress logging helper:** [`scripts/log-task.sh`](scripts/log-task.sh)
