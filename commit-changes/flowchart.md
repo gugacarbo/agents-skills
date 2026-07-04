@@ -115,7 +115,7 @@ flowchart TD
 
 | Cor | Significado |
 | --- | --- |
-| 🟢 Verde | Início / Fim |
+| 🟢 Verde escuro | Início / Fim |
 | 🔴 Vermelho escuro | Parada (não executar) |
 | 🟡 Amarelo | Pausa para o usuário |
 | 🟠 Salmão | Caminho `--no-verify` (exceção controlada) |
