@@ -1,21 +1,41 @@
 # Phase 6: Review Gates
 
-Two-stage review after each task (or after all tasks in parallel mode).
+Two-stage review according to `reviewCadence`: after each task, after each batch, or only during final integration.
+
+## Review Cadence Routing
+
+Read `reviewCadence` from `super-plan.json` before dispatching reviewers:
+
+- `per_task` — review each task as soon as it reaches `ready_for_review`
+- `per_batch` — review all tasks in the batch together once the batch is `ready_for_review`
+- `final_only` — skip Phase 6 task-level review during implementation; Phase 7 must run the independent review gate before any task is accepted as complete
+
+In parallel execution with `reviewCadence=per_task`, Phase 6 begins for an individual task immediately after that task's implementer finishes, even if sibling tasks in the same batch are still running.
 
 ## Materialize Task Artifacts Before Review
 
-Phase 6 is the first phase that creates the persistent task artifact structure. Before reviewing any task, materialize:
+Phase 6 is the first phase that creates the per-task persistent artifact structure. Before reviewing any task or reviewable batch member, materialize:
 
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/`
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/report.md`
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/review-package.diff.md`
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log`
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/log-task.sh`
-- `docs/tasks/{NNNN-<feature-name>}/progress-ledger.md`
 
 Use [`templates/progress-ledger-template.md`](../templates/progress-ledger-template.md) for the ledger and [`templates/progress-template.txt`](../templates/progress-template.txt) for the task log format.
 
-After materializing the ledger, initialize all tasks as ⏳ pending if this is its first creation, then keep it updated through review, fixes, and final integration.
+The ledger should already exist from Phase 4. Regenerate it through the `super-plan.json` script path after every registry update, then keep it synchronized through review, fixes, and final integration.
+
+The task-local `log-task.sh` is now a thin wrapper generated from `.super-planning/log-task.sh`. The orchestrator should call:
+
+```bash
+bash /absolute/path/to/workspace/.super-planning/log-task.sh materialize-task-logger \
+  --plan 0003-auth-middleware \
+  --task Task-A-0001 \
+  --output /absolute/path/to/workspace/docs/tasks/0003-auth-middleware/Task-A-0001/log-task.sh
+```
+
+That wrapper must delegate back to the shared `.super-planning/log-task.sh` while prefilling the shared arguments for the plan, task, and task directory.
 
 ## Stage 1: Spec Compliance
 
@@ -52,7 +72,7 @@ The reviewer gets three things:
 - Instructions to ignore or not flag specific issues
 - The entire plan file (only their task's entry from `super-plan.json`)
 
-**Do NOT** skip review. Both spec compliance AND code quality are required. Self-review by the implementer does not replace an independent review.
+**Do NOT** skip review when the configured cadence says review is due. Both spec compliance AND code quality are required. Self-review by the implementer does not replace an independent review.
 
 ## Reviewer Guidance
 
@@ -74,3 +94,11 @@ When dispatching a reviewer, include the expectations from [`prompts/reviewer-gu
 | **Minor**     | Nice to have               | Record in progress ledger, point final review at the list |
 
 For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding.
+
+## Completion Rule
+
+Only mark a task `completed` once its required independent review has happened and is clean for the configured `reviewCadence`.
+
+- `per_task` — the task can be completed right after its own clean review
+- `per_batch` — tasks in the batch can be completed after the batch review is clean
+- `final_only` — tasks stay short of `completed` until the final integration review passes

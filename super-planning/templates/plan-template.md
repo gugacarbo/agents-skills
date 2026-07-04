@@ -25,7 +25,7 @@ include this section.]
 ## Structured Registry
 
 - **Registry:** `docs/tasks/NNNN-<feature-name>/super-plan.json`
-- **Progress ledger:** `docs/tasks/NNNN-<feature-name>/progress-ledger.md` (materialized in Phase 6)
+- **Progress ledger:** `docs/tasks/NNNN-<feature-name>/progress-ledger.md` (created in Phase 4 and regenerated on every `super-plan.json` write)
 - **Task directories:** `docs/tasks/NNNN-<feature-name>/<task-id>/` (materialized in Phase 6)
 - **Task-local logs:** `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log` (materialized in Phase 6)
 - **Task-local logger:** `docs/tasks/NNNN-<feature-name>/<task-id>/log-task.sh` (materialized in Phase 6)

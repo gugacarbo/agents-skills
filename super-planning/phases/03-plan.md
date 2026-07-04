@@ -11,7 +11,7 @@ Start from [`templates/plan-template.md`](../templates/plan-template.md). The pl
 1. **Header** — goal, architecture summary, tech stack
 2. **Global Constraints** — copied verbatim from the spec; inherited by every task implicitly
 3. **File Structure** — map of files/modules the plan will touch, with clear ownership per task
-4. **Super-plan reference** — note pointing to the `super-plan.json` that Phase 4 will create in the task directory via `scripts/super-plan.sh`
+4. **Super-plan reference** — note pointing to the `super-plan.json` that Phase 4 will create in the task directory via the repo-local `.super-planning/super-plan.sh`
 
 The executable part of the plan lives in `super-plan.json`. The plan file provides context and constraints; `super-plan.json` provides the structured specification, requirement coverage, and executable tasks after Phase 4 materializes it.
 

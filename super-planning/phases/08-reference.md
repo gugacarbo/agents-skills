@@ -82,7 +82,7 @@ pending → in_progress → ready_for_review → completed
                               └──────────→ blocked
 ```
 
-A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `super-plan.json` after every state change.
+A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `super-plan.json` after every state change through `.super-planning/super-plan.sh update`, which also regenerates the ledger.
 
 Implementer subagents log `ready_for_review`; only the orchestrator logs `completed`.
 
@@ -92,7 +92,7 @@ Implementer subagents log `ready_for_review`; only the orchestrator logs `comple
 
 When a gap is discovered during implementation:
 
-1. Add the new task to `super-plan.json` with the next available ID, appropriate `batch`, and appropriate `phase`
+1. Add the new task to `super-plan.json` through the script with the next available ID, appropriate `batch`, and appropriate `phase`
 2. Set its `dependencies` to any tasks it depends on
 3. Update the plan file's File Structure section if the new task touches files not previously listed
 4. Dispatch the new task in the next batch
@@ -101,7 +101,7 @@ When a gap is discovered during implementation:
 
 When a task becomes unnecessary:
 
-1. Set its status to a terminal state (do not delete it — keep the record)
+1. Set its status to a terminal state through the script (do not delete it — keep the record)
 2. Update any tasks that depended on it
 3. Record the removal in the affected task's progress log, or in the ledger if the task never had a directory
 
@@ -109,7 +109,7 @@ When a task becomes unnecessary:
 
 When dependencies change mid-flight:
 
-1. Update `dependencies` in the affected task entries
+1. Update `dependencies` in the affected task entries through the script
 2. If a task was planned for parallel execution but now depends on a task in the same batch, move it to the next batch
 3. Do not change batch assignments of tasks that are already `in_progress` or `completed`
 
@@ -120,7 +120,7 @@ If the user requests a spec change during implementation:
 1. **Pause dispatching** — do not start new tasks that may be affected
 2. **Assess impact** — which tasks are affected? Which are already complete?
 3. **Update the spec** — incorporate the change and re-approve with the user
-4. **Update the plan and `super-plan.json`** — modify affected tasks, add new tasks if needed
+4. **Update the plan and `super-plan.json`** — modify affected tasks through the script, add new tasks if needed
 5. **Re-review completed tasks** — if a spec change affects already-completed work, flag it for re-review
 6. **Resume dispatching** — continue from where you left off
 
@@ -140,6 +140,7 @@ If the user requests a spec change during implementation:
 - Re-dispatch a task the progress ledger already marks complete
 - Start implementation on main/master without explicit user consent
 - Tell a reviewer what not to flag (the reviewer's job is independent assessment)
+- Edit `super-plan.json` by hand or leave `progress-ledger.md` stale after a registry change
 
 **If a subagent asks questions:** Answer clearly. Provide context. Don't rush them.
 

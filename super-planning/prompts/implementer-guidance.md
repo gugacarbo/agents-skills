@@ -63,7 +63,7 @@ Write your full report to the report file path provided in the dispatch prompt, 
 
 ## Progress Logging
 
-You must log task lifecycle events using the helper script provided by the orchestrator. Do **not** write to `progress.log` directly.
+You must log task lifecycle events using the wrapper script provided by the orchestrator. Do **not** write to `progress.log` directly.
 
 Call the script at minimum for these events:
 
@@ -76,8 +76,6 @@ Example:
 
 ```bash
 bash /absolute/path/to/docs/tasks/0003-auth-middleware/Task-A-0001/log-task.sh \
-  --plan 0003-auth-middleware \
-  --task Task-A-0001 \
   --event started \
   --try 1 \
   --max-tries 3 \

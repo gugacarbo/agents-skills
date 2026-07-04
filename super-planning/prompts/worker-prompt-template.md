@@ -26,11 +26,11 @@ Read the task entry in `docs/tasks/[NNNN-<feature-name>]/super-plan.json` with `
 
 ## Logging
 
-Use the task-local logging script to record every state change. The script is at:
+Use the task-local logging wrapper to record every state change. The script is at:
 
 `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh`
 
-If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. If not, return your status and report content so the orchestrator can persist them during Phase 6.
+If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. That wrapper delegates to `.super-planning/log-task.sh` with the shared plan/task/log-dir arguments already filled in. If not, return your status and report content so the orchestrator can persist them during Phase 6.
 
 ### Log on these events
 
@@ -45,16 +45,16 @@ If the orchestrator has already materialized Phase 6 task artifacts, use the abs
 
 ```sh
 # At the start
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event started --try 1 --max-tries 3 --message "Starting implementation"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event started --try 1 --max-tries 3 --message "Starting implementation"
 
 # When ready for review
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event ready_for_review --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event ready_for_review --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
 
 # On failure (final retry)
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
 
 # When blocked
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --plan [NNNN-<feature-name>] --task [Task-X-NNNN] --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-0003"
+bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-0003"
 ```
 
 When present, the script appends a timestamped line to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/progress.log`. Adjust the try count to your actual current attempt.
