@@ -13,11 +13,16 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 .
 ├── skills.sh              # public entrypoint; also supports curl | sh bootstrap
 ├── .scripts/              # install/update command implementations and tests
-├── commit-changes/        # tracked skill directory
+├── commit-changes/        # tracked skill directory; includes flowcharts
 ├── find-skills/           # local skill directory, ignored by git allowlist
 ├── init-deep/             # local skill directory, ignored by git allowlist
 ├── skill-creator/         # complex local skill, mostly ignored except AGENTS.md
 └── super-planning/        # tracked planning/orchestration skill
+    ├── docs/              # reference docs: workflows, decision flow, examples
+    ├── scripts/           # super-plan.sh, log-task.sh, render-progress-ledger.sh
+    ├── phases/            # phase guidance (01–08)
+    ├── prompts/           # worker and implementer prompt templates
+    └── templates/         # plan and tasks templates
 ```
 
 ## WHERE TO LOOK
@@ -30,7 +35,10 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Validate curl bootstrap       | `.scripts/tests/bootstrap.sh`               | Uses local tarballs and `sh -s -- <command>`.                    |
 | Validate git allowlist        | `.gitignore`, `.scripts/tests/gitignore.sh` | The repo ignores everything by default.                          |
 | Work on commit skill content  | `commit-changes/SKILL.md`                   | Conventional-commit workflow skill.                              |
+| Work on commit flowcharts     | `commit-changes/flowchart.md`, `flowchart.mmd` | Mermaid flowcharts for commit decision flow.                    |
 | Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
+| Work on planning reference     | `super-planning/docs/`                     | Workflows, decision flow, file structure, and examples.          |
+| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh.           |
 | Work on skill eval tooling    | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.            |
 
 ## CONVENTIONS
