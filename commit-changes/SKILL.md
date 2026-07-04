@@ -17,12 +17,13 @@ Use this skill when the user clearly wants git commit work done, not when they o
 - When no path is named, infer the narrowest safe scope from the current conversation before considering the whole worktree.
 - Do not discard, reset, or revert user changes to make the commit easier.
 - Do not create sidecar files inside the user's repo unless the task itself requires them.
+- Be careful with broad `git add` in repos that ignore everything by default (allowlist-style `.gitignore`); staging widely can pull in unrelated local files. When unsure, stage named paths only.
 
 ## Delegation Preference
 
 - Prefer dispatching a subagent for the preparatory parts of this skill when that capability is available.
 - When the platform allows it, prefer a model that is cheaper or weaker than the main agent for that subagent run.
-- When the platform allows it, prefer `reasoning effort: low` by default and increase only to `medium` when the diff is ambiguous, the commit grouping is unclear, or hook failures need more careful analysis.
+- When the platform allows it, prefer `reasoning effort: low` by default and increase only to `medium` when the diff is ambiguous, the commit grouping is unclear, or hook failures need more careful analysis. This control is platform-specific; if the runtime does not expose a reasoning-effort knob, ignore this guidance and proceed inline.
 - Avoid `reasoning effort: high` by default for this skill unless the user explicitly asks for deeper analysis or the available options make that unavoidable.
 - Good subagent tasks include inspecting the working tree, proposing commit groups, drafting Conventional Commit messages, and identifying likely `AGENTS.md` updates.
 - If no subagent is available, no model or effort controls exist, or the task requires especially careful local git state handling, continue inline without blocking on delegation.
@@ -73,6 +74,8 @@ git diff --stat HEAD
 git diff HEAD -- <scope paths if provided>
 ```
 
+When a scope is named, prefer filtering the diff by those paths to keep output focused. Run the unscoped `git diff --stat HEAD` only when the user explicitly asked for the whole worktree, or when no scope can be inferred.
+
 Also check staged changes when needed:
 
 ```bash
@@ -104,7 +107,7 @@ Good reasons to split:
 - refactor-only changes mixed with behavior changes
 - styling changes mixed with API or data changes
 
-Prefer file-boundary splits. If unrelated work is mixed inside the same file and would require hunk staging or semantic judgment, stop and tell the user exactly why the split is unsafe.
+Prefer file-boundary splits. If unrelated work is mixed inside the same file and would require hunk staging or semantic judgment, stop and tell the user exactly why the split is unsafe. Offering `git add -p` as an option for the user to drive is acceptable; making semantic hunk-staging decisions for them is not.
 If the groups are already cleanly separated by file paths, keep them as separate commits rather than collapsing them for convenience.
 
 Use this pattern:
@@ -189,7 +192,7 @@ When editing AGENTS files:
 4. Update the timestamp if the file uses one
 5. Stage the AGENTS change with the related commit when practical
 
-If a new feature-level `AGENTS.md` is clearly needed and there is no local one, use `feature-agents-md` if available. Otherwise create the smallest useful file rather than inventing a large policy document.
+If a new feature-level `AGENTS.md` is clearly needed and there is no local one, create the smallest useful file rather than inventing a large policy document.
 
 If the diff does not teach future agents anything new, explicitly note that no AGENTS update is needed and continue.
 
@@ -235,7 +238,7 @@ Typical commands:
 ```bash
 git add <files>
 git commit -m "<type>(<scope>): <subject>"
-git show --stat --oneline HEAD~0
+git show --stat --oneline HEAD
 ```
 
 If the commit needs a body:
@@ -271,6 +274,14 @@ Never solve hook failures by discarding changes with commands like:
 - `git checkout -- ...`
 - `git reset --hard`
 - any other destructive revert of user work
+
+### Skipping Hooks
+
+Do not pass `--no-verify` to `git commit` by default, even if a hook is failing. Only use `--no-verify` when the user explicitly asks to skip hooks for that commit, and confirm they understand the implications. A persistent hook failure should be fixed at its root, not bypassed.
+
+### Missing Git Identity
+
+If `git commit` fails because `user.name` or `user.email` is not configured, stop and tell the user. Do not invent an identity or set a global config silently. Suggest a local `git config user.email <email>` / `git config user.name <name>` for the repo and let the user provide the values.
 
 ## Edge Cases
 
@@ -356,7 +367,7 @@ Response plan:
 
 ### Commit 1/1
 Files: commit-changes/SKILL.md
-Message: docs(commit-changes): narrow default commit scope
+Message: refactor(commit-changes): narrow default commit scope
 AGENTS: none
 
 Left untouched: skill-creator/
