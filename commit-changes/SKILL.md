@@ -21,8 +21,8 @@ Use this skill when the user clearly wants git commit work done, not when they o
 
 ## Delegation Preference
 
-- Prefer dispatching a subagent for the preparatory parts of this skill when that capability is available.
-- When the platform allows it, prefer a model that is cheaper or weaker than the main agent for that subagent run.
+- Only dispatch a subagent when the user explicitly asks for it via a flag like `--sub`, `--subagent`, `--delegate`, or similar wording. Without such a flag, continue inline without delegating.
+- When delegation is requested and the platform allows it, prefer a model that is cheaper or weaker than the main agent for that subagent run.
 - When the platform allows it, prefer `reasoning effort: low` by default and increase only to `medium` when the diff is ambiguous, the commit grouping is unclear, or hook failures need more careful analysis. This control is platform-specific; if the runtime does not expose a reasoning-effort knob, ignore this guidance and proceed inline.
 - Avoid `reasoning effort: high` by default for this skill unless the user explicitly asks for deeper analysis or the available options make that unavoidable.
 - Good subagent tasks include inspecting the working tree, proposing commit groups, drafting Conventional Commit messages, and identifying likely `AGENTS.md` updates.
@@ -58,7 +58,7 @@ Path examples:
 
 If the user names paths, commit only those paths. If a path does not exist or has no changes, stop and say so.
 
-If the user does not name paths but the conversation history points to a specific execution, fix, test run, generated output, or task you just performed, treat that as the commit scope. Commit only files plausibly related to that execution, and leave unrelated worktree changes untouched. The whole worktree is only the default when the user explicitly asks for all changes or when inspection shows every changed file belongs to the same requested concern.
+If the user does not name paths but the conversation history points to a specific execution, fix, test run, generated output, or task you just performed, treat that as the commit scope. Commit only files plausibly related to that execution, and leave unrelated worktree changes untouched. When no path is named and no specific execution can be inferred from the conversation, default to the whole worktree rather than pausing for ambiguity.
 
 Treat `all`, `--all`, `everything`, `todos`, `tudo`, `worktree inteira`, and similar wording as an explicit request to consider every changed file in the worktree only when they are used as the commit scope. Casual phrases like `all tests pass` or `ta tudo certo, commit` are not whole-worktree requests. Even then, still split unrelated concerns into separate commits when the boundaries are clear.
 
@@ -401,3 +401,7 @@ The skill is doing its job when it helps the agent:
 - write a strong Conventional Commit message
 - keep AGENTS documentation aligned when warranted
 - avoid destructive git behavior under pressure
+
+## Reference
+
+See `flowchart.md` for a Mermaid diagram of the full execution flow, including scope parsing, delegation gating, commit grouping, AGENTS checks, the sequential commit loop, and hook-failure handling.

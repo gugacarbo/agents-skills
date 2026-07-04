@@ -31,10 +31,13 @@ flowchart TD
 
     CheckState -->|merge conflict / rebase / cherry-pick / merge em andamento| StopConflict[Parar e escalar]
     CheckState -->|sem mudanças no escopo| StopEmpty[Parar: nada a commitar]
-    CheckState -->|ok| Delegate{Subagent disponível?<br/>e plataforma permite?}
+    CheckState -->|ok| DelegateFlag{User passou flag<br/>--sub / --subagent / --delegate<br/>ou similares?}
+
+    DelegateFlag -->|sim| Delegate{Subagent disponível?<br/>e plataforma permite?}
+    DelegateFlag -->|não| Inline[Continuar inline]
 
     Delegate -->|sim| Subagent[Delegar análise a subagent<br/>model mais barato, reasoning low<br/>inspect tree, propor grupos, draft messages, identificar AGENTS updates]
-    Delegate -->|não| Inline[Continuar inline]
+    Delegate -->|não| Inline
     Subagent --> Groups
     Inline --> Groups
 
@@ -103,11 +106,11 @@ flowchart TD
     style StopConflict fill:#8B0000
     style StopEmpty fill:#8B0000
     style StopIdentity fill:#8B0000
-    style PauseAddP fill:#FFD700
-    style PauseSemantic fill:#FFD700
-    style PauseRisk fill:#FFD700
-    style HookPause fill:#FFD700
-    style DoCommitNoVerify fill:#FFA07A
+    style PauseAddP fill:#8B7500
+    style PauseSemantic fill:#8B7500
+    style PauseRisk fill:#8B7500
+    style HookPause fill:#8B7500
+    style DoCommitNoVerify fill:#8B4500
 ```
 
 ## Legenda
@@ -116,8 +119,8 @@ flowchart TD
 | --- | --- |
 | 🟢 Verde escuro | Início / Fim |
 | 🔴 Vermelho escuro | Parada (não executar) |
-| 🟡 Amarelo | Pausa para o usuário |
-| 🟠 Salmão | Caminho `--no-verify` (exceção controlada) |
+| 🟡 Amarelo escuro | Pausa para o usuário |
+| 🟠 Laranja escurja escuro | Caminho `--no-verify` (exceção controlada) |
 
 ## Etapas do Fluxo
 
