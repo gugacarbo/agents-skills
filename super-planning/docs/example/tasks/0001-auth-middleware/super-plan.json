@@ -1,0 +1,394 @@
+{
+  "$schema": "../../../interfaces/super-plan.schema.json",
+  "planId": "0001-auth-middleware",
+  "featureName": "auth-middleware",
+  "status": "completed",
+  "source": {
+    "spec": "docs/specs/0001-auth-middleware-spec.md",
+    "plan": "docs/plans/0001-auth-middleware.md"
+  },
+  "goal": "Implementar middleware Express de autenticação JWT com validação de token e controle de role",
+  "architectureSummary": "Dois middlewares independentes (requireAuth, requireRole) que compõem em cadeia no Express. requireAuth valida o token e popula req.user; requireRole verifica permissões. verifyToken é extraída para teste isolado. Tipos centralizados em src/types/auth.ts.",
+  "techStack": [
+    "Node.js >= 18",
+    "TypeScript strict",
+    "Express",
+    "jsonwebtoken",
+    "vitest"
+  ],
+  "executionMode": "sequential",
+  "reviewCadence": "per_task",
+  "branchStrategy": {
+    "baseBranch": "main",
+    "featureBranch": "feature/0001-auth-middleware"
+  },
+  "worktree": {
+    "enabled": false,
+    "path": ""
+  },
+  "globalConstraints": [
+    "Node.js >= 18",
+    "TypeScript strict mode (strict: true no tsconfig)",
+    "Não adicionar novas dependências além de jsonwebtoken e @types/jsonwebtoken (já presentes)",
+    "Manter compatibilidade com logger pino existente",
+    "Mensagens de erro não devem vazar detalhes de implementação",
+    "Algoritmo fixo: HS256",
+    "JWT_SECRET via process.env.JWT_SECRET"
+  ],
+  "fileStructure": [
+    {
+      "path": "src/types/auth.ts",
+      "ownerTask": "Task-A-0001",
+      "notes": "Interfaces JwtPayload, AuthUser, AuthOptions"
+    },
+    {
+      "path": "src/middleware/auth.ts",
+      "ownerTask": "Task-B-0001",
+      "notes": "verifyToken, requireAuth (Task-B-0001); requireRole (Task-B-0002)"
+    },
+    {
+      "path": "src/middleware/auth.test.ts",
+      "ownerTask": "Task-A-0002",
+      "notes": "Testes unitários — 12 casos cobrindo todos os edge cases"
+    },
+    {
+      "path": "src/app.ts",
+      "ownerTask": "Task-C-0001",
+      "notes": "Integração dos middlewares nas rotas existentes"
+    },
+    {
+      "path": "src/app.integration.test.ts",
+      "ownerTask": "Task-C-0001",
+      "notes": "Testes de integração — 3 casos"
+    }
+  ],
+  "requirementsChecklist": [
+    {
+      "id": "REQ-001",
+      "title": "Validar token JWT do header Authorization: Bearer <token>",
+      "source": "spec edge case #1, #2, #3, #4",
+      "status": "completed",
+      "acceptanceCriteria": [
+        "Header ausente retorna 401",
+        "Header mal formatado retorna 401",
+        "Token expirado retorna 401",
+        "Assinatura inválida retorna 401"
+      ],
+      "coveredByTasks": ["Task-B-0001"],
+      "notes": ["Coberto por verifyToken + requireAuth"]
+    },
+    {
+      "id": "REQ-002",
+      "title": "Extrair userId e role do payload JWT",
+      "source": "spec contract: req.user type",
+      "status": "completed",
+      "acceptanceCriteria": [
+        "Payload sem sub retorna 401",
+        "Payload sem role retorna 401",
+        "Payload válido popula req.user com userId e role"
+      ],
+      "coveredByTasks": ["Task-A-0001", "Task-B-0001"],
+      "notes": ["Tipos definidos em Task-A-0001, extração em Task-B-0001"]
+    },
+    {
+      "id": "REQ-003",
+      "title": "Responder 403 quando role não tem permissão",
+      "source": "spec edge case #8",
+      "status": "completed",
+      "acceptanceCriteria": [
+        "role=user em rota admin retorna 403",
+        "role=admin em rota admin passa",
+        "múltiplos roles permitidos funcionam"
+      ],
+      "coveredByTasks": ["Task-B-0002"],
+      "notes": ["requireRole middleware"]
+    },
+    {
+      "id": "REQ-004",
+      "title": "Expor req.user tipado para handlers downstream",
+      "source": "spec contract: req.user type",
+      "status": "completed",
+      "acceptanceCriteria": [
+        "TypeScript reconhece req.user como AuthUser após requireAuth",
+        "Handlers downstream acessam req.user.userId e req.user.role sem cast"
+      ],
+      "coveredByTasks": ["Task-A-0001", "Task-C-0001"],
+      "notes": ["Usa declaration merging do Express"]
+    }
+  ],
+  "taskDirectory": "docs/tasks/0001-auth-middleware",
+  "rules": [
+    "Nunca re-despachar uma tarefa que o ledger ou log já marca como concluída",
+    "Subagentes não devem editar super-plan.json — apenas o orquestrador",
+    "Status lifecycle: pending -> in_progress -> ready_for_review -> needs_fix|blocked|completed",
+    "Apenas o orquestrador pode marcar completed, e apenas após review limpa"
+  ],
+  "tasks": [
+    {
+      "id": "Task-A-0001",
+      "title": "Definir tipos e interfaces de autenticação",
+      "description": "Criar src/types/auth.ts com as interfaces JwtPayload, AuthUser, AuthOptions e o declaration merging do Express para tipar req.user.",
+      "status": "completed",
+      "tryCount": 1,
+      "batch": "A",
+      "phase": "foundation",
+      "reportFile": "docs/tasks/0001-auth-middleware/Task-A-0001/report.md",
+      "reviewPackage": "docs/tasks/0001-auth-middleware/Task-A-0001/review-package.diff.md",
+      "progressLog": "docs/tasks/0001-auth-middleware/Task-A-0001/progress.log",
+      "logTaskScript": "docs/tasks/0001-auth-middleware/Task-A-0001/log-task.sh",
+      "dependencies": [],
+      "acceptanceCriteria": [
+        "src/types/auth.ts existe com JwtPayload, AuthUser, AuthOptions exportados",
+        "Declaration merging do Express funciona — req.user é reconhecido como AuthUser | undefined",
+        "TypeScript compila sem erros (npx tsc --noEmit)"
+      ],
+      "requirements": ["REQ-002", "REQ-004"],
+      "rules": [
+        "Usar declaration merging do Express (declare global { namespace Express { ... } })",
+        "JwtPayload deve estender JwtPayload do jsonwebtoken",
+        "AuthUser.userId é string, AuthUser.role é 'admin' | 'user'"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Criar src/types/auth.ts",
+          "description": "Criar o arquivo com as três interfaces e o declaration merging",
+          "command": null,
+          "expectedResult": "Arquivo criado com tipos exportados",
+          "codeExample": "import { JwtPayload as JwtBasePayload } from 'jsonwebtoken';\n\nexport interface JwtPayload extends JwtBasePayload {\n  sub: string;\n  role: 'admin' | 'user';\n}\n\nexport interface AuthUser {\n  userId: string;\n  role: 'admin' | 'user';\n}\n\nexport interface AuthOptions {\n  secret?: string;\n  algorithms?: string[];\n}\n\ndeclare global {\n  namespace Express {\n    interface Request {\n      user?: AuthUser;\n    }\n  }\n}"
+        },
+        {
+          "order": 2,
+          "title": "Verificar compilação TypeScript",
+          "description": "Rodar npx tsc --noEmit para garantir que os tipos compilam",
+          "command": "npx tsc --noEmit",
+          "expectedResult": "exit 0, sem erros",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": ["src/types/auth.ts"],
+      "files": {
+        "created": ["src/types/auth.ts"],
+        "modified": [],
+        "deleted": []
+      },
+      "notes": ["Foundation task — todas as outras tasks dependem destes tipos"]
+    },
+    {
+      "id": "Task-A-0002",
+      "title": "Implementar verifyToken com testes unitários",
+      "description": "Implementar a função verifyToken em src/middleware/auth.ts e escrever testes unitários cobrindo token válido, expirado, assinatura inválida, payload sem sub, payload sem role.",
+      "status": "completed",
+      "tryCount": 1,
+      "batch": "A",
+      "phase": "foundation",
+      "reportFile": "docs/tasks/0001-auth-middleware/Task-A-0002/report.md",
+      "reviewPackage": "docs/tasks/0001-auth-middleware/Task-A-0002/review-package.diff.md",
+      "progressLog": "docs/tasks/0001-auth-middleware/Task-A-0002/progress.log",
+      "logTaskScript": "docs/tasks/0001-auth-middleware/Task-A-0002/log-task.sh",
+      "dependencies": ["Task-A-0001"],
+      "acceptanceCriteria": [
+        "verifyToken retorna JwtPayload para token válido",
+        "verifyToken lança para token expirado",
+        "verifyToken lança para assinatura inválida",
+        "verifyToken lança para payload sem sub",
+        "verifyToken lança para payload sem role",
+        "5/5 testes passando"
+      ],
+      "requirements": ["REQ-001"],
+      "rules": [
+        "Usar jsonwebtoken.verify com algorithms: ['HS256']",
+        "Usar JWT_SECRET de process.env com fallback para teste",
+        "Testes devem usar token gerado com jsonwebtoken.sign, não mocks"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Implementar verifyToken",
+          "description": "Função que recebe token string, chama jwt.verify, valida payload e retorna JwtPayload",
+          "command": null,
+          "expectedResult": "Função implementada e exportada",
+          "codeExample": "import jwt from 'jsonwebtoken';\nimport { JwtPayload } from '../types/auth';\n\nexport function verifyToken(token: string): JwtPayload {\n  const secret = process.env.JWT_SECRET || 'test-secret';\n  const payload = jwt.verify(token, secret, { algorithms: ['HS256'] }) as JwtPayload;\n  if (!payload.sub) throw new Error('Invalid token payload');\n  if (!payload.role) throw new Error('Invalid token payload');\n  return payload;\n}"
+        },
+        {
+          "order": 2,
+          "title": "Escrever testes unitários",
+          "description": "5 casos de teste em src/middleware/auth.test.ts",
+          "command": "npx vitest run src/middleware/auth.test.ts",
+          "expectedResult": "5/5 passing",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
+      "files": {
+        "created": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
+        "modified": [],
+        "deleted": []
+      },
+      "notes": ["verifyToken é a fundação para os middlewares nas tasks B"]
+    },
+    {
+      "id": "Task-B-0001",
+      "title": "Implementar middleware requireAuth",
+      "description": "Implementar o middleware requireAuth que extrai o token do header Authorization, chama verifyToken, e popula req.user. Adicionar testes para os edge cases de header.",
+      "status": "completed",
+      "tryCount": 1,
+      "batch": "B",
+      "phase": "core",
+      "reportFile": "docs/tasks/0001-auth-middleware/Task-B-0001/report.md",
+      "reviewPackage": "docs/tasks/0001-auth-middleware/Task-B-0001/review-package.diff.md",
+      "progressLog": "docs/tasks/0001-auth-middleware/Task-B-0001/progress.log",
+      "logTaskScript": "docs/tasks/0001-auth-middleware/Task-B-0001/log-task.sh",
+      "dependencies": ["Task-A-0001", "Task-A-0002"],
+      "acceptanceCriteria": [
+        "Header ausente retorna 401 { error: 'Missing authorization header' }",
+        "Header sem prefixo Bearer retorna 401 { error: 'Invalid authorization format' }",
+        "Token válido popula req.user e chama next()",
+        "Token inválido retorna 401 { error: 'Invalid or expired token' }",
+        "4/4 novos testes passando (total: 9/9)"
+      ],
+      "requirements": ["REQ-001", "REQ-002"],
+      "rules": [
+        "Middleware deve ser uma função (req, res, next) => void",
+        "Usar verifyToken da Task-A-0002 — não reimplementar",
+        "Mensagens de erro genéricas — não expor detalhes do jwt.verify",
+        "Logar erros com pino (req.log.error) mas retornar mensagem genérica ao cliente"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Implementar requireAuth",
+          "description": "Middleware que extrai Bearer token, chama verifyToken, popula req.user",
+          "command": null,
+          "expectedResult": "Middleware implementado",
+          "codeExample": "import { Request, Response, NextFunction } from 'express';\nimport { verifyToken } from './auth';\n\nexport function requireAuth(req: Request, res: Response, next: NextFunction): void {\n  const header = req.headers.authorization;\n  if (!header) {\n    res.status(401).json({ error: 'Missing authorization header' });\n    return;\n  }\n  if (!header.startsWith('Bearer ')) {\n    res.status(401).json({ error: 'Invalid authorization format' });\n    return;\n  }\n  const token = header.slice(7);\n  try {\n    const payload = verifyToken(token);\n    req.user = { userId: payload.sub, role: payload.role };\n    next();\n  } catch (err) {\n    req.log?.error(err, 'Token verification failed');\n    res.status(401).json({ error: 'Invalid or expired token' });\n  }\n}"
+        },
+        {
+          "order": 2,
+          "title": "Adicionar testes do requireAuth",
+          "description": "4 casos de teste para o middleware",
+          "command": "npx vitest run src/middleware/auth.test.ts",
+          "expectedResult": "9/9 passing",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
+      "files": {
+        "created": [],
+        "modified": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
+        "deleted": []
+      },
+      "notes": ["Depende de verifyToken (Task-A-0002) e tipos (Task-A-0001)"]
+    },
+    {
+      "id": "Task-B-0002",
+      "title": "Implementar middleware requireRole",
+      "description": "Implementar o middleware requireRole que verifica se req.user.role está na lista de roles permitidas. Adicionar testes para role autorizada e não autorizada.",
+      "status": "completed",
+      "tryCount": 1,
+      "batch": "B",
+      "phase": "core",
+      "reportFile": "docs/tasks/0001-auth-middleware/Task-B-0002/report.md",
+      "reviewPackage": "docs/tasks/0001-auth-middleware/Task-B-0002/review-package.diff.md",
+      "progressLog": "docs/tasks/0001-auth-middleware/Task-B-0002/progress.log",
+      "logTaskScript": "docs/tasks/0001-auth-middleware/Task-B-0002/log-task.sh",
+      "dependencies": ["Task-B-0001"],
+      "acceptanceCriteria": [
+        "role na lista permitida chama next()",
+        "role fora da lista retorna 403 { error: 'Insufficient permissions' }",
+        "Múltiplos roles no parâmetro funcionam (ex: requireRole('admin', 'moderator'))",
+        "3/3 novos testes passando (total: 12/12)"
+      ],
+      "requirements": ["REQ-003"],
+      "rules": [
+        "Middleware deve ser uma higher-order function: requireRole(...roles: string[]) => middleware",
+        "Presume que requireAuth já foi executado (req.user existe)",
+        "Se req.user for undefined, retornar 401 (não 403 — auth não foi feita)"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Implementar requireRole",
+          "description": "Higher-order function que retorna middleware de verificação de role",
+          "command": null,
+          "expectedResult": "Middleware implementado",
+          "codeExample": "import { Request, Response, NextFunction } from 'express';\n\nexport function requireRole(...roles: string[]) {\n  return (req: Request, res: Response, next: NextFunction): void => {\n    if (!req.user) {\n      res.status(401).json({ error: 'Missing authorization header' });\n      return;\n    }\n    if (!roles.includes(req.user.role)) {\n      res.status(403).json({ error: 'Insufficient permissions' });\n      return;\n    }\n    next();\n  };\n}"
+        },
+        {
+          "order": 2,
+          "title": "Adicionar testes do requireRole",
+          "description": "3 casos de teste para o middleware",
+          "command": "npx vitest run src/middleware/auth.test.ts",
+          "expectedResult": "12/12 passing",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
+      "files": {
+        "created": [],
+        "modified": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
+        "deleted": []
+      },
+      "notes": ["Depende de requireAuth (Task-B-0001) para req.user populado"]
+    },
+    {
+      "id": "Task-C-0001",
+      "title": "Integrar middlewares nas rotas e testes de integração",
+      "description": "Adicionar requireAuth e requireRole nas rotas existentes em src/app.ts. Escrever testes de integração que fazem requisições HTTP reais.",
+      "status": "completed",
+      "tryCount": 1,
+      "batch": "C",
+      "phase": "surface",
+      "reportFile": "docs/tasks/0001-auth-middleware/Task-C-0001/report.md",
+      "reviewPackage": "docs/tasks/0001-auth-middleware/Task-C-0001/review-package.diff.md",
+      "progressLog": "docs/tasks/0001-auth-middleware/Task-C-0001/progress.log",
+      "logTaskScript": "docs/tasks/0001-auth-middleware/Task-C-0001/log-task.sh",
+      "dependencies": ["Task-B-0001", "Task-B-0002"],
+      "acceptanceCriteria": [
+        "Rotas protegidas rejeitam requisições sem token (401)",
+        "Rotas admin rejeitam role=user (403)",
+        "Rotas admin aceitam role=admin (200)",
+        "3/3 integration tests passando"
+      ],
+      "requirements": ["REQ-004"],
+      "rules": [
+        "Não modificar a lógica das rotas existentes — apenas adicionar middlewares",
+        "Testes de integração devem usar supertest ou similar",
+        "Gerar token real nos testes (não mockar verifyToken)"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Adicionar middlewares nas rotas",
+          "description": "Importar e aplicar requireAuth e requireRole nas rotas de src/app.ts",
+          "command": null,
+          "expectedResult": "Rotas protegidas",
+          "codeExample": "import { requireAuth, requireRole } from './middleware/auth';\n\n// Rota protegida (qualquer role)\napp.get('/api/profile', requireAuth, profileHandler);\n\n// Rota admin\napp.get('/api/admin/users', requireAuth, requireRole('admin'), adminUsersHandler);"
+        },
+        {
+          "order": 2,
+          "title": "Escrever testes de integração",
+          "description": "3 casos: sem token, role errado, role correto",
+          "command": "npx vitest run --integration",
+          "expectedResult": "3/3 integration tests passing",
+          "codeExample": null
+        },
+        {
+          "order": 3,
+          "title": "Verificação final",
+          "description": "Rodar todos os testes e typecheck",
+          "command": "npx tsc --noEmit && npx vitest run && npx vitest run --integration",
+          "expectedResult": "Tudo verde",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": ["src/app.ts", "src/app.integration.test.ts"],
+      "files": {
+        "created": ["src/app.integration.test.ts"],
+        "modified": ["src/app.ts"],
+        "deleted": []
+      },
+      "notes": ["Última task — fecha o ciclo de implementação"]
+    }
+  ]
+}
