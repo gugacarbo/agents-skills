@@ -1,17 +1,21 @@
-# Progress Ledger: Auth Middleware
+# Progress Ledger: auth-middleware
 
 > **Plan:** `0001-auth-middleware`
 > **Registry:** `docs/tasks/0001-auth-middleware/super-plan.json`
 > **Generated:** 2026-07-04T15:30:00Z
-> **Regenerated on every `super-plan.json` write via `.super-planning/render-progress-ledger.sh`**
+> **Regenerated on every `super-plan.json` write via the active `render-progress-ledger.sh` helper path**
 
 ## Summary
 
 | Status | Count |
 |--------|-------|
-| completed | 5 |
-| in_progress | 0 |
 | pending | 0 |
+| in_progress | 0 |
+| ready_for_review | 0 |
+| needs_fix | 0 |
+| blocked | 0 |
+| completed | 5 |
+| cancelled | 0 |
 | **Total** | **5** |
 
 ## Tasks
@@ -48,7 +52,7 @@
 
 | Requirement | Status | Covered By |
 |-------------|--------|------------|
-| REQ-001: Validar token JWT | ✅ completed | Task-B-0001 |
-| REQ-002: Extrair userId e role | ✅ completed | Task-A-0001, Task-B-0001 |
-| REQ-003: Responder 403 para role não autorizada | ✅ completed | Task-B-0002 |
-| REQ-004: Expor req.user tipado | ✅ completed | Task-A-0001, Task-C-0001 |
+| REQ-001: Validar token JWT do header Authorization: Bearer <token> | ✅ completed | Task-B-0001 |
+| REQ-002: Extrair userId e role do payload JWT | ✅ completed | Task-A-0001, Task-B-0001 |
+| REQ-003: Responder 403 quando role não tem permissão | ✅ completed | Task-B-0002 |
+| REQ-004: Expor req.user tipado para handlers downstream | ✅ completed | Task-A-0001, Task-C-0001 |

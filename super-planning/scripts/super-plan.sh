@@ -62,6 +62,213 @@ render_ledger() {
   "$LEDGER_SCRIPT" --input "$json_path" >/dev/null
 }
 
+validate_json() {
+  json_path="$1"
+  python3 - "$json_path" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+
+PLAN_STATUSES = {"pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed"}
+TASK_STATUSES = PLAN_STATUSES | {"cancelled"}
+REVIEW_CADENCE = {"per_task", "per_batch", "final_only"}
+EXECUTION_MODE = {"subagent-driven", "sequential"}
+TASK_PHASES = {"foundation", "core", "surface", "final"}
+
+
+def fail(message: str):
+    raise ValueError(message)
+
+
+def expect_type(value, expected_type, path_label: str):
+    if not isinstance(value, expected_type):
+        fail(f"{path_label} must be {expected_type.__name__}")
+
+
+def expect_non_empty_string(value, path_label: str):
+    if not isinstance(value, str) or not value:
+        fail(f"{path_label} must be a non-empty string")
+
+
+def expect_string_list(value, path_label: str):
+    expect_type(value, list, path_label)
+    for index, item in enumerate(value):
+        expect_non_empty_string(item, f"{path_label}[{index}]")
+
+
+def expect_status(value, allowed: set[str], path_label: str):
+    expect_non_empty_string(value, path_label)
+    if value not in allowed:
+        fail(f"{path_label} must be one of: {', '.join(sorted(allowed))}")
+
+
+def expect_keys(obj, required_keys, path_label: str):
+    expect_type(obj, dict, path_label)
+    missing = [key for key in required_keys if key not in obj]
+    if missing:
+        fail(f"{path_label} is missing required keys: {', '.join(missing)}")
+
+
+with path.open("r", encoding="utf-8") as fh:
+    payload = json.load(fh)
+
+expect_keys(
+    payload,
+    [
+        "$schema",
+        "planId",
+        "featureName",
+        "status",
+        "source",
+        "goal",
+        "architectureSummary",
+        "techStack",
+        "executionMode",
+        "reviewCadence",
+        "branchStrategy",
+        "worktree",
+        "globalConstraints",
+        "fileStructure",
+        "requirementsChecklist",
+        "taskDirectory",
+        "rules",
+        "tasks",
+    ],
+    "root",
+)
+
+expect_non_empty_string(payload["$schema"], "$schema")
+expect_non_empty_string(payload["planId"], "planId")
+expect_non_empty_string(payload["featureName"], "featureName")
+expect_status(payload["status"], PLAN_STATUSES, "status")
+expect_type(payload["goal"], str, "goal")
+expect_type(payload["architectureSummary"], str, "architectureSummary")
+expect_string_list(payload["techStack"], "techStack")
+expect_string_list(payload["globalConstraints"], "globalConstraints")
+expect_string_list(payload["rules"], "rules")
+expect_non_empty_string(payload["taskDirectory"], "taskDirectory")
+
+expect_keys(payload["source"], ["spec", "plan"], "source")
+expect_non_empty_string(payload["source"]["spec"], "source.spec")
+expect_non_empty_string(payload["source"]["plan"], "source.plan")
+
+expect_non_empty_string(payload["executionMode"], "executionMode")
+if payload["executionMode"] not in EXECUTION_MODE:
+    fail(f"executionMode must be one of: {', '.join(sorted(EXECUTION_MODE))}")
+
+expect_non_empty_string(payload["reviewCadence"], "reviewCadence")
+if payload["reviewCadence"] not in REVIEW_CADENCE:
+    fail(f"reviewCadence must be one of: {', '.join(sorted(REVIEW_CADENCE))}")
+
+expect_keys(payload["branchStrategy"], ["baseBranch", "featureBranch"], "branchStrategy")
+expect_non_empty_string(payload["branchStrategy"]["baseBranch"], "branchStrategy.baseBranch")
+expect_non_empty_string(payload["branchStrategy"]["featureBranch"], "branchStrategy.featureBranch")
+
+expect_keys(payload["worktree"], ["enabled", "path"], "worktree")
+if not isinstance(payload["worktree"]["enabled"], bool):
+    fail("worktree.enabled must be a boolean")
+if not isinstance(payload["worktree"]["path"], str):
+    fail("worktree.path must be a string")
+if payload["worktree"]["enabled"] and not payload["worktree"]["path"]:
+    fail("worktree.path must be a non-empty string when worktree.enabled is true")
+
+expect_type(payload["fileStructure"], list, "fileStructure")
+for index, entry in enumerate(payload["fileStructure"]):
+    path_label = f"fileStructure[{index}]"
+    expect_keys(entry, ["path", "ownerTask", "notes"], path_label)
+    expect_non_empty_string(entry["path"], f"{path_label}.path")
+    expect_non_empty_string(entry["ownerTask"], f"{path_label}.ownerTask")
+    expect_type(entry["notes"], str, f"{path_label}.notes")
+
+expect_type(payload["requirementsChecklist"], list, "requirementsChecklist")
+for index, requirement in enumerate(payload["requirementsChecklist"]):
+    path_label = f"requirementsChecklist[{index}]"
+    expect_keys(
+        requirement,
+        ["id", "title", "source", "status", "acceptanceCriteria", "coveredByTasks", "notes"],
+        path_label,
+    )
+    expect_non_empty_string(requirement["id"], f"{path_label}.id")
+    expect_non_empty_string(requirement["title"], f"{path_label}.title")
+    expect_type(requirement["source"], str, f"{path_label}.source")
+    expect_status(requirement["status"], PLAN_STATUSES, f"{path_label}.status")
+    expect_string_list(requirement["acceptanceCriteria"], f"{path_label}.acceptanceCriteria")
+    expect_string_list(requirement["coveredByTasks"], f"{path_label}.coveredByTasks")
+    expect_string_list(requirement["notes"], f"{path_label}.notes")
+
+expect_type(payload["tasks"], list, "tasks")
+for index, task in enumerate(payload["tasks"]):
+    path_label = f"tasks[{index}]"
+    expect_keys(
+        task,
+        [
+            "id",
+            "title",
+            "description",
+            "status",
+            "tryCount",
+            "batch",
+            "phase",
+            "reportFile",
+            "reviewPackage",
+            "progressLog",
+            "logTaskScript",
+            "dependencies",
+            "acceptanceCriteria",
+            "requirements",
+            "rules",
+            "steps",
+            "filesTouched",
+            "files",
+            "notes",
+        ],
+        path_label,
+    )
+    expect_non_empty_string(task["id"], f"{path_label}.id")
+    expect_non_empty_string(task["title"], f"{path_label}.title")
+    expect_type(task["description"], str, f"{path_label}.description")
+    expect_status(task["status"], TASK_STATUSES, f"{path_label}.status")
+    if not isinstance(task["tryCount"], int) or task["tryCount"] < 1:
+        fail(f"{path_label}.tryCount must be an integer >= 1")
+    expect_non_empty_string(task["batch"], f"{path_label}.batch")
+    expect_non_empty_string(task["phase"], f"{path_label}.phase")
+    if task["phase"] not in TASK_PHASES:
+        fail(f"{path_label}.phase must be one of: {', '.join(sorted(TASK_PHASES))}")
+    expect_non_empty_string(task["reportFile"], f"{path_label}.reportFile")
+    expect_non_empty_string(task["reviewPackage"], f"{path_label}.reviewPackage")
+    expect_non_empty_string(task["progressLog"], f"{path_label}.progressLog")
+    expect_non_empty_string(task["logTaskScript"], f"{path_label}.logTaskScript")
+    expect_string_list(task["dependencies"], f"{path_label}.dependencies")
+    expect_string_list(task["acceptanceCriteria"], f"{path_label}.acceptanceCriteria")
+    expect_string_list(task["requirements"], f"{path_label}.requirements")
+    expect_string_list(task["rules"], f"{path_label}.rules")
+    expect_string_list(task["filesTouched"], f"{path_label}.filesTouched")
+    expect_string_list(task["notes"], f"{path_label}.notes")
+
+    expect_type(task["steps"], list, f"{path_label}.steps")
+    for step_index, step in enumerate(task["steps"]):
+        step_label = f"{path_label}.steps[{step_index}]"
+        expect_keys(step, ["order", "title", "description", "command", "expectedResult", "codeExample"], step_label)
+        if not isinstance(step["order"], int) or step["order"] < 1:
+            fail(f"{step_label}.order must be an integer >= 1")
+        expect_non_empty_string(step["title"], f"{step_label}.title")
+        expect_type(step["description"], str, f"{step_label}.description")
+        if step["command"] is not None and not isinstance(step["command"], str):
+            fail(f"{step_label}.command must be a string or null")
+        if step["expectedResult"] is not None and not isinstance(step["expectedResult"], str):
+            fail(f"{step_label}.expectedResult must be a string or null")
+        if step["codeExample"] is not None and not isinstance(step["codeExample"], str):
+            fail(f"{step_label}.codeExample must be a string or null")
+
+    expect_keys(task["files"], ["created", "modified", "deleted"], f"{path_label}.files")
+    expect_string_list(task["files"]["created"], f"{path_label}.files.created")
+    expect_string_list(task["files"]["modified"], f"{path_label}.files.modified")
+    expect_string_list(task["files"]["deleted"], f"{path_label}.files.deleted")
+PY
+}
+
 if [ "$MODE" = "init" ]; then
   PLAN_ID=""
   FEATURE_NAME=""
@@ -242,6 +449,7 @@ with open(output_path, "w", encoding="utf-8") as fh:
     fh.write("\n")
 PY
 
+  validate_json "$OUTPUT_PATH"
   render_ledger "$OUTPUT_PATH"
   printf '%s\n' "$OUTPUT_PATH"
   exit 0
@@ -274,13 +482,17 @@ if [ "$MODE" = "update" ]; then
     usage
   fi
 
-  python3 - "$INPUT_PATH" "$UPDATE_ARGS_FILE" <<'PY'
+  TEMP_OUTPUT_PATH="$(mktemp)"
+  trap 'rm -f "$UPDATE_ARGS_FILE" "$TEMP_OUTPUT_PATH"' EXIT HUP INT TERM
+
+  python3 - "$INPUT_PATH" "$UPDATE_ARGS_FILE" "$TEMP_OUTPUT_PATH" <<'PY'
 import json
 import sys
 from pathlib import Path
 
 input_path = Path(sys.argv[1])
 ops_path = Path(sys.argv[2])
+output_path = Path(sys.argv[3])
 
 with input_path.open("r", encoding="utf-8") as fh:
     data = json.load(fh)
@@ -416,11 +628,13 @@ with ops_path.open("r", encoding="utf-8") as fh:
         value = parse_value(raw_value)
         set_value(data, path, value, append=(op == "--append"))
 
-with input_path.open("w", encoding="utf-8") as fh:
+with output_path.open("w", encoding="utf-8") as fh:
     json.dump(data, fh, indent=2)
     fh.write("\n")
 PY
 
+  validate_json "$TEMP_OUTPUT_PATH"
+  mv "$TEMP_OUTPUT_PATH" "$INPUT_PATH"
   render_ledger "$INPUT_PATH"
   printf '%s\n' "$INPUT_PATH"
   exit 0

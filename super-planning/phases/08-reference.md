@@ -79,10 +79,11 @@ Each task has a `tryCount` in `super-plan.json`. The default maximum is **3 atte
 ```
 pending → in_progress → ready_for_review → completed
                               ├──────────→ needs_fix → in_progress
-                              └──────────→ blocked
+                              ├──────────→ blocked
+                              └──────────→ cancelled
 ```
 
-A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `super-plan.json` after every state change through `.super-planning/super-plan.sh update`, which also regenerates the ledger.
+A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `super-plan.json` after every state change through the active `super-plan.sh update` helper path, which also regenerates the ledger.
 
 Implementer subagents log `ready_for_review`; only the orchestrator logs `completed`.
 
@@ -101,7 +102,7 @@ When a gap is discovered during implementation:
 
 When a task becomes unnecessary:
 
-1. Set its status to a terminal state through the script (do not delete it — keep the record)
+1. Set its status to `cancelled` through the script (do not delete it — keep the record)
 2. Update any tasks that depended on it
 3. Record the removal in the affected task's progress log, or in the ledger if the task never had a directory
 
@@ -111,7 +112,7 @@ When dependencies change mid-flight:
 
 1. Update `dependencies` in the affected task entries through the script
 2. If a task was planned for parallel execution but now depends on a task in the same batch, move it to the next batch
-3. Do not change batch assignments of tasks that are already `in_progress` or `completed`
+3. Do not change batch assignments of tasks that are already `in_progress`, `completed`, or `cancelled`
 
 ### When the Spec Changes
 

@@ -30,7 +30,7 @@ Use the task-local logging wrapper to record every state change. The script is a
 
 `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh`
 
-If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. That wrapper delegates to `.super-planning/log-task.sh` with the shared plan/task/log-dir arguments already filled in. If not, return your status and report content so the orchestrator can persist them during Phase 6.
+If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. That wrapper delegates to the shared helper path chosen by the orchestrator, with the shared plan/task/log-dir arguments already filled in. If not, return your status and report content so the orchestrator can persist them during Phase 6.
 
 ### Log on these events
 

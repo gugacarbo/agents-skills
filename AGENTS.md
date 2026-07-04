@@ -1,7 +1,7 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-06-11 09:55:28 -0300
-**Commit:** 1e1ebb6
+**Generated:** 2026-07-04 12:00:00 -0300
+**Commit:** (pending)
 
 ## OVERVIEW
 
@@ -39,6 +39,7 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
 | Work on planning reference     | `super-planning/docs/`                     | Workflows, decision flow, file structure, and examples.          |
 | Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh.           |
+| Test planning scripts          | `.scripts/tests/super-planning.sh`         | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh. |
 | Work on skill eval tooling    | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.            |
 
 ## CONVENTIONS
@@ -69,6 +70,7 @@ rtk bash .scripts/tests/update.sh
 rtk bash .scripts/tests/bootstrap.sh
 rtk bash .scripts/tests/gitignore.sh
 rtk bash .scripts/tests/orchestrator.sh
+rtk bash .scripts/tests/super-planning.sh
 rtk sh -n skills.sh .scripts/install.sh .scripts/update.sh
 ```
 

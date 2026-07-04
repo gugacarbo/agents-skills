@@ -16,9 +16,10 @@ set -euo pipefail
 # The log file is written to <workspace-root>/docs/tasks/<plan>/<task>/progress.log
 # unless --log-dir is provided.
 #
-# The orchestrator should keep one shared copy under .super-planning/ and use
-# `materialize-task-logger` to create thin task-local wrappers that prefill the
-# shared arguments for workers.
+# The orchestrator should use one shared helper path and `materialize-task-logger`
+# to create thin task-local wrappers that prefill the shared arguments for
+# workers. When the target repo already vendors this skill, use the in-repo
+# script directly; otherwise keep a shared copy under .super-planning/.
 
 MODE="log"
 
@@ -63,7 +64,7 @@ Usage:
     --plan <plan-ref> \
     --task <task-id> \
     --output </absolute/path/to/task-dir/log-task.sh> \
-    [--root-script </absolute/path/to/.super-planning/log-task.sh>]
+    [--root-script </absolute/path/to/shared/log-task.sh>]
 EOF
   exit 1
 }

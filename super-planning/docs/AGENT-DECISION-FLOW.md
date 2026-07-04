@@ -121,21 +121,22 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Ensure repo-local .super-planning helper stack exists"] --> B{"Any helper missing?"}
-    B -->|Yes| C["Recreate or refresh helper files"]
-    B -->|No| D["Generate super-plan.json via repo-local script"]
-    C --> D
-    D --> E["Populate plan metadata, requirements, file structure, execution settings, tasks"]
-    E --> F["Set every task status to pending"]
-    F --> G{"Need per-task directories or progress.log now?"}
-    G -->|Yes| H["No: defer task artifacts to Phase 6"]
-    G -->|No| I["Keep only registry and ledger for now"]
-    H --> J["Proceed with registry as single source of truth"]
-    I --> J
-    J --> K{"Any future change to registry?"}
-    K -->|Yes| L["Update only through .super-planning/super-plan.sh update"]
-    K -->|No| M["Proceed to Phase 5"]
-    L --> M
+    A["Resolve active helper path"] --> B{"Target repo already contains this skill?"}
+    B -->|Yes| C["Use in-repo skill scripts directly"]
+    B -->|No| D["Create or refresh .super-planning helper stack"]
+    C --> E["Generate super-plan.json via active helper path"]
+    D --> E
+    E --> F["Populate plan metadata, requirements, file structure, execution settings, tasks"]
+    F --> G["Set every task status to pending"]
+    G --> H{"Need per-task directories or progress.log now?"}
+    H -->|Yes| I["No: defer task artifacts to Phase 6"]
+    H -->|No| J["Keep only registry and ledger for now"]
+    I --> K["Proceed with registry as single source of truth"]
+    J --> K
+    K --> L{"Any future change to registry?"}
+    L -->|Yes| M["Update only through the same active super-plan.sh helper path"]
+    L -->|No| N["Proceed to Phase 5"]
+    M --> N
 ```
 
 ## Phase 5: Dispatch
@@ -193,7 +194,7 @@ flowchart TD
     K -->|Yes| L["Record in ledger for final review"]
     K -->|No| M["Review is clean"]
     J --> C
-    L --> N["Mark task completed through orchestrator after clean review state"]
+    L --> N["Mark task completed through orchestrator after clean review state unless reviewCadence=final_only"]
     M --> N
 ```
 
@@ -247,5 +248,7 @@ stateDiagram-v2
     in_progress --> blocked: cannot proceed
     blocked --> in_progress: context/model/scope changed
     ready_for_review --> completed: review clean and orchestrator closes task
+    ready_for_review --> cancelled: orchestrator retires task but keeps audit trail
     completed --> [*]
+    cancelled --> [*]
 ```

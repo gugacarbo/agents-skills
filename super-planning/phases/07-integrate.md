@@ -11,3 +11,5 @@ After implementation is done and the plan is ready for final closure:
 Then transition the spec status to `implemented` and fill in `implemented-by` with the real paths that deliver the spec.
 
 If `reviewCadence=final_only`, this phase must also perform the first independent review gate for the implementation before any task or requirement is considered fully accepted.
+
+When that final-only review passes, the orchestrator then appends the `completed` log entries, transitions the affected tasks from `ready_for_review` to `completed`, and regenerates the ledger before closing the plan.

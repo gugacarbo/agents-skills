@@ -22,11 +22,11 @@ Phase 6 is the first phase that creates the per-task persistent artifact structu
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log`
 - `docs/tasks/{NNNN-<feature-name>}/{task-id}/log-task.sh`
 
-Use [`templates/progress-ledger-template.md`](../templates/progress-ledger-template.md) for the ledger and [`templates/progress-template.txt`](../templates/progress-template.txt) for the task log format.
+Use [`templates/progress-template.txt`](../templates/progress-template.txt) for the task log format. The ledger itself is a generated artifact produced by the active `render-progress-ledger.sh` helper path, not a hand-maintained template.
 
 The ledger should already exist from Phase 4. Regenerate it through the `super-plan.json` script path after every registry update, then keep it synchronized through review, fixes, and final integration.
 
-The task-local `log-task.sh` is now a thin wrapper generated from `.super-planning/log-task.sh`. The orchestrator should call:
+The task-local `log-task.sh` is now a thin wrapper generated from the shared helper resolved in Phase 5. If the skill was bootstrapped into `.super-planning/`, the orchestrator should call:
 
 ```bash
 bash /absolute/path/to/workspace/.super-planning/log-task.sh materialize-task-logger \
@@ -36,6 +36,8 @@ bash /absolute/path/to/workspace/.super-planning/log-task.sh materialize-task-lo
 ```
 
 That wrapper must delegate back to the shared `.super-planning/log-task.sh` while prefilling the shared arguments for the plan, task, and task directory.
+
+If the skill already exists inside the target repository, generate the wrapper from `super-planning/scripts/log-task.sh` instead and keep that path as the wrapper's root script.
 
 ## Stage 1: Spec Compliance
 

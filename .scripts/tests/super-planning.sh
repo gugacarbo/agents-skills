@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR=$(
+  CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
+)
+REPO_ROOT=$(
+  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
+)
+SUPER_PLAN_SCRIPT="$REPO_ROOT/super-planning/scripts/super-plan.sh"
+RENDER_LEDGER_SCRIPT="$REPO_ROOT/super-planning/scripts/render-progress-ledger.sh"
+LOG_TASK_SCRIPT="$REPO_ROOT/super-planning/scripts/log-task.sh"
+EXAMPLE_PLAN="$REPO_ROOT/super-planning/docs/example/tasks/0001-auth-middleware/super-plan.json"
+
+fail() {
+  printf 'FAIL: %s\n' "$1" >&2
+  exit 1
+}
+
+assert_exists() {
+  local path="$1"
+  if [ ! -e "$path" ]; then
+    fail "expected path to exist: $path"
+  fi
+}
+
+assert_contains_file() {
+  local needle="$1"
+  local path="$2"
+  if ! grep -Fq "$needle" "$path"; then
+    fail "expected $path to contain: $needle"
+  fi
+}
+
+test_init_generates_valid_registry_and_rich_empty_ledger() {
+  local tmp registry ledger
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-sample/super-plan.json"
+  ledger="$tmp/docs/tasks/0001-sample/progress-ledger.md"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$registry" >/dev/null
+
+  assert_exists "$registry"
+  assert_exists "$ledger"
+  assert_contains_file "# Progress Ledger: sample" "$ledger"
+  assert_contains_file "## Summary" "$ledger"
+  assert_contains_file "| pending | 0 |" "$ledger"
+  assert_contains_file "## Timeline" "$ledger"
+  assert_contains_file "no task events logged yet" "$ledger"
+  assert_contains_file "## Requirements Coverage" "$ledger"
+  assert_contains_file "no requirements defined yet" "$ledger"
+}
+
+test_update_rejects_invalid_status_without_mutating_file() {
+  local tmp registry before
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+  before=$(cat "$registry")
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-0001].status=banana >"$tmp/output.log" 2>&1; then
+    fail "expected invalid status update to fail"
+  fi
+
+  if [ "$(cat "$registry")" != "$before" ]; then
+    fail "registry changed after invalid update"
+  fi
+
+  assert_contains_file "must be one of" "$tmp/output.log"
+}
+
+test_update_accepts_cancelled_task_status() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-0001].status=cancelled >/dev/null
+
+  assert_contains_file '"status": "cancelled"' "$registry"
+  assert_contains_file "⚪ cancelled" "$tmp/docs/tasks/0001-auth-middleware/progress-ledger.md"
+}
+
+test_render_progress_ledger_includes_timeline_and_requirements() {
+  local tmp registry ledger
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  ledger="$tmp/progress-ledger.md"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+  cp -R "$REPO_ROOT/super-planning/docs/example/tasks/0001-auth-middleware"/Task-* "$tmp/docs/tasks/0001-auth-middleware/"
+
+  "$RENDER_LEDGER_SCRIPT" --input "$registry" --output "$ledger" >/dev/null
+
+  assert_contains_file "## Summary" "$ledger"
+  assert_contains_file "| completed | 5 |" "$ledger"
+  assert_contains_file "## Tasks" "$ledger"
+  assert_contains_file "| Task-A-0001 | Definir tipos e interfaces de autenticação | A | foundation | ✅ completed | — |" "$ledger"
+  assert_contains_file "## Timeline" "$ledger"
+  assert_contains_file "| 2026-07-04T14:10:00Z | Task-A-0001 | completed | 1 |" "$ledger"
+  assert_contains_file "## Requirements Coverage" "$ledger"
+  assert_contains_file "| REQ-001: Validar token JWT do header Authorization: Bearer <token> | ✅ completed | Task-B-0001 |" "$ledger"
+}
+
+test_materialized_logger_wrapper_writes_jsonl_events() {
+  local tmp wrapper log_file
+  tmp=$(mktemp -d)
+  wrapper="$tmp/docs/tasks/0001-sample/Task-A-0001/log-task.sh"
+  log_file="$tmp/docs/tasks/0001-sample/Task-A-0001/progress.log"
+
+  "$LOG_TASK_SCRIPT" materialize-task-logger \
+    --plan 0001-sample \
+    --task Task-A-0001 \
+    --output "$wrapper" \
+    --root-script "$LOG_TASK_SCRIPT" >/dev/null
+
+  bash "$wrapper" --event started --try 1 --max-tries 3 --message "Starting implementation" >/dev/null
+
+  assert_exists "$log_file"
+  assert_contains_file '"event":"started"' "$log_file"
+  assert_contains_file '"task":"Task-A-0001"' "$log_file"
+}
+
+main() {
+  test_init_generates_valid_registry_and_rich_empty_ledger
+  test_update_rejects_invalid_status_without_mutating_file
+  test_update_accepts_cancelled_task_status
+  test_render_progress_ledger_includes_timeline_and_requirements
+  test_materialized_logger_wrapper_writes_jsonl_events
+
+  printf 'PASS: super-planning.sh\n'
+}
+
+main "$@"

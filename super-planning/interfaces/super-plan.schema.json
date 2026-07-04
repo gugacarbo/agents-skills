@@ -144,8 +144,7 @@
           "type": "boolean"
         },
         "path": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         }
       }
     },
@@ -185,7 +184,7 @@
         },
         "status": {
           "type": "string",
-          "enum": ["pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed"]
+          "enum": ["pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed", "cancelled"]
         },
         "acceptanceCriteria": {
           "type": "array",

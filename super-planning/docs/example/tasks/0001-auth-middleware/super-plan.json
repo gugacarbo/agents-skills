@@ -120,7 +120,7 @@
   "rules": [
     "Nunca re-despachar uma tarefa que o ledger ou log já marca como concluída",
     "Subagentes não devem editar super-plan.json — apenas o orquestrador",
-    "Status lifecycle: pending -> in_progress -> ready_for_review -> needs_fix|blocked|completed",
+    "Status lifecycle: pending -> in_progress -> ready_for_review -> needs_fix|blocked|completed|cancelled",
     "Apenas o orquestrador pode marcar completed, e apenas após review limpa"
   ],
   "tasks": [

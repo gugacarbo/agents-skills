@@ -40,23 +40,29 @@ flowchart TD
     T1[Task 1] --> D1[Dispatch Implementer]
     D1 --> RC1{reviewCadence}
     RC1 -->|per_task| R1[Review]
-    RC1 -->|per_batch/final_only| H1[Hold review until later gate]
+    RC1 -->|per_batch| H1[Hold review until batch gate]
+    RC1 -->|final_only| H1A[Hold independent review and keep task ready_for_review]
     R1 -->|Issues Found| F1[Fix Subagent]
     F1 --> RR1[Re-review]
     RR1 -->|Clean| C1[Mark Complete]
     R1 -->|Clean| C1
     H1 --> C1
+    H1A --> T1[Do not mark completed yet]
     C1 --> T2[Task 2]
+    T1 --> T2
     T2 --> D2[Dispatch Implementer]
     D2 --> RC2{reviewCadence}
     RC2 -->|per_task| R2[Review]
-    RC2 -->|per_batch/final_only| H2[Hold review until later gate]
+    RC2 -->|per_batch| H2[Hold review until batch gate]
+    RC2 -->|final_only| H2A[Hold independent review and keep task ready_for_review]
     R2 -->|Issues Found| F2[Fix Subagent]
     F2 --> RR2[Re-review]
     RR2 -->|Clean| C2[Mark Complete]
     R2 -->|Clean| C2
     H2 --> C2
+    H2A --> T3[Do not mark completed yet]
     C2 --> TN[All Tasks Complete]
+    T3 --> TN
     TN --> INTEGRATE[Phase 7:<br/>Integrate & Finish]
 ```
 
@@ -179,7 +185,7 @@ stateDiagram-v2
     needs_fix --> in_progress: Re-dispatch
     in_progress --> blocked: Cannot proceed
     blocked --> in_progress: Re-assess<br/>more context / better model / smaller scope
-    pending --> cancelled: Never started
+    ready_for_review --> cancelled: Orchestrator retires task
     completed --> [*]
     cancelled --> [*]
 ```

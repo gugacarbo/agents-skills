@@ -2,21 +2,24 @@
 
 Before dispatching any subagent, generate a single machine-readable registry that is the source of truth for the plan and every task.
 
-## Bootstrap Repo-Local Helpers First
+## Resolve the Active Helper Path First
 
-Before using the registry script, ensure the target repository has a `.super-planning/` directory with the full helper stack copied into it. If the directory or any dependency is missing, recreate or refresh it before proceeding.
+Before using the registry script, decide which helper path is active for this run:
 
-Required files in the target repo:
+1. **If the target repository already contains this `super-planning` skill**, do **not** create `.super-planning/`. Use the helper files directly from the skill directory already present in that repo.
+2. **If the target repository does not contain this skill**, create `.super-planning/` and copy the helper stack there before proceeding.
+
+Fallback helper files when bootstrap is required:
 
 - `.super-planning/super-plan.sh`
 - `.super-planning/render-progress-ledger.sh`
 - `.super-planning/super-plan.schema.json`
 
-The goal is for Phase 4 to be executable from inside the target repo without depending on the skill source tree staying at the same path.
+The goal is to avoid a duplicate helper directory when the skill already lives in the repository, while still keeping the flow self-contained for repositories that do not vendor the skill.
 
 ## Unified Registry (`super-plan.json`)
 
-Create the registry in the plan's task directory with the repo-local `.super-planning/super-plan.sh`:
+Create the registry in the plan's task directory with the active helper path:
 
 ```
 docs/tasks/{NNNN-<feature-name>}/super-plan.json
@@ -28,7 +31,7 @@ Example for plan `docs/plans/0003-auth-middleware.md`:
 docs/tasks/0003-auth-middleware/super-plan.json
 ```
 
-The generator script materializes the file from the repo-local schema copy at `.super-planning/super-plan.schema.json`.
+The generator script materializes the file from the matching schema file in the active helper path.
 
 `super-plan.json` is the orchestrator-owned structured source of truth. It combines:
 
@@ -36,7 +39,20 @@ The generator script materializes the file from the repo-local schema copy at `.
 - requirements coverage and plan metadata
 - the executable task registry that used to live in `tasks.json`
 
-Run the generator first:
+Run the generator first.
+
+When the skill is already inside the target repository:
+
+```bash
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh \
+  --plan-id 0003-auth-middleware \
+  --feature-name auth-middleware \
+  --spec docs/specs/0003-auth-middleware-spec.md \
+  --plan docs/plans/0003-auth-middleware.md \
+  --output docs/tasks/0003-auth-middleware/super-plan.json
+```
+
+When the skill is not inside the target repository:
 
 ```bash
 mkdir -p /absolute/path/to/workspace/.super-planning
@@ -52,9 +68,9 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh \
   --output docs/tasks/0003-auth-middleware/super-plan.json
 ```
 
-Then make every later change through `.super-planning/super-plan.sh update`. Do not edit `super-plan.json` by hand.
+Then make every later change through that same active helper path. Do not edit `super-plan.json` by hand.
 
-Structure and field definitions live in `.super-planning/super-plan.schema.json`. All required fields must be present, including:
+Structure and field definitions live in the schema file from the active helper path. All required fields must be present, including:
 
 - `source.spec` and `source.plan`
 - `goal`, `architectureSummary`, `techStack`
@@ -88,8 +104,9 @@ Each task entry must still include:
 
 - Set all tasks to `pending` when creating the registry.
 - Update status after each dispatch/review cycle.
-- Use only these status values: `pending`, `in_progress`, `ready_for_review`, `needs_fix`, `blocked`, `completed`.
+- Use only these status values: `pending`, `in_progress`, `ready_for_review`, `needs_fix`, `blocked`, `completed`, `cancelled`.
 - A task cannot move to `completed` until its review is clean.
+- Use `cancelled` only when the orchestrator decides to retire a task while keeping the audit trail in the registry.
 
 **Ownership rule:** Subagents must not edit `super-plan.json`. Only the orchestrator updates it, and every orchestrator write must go through the script so the ledger stays synchronized.
 
