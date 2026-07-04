@@ -14,6 +14,7 @@
     "architectureSummary",
     "techStack",
     "executionMode",
+    "reviewCadence",
     "branchStrategy",
     "worktree",
     "globalConstraints",
@@ -57,6 +58,10 @@
     "executionMode": {
       "type": "string",
       "enum": ["subagent-driven", "sequential"]
+    },
+    "reviewCadence": {
+      "type": "string",
+      "enum": ["per_task", "per_batch", "final_only"]
     },
     "branchStrategy": {
       "$ref": "#/$defs/branchStrategy"
