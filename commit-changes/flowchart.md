@@ -18,14 +18,14 @@ flowchart TD
     ParseB -->|não| ParseC{Optou por worktree inteira?<br/>all, --all, tudo, worktree inteira}
     ParseC -->|sim| ScopeAll[Escopo = todos arquivos modificados]
     ParseC -->|não, mas conversa aponta execução| ScopeConv[Escopo = arquivos da execução recente]
-    ParseC -->|não, sem contexto claro| ScopeAmbig[Escopo ambíguo]
+    ParseC -->|não, sem contexto claro| ScopeAllDefault[Escopo = worktree inteira por default]
 
     ScopePath --> CheckPathExists{Path existe e tem mudanças?}
     CheckPathExists -->|não| StopNoChanges[Parar: No changes found]
     CheckPathExists -->|sim| Inspect
     ScopeAll --> Inspect
     ScopeConv --> Inspect
-    ScopeAmbig --> PauseAmbig1[Pausar e explicar ambiguidade]
+    ScopeAllDefault --> Inspect
 
     Inspect[2. Inspect Working Tree<br/>git status --short<br/>git diff --stat HEAD<br/>git diff HEAD -- scope] --> CheckState{Estado do repo ok?}
 
@@ -103,7 +103,6 @@ flowchart TD
     style StopConflict fill:#8B0000
     style StopEmpty fill:#8B0000
     style StopIdentity fill:#8B0000
-    style PauseAmbig1 fill:#FFD700
     style PauseAddP fill:#FFD700
     style PauseSemantic fill:#FFD700
     style PauseRisk fill:#FFD700
