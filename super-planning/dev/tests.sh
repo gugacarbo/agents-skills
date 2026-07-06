@@ -11,6 +11,7 @@ REPO_ROOT=$(
 SUPER_PLAN_SCRIPT="$REPO_ROOT/super-planning/scripts/super-plan.sh"
 RENDER_LEDGER_SCRIPT="$REPO_ROOT/super-planning/scripts/render-progress-ledger.sh"
 LOG_TASK_SCRIPT="$REPO_ROOT/super-planning/scripts/log-task.sh"
+SUMMARIZE_SCRIPT="$REPO_ROOT/super-planning/scripts/summarize-all-tasks.sh"
 EXAMPLE_PLAN="$REPO_ROOT/super-planning/docs/example/tasks/0001-auth-middleware/super-plan.json"
 
 fail() {
@@ -129,12 +130,131 @@ test_materialized_logger_wrapper_writes_jsonl_events() {
   assert_contains_file '"task":"Task-A-0001"' "$log_file"
 }
 
+test_summarize_all_tasks_terminal_output() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  # Set up two plans with different task states
+  mkdir -p "$tmp/docs/tasks/0001-sample"
+  mkdir -p "$tmp/docs/tasks/0002-other"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$tmp/docs/tasks/0001-sample/super-plan.json" >/dev/null
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0002-other \
+    --feature-name other \
+    --spec docs/specs/0002-other-spec.md \
+    --plan docs/plans/0002-other.md \
+    --output "$tmp/docs/tasks/0002-other/super-plan.json" >/dev/null
+
+  local output
+  output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/tasks" 2>&1) || fail "summarize-all-tasks.sh failed"
+
+  echo "$output" | grep -q "Plans found: 2" || fail "expected 'Plans found: 2' in output"
+  echo "$output" | grep -q "0002-other" || fail "expected 0002-other in output"
+  echo "$output" | grep -q "SUPER-PLAN TASK PROGRESS SUMMARY" || fail "expected header in output"
+}
+
+test_summarize_all_tasks_json_output() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  mkdir -p "$tmp/docs/tasks/0001-sample"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$tmp/docs/tasks/0001-sample/super-plan.json" >/dev/null
+
+  local json_output
+  json_output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/tasks" --json 2>&1) || fail "summarize-all-tasks.sh --json failed"
+
+  echo "$json_output" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['totalPlans']==1; assert d['plans'][0]['planId']=='0001-sample'" \
+    || fail "JSON output validation failed"
+}
+
+test_summarize_all_tasks_with_plan_id_filter() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  mkdir -p "$tmp/docs/tasks/0001-sample"
+  mkdir -p "$tmp/docs/tasks/0002-other"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$tmp/docs/tasks/0001-sample/super-plan.json" >/dev/null
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0002-other \
+    --feature-name other \
+    --spec docs/specs/0002-other-spec.md \
+    --plan docs/plans/0002-other.md \
+    --output "$tmp/docs/tasks/0002-other/super-plan.json" >/dev/null
+
+  local output
+  output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/tasks" --plan-id 0001-sample 2>&1) || fail "summarize-all-tasks.sh with --plan-id failed"
+
+  echo "$output" | grep -q "0001-sample" || fail "expected 0001-sample in filtered output"
+  if echo "$output" | grep -q "0002-other"; then
+    fail "0002-other should not appear when filtered by --plan-id"
+  fi
+}
+
+test_summarize_all_tasks_with_example_data() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  mkdir -p "$tmp/docs/tasks/0001-auth-middleware"
+  cp "$EXAMPLE_PLAN" "$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  cp -R "$REPO_ROOT/super-planning/docs/example/tasks/0001-auth-middleware"/Task-* "$tmp/docs/tasks/0001-auth-middleware/"
+
+  local output
+  output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/tasks" 2>&1) || fail "summarize-all-tasks.sh with example data failed"
+
+  echo "$output" | grep -q "0001-auth-middleware" || fail "expected 0001-auth-middleware in output"
+  echo "$output" | grep -q "completed" || fail "expected completed status in output"
+  echo "$output" | grep -q "Task-A-0001" || fail "expected Task-A-0001 in output"
+  echo "$output" | grep -q "Task-B-0001" || fail "expected Task-B-0001 in output"
+  echo "$output" | grep -q "Task-C-0001" || fail "expected Task-C-0001 in output"
+
+  # JSON mode with example data
+  local json_output
+  json_output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/tasks" --json 2>&1) || fail "summarize-all-tasks.sh --json with example data failed"
+
+  echo "$json_output" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert d['totalPlans'] == 1
+plan = d['plans'][0]
+assert plan['planId'] == '0001-auth-middleware'
+assert plan['totalTasks'] == 5
+assert plan['completedTasks'] == 5
+assert plan['completionPercent'] == 100.0
+assert len(plan['tasks']) == 5
+print('JSON validation passed')
+" || fail "JSON output validation with example data failed"
+}
+
 main() {
   test_init_generates_valid_registry_and_rich_empty_ledger
   test_update_rejects_invalid_status_without_mutating_file
   test_update_accepts_cancelled_task_status
   test_render_progress_ledger_includes_timeline_and_requirements
   test_materialized_logger_wrapper_writes_jsonl_events
+  test_summarize_all_tasks_terminal_output
+  test_summarize_all_tasks_json_output
+  test_summarize_all_tasks_with_plan_id_filter
+  test_summarize_all_tasks_with_example_data
 
   printf 'PASS: super-planning.sh\n'
 }

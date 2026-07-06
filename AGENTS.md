@@ -19,10 +19,11 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 ├── skill-creator/         # complex local skill, mostly ignored except AGENTS.md
 └── super-planning/        # tracked planning/orchestration skill
     ├── docs/              # reference docs: workflows, decision flow, examples
-    ├── scripts/           # super-plan.sh, log-task.sh, render-progress-ledger.sh
+    ├── scripts/           # super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh
     ├── phases/            # phase guidance (01–08)
     ├── prompts/           # worker and implementer prompt templates
-    └── templates/         # plan and tasks templates
+    ├── templates/         # plan and tasks templates
+    └── dev/               # tests and aux scripts for the super-planning skill
 ```
 
 ## WHERE TO LOOK
@@ -38,8 +39,9 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Work on commit flowchart      | `commit-changes/README.md`                  | Mermaid flowchart for commit decision flow.                      |
 | Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
 | Work on planning reference     | `super-planning/docs/`                     | Workflows, decision flow, file structure, and examples.          |
-| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh.           |
-| Test planning scripts          | `.scripts/tests/super-planning.sh`         | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh. |
+| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
+| Test planning scripts          | `super-planning/dev/tests.sh`              | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
+| Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
 | Work on skill eval tooling    | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.            |
 
 ## CONVENTIONS
@@ -70,7 +72,7 @@ rtk bash .scripts/tests/update.sh
 rtk bash .scripts/tests/bootstrap.sh
 rtk bash .scripts/tests/gitignore.sh
 rtk bash .scripts/tests/orchestrator.sh
-rtk bash .scripts/tests/super-planning.sh
+rtk bash super-planning/dev/tests.sh
 rtk sh -n skills.sh .scripts/install.sh .scripts/update.sh
 ```
 
