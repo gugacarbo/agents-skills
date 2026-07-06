@@ -4,23 +4,26 @@ set -eu
 # Summarize all super-plan task progress across the workspace.
 #
 # Usage:
-#   scripts/summarize-all-tasks.sh [--base-dir <path>] [--plan-id <id>] [--json]
+#   scripts/summarize-all-tasks.sh [--base-dir <path>] [--plan-id <id>] [--task-id <id>] [--json]
 #
 # Scans <base-dir> (default: docs/tasks) for super-plan.json files and prints
 # a consolidated progress summary. Use --plan-id to filter to a single plan.
+# Use --task-id to filter to a single task (requires --plan-id).
 # Use --json for machine-readable output.
 
 BASE_DIR="docs/tasks"
 PLAN_ID=""
+TASK_ID=""
 OUTPUT_MODE="terminal"
 
 usage() {
   cat <<'EOF'
-Usage: summarize-all-tasks.sh [--base-dir <path>] [--plan-id <id>] [--json]
+Usage: summarize-all-tasks.sh [--base-dir <path>] [--plan-id <id>] [--task-id <id>] [--json]
 
 Options:
   --base-dir <path>   Root directory to scan for super-plan.json files (default: docs/tasks)
   --plan-id <id>      Filter to a single plan (e.g. 0001-auth-middleware)
+  --task-id <id>      Filter to a single task inside the given plan (e.g. Task-A-0001)
   --json              Output machine-readable JSON instead of terminal-friendly text
 EOF
   exit 1
@@ -36,6 +39,10 @@ while [ "$#" -gt 0 ]; do
       PLAN_ID="$2"
       shift 2
       ;;
+    --task-id)
+      TASK_ID="$2"
+      shift 2
+      ;;
     --json)
       OUTPUT_MODE="json"
       shift
@@ -49,6 +56,11 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+if [ -n "$TASK_ID" ] && [ -z "$PLAN_ID" ]; then
+  echo "Error: --task-id requires --plan-id" >&2
+  exit 1
+fi
 
 if [ ! -d "$BASE_DIR" ]; then
   echo "Error: base directory not found: $BASE_DIR" >&2
@@ -78,14 +90,15 @@ if [ "$#" -eq 0 ]; then
   exit 0
 fi
 
-python3 - "$OUTPUT_MODE" "$@" <<'PY'
+python3 - "$OUTPUT_MODE" "$TASK_ID" "$@" <<'PY'
 import json
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
 
 output_mode = sys.argv[1]
-registry_paths = sys.argv[2:]
+task_id_filter = sys.argv[2] if sys.argv[2] else None
+registry_paths = sys.argv[3:]
 
 STATUS_MAP = {
     "pending": "⏳ pending",
@@ -170,7 +183,7 @@ def count_requirements_by_status(requirements: list[dict]) -> dict[str, int]:
     return counts
 
 
-def build_plan_summary(registry_path: str) -> dict | None:
+def build_plan_summary(registry_path: str, task_id_filter: str | None = None) -> dict | None:
     registry = load_registry(registry_path)
     if registry is None:
         return None
@@ -182,6 +195,13 @@ def build_plan_summary(registry_path: str) -> dict | None:
     tasks = registry.get("tasks", [])
     requirements = registry.get("requirementsChecklist", [])
 
+    # Filter tasks if requested
+    if task_id_filter:
+        tasks = [t for t in tasks if t.get("id") == task_id_filter]
+        requirements = [
+            r for r in requirements
+            if task_id_filter in r.get("coveredByTasks", [])
+        ]
     task_counts = count_tasks_by_status(tasks)
     req_counts = count_requirements_by_status(requirements)
     total_tasks = len(tasks)
@@ -417,7 +437,7 @@ def format_json(summaries: list[dict]) -> str:
 # Main
 summaries = []
 for rp in registry_paths:
-    summary = build_plan_summary(rp)
+    summary = build_plan_summary(rp, task_id_filter=task_id_filter)
     if summary is not None:
         summaries.append(summary)
 
