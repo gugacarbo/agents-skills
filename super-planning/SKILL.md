@@ -28,8 +28,11 @@ Treat this file as an explicit, expandable router for entry phases.
 | `/super-planning dispatch` | `dispatch` | Start at Phase 5 and continue forward from there. Use only when tasks are already decomposed and ready to execute. | [`phases/05-dispatch.md`](phases/05-dispatch.md) |
 | `/super-planning review` | `review` | Start at Phase 6 and continue forward from there. Use only when implementation outputs already exist and are ready for review gates. | [`phases/06-review.md`](phases/06-review.md) |
 | `/super-planning integrate` | `integrate` | Start at Phase 7 and continue forward from there. Use only when reviewed outputs are ready to merge and finish. | [`phases/07-integrate.md`](phases/07-integrate.md) |
+| `/super-planning stats` | `stats` | Print a progress summary across all task registries. Aliases: `progress`, `task-stats`, `task-progress`. | This file, then run [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh) |
 
 **Routing rule:** If no subcommand is provided, always choose `default`.
+
+**Stats rule:** When the user invokes `/super-planning stats`, `/super-planning progress`, `/super-planning task-stats`, or `/super-planning task-progress`, run the active `summarize-all-tasks.sh` helper. Prefer the in-repo script at `super-planning/scripts/summarize-all-tasks.sh` when the skill is vendored; otherwise use the repo-local `.super-planning/summarize-all-tasks.sh` copied by Phase 4. Default scan directory is `docs/tasks`. Accept optional flags exactly as the script does: `--base-dir`, `--plan-id`, `--json`. Produce only the script output plus a one-line note about the command used.
 
 **Forward-only rule:** When a phase name is provided, start at that phase and execute the remaining phases in order unless the user explicitly asks to stop earlier.
 
