@@ -1,27 +1,16 @@
 #!/usr/bin/env sh
 set -eu
 
-MODE="init"
-
-if [ "$#" -gt 0 ]; then
-  case "$1" in
-    init|update)
-      MODE="$1"
-      shift
-      ;;
-    --*)
-      MODE="init"
-      ;;
-    *)
-      echo "Unknown subcommand: $1" >&2
-      exit 1
-      ;;
-  esac
-fi
-
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 LEDGER_SCRIPT="$SCRIPT_DIR/render-progress-ledger.sh"
+
+error_json() {
+  status_code="${1:-1}"
+  shift
+  printf '{"error": true, "message": "%s", "exit_code": %s}\n' "$*" "$status_code" >&2
+  exit "$status_code"
+}
 
 usage() {
   cat <<'EOF'
@@ -43,9 +32,23 @@ Usage:
 
   super-plan.sh update \
     --input <docs/tasks/.../super-plan.json> \
-    [--set <path>=<json-or-string>] \
-    [--append <path>=<json-or-@file>] \
-    [--remove <path>] ...
+    [   --set <path>=<json-or-string>] \
+    [--append <path>=<json-or-@file>] ...
+
+Append-only update mode for tasks:
+  super-plan.sh append-task \
+    --input <docs/tasks/.../super-plan.json> \
+    [--task <json-or-@file>] \
+    [--tasks <json-array-or-@file>] \
+    [--validate-only <json-array-or-@file>]
+
+Notes:
+  - `append-task` appends task objects to `tasks` and can validate an entire
+    task array without writing anything when `--validate-only` is used.
+  - `--task` appends a single task object; `--tasks` appends each element of a
+    JSON array. They may be combined in one invocation.
+  - The `append-task` mode is the preferred way for Phase 4 to add tasks one
+    by one so that every task is validated independently.
 
 Notes:
   - If no subcommand is provided, `init` is assumed for backward compatibility.
@@ -80,7 +83,9 @@ TASK_PROFILES = {"general", "deep", "quick"}
 
 
 def fail(message: str):
-    raise ValueError(message)
+    error = {"error": True, "message": message, "exit_code": 1}
+    print(json.dumps(error), file=sys.stderr)
+    sys.exit(1)
 
 
 def expect_type(value, expected_type, path_label: str):
@@ -284,6 +289,23 @@ for index, task in enumerate(payload["tasks"]):
 PY
 }
 
+MODE="init"
+
+if [ "$#" -gt 0 ]; then
+  case "$1" in
+    init|update)
+      MODE="$1"
+      shift
+      ;;
+    --*)
+      MODE="init"
+      ;;
+    *)
+      error_json 1 "Unknown subcommand: $1"
+      ;;
+  esac
+fi
+
 if [ "$MODE" = "init" ]; then
   PLAN_ID=""
   FEATURE_NAME=""
@@ -360,30 +382,27 @@ if [ "$MODE" = "init" ]; then
   done
 
   if [ -z "$PLAN_ID" ] || [ -z "$FEATURE_NAME" ] || [ -z "$SPEC_PATH" ] || [ -z "$PLAN_PATH" ] || [ -z "$OUTPUT_PATH" ]; then
-    usage
+    error_json 1 "Missing required argument for init: --plan-id, --feature-name, --spec, --plan, --output"
   fi
 
   case "$WORKTREE_ENABLED" in
     true|false) ;;
     *)
-      echo "Invalid --worktree-enabled value: $WORKTREE_ENABLED" >&2
-      exit 1
+      error_json 1 "Invalid --worktree-enabled value: $WORKTREE_ENABLED"
       ;;
   esac
 
   case "$EXECUTION_MODE" in
     subagent-driven|sequential) ;;
     *)
-      echo "Invalid --execution-mode value: $EXECUTION_MODE" >&2
-      exit 1
+      error_json 1 "Invalid --execution-mode value: $EXECUTION_MODE"
       ;;
   esac
 
   case "$REVIEW_CADENCE" in
     per_task|per_batch|final_only) ;;
     *)
-      echo "Invalid --review-cadence value: $REVIEW_CADENCE" >&2
-      exit 1
+      error_json 1 "Invalid --review-cadence value: $REVIEW_CADENCE"
       ;;
   esac
 
@@ -499,7 +518,7 @@ if [ "$MODE" = "update" ]; then
   done
 
   if [ -z "$INPUT_PATH" ] || [ ! -s "$UPDATE_ARGS_FILE" ]; then
-    usage
+    error_json 1 "update requires --input and at least one --set/--append/--remove operation"
   fi
 
   TEMP_OUTPUT_PATH="$(mktemp)"
@@ -514,14 +533,21 @@ input_path = Path(sys.argv[1])
 ops_path = Path(sys.argv[2])
 output_path = Path(sys.argv[3])
 
-with input_path.open("r", encoding="utf-8") as fh:
-    data = json.load(fh)
+
+def emit_error(message: str, code: int = 1):
+    print(json.dumps({"error": True, "message": message, "exit_code": code}), file=sys.stderr)
+    sys.exit(code)
 
 
 def parse_value(raw: str):
     if raw.startswith("@"):
-        with open(raw[1:], "r", encoding="utf-8") as fh:
-            return json.load(fh)
+        try:
+            with open(raw[1:], "r", encoding="utf-8") as fh:
+                return json.load(fh)
+        except FileNotFoundError:
+            emit_error(f"File not found: {raw[1:]}")
+        except json.JSONDecodeError as exc:
+            emit_error(f"Invalid JSON in file {raw[1:]}: {exc}")
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
@@ -545,7 +571,7 @@ def parse_path(path: str):
             current = ""
             end = path.find("]", idx)
             if end == -1:
-                raise ValueError(f"Invalid path selector: {path}")
+                emit_error(f"Invalid path selector: {path}")
             selector = path[idx + 1 : end]
             tokens.append((field, selector))
             idx = end + 1
@@ -565,13 +591,13 @@ def select_child(container, field, selector):
     if selector is None:
         return container
     if not isinstance(container, list):
-        raise TypeError(f"Path selector requires a list at {field!r}")
+        emit_error(f"Path selector requires a list at {field!r}")
     if selector.isdigit():
         return container[int(selector)]
     for item in container:
         if isinstance(item, dict) and item.get("id") == selector:
             return item
-    raise KeyError(f"Could not find list item with id {selector!r} in {field!r}")
+    emit_error(f"Could not find list item with id {selector!r} in {field!r}")
 
 
 def get_parent(root, tokens):
@@ -588,7 +614,7 @@ def set_value(root, path, value, append=False):
         if append:
             target = parent[field]
             if not isinstance(target, list):
-                raise TypeError(f"Append target is not a list: {path}")
+                emit_error(f"Append target is not a list: {path}")
             target.append(value)
         else:
             parent[field] = value
@@ -599,7 +625,7 @@ def set_value(root, path, value, append=False):
         if append:
             nested = target[index]
             if not isinstance(nested, list):
-                raise TypeError(f"Append target is not a list: {path}")
+                emit_error(f"Append target is not a list: {path}")
             nested.append(value)
         else:
             target[index] = value
@@ -608,12 +634,12 @@ def set_value(root, path, value, append=False):
         if isinstance(item, dict) and item.get("id") == selector:
             if append:
                 if not isinstance(item, list):
-                    raise TypeError(f"Append target is not a list: {path}")
+                    emit_error(f"Append target is not a list: {path}")
                 item.append(value)
             else:
                 target[index] = value
             return
-    raise KeyError(f"Could not replace list item with id {selector!r}")
+    emit_error(f"Could not replace list item with id {selector!r}")
 
 
 def remove_value(root, path):
@@ -630,23 +656,38 @@ def remove_value(root, path):
         if isinstance(item, dict) and item.get("id") == selector:
             del target[index]
             return
-    raise KeyError(f"Could not remove list item with id {selector!r}")
+    emit_error(f"Could not remove list item with id {selector!r}")
 
+
+with input_path.open("r", encoding="utf-8") as fh:
+    try:
+        data = json.load(fh)
+    except json.JSONDecodeError as exc:
+        emit_error(f"Invalid JSON in input file {input_path}: {exc}")
 
 with ops_path.open("r", encoding="utf-8") as fh:
     for raw_line in fh:
         raw_line = raw_line.rstrip("\n")
         if not raw_line:
             continue
-        op, payload = raw_line.split("\t", 1)
+        try:
+            op, payload = raw_line.split("\t", 1)
+        except ValueError:
+            emit_error(f"Malformed operation line: {raw_line}")
         if op == "--remove":
-            remove_value(data, payload)
+            try:
+                remove_value(data, payload)
+            except (KeyError, TypeError) as exc:
+                emit_error(str(exc))
             continue
         if "=" not in payload:
-            raise ValueError(f"Expected <path>=<value> for {op}: {payload}")
+            emit_error(f"Expected <path>=<value> for {op}: {payload}")
         path, raw_value = payload.split("=", 1)
         value = parse_value(raw_value)
-        set_value(data, path, value, append=(op == "--append"))
+        try:
+            set_value(data, path, value, append=(op == "--append"))
+        except (KeyError, TypeError) as exc:
+            emit_error(str(exc))
 
 with output_path.open("w", encoding="utf-8") as fh:
     json.dump(data, fh, indent=2)

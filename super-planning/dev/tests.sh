@@ -128,6 +128,38 @@ test_update_rejects_invalid_task_profile_without_mutating_file() {
   assert_contains_file "task_profile must be one of" "$tmp/output.log"
 }
 
+test_errors_are_emitted_as_json() {
+  local tmp output
+  tmp=$(mktemp -d)
+
+  # Unknown subcommand
+  if "$SUPER_PLAN_SCRIPT" bogus >"$tmp/output.log" 2>&1; then
+    fail "expected unknown subcommand to fail"
+  fi
+  python3 -c "import json,sys; json.load(open('$tmp/output.log'))" || fail "unknown subcommand error is not valid JSON"
+  assert_contains_file '"error": true' "$tmp/output.log"
+  assert_contains_file '"Unknown subcommand: bogus"' "$tmp/output.log"
+
+  # Missing required init argument
+  if "$SUPER_PLAN_SCRIPT" init --plan-id 0001-sample >"$tmp/output.log" 2>&1; then
+    fail "expected missing required argument to fail"
+  fi
+  python3 -c "import json,sys; json.load(open('$tmp/output.log'))" || fail "missing argument error is not valid JSON"
+  assert_contains_file '"error": true' "$tmp/output.log"
+
+  # Invalid value for enum field
+  local registry
+  registry="$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-0001].status=banana >"$tmp/output.log" 2>&1; then
+    fail "expected invalid status update to fail"
+  fi
+  python3 -c "import json,sys; json.load(open('$tmp/output.log'))" || fail "validation error is not valid JSON"
+  assert_contains_file '"error": true' "$tmp/output.log"
+  assert_contains_file '"exit_code": 1' "$tmp/output.log"
+}
+
 test_render_progress_ledger_includes_timeline_and_requirements() {
   local tmp registry ledger
   tmp=$(mktemp -d)
@@ -149,6 +181,95 @@ test_render_progress_ledger_includes_timeline_and_requirements() {
   assert_contains_file "| 2026-07-04T14:10:00Z | Task-A-0001 | completed | 1 |" "$ledger"
   assert_contains_file "## Requirements Coverage" "$ledger"
   assert_contains_file "| REQ-001: Validar token JWT do header Authorization: Bearer <token> | ✅ completed | Task-B-0001 |" "$ledger"
+}
+
+test_incremental_decompose_appends_tasks_one_by_one() {
+  local tmp registry task_a task_b
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-sample/super-plan.json"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$registry" >/dev/null
+
+  assert_exists "$registry"
+  assert_contains_file '"tasks": []' "$registry"
+
+  task_a="$tmp/task-a.json"
+  cat > "$task_a" <<'EOF'
+{
+  "id": "Task-A-0001",
+  "title": "Task A",
+  "description": "First task",
+  "status": "pending",
+  "tryCount": 3,
+  "task_profile": "general",
+  "batch": "A",
+  "phase": "foundation",
+  "reportFile": "docs/tasks/0001-sample/Task-A-0001/report.md",
+  "reviewPackage": "docs/tasks/0001-sample/Task-A-0001/review-package.diff.md",
+  "progressLog": "docs/tasks/0001-sample/Task-A-0001/progress.log",
+  "logTaskScript": "docs/tasks/0001-sample/Task-A-0001/log-task.sh",
+  "dependencies": [],
+  "acceptanceCriteria": [],
+  "requirements": [],
+  "rules": [],
+  "steps": [],
+  "filesTouched": [],
+  "files": {
+    "created": [],
+    "modified": [],
+    "deleted": []
+  },
+  "notes": []
+}
+EOF
+
+  task_b="$tmp/task-b.json"
+  cat > "$task_b" <<'EOF'
+{
+  "id": "Task-B-0001",
+  "title": "Task B",
+  "description": "Second task",
+  "status": "pending",
+  "tryCount": 3,
+  "task_profile": "quick",
+  "batch": "B",
+  "phase": "core",
+  "reportFile": "docs/tasks/0001-sample/Task-B-0001/report.md",
+  "reviewPackage": "docs/tasks/0001-sample/Task-B-0001/review-package.diff.md",
+  "progressLog": "docs/tasks/0001-sample/Task-B-0001/progress.log",
+  "logTaskScript": "docs/tasks/0001-sample/Task-B-0001/log-task.sh",
+  "dependencies": ["Task-A-0001"],
+  "acceptanceCriteria": [],
+  "requirements": [],
+  "rules": [],
+  "steps": [],
+  "filesTouched": [],
+  "files": {
+    "created": [],
+    "modified": [],
+    "deleted": []
+  },
+  "notes": []
+}
+EOF
+
+  "$SUPER_PLAN_SCRIPT" update \
+    --input "$registry" \
+    --append tasks="@$task_a" >/dev/null
+
+  "$SUPER_PLAN_SCRIPT" update \
+    --input "$registry" \
+    --append tasks="@$task_b" >/dev/null
+
+  assert_contains_file '"id": "Task-A-0001"' "$registry"
+  assert_contains_file '"id": "Task-B-0001"' "$registry"
+  assert_contains_file '"Task-A-0001"' "$tmp/docs/tasks/0001-sample/progress-ledger.md"
+  assert_contains_file '"Task-B-0001"' "$tmp/docs/tasks/0001-sample/progress-ledger.md"
 }
 
 test_materialized_logger_wrapper_writes_jsonl_events() {

@@ -31,20 +31,29 @@ Example for plan `docs/plans/0003-auth-middleware.md`:
 docs/tasks/0003-auth-middleware/super-plan.json
 ```
 
-The generator script materializes the file from the matching schema file in the active helper path.
-
 `super-plan.json` is the orchestrator-owned structured source of truth. It combines:
 
 - plan governance and execution settings that used to live in `plan.json`
 - requirements coverage and plan metadata
 - the executable task registry that used to live in `tasks.json`
 
-Run the generator first.
+### Build the registry incrementally via the helper script
+
+You must construct `super-plan.json` through **multiple explicit invocations** of the active helper path. Do not create the whole file in a single call and do not edit `super-plan.json` by hand.
+
+1. **Create the header / plan skeleton** with `super-plan.sh init`.
+2. **Append each task one by one** with `super-plan.sh update --append tasks=<task-json-or-@file>`.
+3. **Patch top-level fields** (goal, architectureSummary, techStack, constraints, fileStructure, requirementsChecklist, etc.) using `super-plan.sh update --set <path>=<json-or-string>`.
+4. **Patch agent profiles and review cadence** using `super-plan.sh update --set ...` after user confirmation.
+
+This incremental approach guarantees that every mutation goes through the helper, which validates the result and regenerates `progress-ledger.md` after each successful write.
+
+### Step 1: create the skeleton
 
 When the skill is already inside the target repository:
 
 ```bash
-sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh \
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh init \
   --plan-id 0003-auth-middleware \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
@@ -60,12 +69,100 @@ cp /absolute/path/to/skills/super-planning/scripts/super-plan.sh /absolute/path/
 cp /absolute/path/to/skills/super-planning/scripts/render-progress-ledger.sh /absolute/path/to/workspace/.super-planning/render-progress-ledger.sh
 cp /absolute/path/to/skills/super-planning/interfaces/super-plan.schema.json /absolute/path/to/workspace/.super-planning/super-plan.schema.json
 
-sh /absolute/path/to/workspace/.super-planning/super-plan.sh \
+sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
   --plan-id 0003-auth-middleware \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
   --output docs/tasks/0003-auth-middleware/super-plan.json
+```
+
+`init` produces a valid but empty registry with `tasks: []`, `requirementsChecklist: []`, placeholder agent profiles, and a generated `progress-ledger.md`.
+
+### Step 2: add tasks one by one
+
+For every task, build a JSON object matching the schema and append it with:
+
+```bash
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --append tasks='{"id":"Task-A-0003","title":"...",...}'
+```
+
+Use an external JSON file for multi-line payloads when the shell becomes unwieldy:
+
+```bash
+cat > /tmp/task-a.json <<'EOF'
+{
+  "id": "Task-A-0003",
+  "title": "Implementar middleware de autenticação",
+  "description": "...",
+  "status": "pending",
+  "tryCount": 3,
+  "task_profile": "general",
+  "batch": "A",
+  "phase": "foundation",
+  "reportFile": "docs/tasks/0003-auth-middleware/Task-A-0003/report.md",
+  "reviewPackage": "docs/tasks/0003-auth-middleware/Task-A-0003/review-package.diff.md",
+  "progressLog": "docs/tasks/0003-auth-middleware/Task-A-0003/progress.log",
+  "logTaskScript": "docs/tasks/0003-auth-middleware/Task-A-0003/log-task.sh",
+  "dependencies": [],
+  "acceptanceCriteria": [],
+  "requirements": [],
+  "rules": [],
+  "steps": [],
+  "filesTouched": [],
+  "files": {
+    "created": [],
+    "modified": [],
+    "deleted": []
+  },
+  "notes": []
+}
+EOF
+
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --append tasks=@/tmp/task-a.json
+```
+
+Minimum number of script invocations in this phase:
+
+- **1 call to `init`** for the plan skeleton.
+- **At least 1 call to `update --append tasks=...` per task.** Prefer exactly one call per task so that each task is explicitly and independently validated.
+
+### Step 3: fill top-level plan fields
+
+After all tasks are appended, set the remaining plan-level fields using `--set`:
+
+```bash
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --set goal='Validar tokens JWT em todas as rotas protegidas.' \
+  --set architectureSummary='Middleware em camadas separando parsing, validação e refresh de token.' \
+  --set techStack='["Node.js","Express","jsonwebtoken"]' \
+  --set globalConstraints='["Máximo 1 query por request","Sem estado de sessão no servidor"]' \
+  --set rules='["Nunca iniciar implementação na main sem permissão","Nunca redespachar tarefas completadas"]' \
+  --set fileStructure='[{"path":"src/auth/middleware.ts","ownerTask":"Task-A-0003","notes":"Entry point do middleware"}]'
+```
+
+For large arrays or objects, prefer writing the JSON to a file and using `@file` syntax:
+
+```bash
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --set requirementsChecklist=@/tmp/requirements.json
+```
+
+### Step 4: set agents and review cadence after user confirmation
+
+Run profile discovery and ask the user for the cadence first (see below). Then persist the choices:
+
+```bash
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --set reviewCadence=per_task \
+  --set agents='{"general":{"model":"gpt-5","agent":"general"},"deep":{"model":"claude-opus-4","agent":"deep"},"quick":{"model":"gpt-5-mini","agent":"quick"}}'
 ```
 
 Then make every later change through that same active helper path. Do not edit `super-plan.json` by hand.
