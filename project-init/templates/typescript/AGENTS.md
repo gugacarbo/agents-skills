@@ -1,0 +1,40 @@
+# TypeScript Project
+
+This is a TypeScript project. The exact runtime (Node, Deno, Bun) is chosen during project initialization.
+
+## Conventions
+
+- **Package manager**: pnpm (mandatory)
+- **Module system**: ESM (`.ts` files, `import`/`export` syntax)
+- **Testing**: Vitest
+- **Linting/formatting**: Biome (mandatory)
+- **Type checking**: `tsc --noEmit`
+- **Dead code removal**: Knip
+- **Git hooks**: Husky (pre-commit: lint + typecheck; pre-push: test)
+
+## Commands (once initialized)
+
+```sh
+pnpm dev          # development server/watch mode
+pnpm build        # production build
+pnpm test         # vitest run
+pnpm lint         # biome check
+pnpm format       # biome check --write
+pnpm typecheck    # tsc --noEmit
+pnpm knip         # dead code detection
+pnpm prepare      # husky install (runs automatically on pnpm install)
+```
+
+## Stack
+
+| Concern          | Tool     |
+| ---------------- | -------- |
+| Runtime          | Node 22+ / Bun / Deno |
+| Language         | TypeScript 5.x (strict mode) |
+| Package manager  | pnpm     |
+| Testing          | Vitest   |
+| Linting          | Biome    |
+| Formatting       | Biome    |
+| Dead code        | Knip     |
+| Git hooks        | Husky    |
+| CI               | GitHub Actions |
