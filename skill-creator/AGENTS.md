@@ -15,7 +15,7 @@ skill-creator/
 ├── agents/                  # analyzer/comparator/grader prompts
 ├── references/schemas.md    # eval schema reference
 ├── scripts/                 # Python eval, benchmark, packaging, validation helpers
-├── eval-viewer/             # report generator and viewer HTML
+├── eval-viewer/             # prompt-approval + result-review viewer HTML and generators
 └── assets/                  # bundled review UI asset
 ```
 
@@ -27,6 +27,7 @@ skill-creator/
 | Parse skill metadata  | `scripts/utils.py`                                             | `parse_skill_md()` handles YAML frontmatter.                                          |
 | Trigger evals         | `scripts/run_eval.py`                                          | Spawns `claude -p`, creates temporary `.claude/commands` files, removes `CLAUDECODE`. |
 | Benchmark aggregation | `scripts/aggregate_benchmark.py`                               | Summarizes repeated eval runs.                                                        |
+| Prompt approval UI    | `eval-viewer/generate_prompt_review.py`                        | Lets the user approve or edit draft eval prompts before execution.                    |
 | Report generation     | `scripts/generate_report.py`, `eval-viewer/generate_review.py` | Produces human-reviewable output.                                                     |
 | Eval schema           | `references/schemas.md`                                        | Read before changing eval JSON shape.                                                 |
 
@@ -51,6 +52,7 @@ skill-creator/
 
 ```sh
 rtk python3 skill-creator/scripts/quick_validate.py <skill-path>
+rtk python3 skill-creator/eval-viewer/generate_prompt_review.py --help
 rtk python3 skill-creator/scripts/run_eval.py --help
 rtk python3 skill-creator/eval-viewer/generate_review.py --help
 ```

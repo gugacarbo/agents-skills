@@ -48,6 +48,15 @@ It's OK to briefly explain terms if you're in doubt, and feel free to clarify te
 
 Start by understanding the user's intent. The current conversation might already contain a workflow the user wants to capture (e.g., they say "turn this into a skill"). If so, extract answers from the conversation history first — the tools used, the sequence of steps, corrections the user made, input/output formats observed. The user may need to fill the gaps, and should confirm before proceeding to the next step.
 
+If the user is starting from a loose idea for a brand-new skill, do a quick availability check before the interview:
+
+1. First look for `/super-planning brainstorming`.
+2. If that is not available, look for `/brainstorming`.
+3. If either one is available, suggest that the user use it first to sharpen the problem, constraints, and intended workflow before you draft the new skill.
+4. If neither is available, continue with the normal capture-intent interview inline.
+
+Frame this as a helpful suggestion, not a hard blocker. The goal is to improve the context quality for the new skill, not to force a detour when the user already has enough clarity.
+
 1. What should this skill enable Claude to do?
 2. When should this skill trigger? (what user phrases/contexts)
 3. What's the expected output format?
@@ -152,9 +161,19 @@ Try to explain to the model why things are important in lieu of heavy-handed mus
 
 ### Test Cases
 
-After writing the skill draft, come up with 2-3 realistic test prompts — the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
+After writing the skill draft, come up with 2-3 realistic test prompts — the kind of thing a real user would actually say.
 
-Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts. You'll draft assertions in the next step while the runs are in progress.
+Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts. Then stop and get explicit user approval before running anything.
+
+Use the prompt-approval viewer so the user can review, edit, add, or delete prompts in a dedicated window before execution:
+
+```bash
+python <skill-creator-path>/eval-viewer/generate_prompt_review.py <skill-path>/evals/evals.json
+```
+
+If you're in a headless environment, use `--static <output_path>` and have the user download the updated `evals.json`.
+
+Do not start the eval runs until the user has approved the prompt set. The point of this pause is to catch bad or unrepresentative prompts before they contaminate the iteration loop.
 
 ```json
 {
@@ -174,7 +193,7 @@ See `references/schemas.md` for the full schema (including the `assertions` fiel
 
 ## Running and evaluating test cases
 
-This section is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.
+This section starts only after the user approves the prompt set. Once it starts, it is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.
 
 Put results in `<skill-name>-workspace/` as a sibling to the skill directory. Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.) and within that, each test case gets a directory (`eval-0/`, `eval-1/`, etc.). Don't create all of this upfront — just create directories as you go.
 
@@ -452,6 +471,8 @@ In Claude.ai, the core workflow is the same (draft → test → review → impro
 
 **Reviewing results**: If you can't open a browser (e.g., Claude.ai's VM has no display, or you're on a remote server), skip the browser reviewer entirely. Instead, present results directly in the conversation. For each test case, show the prompt and the output. If the output is a file the user needs to see (like a .docx or .xlsx), save it to the filesystem and tell them where it is so they can download and inspect it. Ask for feedback inline: "How does this look? Anything you'd change?"
 
+**Approving prompts before runs**: If you can open a browser, launch the prompt-approval viewer after writing `evals/evals.json` and wait for the user to approve the draft prompts before you execute anything. If you can't open a browser, show the prompts inline in the conversation and get explicit approval there.
+
 **Benchmarking**: Skip the quantitative benchmarking — it relies on baseline comparisons which aren't meaningful without subagents. Focus on qualitative feedback from the user.
 
 **The iteration loop**: Same as before — improve the skill, rerun the test cases, ask for feedback — just without the browser reviewer in the middle. You can still organize results into iteration directories on the filesystem if you have one.
@@ -476,6 +497,7 @@ If you're in Cowork, the main things to know are:
 
 - You have subagents, so the main workflow (spawn test cases in parallel, run baselines, grade, etc.) all works. (However, if you run into severe problems with timeouts, it's OK to run the test prompts in series rather than parallel.)
 - You don't have a browser or display, so when generating the eval viewer, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Then proffer a link that the user can click to open the HTML in their browser.
+- Use that same `--static` pattern for the prompt-approval viewer after drafting `evals/evals.json`, and wait for the user to approve the prompts before launching eval runs.
 - For whatever reason, the Cowork setup seems to disincline Claude from generating the eval viewer after running the tests, so just to reiterate: whether you're in Cowork or in Claude Code, after running tests, you should always generate the eval viewer for the human to look at examples before revising the skill yourself and trying to make corrections, using `generate_review.py` (not writing your own boutique html code). Sorry in advance but I'm gonna go all caps here: GENERATE THE EVAL VIEWER _BEFORE_ evaluating inputs yourself. You want to get them in front of the human ASAP!
 - Feedback works differently: since there's no running server, the viewer's "Submit All Reviews" button will download `feedback.json` as a file. You can then read it from there (you may have to request access first).
 - Packaging works — `package_skill.py` just needs Python and a filesystem.
@@ -502,13 +524,13 @@ Repeating one more time the core loop here for emphasis:
 
 - Figure out what the skill is about
 - Draft or edit the skill
-- Run claude-with-access-to-the-skill on test prompts
+- Draft eval prompts, pause for prompt approval, then run claude-with-access-to-the-skill on them
 - With the user, evaluate the outputs:
   - Create benchmark.json and run `eval-viewer/generate_review.py` to help the user review them
   - Run quantitative evals
 - Repeat until you and the user are satisfied
 - Package the final skill and return it to the user.
 
-Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
+Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON, run the prompt-approval viewer, wait for approval, then run `eval-viewer/generate_review.py` so the human can review test cases" in your TodoList to make sure it happens.
 
 Good luck!
