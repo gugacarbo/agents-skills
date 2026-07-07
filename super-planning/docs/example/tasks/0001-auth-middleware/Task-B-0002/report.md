@@ -11,10 +11,10 @@ Implementado o middleware `requireRole` como higher-order function que verifica 
 
 ## Files Changed
 
-| File | Action |
-|------|--------|
-| `src/middleware/auth.ts` | modified (adicionado `requireRole`) |
-| `src/middleware/auth.test.ts` | modified (adicionados 3 testes) |
+| File                          | Action                              |
+| ----------------------------- | ----------------------------------- |
+| `src/middleware/auth.ts`      | modified (adicionado `requireRole`) |
+| `src/middleware/auth.test.ts` | modified (adicionados 3 testes)     |
 
 ## Implementation Notes
 

@@ -20,12 +20,12 @@ Use the least powerful model that can handle each role:
 
 Before dispatching, check what the current platform actually supports:
 
-| Capability                         | Preferred behavior                              | Fallback if unavailable                                      |
-| ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
-| Explicit model selection           | Set the model for each role                     | Note the limitation in `super-plan.json` via the active helper path and use the session model  |
-| Parallel subagent dispatch         | Dispatch 2–4 isolated workers in one turn       | Run the same wave sequentially                               |
-| Worktree isolation                 | Use one worktree/branch per parallel subagent   | Do not run parallel workers that can touch overlapping files |
-| Subagent file handoff/report write | Require report/review files in the task folder  | Execute inline but still write the same files yourself       |
+| Capability                         | Preferred behavior                             | Fallback if unavailable                                                                       |
+| ---------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Explicit model selection           | Set the model for each role                    | Note the limitation in `super-plan.json` via the active helper path and use the session model |
+| Parallel subagent dispatch         | Dispatch 2–4 isolated workers in one turn      | Run the same wave sequentially                                                                |
+| Worktree isolation                 | Use one worktree/branch per parallel subagent  | Do not run parallel workers that can touch overlapping files                                  |
+| Subagent file handoff/report write | Require report/review files in the task folder | Execute inline but still write the same files yourself                                        |
 
 If any preferred capability is missing, adapt the execution mode instead of pretending the capability exists.
 

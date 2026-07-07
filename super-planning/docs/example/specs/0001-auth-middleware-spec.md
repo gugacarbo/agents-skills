@@ -33,7 +33,7 @@ Rotas protegidas da API recebem `req.user` populado automaticamente após valida
 ```ts
 interface AuthUser {
   userId: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
 }
 ```
 
@@ -60,17 +60,17 @@ interface AuthUser {
 
 ## Edge cases
 
-| # | WHEN ⟨trigger⟩ | the system MUST ⟨response⟩ |
-|---|---------------|---------------------------|
-| 1 | Header `Authorization` está ausente | Retornar 401 `{ error: "Missing authorization header" }` |
-| 2 | Header `Authorization` não começa com `Bearer ` | Retornar 401 `{ error: "Invalid authorization format" }` |
-| 3 | Token está expirado (`TokenExpiredError`) | Retornar 401 `{ error: "Invalid or expired token" }` |
-| 4 | Token tem assinatura inválida | Retornar 401 `{ error: "Invalid or expired token" }` |
-| 5 | Payload não contém `sub` (userId) | Retornar 401 `{ error: "Invalid token payload" }` |
-| 6 | Payload não contém `role` | Retornar 401 `{ error: "Invalid token payload" }` |
-| 7 | `requireRole` chamado sem `requireAuth` antes | `req.user` é `undefined` → 401 |
-| 8 | `role` no token não está na lista permitida | Retornar 403 `{ error: "Insufficient permissions" }` |
-| 9 | Token usa algoritmo diferente de HS256 | Rejeitar — `jsonwebtoken.verify` com `algorithms: ['HS256']` |
+| #   | WHEN ⟨trigger⟩                                  | the system MUST ⟨response⟩                                   |
+| --- | ----------------------------------------------- | ------------------------------------------------------------ |
+| 1   | Header `Authorization` está ausente             | Retornar 401 `{ error: "Missing authorization header" }`     |
+| 2   | Header `Authorization` não começa com `Bearer ` | Retornar 401 `{ error: "Invalid authorization format" }`     |
+| 3   | Token está expirado (`TokenExpiredError`)       | Retornar 401 `{ error: "Invalid or expired token" }`         |
+| 4   | Token tem assinatura inválida                   | Retornar 401 `{ error: "Invalid or expired token" }`         |
+| 5   | Payload não contém `sub` (userId)               | Retornar 401 `{ error: "Invalid token payload" }`            |
+| 6   | Payload não contém `role`                       | Retornar 401 `{ error: "Invalid token payload" }`            |
+| 7   | `requireRole` chamado sem `requireAuth` antes   | `req.user` é `undefined` → 401                               |
+| 8   | `role` no token não está na lista permitida     | Retornar 403 `{ error: "Insufficient permissions" }`         |
+| 9   | Token usa algoritmo diferente de HS256          | Rejeitar — `jsonwebtoken.verify` com `algorithms: ['HS256']` |
 
 ## Open questions
 

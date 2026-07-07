@@ -4,28 +4,28 @@ Crie planos de implementação decompostos em tarefas e execute-os via subagente
 
 ## Modos de Invocação
 
-| Comando | O que faz |
-| ------- | --------- |
-| `/super-planning` | Executa o fluxo completo padrão (todas as fases). |
-| `/super-planning brainstorm` | Inicia na Fase 1 (Brainstorm) e continua. |
-| `/super-planning spec` | Inicia na Fase 2 (Spec) e continua. |
-| `/super-planning plan` | Inicia na Fase 3 (Plan) e continua. |
-| `/super-planning decompose` | Inicia na Fase 4 (Decompose) e continua. |
-| `/super-planning dispatch` | Inicia na Fase 5 (Dispatch) e continua. |
-| `/super-planning review` | Inicia na Fase 6 (Review) e continua. |
-| `/super-planning integrate` | Inicia na Fase 7 (Integrate). |
+| Comando                      | O que faz                                         |
+| ---------------------------- | ------------------------------------------------- |
+| `/super-planning`            | Executa o fluxo completo padrão (todas as fases). |
+| `/super-planning brainstorm` | Inicia na Fase 1 (Brainstorm) e continua.         |
+| `/super-planning spec`       | Inicia na Fase 2 (Spec) e continua.               |
+| `/super-planning plan`       | Inicia na Fase 3 (Plan) e continua.               |
+| `/super-planning decompose`  | Inicia na Fase 4 (Decompose) e continua.          |
+| `/super-planning dispatch`   | Inicia na Fase 5 (Dispatch) e continua.           |
+| `/super-planning review`     | Inicia na Fase 6 (Review) e continua.             |
+| `/super-planning integrate`  | Inicia na Fase 7 (Integrate).                     |
 
 ## Fases
 
-| Fase | O que produz | Ponto de verificação |
-| ---- | ------------ | -------------------- |
-| 1. Brainstorm | Requisitos, restrições, decisões de design | Fluxo completo de brainstorm integrado |
-| 2. Spec | `docs/specs/NNNN-<nome>-spec.md` | Aprovação do usuário |
-| 3. Plan | `docs/plans/NNNN-<nome>.md` | Checklist de auto-revisão |
-| 4. Decompose | `docs/tasks/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers e criação do plano; ledger gerado com Summary, Tasks, Timeline e Requirements Coverage |
-| 5. Dispatch | Trabalho dos subagentes | Checks pré-voo |
-| 6. Review | Revisão em dois estágios | Issues críticos/importantes devem ser corrigidos |
-| 7. Integrate | Revisão final, preparação para merge | Suite de testes completa passa |
+| Fase          | O que produz                                                    | Ponto de verificação                                                                                         |
+| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 1. Brainstorm | Requisitos, restrições, decisões de design                      | Fluxo completo de brainstorm integrado                                                                       |
+| 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                                | Aprovação do usuário                                                                                         |
+| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                     | Checklist de auto-revisão                                                                                    |
+| 4. Decompose  | `docs/tasks/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers e criação do plano; ledger gerado com Summary, Tasks, Timeline e Requirements Coverage |
+| 5. Dispatch   | Trabalho dos subagentes                                         | Checks pré-voo                                                                                               |
+| 6. Review     | Revisão em dois estágios                                        | Issues críticos/importantes devem ser corrigidos                                                             |
+| 7. Integrate  | Revisão final, preparação para merge                            | Suite de testes completa passa                                                                               |
 
 ## Documentação Detalhada
 

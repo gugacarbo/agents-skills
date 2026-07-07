@@ -59,10 +59,10 @@ Implementar um middleware de autenticação JWT para a API Express existente. O 
 
 ## Alternatives Considered
 
-| Option | Why it was not chosen |
-| ------ | --------------------- |
-| Passport.js + passport-jwt | Muitas dependências para o escopo atual; overkill |
-| `express-jwt` | Deprecated; comunidade migrou para alternativas |
+| Option                                        | Why it was not chosen                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------------- |
+| Passport.js + passport-jwt                    | Muitas dependências para o escopo atual; overkill                                 |
+| `express-jwt`                                 | Deprecated; comunidade migrou para alternativas                                   |
 | Middleware como serviço externo (API Gateway) | Adiciona latência e ponto único de falha; não justifica para o tamanho do projeto |
 
 ## Open Questions

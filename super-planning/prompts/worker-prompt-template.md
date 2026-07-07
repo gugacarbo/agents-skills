@@ -34,12 +34,12 @@ If the orchestrator has already materialized Phase 6 task artifacts, use the abs
 
 ### Log on these events
 
-| Event flag  | When                                        |
-| ----------- | ------------------------------------------- |
-| `started`   | Right before you begin work                 |
-| `ready_for_review` | After your last command and self-review |
-| `failed`    | After the last retry of a recoverable error |
-| `blocked`   | When you cannot proceed and need help       |
+| Event flag         | When                                        |
+| ------------------ | ------------------------------------------- |
+| `started`          | Right before you begin work                 |
+| `ready_for_review` | After your last command and self-review     |
+| `failed`           | After the last retry of a recoverable error |
+| `blocked`          | When you cannot proceed and need help       |
 
 ### Usage
 

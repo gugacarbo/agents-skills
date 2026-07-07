@@ -32,12 +32,12 @@ Assign each task both a `batch` and a `phase` before writing steps:
 
 ### `phase` values
 
-| Phase         | Contents                                                      |
-| ------------- | ------------------------------------------------------------- |
-| `foundation`  | Infrastructure, types, shared utilities, config, schemas      |
-| `core`        | Primary business logic                                        |
-| `surface`     | UI, API endpoints, integration tests, wiring, CLI entrypoints |
-| `final`       | Final review, cleanup, documentation, merge preparation       |
+| Phase        | Contents                                                      |
+| ------------ | ------------------------------------------------------------- |
+| `foundation` | Infrastructure, types, shared utilities, config, schemas      |
+| `core`       | Primary business logic                                        |
+| `surface`    | UI, API endpoints, integration tests, wiring, CLI entrypoints |
+| `final`      | Final review, cleanup, documentation, merge preparation       |
 
 Rules:
 

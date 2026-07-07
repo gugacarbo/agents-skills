@@ -18,17 +18,17 @@ Create implementation plans decomposed into tasks and execute them via subagents
 
 Treat this file as an explicit, expandable router for entry phases.
 
-| Invocation | Entry Phase | Behavior | Load This First |
-| ---------- | ----------- | -------- | --------------- |
-| `/super-planning` | `default` | Run the standard end-to-end workflow. Start at Phase 1 unless there is already an approved spec in the repo. | This file, then follow the phase router below |
-| `/super-planning brainstorm` | `brainstorm` | Start at Phase 1 and continue forward from there. | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
-| `/super-planning spec` | `spec` | Start at Phase 2 and continue forward from there. Use only when brainstorm outputs already exist or the request is already well-defined enough to write the spec. | [`phases/02-spec.md`](phases/02-spec.md) |
-| `/super-planning plan` | `plan` | Start at Phase 3 and continue forward from there. Use only when there is already an approved spec. | [`phases/03-plan.md`](phases/03-plan.md) |
-| `/super-planning decompose` | `decompose` | Start at Phase 4 and continue forward from there. Use only when the implementation plan already exists. | [`phases/04-decompose.md`](phases/04-decompose.md) |
-| `/super-planning dispatch` | `dispatch` | Start at Phase 5 and continue forward from there. Use only when tasks are already decomposed and ready to execute. | [`phases/05-dispatch.md`](phases/05-dispatch.md) |
-| `/super-planning review` | `review` | Start at Phase 6 and continue forward from there. Use only when implementation outputs already exist and are ready for review gates. | [`phases/06-review.md`](phases/06-review.md) |
-| `/super-planning integrate` | `integrate` | Start at Phase 7 and continue forward from there. Use only when reviewed outputs are ready to merge and finish. | [`phases/07-integrate.md`](phases/07-integrate.md) |
-| `/super-planning stats` | `stats` | Print a progress summary across all task registries. Aliases: `progress`, `task-stats`, `task-progress`. | This file, then run [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh) |
+| Invocation                   | Entry Phase  | Behavior                                                                                                                                                          | Load This First                                                                        |
+| ---------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `/super-planning`            | `default`    | Run the standard end-to-end workflow. Start at Phase 1 unless there is already an approved spec in the repo.                                                      | This file, then follow the phase router below                                          |
+| `/super-planning brainstorm` | `brainstorm` | Start at Phase 1 and continue forward from there.                                                                                                                 | [`phases/01-brainstorm.md`](phases/01-brainstorm.md)                                   |
+| `/super-planning spec`       | `spec`       | Start at Phase 2 and continue forward from there. Use only when brainstorm outputs already exist or the request is already well-defined enough to write the spec. | [`phases/02-spec.md`](phases/02-spec.md)                                               |
+| `/super-planning plan`       | `plan`       | Start at Phase 3 and continue forward from there. Use only when there is already an approved spec.                                                                | [`phases/03-plan.md`](phases/03-plan.md)                                               |
+| `/super-planning decompose`  | `decompose`  | Start at Phase 4 and continue forward from there. Use only when the implementation plan already exists.                                                           | [`phases/04-decompose.md`](phases/04-decompose.md)                                     |
+| `/super-planning dispatch`   | `dispatch`   | Start at Phase 5 and continue forward from there. Use only when tasks are already decomposed and ready to execute.                                                | [`phases/05-dispatch.md`](phases/05-dispatch.md)                                       |
+| `/super-planning review`     | `review`     | Start at Phase 6 and continue forward from there. Use only when implementation outputs already exist and are ready for review gates.                              | [`phases/06-review.md`](phases/06-review.md)                                           |
+| `/super-planning integrate`  | `integrate`  | Start at Phase 7 and continue forward from there. Use only when reviewed outputs are ready to merge and finish.                                                   | [`phases/07-integrate.md`](phases/07-integrate.md)                                     |
+| `/super-planning stats`      | `stats`      | Print a progress summary across all task registries. Aliases: `progress`, `task-stats`, `task-progress`.                                                          | This file, then run [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh) |
 
 **Routing rule:** If no subcommand is provided, always choose `default`.
 
@@ -48,15 +48,15 @@ Treat this file as an explicit, expandable router for entry phases.
 
 ## Phase Router
 
-| Phase          | Purpose                                                | Load This                                            |
-| -------------- | ------------------------------------------------------ | ---------------------------------------------------- |
-| 1 — BRAINSTORM | Refine the idea into requirements and design decisions | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
-| 2 — SPEC       | Write the feature spec and get user approval           | [`phases/02-spec.md`](phases/02-spec.md)             |
-| 3 — PLAN       | Write the implementation plan                          | [`phases/03-plan.md`](phases/03-plan.md)             |
+| Phase          | Purpose                                                          | Load This                                            |
+| -------------- | ---------------------------------------------------------------- | ---------------------------------------------------- |
+| 1 — BRAINSTORM | Refine the idea into requirements and design decisions           | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
+| 2 — SPEC       | Write the feature spec and get user approval                     | [`phases/02-spec.md`](phases/02-spec.md)             |
+| 3 — PLAN       | Write the implementation plan                                    | [`phases/03-plan.md`](phases/03-plan.md)             |
 | 4 — DECOMPOSE  | Fill `super-plan.json` with atomic tasks and task-state metadata | [`phases/04-decompose.md`](phases/04-decompose.md)   |
-| 5 — DISPATCH   | Send subagents (sequential or parallel)                | [`phases/05-dispatch.md`](phases/05-dispatch.md)     |
-| 6 — REVIEW     | Spec compliance + code quality gates                   | [`phases/06-review.md`](phases/06-review.md)         |
-| 7 — INTEGRATE  | Merge results, final review, finish                    | [`phases/07-integrate.md`](phases/07-integrate.md)   |
+| 5 — DISPATCH   | Send subagents (sequential or parallel)                          | [`phases/05-dispatch.md`](phases/05-dispatch.md)     |
+| 6 — REVIEW     | Spec compliance + code quality gates                             | [`phases/06-review.md`](phases/06-review.md)         |
+| 7 — INTEGRATE  | Merge results, final review, finish                              | [`phases/07-integrate.md`](phases/07-integrate.md)   |
 
 **Default rule:** Always run Phase 1 first when the user starts from an idea, request, or loose requirements. Skip it only when there is already an approved spec in the repo or when the user explicitly invoked a later phase.
 
@@ -86,27 +86,27 @@ Have a feature idea or requirements for a multi-step task?
 
 ## Outputs & Conventions
 
-| Artifact        | Path                                                | Template                                                                         |
-| --------------- | --------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Brainstorm decisions (optional) | `docs/specs/{feature_number}_{feature_name}_decisions.md` | [`templates/decisions-template.md`](templates/decisions-template.md) |
-| Spec            | `docs/specs/NNNN-<feature-name>-spec.md`            | [`templates/spec-template.md`](templates/spec-template.md)                       |
-| Plan            | `docs/plans/NNNN-<feature-name>.md`                 | [`templates/plan-template.md`](templates/plan-template.md)                       |
-| Super plan      | `docs/tasks/NNNN-<feature-name>/super-plan.json`    | Created and later mutated only via the active helper path: the in-repo skill scripts when available, otherwise the repo-local `.super-planning/super-plan.sh`, backed by the matching schema file |
-| Task directory  | `docs/tasks/NNNN-<feature-name>/<task-id>/`         | Contains task report, review package, local logger, and task progress log        |
-| Task progress log | `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
-| Progress ledger | `docs/tasks/NNNN-<feature-name>/progress-ledger.md` | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write |
-| Repo helpers     | `.super-planning/`                                  | Only created when the target repo does not already contain this `super-planning` skill; holds copied helper scripts and schema |
+| Artifact                        | Path                                                      | Template                                                                                                                                                                                          |
+| ------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Brainstorm decisions (optional) | `docs/specs/{feature_number}_{feature_name}_decisions.md` | [`templates/decisions-template.md`](templates/decisions-template.md)                                                                                                                              |
+| Spec                            | `docs/specs/NNNN-<feature-name>-spec.md`                  | [`templates/spec-template.md`](templates/spec-template.md)                                                                                                                                        |
+| Plan                            | `docs/plans/NNNN-<feature-name>.md`                       | [`templates/plan-template.md`](templates/plan-template.md)                                                                                                                                        |
+| Super plan                      | `docs/tasks/NNNN-<feature-name>/super-plan.json`          | Created and later mutated only via the active helper path: the in-repo skill scripts when available, otherwise the repo-local `.super-planning/super-plan.sh`, backed by the matching schema file |
+| Task directory                  | `docs/tasks/NNNN-<feature-name>/<task-id>/`               | Contains task report, review package, local logger, and task progress log                                                                                                                         |
+| Task progress log               | `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log`   | [`templates/progress-template.txt`](templates/progress-template.txt)                                                                                                                              |
+| Progress ledger                 | `docs/tasks/NNNN-<feature-name>/progress-ledger.md`       | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write                                                                                             |
+| Repo helpers                    | `.super-planning/`                                        | Only created when the target repo does not already contain this `super-planning` skill; holds copied helper scripts and schema                                                                    |
 
 ## Prompt Library
 
-| Prompt                                                                   | Use When                            |
-| ------------------------------------------------------------------------ | ----------------------------------- |
-| [`prompts/pre-write-approval.md`](prompts/pre-write-approval.md)         | Before writing the spec             |
-| [`prompts/post-write-approval.md`](prompts/post-write-approval.md)       | After writing the spec              |
-| [`prompts/spec-document-reviewer-prompt.md`](prompts/spec-document-reviewer-prompt.md) | Reviewing spec readiness |
-| [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building a subagent dispatch prompt |
-| [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Dispatching an implementer subagent |
-| [`prompts/reviewer-guidance.md`](prompts/reviewer-guidance.md)           | Dispatching a reviewer subagent     |
+| Prompt                                                                                 | Use When                            |
+| -------------------------------------------------------------------------------------- | ----------------------------------- |
+| [`prompts/pre-write-approval.md`](prompts/pre-write-approval.md)                       | Before writing the spec             |
+| [`prompts/post-write-approval.md`](prompts/post-write-approval.md)                     | After writing the spec              |
+| [`prompts/spec-document-reviewer-prompt.md`](prompts/spec-document-reviewer-prompt.md) | Reviewing spec readiness            |
+| [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md)               | Building a subagent dispatch prompt |
+| [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)                   | Dispatching an implementer subagent |
+| [`prompts/reviewer-guidance.md`](prompts/reviewer-guidance.md)                         | Dispatching a reviewer subagent     |
 
 ## See Also
 

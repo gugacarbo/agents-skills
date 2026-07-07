@@ -11,8 +11,8 @@ Criado `src/types/auth.ts` com as interfaces `JwtPayload`, `AuthUser`, `AuthOpti
 
 ## Files Changed
 
-| File | Action |
-|------|--------|
+| File                | Action  |
+| ------------------- | ------- |
 | `src/types/auth.ts` | created |
 
 ## Implementation Notes

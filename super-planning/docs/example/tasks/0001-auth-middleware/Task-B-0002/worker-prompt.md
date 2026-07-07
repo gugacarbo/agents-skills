@@ -5,6 +5,7 @@
 **Registry:** Read your task entry in `docs/tasks/0001-auth-middleware/super-plan.json` — it is your requirements. Look for `Task-B-0002`.
 
 **Interfaces from earlier tasks:**
+
 - `AuthUser` from `src/types/auth.ts` (Task-A-0001)
 - `requireAuth` from `src/middleware/auth.ts` (Task-B-0001) — `requireRole` is used AFTER `requireAuth` in the middleware chain
 

@@ -25,33 +25,33 @@ related-spec: docs/specs/NNNN-<feature-name>-spec.md
 <!-- The most important requirements discovered in brainstorming that directly
      constrained the chosen approach. -->
 
-- 
+-
 
 ## Constraints
 
 <!-- Technical, product, compatibility, or timeline constraints that the
      later spec must preserve. -->
 
-- 
+-
 
 ## Assumptions
 
 <!-- Assumptions accepted during brainstorming. If any assumption still needs
      validation, mark it explicitly. -->
 
-- 
+-
 
 ## Non-Goals
 
 <!-- Deliberately excluded scope so later phases do not quietly reintroduce it. -->
 
-- 
+-
 
 ## Risks and Tradeoffs
 
 <!-- Risks accepted and tradeoffs made while choosing the direction. -->
 
-- 
+-
 
 ## Alternatives Considered
 

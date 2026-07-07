@@ -21,13 +21,13 @@
 
 ## File Structure
 
-| File/Directory | Owner Task | Notes |
-| -------------- | ---------- | ----- |
-| `src/types/auth.ts` | `Task-A-0001` | Interfaces `JwtPayload`, `AuthUser`, `AuthOptions` |
-| `src/middleware/auth.ts` | `Task-B-0001`, `Task-B-0002` | `verifyToken`, `requireAuth`, `requireRole` |
-| `src/middleware/auth.test.ts` | `Task-A-0002`, `Task-B-0001`, `Task-B-0002` | Testes unitários (12 casos) |
-| `src/app.ts` | `Task-C-0001` | Integração dos middlewares nas rotas |
-| `src/app.integration.test.ts` | `Task-C-0001` | Testes de integração (3 casos) |
+| File/Directory                | Owner Task                                  | Notes                                              |
+| ----------------------------- | ------------------------------------------- | -------------------------------------------------- |
+| `src/types/auth.ts`           | `Task-A-0001`                               | Interfaces `JwtPayload`, `AuthUser`, `AuthOptions` |
+| `src/middleware/auth.ts`      | `Task-B-0001`, `Task-B-0002`                | `verifyToken`, `requireAuth`, `requireRole`        |
+| `src/middleware/auth.test.ts` | `Task-A-0002`, `Task-B-0001`, `Task-B-0002` | Testes unitários (12 casos)                        |
+| `src/app.ts`                  | `Task-C-0001`                               | Integração dos middlewares nas rotas               |
+| `src/app.integration.test.ts` | `Task-C-0001`                               | Testes de integração (3 casos)                     |
 
 ## Structured Registry
 

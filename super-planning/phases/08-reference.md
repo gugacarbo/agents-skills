@@ -151,11 +151,11 @@ If the user requests a spec change during implementation:
 
 ## Integration with Other Skills
 
-| Skill                   | When to use                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------ |
+| Skill                   | When to use                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------- |
 | **brainstorming**       | Optional external companion only if you want to keep a standalone brainstorm workflow |
-| **commit-changes**      | After this skill — commit the final changes                                          |
-| **plan-with-subagents** | This skill itself — use for any implementation plan that delegates work to subagents |
+| **commit-changes**      | After this skill — commit the final changes                                           |
+| **plan-with-subagents** | This skill itself — use for any implementation plan that delegates work to subagents  |
 
 ## Sources
 

@@ -11,10 +11,10 @@ Implementado o middleware `requireAuth` que extrai o token Bearer do header `Aut
 
 ## Files Changed
 
-| File | Action |
-|------|--------|
-| `src/middleware/auth.ts` | modified (adicionado `requireAuth`) |
-| `src/middleware/auth.test.ts` | modified (adicionados 4 testes) |
+| File                          | Action                              |
+| ----------------------------- | ----------------------------------- |
+| `src/middleware/auth.ts`      | modified (adicionado `requireAuth`) |
+| `src/middleware/auth.test.ts` | modified (adicionados 4 testes)     |
 
 ## Implementation Notes
 

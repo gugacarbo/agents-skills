@@ -11,10 +11,10 @@ Integrados os middlewares `requireAuth` e `requireRole` nas rotas existentes de 
 
 ## Files Changed
 
-| File | Action |
-|------|--------|
-| `src/app.ts` | modified (adicionados middlewares nas rotas) |
-| `src/app.integration.test.ts` | created |
+| File                          | Action                                       |
+| ----------------------------- | -------------------------------------------- |
+| `src/app.ts`                  | modified (adicionados middlewares nas rotas) |
+| `src/app.integration.test.ts` | created                                      |
 
 ## Implementation Notes
 

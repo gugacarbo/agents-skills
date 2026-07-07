@@ -11,9 +11,9 @@ Implementada a função `verifyToken` em `src/middleware/auth.ts` com 5 testes u
 
 ## Files Changed
 
-| File | Action |
-|------|--------|
-| `src/middleware/auth.ts` | created |
+| File                          | Action  |
+| ----------------------------- | ------- |
+| `src/middleware/auth.ts`      | created |
 | `src/middleware/auth.test.ts` | created |
 
 ## Implementation Notes

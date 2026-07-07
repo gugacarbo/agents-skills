@@ -5,6 +5,7 @@
 **Registry:** Read your task entry in `docs/tasks/0001-auth-middleware/super-plan.json` — it is your requirements. Look for `Task-B-0001`.
 
 **Interfaces from earlier tasks:**
+
 - `JwtPayload`, `AuthUser` from `src/types/auth.ts` (Task-A-0001)
 - `verifyToken` from `src/middleware/auth.ts` (Task-A-0002) — import and use it, do NOT reimplement
 
