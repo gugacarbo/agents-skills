@@ -76,7 +76,7 @@ pnpm prepare      # husky install (runs automatically on pnpm install)
 
 ## Optional Tools
 
-During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
+During scaffolding, the agent must use a question tool such as `request_user_input` to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
 
 The `Install` column uses `<pm>` as a placeholder for the resolved package manager (e.g., `pnpm`, `bun`, `npm`). The agent must substitute `<pm>` with the package manager resolved from the template cascade before printing setup instructions. The `-w` flag is pnpm-specific; for other package managers, omit it or use the equivalent.
 

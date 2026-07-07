@@ -4,13 +4,13 @@
 		{
 			"id": 1,
 			"prompt": "/project-init base-only. Quero criar um repositório novo só com as convenções base em ./hello-base.",
-			"expected_output": "Resolves `base-only` as the `_base` alias only (no family/derivative directory is read). Scaffolds exactly the three base files into ./hello-base: `.editorconfig`, `.gitignore`, and `AGENTS.md` (REQUIREMENTS.md is NOT scaffolded at this layer). Uses a question tool to ask which optional tools to include from the `_base` Optional Tools table (turbo, lint-staged, test-staged, t3oss). Prints the CASA Standard install command verbatim: `curl -fsSL https://raw.githubusercontent.com/atplus-digital/casa-standard/main/install.sh | sh -s -- . --repo-id <project-name>`. Does not run any package manager or framework CLI.",
+			"expected_output": "Resolves `base-only` as the `_base` alias only (no family/derivative directory is read). Scaffolds exactly the three base files into ./hello-base: `.editorconfig`, `.gitignore`, and `AGENTS.md` (REQUIREMENTS.md is NOT scaffolded at this layer). Uses a question tool such as `request_user_input` to ask which optional tools to include from the `_base` Optional Tools table (turbo, lint-staged, test-staged, t3oss). Prints the CASA Standard install command verbatim: `curl -fsSL https://raw.githubusercontent.com/atplus-digital/casa-standard/main/install.sh | sh -s -- . --repo-id <project-name>`. Does not run any package manager or framework CLI.",
 			"files": []
 		},
 		{
 			"id": 2,
 			"prompt": "Start a new TypeScript project in ./ts-app using the default TypeScript template.",
-			"expected_output": "Resolves the cascade `_base` -> `typescript` (no derivative). Scaffolds `.editorconfig`, `.gitignore` from `_base`, then `AGENTS.md` and `REQUIREMENTS.md` from the `typescript` layer (deeper AGENTS.md overwrites the base one). Asks about optional tools via a question tool, but does NOT offer any of the mandatory TypeScript stack packages (typescript, vitest, biome, knip, husky) as optional — they are not in the optional-tools question. Prints the family install command `pnpm add -D typescript vitest biome knip husky` followed by `pnpm exec husky init`. Substitutes `pnpm` for `<pm>` in any optional-tool install lines. Does not print a framework-init command (the `typescript` family has none).",
+			"expected_output": "Resolves the cascade `_base` -> `typescript` (no derivative). Scaffolds `.editorconfig`, `.gitignore` from `_base`, then `AGENTS.md` and `REQUIREMENTS.md` from the `typescript` layer (deeper AGENTS.md overwrites the base one). Asks about optional tools via a question tool such as `request_user_input`, but does NOT offer any of the mandatory TypeScript stack packages (typescript, vitest, biome, knip, husky) as optional — they are not in the optional-tools question. Prints the family install command `pnpm add -D typescript vitest biome knip husky` followed by `pnpm exec husky init`. Substitutes `pnpm` for `<pm>` in any optional-tool install lines. Does not print a framework-init command (the `typescript` family has none).",
 			"files": []
 		},
 		{
@@ -22,31 +22,31 @@
 		{
 			"id": 4,
 			"prompt": "/project-init typescript/vite para um app frontend. Quero React.",
-			"expected_output": "Resolves `_base` -> `typescript` -> `typescript/vite`. Uses a question tool to ask which Vite framework template to use (vanilla-ts, react-ts, vue-ts, svelte-ts) and selects `react-ts` per the user's choice. Prints the framework-init command `pnpm create vite . --template react-ts`. Prints the post-CLI dev tool install: `pnpm add -D biome knip husky` and `pnpm exec husky init`. Instructs the user that `pnpm create vite .` requires an empty target directory and explains how to handle a non-empty one (move scaffolded files aside, run the CLI, restore with deepest-wins) before running the CLI. Does not run the CLI itself.",
+			"expected_output": "Resolves `_base` -> `typescript` -> `typescript/vite`. Uses a question tool such as `request_user_input` to ask which Vite framework template to use (vanilla-ts, react-ts, vue-ts, svelte-ts) and selects `react-ts` per the user's choice. Prints the framework-init command `pnpm create vite . --template react-ts`. Prints the post-CLI dev tool install: `pnpm add -D biome knip husky` and `pnpm exec husky init`. Instructs the user that `pnpm create vite .` requires an empty target directory and explains how to handle a non-empty one (move scaffolded files aside, run the CLI, restore with deepest-wins) before running the CLI. Does not run the CLI itself.",
 			"files": []
 		},
 		{
 			"id": 5,
 			"prompt": "Create a Bun project in ./bun-service and include turbo plus lint-staged.",
-			"expected_output": "Resolves `_base` -> `bun`. Uses a question tool for optional tools; the user selects `turbo` and `lint-staged`. Because the `bun` layer overrides the `turbo` install command (deeper layer wins by tool id), prints `bun add -d -w turbo` (note the bun layer's lowercase `-d` flag is preserved verbatim). For `lint-staged` the bun layer does not override the install command, so it prints `bun add -D lint-staged`. Does NOT print install lines for `test-staged` or `t3oss` (not selected) and does not drop inherited optional tools. Prints `bun init` as the framework-init command and `bun add -D typescript @types/bun biome knip husky` + `bun exec husky init` for the mandatory stack.",
+			"expected_output": "Resolves `_base` -> `bun`. Uses a question tool such as `request_user_input` for optional tools; the user selects `turbo` and `lint-staged`. Because the `bun` layer overrides the `turbo` install command (deeper layer wins by tool id), prints `bun add -d -w turbo` (note the bun layer's lowercase `-d` flag is preserved verbatim). For `lint-staged` the bun layer does not override the install command, so it prints `bun add -D lint-staged`. Does NOT print install lines for `test-staged` or `t3oss` (not selected) and does not drop inherited optional tools. Prints `bun init` as the framework-init command and `bun add -D typescript @types/bun biome knip husky` + `bun exec husky init` for the mandatory stack.",
 			"files": []
 		},
 		{
 			"id": 6,
 			"prompt": "/project-init typescript into ./existing-dir, which already has files inside.",
-			"expected_output": "Detects that ./existing-dir exists and is non-empty. Lists the specific conflicting paths that would be overwritten by the scaffold (at minimum `AGENTS.md`, `.gitignore`, `.editorconfig` from `_base` and `AGENTS.md`, `REQUIREMENTS.md` from the `typescript` layer). Uses a question tool to require explicit approval before overwriting. Does not scaffold or print setup commands until approval is given. Does not delete existing files.",
+			"expected_output": "Detects that ./existing-dir exists and is non-empty. Lists the specific conflicting paths that would be overwritten by the scaffold (at minimum `AGENTS.md`, `.gitignore`, `.editorconfig` from `_base` and `AGENTS.md`, `REQUIREMENTS.md` from the `typescript` layer). Uses a question tool such as `request_user_input` to require explicit approval before overwriting. Does not scaffold or print setup commands until approval is given. Does not delete existing files.",
 			"files": []
 		},
 		{
 			"id": 7,
 			"prompt": "/project-init",
-			"expected_output": "With no template argument, scans the `templates/` directory recursively (relative to the skill's own directory, not the user's cwd) and lists every available template: `base-only` (alias for `_base`), `typescript`, `typescript/node`, `typescript/vite`, and `bun`. For each family/derivative, reads the first paragraph of that template's `AGENTS.md` and shows it as the description (descriptions are read from files, not hardcoded). Uses a question tool to ask the user to pick one before resolving the cascade. Does not scaffold anything yet.",
+			"expected_output": "With no template argument, scans the `templates/` directory recursively (relative to the skill's own directory, not the user's cwd) and lists every available template: `base-only` (alias for `_base`), `typescript`, `typescript/node`, `typescript/vite`, and `bun`. For each family/derivative, reads the first paragraph of that template's `AGENTS.md` and shows it as the description (descriptions are read from files, not hardcoded). Uses a question tool such as `request_user_input` to ask the user to pick one before resolving the cascade. Does not scaffold anything yet.",
 			"files": []
 		},
 		{
 			"id": 8,
 			"prompt": "/project-init rust into ./rust-app.",
-			"expected_output": "`rust` matches no family or derivative under `templates/`. The agent does not fail or invent a rust template; it lists the available templates (base-only, typescript, typescript/node, typescript/vite, bun) with descriptions read from each AGENTS.md, and uses a question tool to re-ask for a valid selection. Does not create ./rust-app or scaffold anything.",
+			"expected_output": "`rust` matches no family or derivative under `templates/`. The agent does not fail or invent a rust template; it lists the available templates (base-only, typescript, typescript/node, typescript/vite, bun) with descriptions read from each AGENTS.md, and uses a question tool such as `request_user_input` to re-ask for a valid selection. Does not create ./rust-app or scaffold anything.",
 			"files": []
 		},
 		{
@@ -64,7 +64,7 @@
 		{
 			"id": 11,
 			"prompt": "Create a Bun project in ./bun-minimal. I don't want any optional tools.",
-			"expected_output": "Resolves `_base` -> `bun`. Uses a question tool to ask about optional tools (turbo, lint-staged, test-staged, t3oss) with none pre-selected. Accepts an empty selection and prints setup instructions with NO optional-tool install lines. Still prints `bun init`, `bun add -D typescript @types/bun biome knip husky`, and `bun exec husky init` for the mandatory stack, plus the CASA Standard install command from `_base`.",
+			"expected_output": "Resolves `_base` -> `bun`. Uses a question tool such as `request_user_input` to ask about optional tools (turbo, lint-staged, test-staged, t3oss) with none pre-selected. Accepts an empty selection and prints setup instructions with NO optional-tool install lines. Still prints `bun init`, `bun add -D typescript @types/bun biome knip husky`, and `bun exec husky init` for the mandatory stack, plus the CASA Standard install command from `_base`.",
 			"files": []
 		},
 		{
@@ -94,7 +94,7 @@
 		{
 			"id": 16,
 			"prompt": "start a new Bun project called payments-svc. Pick a sensible default directory.",
-			"expected_output": "Derives the target directory from the project name as `./payments-svc` (the documented default when no directory is given). Resolves `_base` -> `bun`. Uses a question tool to ask about optional tools using the bun layer's Optional Tools table (turbo `bun add -d -w turbo`, lint-staged `bun add -D lint-staged`, test-staged `bun add -D test-staged`, t3oss `bun add @t3-oss/env-core`). Prints `bun init` as the framework-init command and `bun add -D typescript @types/bun biome knip husky` + `bun exec husky init` for the mandatory stack.",
+			"expected_output": "Derives the target directory from the project name as `./payments-svc` (the documented default when no directory is given). Resolves `_base` -> `bun`. Uses a question tool such as `request_user_input` to ask about optional tools using the bun layer's Optional Tools table (turbo `bun add -d -w turbo`, lint-staged `bun add -D lint-staged`, test-staged `bun add -D test-staged`, t3oss `bun add @t3-oss/env-core`). Prints `bun init` as the framework-init command and `bun add -D typescript @types/bun biome knip husky` + `bun exec husky init` for the mandatory stack.",
 			"files": []
 		},
 		{
@@ -106,7 +106,7 @@
 		{
 			"id": 18,
 			"prompt": "/project-init bun in ./bun-turbo and include turbo only.",
-			"expected_output": "Uses a question tool for optional tools; only `turbo` is selected. Because the `bun` layer overrides the turbo install command (deeper layer wins by tool id), prints `bun add -d -w turbo` (bun layer's lowercase `-d` preserved) and omits install lines for lint-staged, test-staged, and t3oss. Prints `bun init`, `bun add -D typescript @types/bun biome knip husky`, and `bun exec husky init` for the mandatory stack.",
+			"expected_output": "Uses a question tool such as `request_user_input` for optional tools; only `turbo` is selected. Because the `bun` layer overrides the turbo install command (deeper layer wins by tool id), prints `bun add -d -w turbo` (bun layer's lowercase `-d` preserved) and omits install lines for lint-staged, test-staged, and t3oss. Prints `bun init`, `bun add -D typescript @types/bun biome knip husky`, and `bun exec husky init` for the mandatory stack.",
 			"files": []
 		},
 		{
@@ -118,7 +118,7 @@
 		{
 			"id": 20,
 			"prompt": "/project-init bun in ./bun-empty. The directory already has a README.md in it.",
-			"expected_output": "Detects ./bun-empty is non-empty (README.md present) and lists README.md plus the scaffolded paths that would conflict (AGENTS.md, .editorconfig, .gitignore from `_base`; AGENTS.md and REQUIREMENTS.md from the `bun` layer). Uses a question tool to require explicit approval before overwriting. Additionally warns that `bun init` (the framework-init command for the bun layer) requires an empty directory, and explains the move-aside-run-restore workflow before running `bun init`. Does not run `bun init` itself.",
+			"expected_output": "Detects ./bun-empty is non-empty (README.md present) and lists README.md plus the scaffolded paths that would conflict (AGENTS.md, .editorconfig, .gitignore from `_base`; AGENTS.md and REQUIREMENTS.md from the `bun` layer). Uses a question tool such as `request_user_input` to require explicit approval before overwriting. Additionally warns that `bun init` (the framework-init command for the bun layer) requires an empty directory, and explains the move-aside-run-restore workflow before running `bun init`. Does not run `bun init` itself.",
 			"files": []
 		},
 		{
@@ -130,7 +130,7 @@
 		{
 			"id": 22,
 			"prompt": "/project-init vite in ./vite-only.",
-			"expected_output": "`vite` alone matches no family directory (only `typescript` is a family; `vite` is a derivative under `typescript`). The agent does not resolve `vite` directly; it lists the available templates (base-only, typescript, typescript/node, typescript/vite, bun) with descriptions read from each AGENTS.md and uses a question tool to re-ask. Does not scaffold into ./vite-only.",
+			"expected_output": "`vite` alone matches no family directory (only `typescript` is a family; `vite` is a derivative under `typescript`). The agent does not resolve `vite` directly; it lists the available templates (base-only, typescript, typescript/node, typescript/vite, bun) with descriptions read from each AGENTS.md and uses a question tool such as `request_user_input` to re-ask. Does not scaffold into ./vite-only.",
 			"files": []
 		},
 		{

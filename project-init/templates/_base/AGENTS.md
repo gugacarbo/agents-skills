@@ -35,11 +35,11 @@ If `casa-standard` was selected from the optional tools below, run the install s
 
 ## Agent Behavior
 
-- **Ask, don't assume**: Always use a question tool (ask, question, ask user, etc.) when you need confirmation or a decision from the user. Never proceed with ambiguous or irreversible actions without explicit approval.
+- **Ask, don't assume**: Always use a question tool (`request_user_input`, ask, question, ask user, etc.) when you need confirmation or a decision from the user. Never proceed with ambiguous or irreversible actions without explicit approval.
 
 ## Optional Tools
 
-During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
+During scaffolding, the agent must use a question tool such as `request_user_input` to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
 
 The `Install` column uses `<pm>` as a placeholder for the resolved package manager (e.g., `pnpm`, `bun`, `npm`). The agent must substitute `<pm>` with the package manager resolved from the template cascade before printing setup instructions. The `-w` flag is pnpm-specific; for other package managers, omit it or use the equivalent.
 

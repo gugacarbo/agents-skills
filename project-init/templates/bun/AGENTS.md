@@ -88,7 +88,7 @@ bun exec husky init
 
 ## Optional Tools
 
-During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
+During scaffolding, the agent must use a question tool such as `request_user_input` to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
 
 | Tool        | Type    | Purpose                                   | Install                    |
 | ----------- | ------- | ----------------------------------------- | -------------------------- |
