@@ -115,11 +115,11 @@ flowchart TD
 
 ## Legenda
 
-| Cor | Significado |
-| --- | --- |
-| 🟢 Verde escuro | Início / Fim |
-| 🔴 Vermelho escuro | Parada (não executar) |
-| 🟡 Amarelo escuro | Pausa para o usuário |
+| Cor                       | Significado                                |
+| ------------------------- | ------------------------------------------ |
+| 🟢 Verde escuro           | Início / Fim                               |
+| 🔴 Vermelho escuro        | Parada (não executar)                      |
+| 🟡 Amarelo escuro         | Pausa para o usuário                       |
 | 🟠 Laranja escurja escuro | Caminho `--no-verify` (exceção controlada) |
 
 ## Etapas do Fluxo

@@ -28,21 +28,21 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 
 ## WHERE TO LOOK
 
-| Task                          | Location                                    | Notes                                                            |
-| ----------------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
-| Add a public command          | `skills.sh` + `.scripts/<command>.sh`       | Root script delegates by command name.                           |
-| Change install behavior       | `.scripts/install.sh`                       | Tests live in `.scripts/tests/install.sh`.                       |
-| Change update behavior        | `.scripts/update.sh`                        | Tests live in `.scripts/tests/update.sh` and bootstrap coverage. |
-| Validate curl bootstrap       | `.scripts/tests/bootstrap.sh`               | Uses local tarballs and `sh -s -- <command>`.                    |
-| Validate git allowlist        | `.gitignore`, `.scripts/tests/gitignore.sh` | The repo ignores everything by default.                          |
-| Work on commit skill content  | `commit-changes/SKILL.md`                   | Conventional-commit workflow skill.                              |
-| Work on commit flowchart      | `commit-changes/README.md`                  | Mermaid flowchart for commit decision flow.                      |
-| Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
-| Work on planning reference     | `super-planning/docs/`                     | Workflows, decision flow, file structure, and examples.          |
-| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
-| Test planning scripts          | `super-planning/dev/tests.sh`              | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
-| Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
-| Work on skill eval tooling    | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.            |
+| Task                           | Location                                    | Notes                                                                                                |
+| ------------------------------ | ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Add a public command           | `skills.sh` + `.scripts/<command>.sh`       | Root script delegates by command name.                                                               |
+| Change install behavior        | `.scripts/install.sh`                       | Tests live in `.scripts/tests/install.sh`.                                                           |
+| Change update behavior         | `.scripts/update.sh`                        | Tests live in `.scripts/tests/update.sh` and bootstrap coverage.                                     |
+| Validate curl bootstrap        | `.scripts/tests/bootstrap.sh`               | Uses local tarballs and `sh -s -- <command>`.                                                        |
+| Validate git allowlist         | `.gitignore`, `.scripts/tests/gitignore.sh` | The repo ignores everything by default.                                                              |
+| Work on commit skill content   | `commit-changes/SKILL.md`                   | Conventional-commit workflow skill.                                                                  |
+| Work on commit flowchart       | `commit-changes/README.md`                  | Mermaid flowchart for commit decision flow.                                                          |
+| Work on planning skill content | `super-planning/`                           | Phase docs, prompts, templates, and orchestration helpers.                                           |
+| Work on planning reference     | `super-planning/docs/`                      | Workflows, decision flow, file structure, and examples.                                              |
+| Work on planning scripts       | `super-planning/scripts/`                   | super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh.                       |
+| Test planning scripts          | `super-planning/dev/tests.sh`               | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
+| Work on planning dev tooling   | `super-planning/dev/`                       | Tests and auxiliary scripts for the super-planning skill.                                            |
+| Work on skill eval tooling     | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.                                                |
 
 ## CONVENTIONS
 
