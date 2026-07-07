@@ -47,6 +47,7 @@ Agent completes but others running → acknowledge briefly, END response. Do NOT
 ### Main Session (concurrent with agents)
 
 #### 1. Bash Structural Analysis
+
 ```bash
 find . -type d -not -path '*/\.*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/dist/*' -not -path '*/build/*' | awk -F/ '{print NF-1}' | sort -n | uniq -c
 find . -type f -not -path '*/\.*' -not -path '*/node_modules/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -30
@@ -66,13 +67,13 @@ Optional Claude-native/plugin LSP tools for entry points: `lsp_servers()`, `lsp_
 
 Additional explore agents based on project scale (max 5 total):
 
-| Factor | Threshold | Additional Agents |
-|--------|-----------|-------------------|
-| Total files | >100 | +1 per 100 files |
-| Total lines | >10k | +1 per 10k lines |
-| Directory depth | ≥4 | +2 for deep exploration |
+| Factor                   | Threshold | Additional Agents          |
+| ------------------------ | --------- | -------------------------- |
+| Total files              | >100      | +1 per 100 files           |
+| Total lines              | >10k      | +1 per 10k lines           |
+| Directory depth          | ≥4        | +2 for deep exploration    |
 | Large files (>500 lines) | >10 files | +1 for complexity hotspots |
-| Multiple languages | >1 | +1 per language |
+| Multiple languages       | >1        | +1 per language            |
 
 ```bash
 total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | wc -l)
@@ -82,24 +83,24 @@ total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*'
 
 ### Scoring Matrix
 
-| Factor | Weight | High Threshold | Source |
-|--------|--------|----------------|--------|
-| File count | 3x | >20 | bash |
-| Subdir count | 2x | >5 | bash |
-| Code ratio | 2x | >70% | bash |
-| Unique patterns | 1x | Has own config | explore |
-| Module boundary | 2x | Has index.ts/__init__.py | bash |
-| Symbol density | 2x | >30 symbols | lsp_workspace_symbols count |
-| Reference centrality | 3x | >20 refs | lsp_find_references count |
+| Factor               | Weight | High Threshold           | Source                      |
+| -------------------- | ------ | ------------------------ | --------------------------- |
+| File count           | 3x     | >20                      | bash                        |
+| Subdir count         | 2x     | >5                       | bash                        |
+| Code ratio           | 2x     | >70%                     | bash                        |
+| Unique patterns      | 1x     | Has own config           | explore                     |
+| Module boundary      | 2x     | Has index.ts/**init**.py | bash                        |
+| Symbol density       | 2x     | >30 symbols              | lsp_workspace_symbols count |
+| Reference centrality | 3x     | >20 refs                 | lsp_find_references count   |
 
 ### Decision Rules
 
-| Score | Action |
-|-------|--------|
-| **Root (.)** | ALWAYS create |
-| **>15** | Create AGENTS.md |
-| **8-15** | Create if distinct domain |
-| **<8** | Skip (parent covers) |
+| Score        | Action                    |
+| ------------ | ------------------------- |
+| **Root (.)** | ALWAYS create             |
+| **>15**      | Create AGENTS.md          |
+| **8-15**     | Create if distinct domain |
+| **<8**       | Skip (parent covers)      |
 
 ## Phase 3: Generate AGENTS.md
 
@@ -112,21 +113,27 @@ total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*'
 **Commit:** {SHORT_SHA}
 
 ## OVERVIEW
+
 {1-2 sentences: what + core stack}
 
 ## STRUCTURE
+
 {Tree with non-obvious purposes only}
 
 ## WHERE TO LOOK
+
 | Task | Location | Notes |
 
 ## CONVENTIONS
+
 {ONLY deviations from standard}
 
 ## ANTI-PATTERNS (THIS PROJECT)
+
 {Explicitly forbidden here}
 
 ## COMMANDS
+
 {dev/test/build}
 ```
 

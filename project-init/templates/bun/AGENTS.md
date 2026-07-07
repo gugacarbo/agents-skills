@@ -90,9 +90,9 @@ bun exec husky init
 
 During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
 
-| Tool        | Type    | Purpose                                   | Install                     |
-| ----------- | ------- | ----------------------------------------- | --------------------------- |
-| turbo       | global  | Monorepo orchestration (Turborepo)        | `bun add -d -w turbo`       |
-| lint-staged | dev     | Run linters only on staged files          | `bun add -D lint-staged`    |
-| test-staged | dev     | Run tests only on staged/changed files    | `bun add -D test-staged`    |
-| t3oss       | runtime | Type-safe environment variable management | `bun add @t3-oss/env-core`  |
+| Tool        | Type    | Purpose                                   | Install                    |
+| ----------- | ------- | ----------------------------------------- | -------------------------- |
+| turbo       | global  | Monorepo orchestration (Turborepo)        | `bun add -d -w turbo`      |
+| lint-staged | dev     | Run linters only on staged files          | `bun add -D lint-staged`   |
+| test-staged | dev     | Run tests only on staged/changed files    | `bun add -D test-staged`   |
+| t3oss       | runtime | Type-safe environment variable management | `bun add @t3-oss/env-core` |
