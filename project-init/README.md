@@ -16,7 +16,7 @@ O skill lista os templates disponíveis, pergunta o nome do projeto e o diretór
 
 Templates são organizados em famílias com derivativos. O scaffolding aplica as camadas em ordem: `_base` → família → derivativo.
 
-- **_base/**: Aplicado a todo projeto — `.gitignore`, `.editorconfig`, `AGENTS.md` com convenções gerais
+- **\_base/**: Aplicado a todo projeto — `.gitignore`, `.editorconfig`, `AGENTS.md` com convenções gerais
 - **bun/**: Bun runtime (all-in-one: runtime, package manager, test runner, bundler)
 - **typescript/**: Base TypeScript (agnóstico de runtime)
 - **typescript/node/**: TypeScript + Node.js (tsx, @types/node)

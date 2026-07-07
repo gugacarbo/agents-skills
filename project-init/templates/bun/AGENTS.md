@@ -4,7 +4,7 @@ This is a Bun project. Bun is the runtime, package manager, bundler, and test ru
 
 ## Conventions
 
-- **Runtime**: Bun (latest)
+- **Runtime**: Bun (latest stable)
 - **Package manager**: bun (built-in, mandatory)
 - **Module system**: ESM (`.ts` / `.js` files, `import`/`export` syntax)
 - **Entry point**: `src/index.ts` (or `src/index.js`)

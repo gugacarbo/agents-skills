@@ -1,26 +1,35 @@
 # TypeScript + Node — Requirements
 
+> All packages are installed via CLI at their latest stable version. No pinned versions.
+
 ## Runtime
 
-- Node.js 22+ (LTS)
+- Node.js (LTS)
 - Package manager: pnpm (mandatory)
 
 ## Core Dependencies
 
-| Package     | Version | Purpose                  |
-| ----------- | ------- | ------------------------ |
-| typescript  | ^5.7    | TypeScript compiler      |
-| @types/node | ^22     | Node.js type definitions |
+| Package     | Purpose                  | Install                   |
+| ----------- | ------------------------ | ------------------------- |
+| typescript  | TypeScript compiler      | `pnpm add -D typescript`  |
+| @types/node | Node.js type definitions | `pnpm add -D @types/node` |
 
 ## Dev Dependencies
 
-| Package | Version | Purpose                        |
-| ------- | ------- | ------------------------------ |
-| vitest  | ^3      | Test runner                    |
-| biome   | ^1.9    | Linter + formatter (unified)   |
-| tsx     | ^4      | Run TS files directly (dev)    |
-| knip    | ^5      | Dead code and unused dependency detection |
-| husky   | ^9      | Git hooks (pre-commit, pre-push) |
+| Package | Purpose                                   | Install              |
+| ------- | ----------------------------------------- | -------------------- |
+| vitest  | Test runner                               | `pnpm add -D vitest` |
+| biome   | Linter + formatter (unified)              | `pnpm add -D biome`  |
+| tsx     | Run TS files directly (dev)               | `pnpm add -D tsx`    |
+| knip    | Dead code and unused dependency detection | `pnpm add -D knip`   |
+| husky   | Git hooks (pre-commit, pre-push)          | `pnpm add -D husky`  |
+
+## Install all at once
+
+```sh
+pnpm add -D typescript @types/node vitest biome tsx knip husky
+pnpm exec husky init
+```
 
 ## Git Hooks (Husky)
 

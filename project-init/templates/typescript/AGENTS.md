@@ -27,14 +27,14 @@ pnpm prepare      # husky install (runs automatically on pnpm install)
 
 ## Stack
 
-| Concern          | Tool     |
-| ---------------- | -------- |
-| Runtime          | Node 22+ / Bun / Deno |
-| Language         | TypeScript 5.x (strict mode) |
-| Package manager  | pnpm     |
-| Testing          | Vitest   |
-| Linting          | Biome    |
-| Formatting       | Biome    |
-| Dead code        | Knip     |
-| Git hooks        | Husky    |
-| CI               | GitHub Actions |
+| Concern         | Tool                     |
+| --------------- | ------------------------ |
+| Runtime         | Node (LTS) / Bun / Deno  |
+| Language        | TypeScript (strict mode) |
+| Package manager | pnpm                     |
+| Testing         | Vitest                   |
+| Linting         | Biome                    |
+| Formatting      | Biome                    |
+| Dead code       | Knip                     |
+| Git hooks       | Husky                    |
+| CI              | GitHub Actions           |

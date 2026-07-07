@@ -53,13 +53,13 @@ python3 scripts/docs-check
 
 During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
 
-| Tool         | Type    | Purpose                                    | Install                          |
-| ------------ | ------- | ------------------------------------------ | -------------------------------- |
-| turbo        | global  | Monorepo orchestration (Turborepo)         | `pnpm add -w -D turbo`           |
-| lint-staged  | dev     | Run linters only on staged files           | `pnpm add -D lint-staged`        |
-| test-staged  | dev     | Run tests only on staged/changed files     | `pnpm add -D test-staged`        |
-| t3oss        | runtime | Type-safe environment variable management  | `pnpm add @t3-oss/env-core`      |
-| vitest       | dev     | Test runner                                | `pnpm add -D vitest`             |
+| Tool        | Type    | Purpose                                   | Install                     |
+| ----------- | ------- | ----------------------------------------- | --------------------------- |
+| turbo       | global  | Monorepo orchestration (Turborepo)        | `pnpm add -w -D turbo`      |
+| lint-staged | dev     | Run linters only on staged files          | `pnpm add -D lint-staged`   |
+| test-staged | dev     | Run tests only on staged/changed files    | `pnpm add -D test-staged`   |
+| t3oss       | runtime | Type-safe environment variable management | `pnpm add @t3-oss/env-core` |
+| vitest      | dev     | Test runner                               | `pnpm add -D vitest`        |
 
 ## Project Structure
 

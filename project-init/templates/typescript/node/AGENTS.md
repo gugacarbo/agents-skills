@@ -4,7 +4,7 @@ This is a TypeScript project targeting Node.js runtime.
 
 ## Conventions
 
-- **Runtime**: Node.js 22+ (LTS)
+- **Runtime**: Node.js (LTS)
 - **Package manager**: pnpm (mandatory)
 - **Module system**: ESM (`"type": "module"` in package.json, `.ts` files, `import`/`export` syntax)
 - **Entry point**: `src/index.ts`
@@ -53,4 +53,3 @@ pnpm init
 pnpm add -D typescript @types/node vitest biome tsx knip husky
 pnpm exec husky init
 ```
-

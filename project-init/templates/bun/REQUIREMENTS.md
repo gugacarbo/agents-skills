@@ -1,32 +1,42 @@
 # Bun Template — Requirements
 
+> All packages are installed via CLI at their latest stable version. No pinned versions.
+
 ## Runtime
 
-- Bun (latest)
+- Bun (latest stable)
 - Package manager: bun (built-in, mandatory)
 
 ## Core Dependencies
 
-| Package    | Version | Purpose                  |
-| ---------- | ------- | ------------------------ |
-| typescript | ^5.7    | TypeScript compiler      |
-| @types/bun | latest  | Bun type definitions     |
+| Package    | Purpose              | Install                 |
+| ---------- | -------------------- | ----------------------- |
+| typescript | TypeScript compiler  | `bun add -D typescript` |
+| @types/bun | Bun type definitions | `bun add -D @types/bun` |
 
 ## Dev Dependencies
 
-| Package | Version | Purpose                        |
-| ------- | ------- | ------------------------------ |
-| biome   | ^1.9    | Linter + formatter (unified)   |
-| knip    | ^5      | Dead code and unused dependency detection |
-| husky   | ^9      | Git hooks (pre-commit, pre-push) |
+| Package | Purpose                                   | Install            |
+| ------- | ----------------------------------------- | ------------------ |
+| biome   | Linter + formatter (unified)              | `bun add -D biome` |
+| knip    | Dead code and unused dependency detection | `bun add -D knip`  |
+| husky   | Git hooks (pre-commit, pre-push)          | `bun add -D husky` |
+
+## Install all at once
+
+```sh
+bun init
+bun add -D typescript @types/bun biome knip husky
+bun exec husky init
+```
 
 ## Built-in (Bun — no install needed)
 
-| Tool       | Purpose                    |
-| ---------- | -------------------------- |
-| bun test   | Test runner                |
-| bun build  | Bundler                    |
-| bun --watch| Dev mode with hot reload   |
+| Tool        | Purpose                  |
+| ----------- | ------------------------ |
+| bun test    | Test runner              |
+| bun build   | Bundler                  |
+| bun --watch | Dev mode with hot reload |
 
 ## Git Hooks (Husky)
 

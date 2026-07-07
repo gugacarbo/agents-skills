@@ -4,8 +4,8 @@ This is a TypeScript project using Vite as the build tool and dev server.
 
 ## Conventions
 
-- **Runtime**: Node.js 22+ (LTS)
-- **Build tool**: Vite 6+
+- **Runtime**: Node.js (LTS)
+- **Build tool**: Vite (latest stable, installed via CLI)
 - **Package manager**: pnpm (mandatory)
 - **Module system**: ESM (`.ts` files, `import`/`export` syntax)
 - **Entry point**: `index.html` → `src/main.ts`
