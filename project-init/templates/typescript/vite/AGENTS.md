@@ -18,6 +18,11 @@ This is a TypeScript project using Vite as the build tool and dev server.
 
 - ESM (`.ts` files, `import`/`export` syntax)
 
+## Env contract
+
+- In the Vite derivative, the raw environment boundary is `import.meta.env`, read from a centralized client env module rather than throughout the UI code.
+- Only expose variables intentionally prefixed for the client runtime, and validate them before the rest of the app consumes them.
+
 ## Entry point
 
 - `index.html` → `src/main.ts`

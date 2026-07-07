@@ -14,6 +14,11 @@ This is a TypeScript project targeting Node.js runtime.
 
 - ESM (`"type": "module"` in package.json, `.ts` files, `import`/`export` syntax)
 
+## Env contract
+
+- In the Node derivative, the raw environment boundary is typically `process.env`, but it should still be read only from a centralized env module such as `src/env.ts`.
+- Validate and normalize values before exporting them to application code. Do not scatter `process.env.FOO` reads across routes, services, or utilities.
+
 ## Entry point
 
 - `src/index.ts`

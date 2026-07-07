@@ -7,6 +7,19 @@
 - Node.js (LTS) or Bun or Deno
 - Package manager: pnpm (mandatory)
 
+## Env contract
+
+- Create a single environment module such as `src/env.ts` and keep raw environment reads there.
+- Validate required variables before the app starts serving requests, jobs, or CLI work.
+- Export a typed env object to the rest of the codebase instead of passing unvalidated strings around.
+- For larger apps or stricter schemas, prefer adding `@t3-oss/env-core` through the optional tools flow.
+
+## Scripts contract
+
+- Required scripts after initialization: `dev`, `build`, `test`, `lint`, `format`, `typecheck`, `knip`.
+- Add `prepare` when Husky is enabled so git hooks install on dependency setup.
+- Derivatives may add runtime-specific scripts such as `start`, `preview`, or `test:watch`, but they should preserve the required baseline script names above.
+
 ## Core Dependencies
 
 | Package    | Purpose             | Install                  |
