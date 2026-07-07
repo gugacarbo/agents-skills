@@ -41,7 +41,7 @@ flowchart TD
     D1 --> RC1{reviewCadence}
     RC1 -->|per_task| R1[Review]
     RC1 -->|per_batch| H1[Hold review until batch gate]
-    RC1 -->|final_only| H1A[Hold independent review and keep task ready_for_review]
+    RC1 -->|final_only| H1A[Keep task ready_for_review<br/>queue batch review for Phase 7]
     R1 -->|Issues Found| F1[Fix Subagent]
     F1 --> RR1[Re-review]
     RR1 -->|Clean| C1[Mark Complete]
@@ -54,7 +54,7 @@ flowchart TD
     D2 --> RC2{reviewCadence}
     RC2 -->|per_task| R2[Review]
     RC2 -->|per_batch| H2[Hold review until batch gate]
-    RC2 -->|final_only| H2A[Hold independent review and keep task ready_for_review]
+    RC2 -->|final_only| H2A[Keep task ready_for_review<br/>queue batch review for Phase 7]
     R2 -->|Issues Found| F2[Fix Subagent]
     F2 --> RR2[Re-review]
     RR2 -->|Clean| C2[Mark Complete]
@@ -79,7 +79,7 @@ flowchart TD
         A3 --> A4{reviewCadence}
         A4 -->|per_task| A5[Review each task immediately<br/>as it finishes]
         A4 -->|per_batch| A6[Review all after batch completes]
-        A4 -->|final_only| A7[Defer independent review<br/>to final integration]
+        A4 -->|final_only| A7[Defer review to Phase 7<br/>but review one batch at a time]
         A5 --> A8[Fix and re-review only affected tasks]
         A6 -->|Issues Found| A8
         A8 --> A9[Mark accepted tasks complete]
@@ -96,7 +96,7 @@ flowchart TD
         B3 --> B4{reviewCadence}
         B4 -->|per_task| B5[Review each task immediately<br/>as it finishes]
         B4 -->|per_batch| B6[Review all after batch completes]
-        B4 -->|final_only| B7[Defer independent review<br/>to final integration]
+        B4 -->|final_only| B7[Defer review to Phase 7<br/>but review one batch at a time]
         B5 --> B8[Fix and re-review only affected tasks]
         B6 -->|Issues Found| B8
         B8 --> B9[Mark accepted tasks complete]

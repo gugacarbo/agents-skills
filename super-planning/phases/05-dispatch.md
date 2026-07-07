@@ -158,7 +158,7 @@ For each task:
 8. Read `reviewCadence` from `super-plan.json`.
 9. If `reviewCadence=per_task`, set the task status to `reviewing` via script, then hand off immediately to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
 10. If `reviewCadence=per_batch`, wait until the current batch is fully `ready_for_review`, then set each task to `reviewing` and hand off the batch to Phase 6.
-11. If `reviewCadence=final_only`, continue implementation without task-level review, keep the task at `ready_for_review`, and defer both the independent review gate and `completed` transition to final integration.
+11. If `reviewCadence=final_only`, continue implementation without task-level review, keep the task at `ready_for_review`, and defer the independent review gate to final integration, where reviewers are still dispatched one batch at a time before any task transitions to `completed`.
 12. If the reviewer later finds issues, update `super-plan.json` to `needs_fix` via script, dispatch a fix subagent, and re-review according to the same cadence.
 13. After clean review at the configured cadence, append a `completed` log entry with the task-local wrapper `log-task.sh` and update the JSON status to `completed` via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
 
@@ -177,7 +177,7 @@ For independent tasks with no file conflicts:
 9. Read `reviewCadence` from `super-plan.json`.
 10. If `reviewCadence=per_task`, set each finished task to `reviewing` via script, then dispatch a reviewer subagent immediately for each task as soon as that task's implementer finishes. Do not wait for sibling tasks in the same parallel batch.
 11. If `reviewCadence=per_batch`, wait for the full batch to reach `ready_for_review`, then set each task to `reviewing` and hand the batch to Phase 6 together.
-12. If `reviewCadence=final_only`, skip task-level review during the parallel wave, keep accepted tasks at `ready_for_review`, and defer independent review plus the `completed` transition to final integration.
+12. If `reviewCadence=final_only`, skip task-level review during the parallel wave, keep accepted tasks at `ready_for_review`, and defer independent review to final integration, where one reviewer subagent must still be dispatched per batch before any task transitions to `completed`.
 13. Dispatch fix subagents for any reviewed tasks that need fixes.
 14. Integrate all changes onto the working branch.
 15. After clean review at the configured cadence, append `completed` log entries with each task-local wrapper `log-task.sh` and update the JSON status for the accepted tasks via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.

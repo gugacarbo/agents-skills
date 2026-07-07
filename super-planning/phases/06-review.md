@@ -1,6 +1,6 @@
 # Phase 6: Review Gates
 
-Two-stage review according to `reviewCadence`: after each task, after each batch, or only during final integration.
+Two-stage review according to `reviewCadence`: after each task, after each batch, or during final integration on a per-batch basis.
 
 ## Review Cadence Routing
 
@@ -8,7 +8,7 @@ Read `reviewCadence` from `super-plan.json` before dispatching reviewers:
 
 - `per_task` — review each task as soon as it reaches `ready_for_review`; set status to `reviewing` when review begins
 - `per_batch` — review all tasks in the batch together once the batch is `ready_for_review`; set each task to `reviewing` when review begins
-- `final_only` — skip Phase 6 task-level review during implementation; Phase 7 must run the independent review gate before any task is accepted as complete
+- `final_only` — skip Phase 6 review during implementation; Phase 7 must still dispatch one reviewer subagent per batch before any task is accepted as complete
 
 In parallel execution with `reviewCadence=per_task`, Phase 6 begins for an individual task immediately after that task's implementer finishes, even if sibling tasks in the same batch are still running.
 
@@ -103,4 +103,4 @@ Only mark a task `completed` once its required independent review has happened a
 
 - `per_task` — the task can be completed right after its own clean review
 - `per_batch` — tasks in the batch can be completed after the batch review is clean
-- `final_only` — tasks stay short of `completed` until the final integration review passes
+- `final_only` — tasks stay short of `completed` until their batch is reviewed during final integration

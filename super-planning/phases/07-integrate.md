@@ -12,4 +12,4 @@ Then transition the spec status to `implemented` and fill in `implemented-by` wi
 
 If `reviewCadence=final_only`, this phase must also perform the first independent review gate for the implementation before any task or requirement is considered fully accepted.
 
-When that final-only review passes, the orchestrator then appends the `completed` log entries, transitions the affected tasks from `ready_for_review` to `completed`, and regenerates the ledger before closing the plan.
+When `reviewCadence=final_only`, run that review batch by batch: for each batch that reached `ready_for_review` during implementation, dispatch one reviewer subagent for the batch, resolve findings, and only then append the `completed` log entries, transition the affected tasks from `ready_for_review` to `completed`, and regenerate the ledger before moving on.

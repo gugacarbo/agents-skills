@@ -99,7 +99,7 @@ Use platform-native list/discovery tools first. When multiple discovery tools ar
 
 After collecting the discovery result, the orchestrator must present it to the user and ask them to choose how to proceed.
 
-**Preferred interaction rule:** if the current platform exposes an ask/confirm/question tool for structured user input, and the current collaboration mode/session allows that tool to be called, the orchestrator must use that tool instead of a plain text question. Use the structured prompt to:
+**Preferred interaction rule:** if the current platform exposes an ask/confirm/question tool for structured user input, including `request_user_input` / a request user input tool, and the current collaboration mode/session allows that tool to be called, the orchestrator must use that tool instead of a plain text question. Use the structured prompt to:
 
 1. show the discovered agents and models
 2. show the recommended `general`, `deep`, and `quick` configuration
@@ -108,7 +108,7 @@ After collecting the discovery result, the orchestrator must present it to the u
    - provide a manual override
    - keep the configuration empty/default
 
-**Fallback interaction rule:** if the current platform does not expose a structured ask/confirm/question tool, or if the current collaboration mode/session does not allow calling it, the orchestrator must fall back to a normal text message asking the same question.
+**Fallback interaction rule:** if the current platform does not expose a structured ask/confirm/question tool such as `request_user_input`, or if the current collaboration mode/session does not allow calling it, the orchestrator must fall back to a normal text message asking the same question.
 
 After discovery:
 
@@ -120,8 +120,8 @@ After discovery:
 Required fallback behavior when discovery fails:
 
 1. Tell the user that auto-discovery did not find subagent/model options on the current platform
-2. Use the structured ask/confirm/question tool when available and allowed in the current mode/session to ask whether they want to provide a manual override
-3. If the platform has no structured ask/confirm/question tool, or the current mode/session disallows it, ask via plain text
+2. Use the structured ask/confirm/question tool, including `request_user_input` when available, and allowed in the current mode/session to ask whether they want to provide a manual override
+3. If the platform has no structured ask/confirm/question tool such as `request_user_input`, or the current mode/session disallows it, ask via plain text
 4. If the user does not provide an override, keep the fields empty
 
 Recommended structured prompt content:
@@ -165,6 +165,12 @@ Persist the answer in `reviewCadence` using one of these values:
 
 This field is required because it changes the dispatch and review loops in later phases. Do not guess unless the user has already made the preference explicit in the current planning flow.
 
+When presenting the options, make the dispatch behavior explicit:
+
+- `per_task` — as soon as a task finishes, dispatch a reviewer subagent for that task
+- `per_batch` — once the whole batch finishes, dispatch a reviewer subagent for the batch
+- `final_only` — skip implementation-time review, but still dispatch one reviewer subagent per batch during final integration
+
 Each task entry must still include:
 
 - `task_profile` — one of `general`, `deep`, or `quick`
@@ -191,9 +197,9 @@ Do not leave tasks uncategorized. Every task in `super-plan.json` must have a `t
 
 **Execution rule:** `reviewCadence` controls when reviewer subagents launch:
 
-- `per_task` — review starts as soon as a task reaches `ready_for_review`
-- `per_batch` — review waits until the whole current batch reaches `ready_for_review`
-- `final_only` — independent review is deferred to final integration
+- `per_task` — dispatch a reviewer subagent as soon as a task reaches `ready_for_review`
+- `per_batch` — dispatch a reviewer subagent once the whole current batch reaches `ready_for_review`
+- `final_only` — defer independent review to final integration, but still dispatch one reviewer subagent per batch at that stage
 
 ## Deferred Task Artifacts
 

@@ -1,6 +1,6 @@
 # Post-Write Approval Prompt
 
-Use the question/ask tool after writing the spec file to confirm user approval before proceeding to planning.
+Use the question/ask tool, including `request_user_input` / a request user input tool, after writing the spec file to confirm user approval before proceeding to planning.
 
 ```
 Question: "Spec written to docs/specs/NNNN-<feature-name>-spec.md. Please review it."
