@@ -1,21 +1,38 @@
-*
-!.gitignore
-!AGENTS.md
-!README.md
-!skills.sh
-!.scripts/
-!.scripts/**
-!biome.json
-!package.json
+# Dependencies
+node_modules/
+.pnpm-store/
 
-# --- --- SKILLS --- ---
+# Environment
+.env
+.env.*
+!.env.example
 
-!commit-changes/
-!commit-changes/**
-!skill-creator/
-!skill-creator/**
-!super-planning/
-!super-planning/**
-!project-init/
-!project-init/**
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
 
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+.super-planning

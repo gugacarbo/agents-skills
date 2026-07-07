@@ -1,6 +1,6 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-07-04 12:00:00 -0300
+**Generated:** 2026-07-06 23:00:00 -0300
 **Commit:** (pending)
 
 ## OVERVIEW
@@ -14,8 +14,8 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 ├── skills.sh              # public entrypoint; also supports curl | sh bootstrap
 ├── .scripts/              # install/update command implementations and tests
 ├── commit-changes/        # tracked skill directory; includes README with flowchart
-├── find-skills/           # local skill directory, ignored by git allowlist
-├── init-deep/             # local skill directory, ignored by git allowlist
+├── find-skills/           # local skill directory
+├── init-deep/             # local skill directory
 ├── skill-creator/         # complex local skill, mostly ignored except AGENTS.md
 └── super-planning/        # tracked planning/orchestration skill
     ├── docs/              # reference docs: workflows, decision flow, examples
@@ -34,7 +34,7 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Change install behavior        | `.scripts/install.sh`                       | Tests live in `.scripts/tests/install.sh`.                                                           |
 | Change update behavior         | `.scripts/update.sh`                        | Tests live in `.scripts/tests/update.sh` and bootstrap coverage.                                     |
 | Validate curl bootstrap        | `.scripts/tests/bootstrap.sh`               | Uses local tarballs and `sh -s -- <command>`.                                                        |
-| Validate git allowlist         | `.gitignore`, `.scripts/tests/gitignore.sh` | The repo ignores everything by default.                                                              |
+| Validate .gitignore            | `.gitignore`, `.scripts/tests/gitignore.sh` | Deny-list pattern; check that new files are not unintentionally ignored.                             |
 | Work on commit skill content   | `commit-changes/SKILL.md`                   | Conventional-commit workflow skill.                                                                  |
 | Work on commit flowchart       | `commit-changes/README.md`                  | Mermaid flowchart for commit decision flow.                                                          |
 | Work on planning skill content | `super-planning/`                           | Phase docs, prompts, templates, and orchestration helpers.                                           |
@@ -53,14 +53,14 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 - Public commands should be reachable as `./skills.sh <command>` and through `curl .../skills.sh | sh -s -- <command>`.
 - Default remote is `gugacarbo/agents-skills` on `main`; keep env overrides working: `AGENTS_SKILLS_OWNER`, `AGENTS_SKILLS_REPO`, `AGENTS_SKILLS_REF`, `AGENTS_SKILLS_REPO_URL`, `AGENTS_SKILLS_ARCHIVE_URL`.
 - Installable skills are root child directories containing `SKILL.md`; installer skips non-skill directories.
-- `.gitignore` is allowlist-only. New files are ignored unless explicitly unignored.
+- `.gitignore` is deny-list-only. New files are ignored unless explicitly added.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 
 - Do not add a root `install.sh`; `skills.sh install` is the public path.
 - Do not make global install skip confirmation just because `--yes` was passed.
 - Do not read prompts only from stdin; `curl | sh` requires prompt reads from `/dev/tty` or the test seam `AGENTS_SKILLS_PROMPT_INPUT`.
-- Do not use `git add .` casually here; ignored local skill directories and unrelated skill edits may exist.
+- Do not use `git add .` casually here; unrelated skill edits may exist.
 - Do not convert runtime scripts to Bash unless POSIX portability is intentionally dropped.
 - Treat `rm -rf` as cleanup-only and keep it bound to temp dirs or fixtures.
 
