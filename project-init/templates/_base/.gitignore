@@ -15,7 +15,6 @@ out/
 .nuxt/
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -35,3 +34,5 @@ coverage/
 # Cache
 .cache/
 *.tsbuildinfo
+
+.super-planning

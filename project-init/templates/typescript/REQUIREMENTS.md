@@ -9,10 +9,9 @@
 
 ## Core Dependencies
 
-| Package     | Purpose                  | Install                   |
-| ----------- | ------------------------ | ------------------------- |
-| typescript  | TypeScript compiler      | `pnpm add -D typescript`  |
-| @types/node | Node.js type definitions | `pnpm add -D @types/node` |
+| Package    | Purpose             | Install                  |
+| ---------- | ------------------- | ------------------------ |
+| typescript | TypeScript compiler | `pnpm add -D typescript` |
 
 ## Dev Dependencies
 
@@ -26,7 +25,7 @@
 ## Install all at once
 
 ```sh
-pnpm add -D typescript @types/node vitest biome knip husky
+pnpm add -D typescript vitest biome knip husky
 pnpm exec husky init
 ```
 

@@ -53,19 +53,24 @@ python3 scripts/docs-check
 
 During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
 
-| Tool        | Type    | Purpose                                   | Install                     |
-| ----------- | ------- | ----------------------------------------- | --------------------------- |
-| turbo       | global  | Monorepo orchestration (Turborepo)        | `pnpm add -w -D turbo`      |
-| lint-staged | dev     | Run linters only on staged files          | `pnpm add -D lint-staged`   |
-| test-staged | dev     | Run tests only on staged/changed files    | `pnpm add -D test-staged`   |
-| t3oss       | runtime | Type-safe environment variable management | `pnpm add @t3-oss/env-core` |
-| vitest      | dev     | Test runner                               | `pnpm add -D vitest`        |
+The `Install` column uses `<pm>` as a placeholder for the resolved package manager (e.g., `pnpm`, `bun`, `npm`). The agent must substitute `<pm>` with the package manager resolved from the template cascade before printing setup instructions. The `-w` flag is pnpm-specific; for other package managers, omit it or use the equivalent.
+
+Deeper template layers may override a tool from this table by reusing the same value in the `Tool` column and changing its description and/or install command. Tools omitted by deeper layers remain inherited.
+
+| Tool        | Type    | Purpose                                   | Install                          |
+| ----------- | ------- | ----------------------------------------- | -------------------------------- |
+| turbo       | global  | Monorepo orchestration (Turborepo)        | `<pm> add -w -D turbo`           |
+| lint-staged | dev     | Run linters only on staged files          | `<pm> add -D lint-staged`        |
+| test-staged | dev     | Run tests only on staged/changed files    | `<pm> add -D test-staged`        |
+| t3oss       | runtime | Type-safe environment variable management | `<pm> add @t3-oss/env-core`      |
 
 ## Project Structure
 
 - **`.agents/`** — folder for custom skills, prompts, and agent definitions used by opencode.
 
 ## Skills (opencode)
+
+These are recommended skills for the project. Install them separately if not already present:
 
 - `commit-changes` — conventional commits workflow
 - `super-planning` — planning multi-step tasks

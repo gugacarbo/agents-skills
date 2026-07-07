@@ -2,18 +2,45 @@
 
 This is a TypeScript project using Vite as the build tool and dev server.
 
-## Conventions
+## Runtime
 
-- **Runtime**: Node.js (LTS)
-- **Build tool**: Vite (latest stable, installed via CLI)
-- **Package manager**: pnpm (mandatory)
-- **Module system**: ESM (`.ts` files, `import`/`export` syntax)
-- **Entry point**: `index.html` → `src/main.ts`
-- **Testing**: Vitest (shares Vite config)
-- **Linting/formatting**: Biome
-- **Type checking**: `tsc --noEmit` or `vue-tsc` (Vue), `svelte-check` (Svelte)
-- **Dead code removal**: Knip
-- **Git hooks**: Husky (pre-commit: lint + typecheck; pre-push: test)
+- Node.js (LTS)
+
+## Build tool
+
+- Vite (latest stable, installed via CLI)
+
+## Package manager
+
+- pnpm (mandatory)
+
+## Module system
+
+- ESM (`.ts` files, `import`/`export` syntax)
+
+## Entry point
+
+- `index.html` → `src/main.ts`
+
+## Test runner
+
+- Vitest (shares Vite config)
+
+## Lint & Format
+
+- Biome (linter + formatter, unified)
+
+## Type checking
+
+- `tsc --noEmit` (or `vue-tsc` for Vue, `svelte-check` for Svelte)
+
+## Dead code
+
+- Knip
+
+## Git hooks
+
+- Husky (pre-commit: lint + typecheck; pre-push: test)
 
 ## Commands
 
@@ -52,10 +79,21 @@ pnpm knip         # dead code detection
 └── README.md
 ```
 
-## Setup (after scaffolding)
+## Framework init
+
+During scaffolding, the agent must ask which framework to use (vanilla-ts, react-ts, vue-ts, svelte-ts) and use the corresponding Vite template:
 
 ```sh
-pnpm create vite . --template vanilla-ts   # or react-ts, vue-ts, svelte-ts
+pnpm create vite . --template <framework>
+```
+
+Available templates: `vanilla-ts`, `react-ts`, `vue-ts`, `svelte-ts`.
+
+## Dependencies
+
+See `REQUIREMENTS.md` for the full dependency table. After the Vite CLI scaffolds the project, install additional dev tools:
+
+```sh
 pnpm add -D biome knip husky
 pnpm exec husky init
 ```

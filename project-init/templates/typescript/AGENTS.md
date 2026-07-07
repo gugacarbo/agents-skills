@@ -2,15 +2,37 @@
 
 This is a TypeScript project. The exact runtime (Node, Deno, Bun) is chosen during project initialization.
 
-## Conventions
+## Runtime
 
-- **Package manager**: pnpm (mandatory)
-- **Module system**: ESM (`.ts` files, `import`/`export` syntax)
-- **Testing**: Vitest
-- **Linting/formatting**: Biome (mandatory)
-- **Type checking**: `tsc --noEmit`
-- **Dead code removal**: Knip
-- **Git hooks**: Husky (pre-commit: lint + typecheck; pre-push: test)
+- Node.js (LTS) / Bun / Deno — resolved by the selected derivative
+
+## Package manager
+
+- pnpm (mandatory)
+
+## Module system
+
+- ESM (`.ts` files, `import`/`export` syntax)
+
+## Test runner
+
+- Vitest
+
+## Lint & Format
+
+- Biome (linter + formatter, unified, mandatory)
+
+## Type checking
+
+- `tsc --noEmit`
+
+## Dead code
+
+- Knip
+
+## Git hooks
+
+- Husky (pre-commit: lint + typecheck; pre-push: test)
 
 ## Commands (once initialized)
 

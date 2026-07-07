@@ -1,0 +1,41 @@
+{
+  "skill_name": "project-init",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/project-init base-only. Quero criar um repositório novo só com as convenções base em ./hello-base.",
+      "expected_output": "Resolves `base-only` as the `_base` alias, scaffolds only base files, and recommends CASA plus any selected optional tools without trying to resolve a family directory.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Start a new TypeScript project in ./ts-app using the default TypeScript template.",
+      "expected_output": "Resolves `_base` plus `typescript`, scaffolds layered files, and recommends only the TypeScript dependency stack without duplicate optional-tool installs for required packages.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "/project-init typescript/node para um projeto chamado api-core em ./api-core.",
+      "expected_output": "Resolves `_base` -> `typescript` -> `typescript/node`, prints exactly one framework-init command (`pnpm init`), and keeps inherited concerns that the node layer does not override.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "/project-init typescript/vite para um app frontend. Quero React.",
+      "expected_output": "Asks for or respects the selected Vite framework template, uses `pnpm create vite . --template react-ts`, and keeps the instruction about handling non-empty directories before running the framework CLI.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Create a Bun project in ./bun-service and include turbo plus lint-staged.",
+      "expected_output": "Merges optional tools by tool id, uses Bun-specific install commands for the selected tools, and does not replace inherited optional tools by accident.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "/project-init typescript into ./existing-dir, which already has files inside.",
+      "expected_output": "Checks whether the target directory is non-empty, lists conflicting paths, and asks for explicit approval before overwriting scaffolded files.",
+      "files": []
+    }
+  ]
+}

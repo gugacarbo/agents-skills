@@ -2,17 +2,41 @@
 
 This is a TypeScript project targeting Node.js runtime.
 
-## Conventions
+## Runtime
 
-- **Runtime**: Node.js (LTS)
-- **Package manager**: pnpm (mandatory)
-- **Module system**: ESM (`"type": "module"` in package.json, `.ts` files, `import`/`export` syntax)
-- **Entry point**: `src/index.ts`
-- **Testing**: Vitest
-- **Linting/formatting**: Biome
-- **Type checking**: `tsc --noEmit`
-- **Dead code removal**: Knip
-- **Git hooks**: Husky (pre-commit: lint + typecheck; pre-push: test)
+- Node.js (LTS)
+
+## Package manager
+
+- pnpm (mandatory)
+
+## Module system
+
+- ESM (`"type": "module"` in package.json, `.ts` files, `import`/`export` syntax)
+
+## Entry point
+
+- `src/index.ts`
+
+## Test runner
+
+- Vitest
+
+## Lint & Format
+
+- Biome (linter + formatter, unified)
+
+## Type checking
+
+- `tsc --noEmit`
+
+## Dead code
+
+- Knip
+
+## Git hooks
+
+- Husky (pre-commit: lint + typecheck; pre-push: test)
 
 ## Commands
 
@@ -46,10 +70,17 @@ pnpm knip         # dead code detection
 └── README.md
 ```
 
-## Setup (after scaffolding)
+## Framework init
 
 ```sh
 pnpm init
+```
+
+## Dependencies
+
+See `REQUIREMENTS.md` for the full dependency table. Install all at once:
+
+```sh
 pnpm add -D typescript @types/node vitest biome tsx knip husky
 pnpm exec husky init
 ```
