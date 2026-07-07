@@ -103,6 +103,14 @@ def display_dependencies(dependencies):
     return ", ".join(dependencies)
 
 
+def display_profile_config(profile):
+    if not isinstance(profile, dict):
+        return "—", "—"
+    model = profile.get("model", "")
+    agent = profile.get("agent", "")
+    return model or "default", agent or "default"
+
+
 def collect_timeline(tasks):
     events = []
     for task in tasks:
@@ -164,19 +172,34 @@ lines.append(f"| **Total** | **{len(tasks)}** |")
 lines.extend(
     [
         "",
+        "## Agent Profiles",
+        "",
+        "| Profile | Model | Agent |",
+        "|---------|-------|-------|",
+    ]
+)
+
+for profile_name in ("general", "deep", "quick"):
+    model, agent = display_profile_config(payload.get("agents", {}).get(profile_name, {}))
+    lines.append(f"| {profile_name} | {model} | {agent} |")
+
+lines.extend(
+    [
+        "",
         "## Tasks",
         "",
-        "| Task ID | Title | Batch | Phase | Status | Dependencies |",
-        "|---------|-------|-------|-------|--------|-------------|",
+        "| Task ID | Title | Profile | Batch | Phase | Status | Dependencies |",
+        "|---------|-------|---------|-------|-------|--------|-------------|",
     ]
 )
 
 if tasks:
     for task in tasks:
         lines.append(
-            "| {id} | {title} | {batch} | {phase} | {status} | {deps} |".format(
+            "| {id} | {title} | {profile} | {batch} | {phase} | {status} | {deps} |".format(
                 id=task.get("id", "—"),
                 title=task.get("title", "—"),
+                profile=task.get("task_profile", "—"),
                 batch=task.get("batch", "—"),
                 phase=task.get("phase", "—"),
                 status=status_label(task.get("status")),
@@ -184,7 +207,7 @@ if tasks:
             )
         )
 else:
-    lines.append("| — | no tasks defined yet | — | — | ⏳ pending | — |")
+    lines.append("| — | no tasks defined yet | — | — | — | ⏳ pending | — |")
 
 lines.extend(
     [

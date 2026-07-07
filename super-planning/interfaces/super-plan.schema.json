@@ -15,6 +15,7 @@
 		"techStack",
 		"executionMode",
 		"reviewCadence",
+		"agents",
 		"branchStrategy",
 		"worktree",
 		"globalConstraints",
@@ -69,6 +70,9 @@
 		"reviewCadence": {
 			"type": "string",
 			"enum": ["per_task", "per_batch", "final_only"]
+		},
+		"agents": {
+			"$ref": "#/$defs/agentsConfig"
 		},
 		"branchStrategy": {
 			"$ref": "#/$defs/branchStrategy"
@@ -139,6 +143,35 @@
 				"featureBranch": {
 					"type": "string",
 					"minLength": 1
+				}
+			}
+		},
+		"agentProfile": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["model", "agent"],
+			"properties": {
+				"model": {
+					"type": "string"
+				},
+				"agent": {
+					"type": "string"
+				}
+			}
+		},
+		"agentsConfig": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["general", "deep", "quick"],
+			"properties": {
+				"general": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"deep": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"quick": {
+					"$ref": "#/$defs/agentProfile"
 				}
 			}
 		},
@@ -239,6 +272,7 @@
 				"description",
 				"status",
 				"tryCount",
+				"task_profile",
 				"batch",
 				"phase",
 				"reportFile",
@@ -281,6 +315,10 @@
 				"tryCount": {
 					"type": "integer",
 					"minimum": 1
+				},
+				"task_profile": {
+					"type": "string",
+					"enum": ["general", "deep", "quick"]
 				},
 				"batch": {
 					"type": "string",

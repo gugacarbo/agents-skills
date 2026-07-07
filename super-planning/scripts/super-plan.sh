@@ -76,6 +76,7 @@ TASK_STATUSES = PLAN_STATUSES | {"reviewing", "cancelled"}
 REVIEW_CADENCE = {"per_task", "per_batch", "final_only"}
 EXECUTION_MODE = {"subagent-driven", "sequential"}
 TASK_PHASES = {"foundation", "core", "surface", "final"}
+TASK_PROFILES = {"general", "deep", "quick"}
 
 
 def fail(message: str):
@@ -127,6 +128,7 @@ expect_keys(
         "techStack",
         "executionMode",
         "reviewCadence",
+        "agents",
         "branchStrategy",
         "worktree",
         "globalConstraints",
@@ -161,6 +163,15 @@ if payload["executionMode"] not in EXECUTION_MODE:
 expect_non_empty_string(payload["reviewCadence"], "reviewCadence")
 if payload["reviewCadence"] not in REVIEW_CADENCE:
     fail(f"reviewCadence must be one of: {', '.join(sorted(REVIEW_CADENCE))}")
+
+expect_keys(payload["agents"], ["general", "deep", "quick"], "agents")
+for profile_name in ("general", "deep", "quick"):
+    profile = payload["agents"][profile_name]
+    expect_keys(profile, ["model", "agent"], f"agents.{profile_name}")
+    if not isinstance(profile["model"], str):
+        fail(f"agents.{profile_name}.model must be a string")
+    if not isinstance(profile["agent"], str):
+        fail(f"agents.{profile_name}.agent must be a string")
 
 expect_keys(payload["branchStrategy"], ["baseBranch", "featureBranch"], "branchStrategy")
 expect_non_empty_string(payload["branchStrategy"]["baseBranch"], "branchStrategy.baseBranch")
@@ -209,6 +220,7 @@ for index, task in enumerate(payload["tasks"]):
             "description",
             "status",
             "tryCount",
+            "task_profile",
             "batch",
             "phase",
             "reportFile",
@@ -232,6 +244,9 @@ for index, task in enumerate(payload["tasks"]):
     expect_status(task["status"], TASK_STATUSES, f"{path_label}.status")
     if not isinstance(task["tryCount"], int) or task["tryCount"] < 1:
         fail(f"{path_label}.tryCount must be an integer >= 1")
+    expect_non_empty_string(task["task_profile"], f"{path_label}.task_profile")
+    if task["task_profile"] not in TASK_PROFILES:
+        fail(f"{path_label}.task_profile must be one of: {', '.join(sorted(TASK_PROFILES))}")
     expect_non_empty_string(task["batch"], f"{path_label}.batch")
     expect_non_empty_string(task["phase"], f"{path_label}.phase")
     if task["phase"] not in TASK_PHASES:
@@ -428,6 +443,11 @@ payload = {
     "techStack": [],
     "executionMode": execution_mode,
     "reviewCadence": review_cadence,
+    "agents": {
+        "general": {"model": "", "agent": ""},
+        "deep": {"model": "", "agent": ""},
+        "quick": {"model": "", "agent": ""},
+    },
     "branchStrategy": {
         "baseBranch": base_branch,
         "featureBranch": feature_branch,

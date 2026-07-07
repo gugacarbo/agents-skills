@@ -143,37 +143,48 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Choose role-specific model"] --> B{"Platform supports explicit model selection?"}
-    B -->|No| C["Record limitation in super-plan.json and use session model"]
-    B -->|Yes| D["Set explicit model per role"]
-    C --> E["Check platform capabilities"]
-    D --> E
-    E --> F{"Parallel dispatch supported?"}
-    F -->|No| G["Fallback to sequential wave"]
-    F -->|Yes| H["Parallel remains possible"]
-    G --> I
-    H --> I{"Tasks are independent, file-isolated, and dependency-safe?"}
-    I -->|No| J["Use sequential mode"]
-    I -->|Yes| K{"Worktree isolation available if needed?"}
-    K -->|No| L["Do not run parallel tasks with overlapping files"]
-    K -->|Yes| M["Use parallel mode with isolated worktrees"]
-    L --> J
-    J --> N["Run pre-flight checks: repo state, tooling, registry and ledger"]
-    M --> N
-    N --> O{"Any pre-flight check failed?"}
-    O -->|Yes| P["Fix before dispatching"]
-    P --> N
-    O -->|No| Q["Build minimal dispatch prompt"]
-    Q --> R{"Implementer returned status?"}
-    R -->|DONE| S["Mark ready_for_review and hand off to Phase 6"]
-    R -->|DONE_WITH_CONCERNS| T["Read concerns, then mark ready_for_review or address first"]
-    R -->|NEEDS_CONTEXT| U["Provide context and re-dispatch"]
-    R -->|BLOCKED| V{"Can unblock with context, better model, or smaller scope?"}
-    V -->|Yes| W["Change something and re-dispatch"]
-    V -->|No| X["Escalate to user"]
-    U --> Q
-    W --> Q
-    T --> S
+    A["Read task_profile or wave profiles from super-plan.json"] --> B["Map to agents.quick/general/deep"]
+    B --> C{"Configured agent/model present?"}
+    C -->|No| D["Use platform defaults"]
+    C -->|Yes| E["Re-discover current platform options"]
+    E --> F{"Configured agent/model still available?"}
+    F -->|No| G["Clear profile in super-plan.json and fall back to defaults"]
+    F -->|Yes| H{"Platform supports explicit model selection?"}
+    H -->|No| I["Record limitation in super-plan.json and use session model/default agent"]
+    H -->|Yes| J["Run lightweight probe with configured agent/model"]
+    J --> K{"Probe succeeded?"}
+    K -->|No| G
+    K -->|Yes| L["Use explicit agent/model for dispatch"]
+    D --> M["Check platform capabilities"]
+    G --> M
+    I --> M
+    L --> M
+    M --> N{"Parallel dispatch supported?"}
+    N -->|No| O["Fallback to sequential wave"]
+    N -->|Yes| P["Parallel remains possible"]
+    O --> Q
+    P --> Q{"Tasks are independent, file-isolated, and dependency-safe?"}
+    Q -->|No| R["Use sequential mode"]
+    Q -->|Yes| S{"Worktree isolation available if needed?"}
+    S -->|No| T["Do not run parallel tasks with overlapping files"]
+    S -->|Yes| U["Use parallel mode with isolated worktrees"]
+    T --> R
+    R --> V["Run pre-flight checks: repo state, tooling, registry, ledger, validated profiles"]
+    U --> V
+    V --> W{"Any pre-flight check failed?"}
+    W -->|Yes| X["Fix before dispatching"]
+    X --> V
+    W -->|No| Y["Build minimal dispatch prompt"]
+    Y --> Z{"Implementer returned status?"}
+    Z -->|DONE| AA["Mark ready_for_review and hand off to Phase 6"]
+    Z -->|DONE_WITH_CONCERNS| AB["Read concerns, then mark ready_for_review or address first"]
+    Z -->|NEEDS_CONTEXT| AC["Provide context and re-dispatch"]
+    Z -->|BLOCKED| AD{"Can unblock with context, better model, or smaller scope?"}
+    AD -->|Yes| AE["Change something and re-dispatch"]
+    AD -->|No| AF["Escalate to user"]
+    AC --> Y
+    AE --> Y
+    AB --> AA
 ```
 
 ## Phase 6: Review

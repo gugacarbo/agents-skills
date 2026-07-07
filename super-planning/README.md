@@ -17,15 +17,15 @@ Crie planos de implementação decompostos em tarefas e execute-os via subagente
 
 ## Fases
 
-| Fase          | O que produz                                                    | Ponto de verificação                                                                                         |
-| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 1. Brainstorm | Requisitos, restrições, decisões de design                      | Fluxo completo de brainstorm integrado                                                                       |
-| 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                                | Aprovação do usuário                                                                                         |
-| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                     | Checklist de auto-revisão                                                                                    |
-| 4. Decompose  | `docs/tasks/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers e criação do plano; ledger gerado com Summary, Tasks, Timeline e Requirements Coverage |
-| 5. Dispatch   | Trabalho dos subagentes                                         | Checks pré-voo                                                                                               |
-| 6. Review     | Revisão em dois estágios                                        | Issues críticos/importantes devem ser corrigidos                                                             |
-| 7. Integrate  | Revisão final, preparação para merge                            | Suite de testes completa passa                                                                               |
+| Fase          | O que produz                                                    | Ponto de verificação                                                                                       |
+| ------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1. Brainstorm | Requisitos, restrições, decisões de design                      | Fluxo completo de brainstorm integrado                                                                     |
+| 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                                | Aprovação do usuário                                                                                       |
+| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                     | Checklist de auto-revisão                                                                                  |
+| 4. Decompose  | `docs/tasks/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers, descoberta de perfis `general/deep/quick`, `task_profile` por task, e ledger gerado |
+| 5. Dispatch   | Trabalho dos subagentes                                         | Checks pré-voo, validação de `agent/model`, e fallback para default                                        |
+| 6. Review     | Revisão em dois estágios                                        | Issues críticos/importantes devem ser corrigidos                                                           |
+| 7. Integrate  | Revisão final, preparação para merge                            | Suite de testes completa passa                                                                             |
 
 ## Documentação Detalhada
 

@@ -49,9 +49,15 @@ test_init_generates_valid_registry_and_rich_empty_ledger() {
 
   assert_exists "$registry"
   assert_exists "$ledger"
+  assert_contains_file '"agents": {' "$registry"
+  assert_contains_file '"general": {' "$registry"
+  assert_contains_file '"model": ""' "$registry"
+  assert_contains_file '"agent": ""' "$registry"
   assert_contains_file "# Progress Ledger: sample" "$ledger"
   assert_contains_file "## Summary" "$ledger"
   assert_contains_file "| pending | 0 |" "$ledger"
+  assert_contains_file "## Agent Profiles" "$ledger"
+  assert_contains_file "| quick | default | default |" "$ledger"
   assert_contains_file "## Timeline" "$ledger"
   assert_contains_file "no task events logged yet" "$ledger"
   assert_contains_file "## Requirements Coverage" "$ledger"
@@ -103,6 +109,25 @@ test_update_accepts_reviewing_task_status() {
   assert_contains_file "🔍 reviewing" "$tmp/docs/tasks/0001-auth-middleware/progress-ledger.md"
 }
 
+test_update_rejects_invalid_task_profile_without_mutating_file() {
+  local tmp registry before
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+  before=$(cat "$registry")
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-0001].task_profile=banana >"$tmp/output.log" 2>&1; then
+    fail "expected invalid task_profile update to fail"
+  fi
+
+  if [ "$(cat "$registry")" != "$before" ]; then
+    fail "registry changed after invalid task_profile update"
+  fi
+
+  assert_contains_file "task_profile must be one of" "$tmp/output.log"
+}
+
 test_render_progress_ledger_includes_timeline_and_requirements() {
   local tmp registry ledger
   tmp=$(mktemp -d)
@@ -116,8 +141,10 @@ test_render_progress_ledger_includes_timeline_and_requirements() {
 
   assert_contains_file "## Summary" "$ledger"
   assert_contains_file "| completed | 5 |" "$ledger"
+  assert_contains_file "## Agent Profiles" "$ledger"
+  assert_contains_file "| quick | gpt-5-mini | quick |" "$ledger"
   assert_contains_file "## Tasks" "$ledger"
-  assert_contains_file "| Task-A-0001 | Definir tipos e interfaces de autenticação | A | foundation | ✅ completed | — |" "$ledger"
+  assert_contains_file "| Task-A-0001 | Definir tipos e interfaces de autenticação | general | A | foundation | ✅ completed | — |" "$ledger"
   assert_contains_file "## Timeline" "$ledger"
   assert_contains_file "| 2026-07-04T14:10:00Z | Task-A-0001 | completed | 1 |" "$ledger"
   assert_contains_file "## Requirements Coverage" "$ledger"
@@ -263,6 +290,7 @@ main() {
   test_update_rejects_invalid_status_without_mutating_file
   test_update_accepts_cancelled_task_status
   test_update_accepts_reviewing_task_status
+  test_update_rejects_invalid_task_profile_without_mutating_file
   test_render_progress_ledger_includes_timeline_and_requirements
   test_materialized_logger_wrapper_writes_jsonl_events
   test_summarize_all_tasks_terminal_output

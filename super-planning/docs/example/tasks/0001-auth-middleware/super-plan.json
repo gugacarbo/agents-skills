@@ -18,6 +18,20 @@
 	],
 	"executionMode": "sequential",
 	"reviewCadence": "per_task",
+	"agents": {
+		"general": {
+			"model": "gpt-5",
+			"agent": "general/default"
+		},
+		"deep": {
+			"model": "gpt-5",
+			"agent": "deep"
+		},
+		"quick": {
+			"model": "gpt-5-mini",
+			"agent": "quick"
+		}
+	},
 	"branchStrategy": {
 		"baseBranch": "main",
 		"featureBranch": "feature/0001-auth-middleware"
@@ -130,6 +144,7 @@
 			"description": "Criar src/types/auth.ts com as interfaces JwtPayload, AuthUser, AuthOptions e o declaration merging do Express para tipar req.user.",
 			"status": "completed",
 			"tryCount": 1,
+			"task_profile": "general",
 			"batch": "A",
 			"phase": "foundation",
 			"reportFile": "docs/tasks/0001-auth-middleware/Task-A-0001/report.md",
@@ -180,6 +195,7 @@
 			"description": "Implementar a função verifyToken em src/middleware/auth.ts e escrever testes unitários cobrindo token válido, expirado, assinatura inválida, payload sem sub, payload sem role.",
 			"status": "completed",
 			"tryCount": 1,
+			"task_profile": "deep",
 			"batch": "A",
 			"phase": "foundation",
 			"reportFile": "docs/tasks/0001-auth-middleware/Task-A-0002/report.md",
@@ -233,6 +249,7 @@
 			"description": "Implementar o middleware requireAuth que extrai o token do header Authorization, chama verifyToken, e popula req.user. Adicionar testes para os edge cases de header.",
 			"status": "completed",
 			"tryCount": 1,
+			"task_profile": "general",
 			"batch": "B",
 			"phase": "core",
 			"reportFile": "docs/tasks/0001-auth-middleware/Task-B-0001/report.md",
@@ -286,6 +303,7 @@
 			"description": "Implementar o middleware requireRole que verifica se req.user.role está na lista de roles permitidas. Adicionar testes para role autorizada e não autorizada.",
 			"status": "completed",
 			"tryCount": 1,
+			"task_profile": "quick",
 			"batch": "B",
 			"phase": "core",
 			"reportFile": "docs/tasks/0001-auth-middleware/Task-B-0002/report.md",
@@ -337,6 +355,7 @@
 			"description": "Adicionar requireAuth e requireRole nas rotas existentes em src/app.ts. Escrever testes de integração que fazem requisições HTTP reais.",
 			"status": "completed",
 			"tryCount": 1,
+			"task_profile": "deep",
 			"batch": "C",
 			"phase": "surface",
 			"reportFile": "docs/tasks/0001-auth-middleware/Task-C-0001/report.md",

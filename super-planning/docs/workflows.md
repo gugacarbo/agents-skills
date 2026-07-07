@@ -71,9 +71,9 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Batch A - Parallel Group
-        A1[Task 1<br/>phase: foundation]
-        A2[Task 2<br/>phase: foundation]
-        A3[Dispatch All<br/>Parallel]
+        A1[Task 1<br/>task_profile: quick<br/>phase: foundation]
+        A2[Task 2<br/>task_profile: deep<br/>phase: foundation]
+        A3[Validate quick/deep profiles<br/>then Dispatch All Parallel]
         A1 --> A3
         A2 --> A3
         A3 --> A4{reviewCadence}
@@ -88,9 +88,9 @@ flowchart TD
     end
 
     subgraph Batch B - Parallel Group
-        B1[Task 3<br/>phase: core]
-        B2[Task 4<br/>phase: surface]
-        B3[Dispatch All<br/>Parallel]
+        B1[Task 3<br/>task_profile: general<br/>phase: core]
+        B2[Task 4<br/>task_profile: deep<br/>phase: surface]
+        B3[Validate general/deep profiles<br/>then Dispatch All Parallel]
         B1 --> B3
         B2 --> B3
         B3 --> B4{reviewCadence}

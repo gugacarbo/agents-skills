@@ -16,6 +16,22 @@ Use the least powerful model that can handle each role:
 
 **Turn count beats token price.** The cheapest models take 2–3× more turns on multi-step work, costing more overall. Use standard as the floor for reviewers and for implementers working from prose descriptions. Reserve the cheapest tier for implementers whose task JSON entry contains the complete code to write.
 
+## Task Profiles and Configured Subagent Slots
+
+Read the task's `task_profile` from `super-plan.json` before dispatching. Every task must map to one of three configured execution slots under `agents`:
+
+- `quick`
+- `general`
+- `deep`
+
+Use the matching `agents.<task_profile>` configuration when it is populated.
+
+Example:
+
+- `task_profile=quick` → use `agents.quick`
+- `task_profile=general` → use `agents.general`
+- `task_profile=deep` → use `agents.deep`
+
 ## Capability Adapter
 
 Before dispatching, check what the current platform actually supports:
@@ -28,6 +44,27 @@ Before dispatching, check what the current platform actually supports:
 | Subagent file handoff/report write | Require report/review files in the task folder | Execute inline but still write the same files yourself                                        |
 
 If any preferred capability is missing, adapt the execution mode instead of pretending the capability exists.
+
+## Profile Validation and Fallback
+
+Before starting any implementation wave, especially a parallel wave, validate the configured execution slots against the current platform:
+
+1. Re-discover the currently available agents/subagents and models using the platform's available tools
+2. For each profile used by the pending tasks in the upcoming wave, verify whether the configured `agent` and `model` are still available
+3. Run a lightweight pre-flight dispatch/probe with the configured profile before launching the full batch when the platform supports such a test
+
+If a configured profile is empty:
+
+- treat it as "use platform default"
+- do not block execution
+
+If a configured profile fails validation or the pre-flight dispatch:
+
+1. Update `super-plan.json` through the active helper path and set that profile's `model` and `agent` to empty strings
+2. Record that the orchestrator is falling back to the platform default selection
+3. Use the system default configuration for the real subagent dispatch
+
+Never keep retrying a broken explicit model/agent pairing across a batch. Clear it once, persist the fallback, and continue with the platform defaults.
 
 ## Resolve the Shared Logging Helper
 
@@ -112,33 +149,38 @@ The package must include:
 For each task:
 
 1. Read the task entry from `docs/tasks/{NNNN-<feature-name>}/super-plan.json`.
-2. Do **not** create task directories in this phase.
-3. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
-4. If the subagent asks questions, answer before letting it proceed.
-5. When the subagent returns DONE/DONE_WITH_CONCERNS, update `super-plan.json` to `ready_for_review` via script so the ledger regenerates.
-6. Read `reviewCadence` from `super-plan.json`.
-7. If `reviewCadence=per_task`, set the task status to `reviewing` via script, then hand off immediately to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
-8. If `reviewCadence=per_batch`, wait until the current batch is fully `ready_for_review`, then set each task to `reviewing` and hand off the batch to Phase 6.
-9. If `reviewCadence=final_only`, continue implementation without task-level review, keep the task at `ready_for_review`, and defer both the independent review gate and `completed` transition to final integration.
-10. If the reviewer later finds issues, update `super-plan.json` to `needs_fix` via script, dispatch a fix subagent, and re-review according to the same cadence.
-11. After clean review at the configured cadence, append a `completed` log entry with the task-local wrapper `log-task.sh` and update the JSON status to `completed` via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
+2. Resolve the task's `task_profile` and the corresponding `agents.<task_profile>` config.
+3. Validate the configured model/agent if present; otherwise use the system default.
+4. Do **not** create task directories in this phase.
+5. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
+6. If the subagent asks questions, answer before letting it proceed.
+7. When the subagent returns DONE/DONE_WITH_CONCERNS, update `super-plan.json` to `ready_for_review` via script so the ledger regenerates.
+8. Read `reviewCadence` from `super-plan.json`.
+9. If `reviewCadence=per_task`, set the task status to `reviewing` via script, then hand off immediately to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
+10. If `reviewCadence=per_batch`, wait until the current batch is fully `ready_for_review`, then set each task to `reviewing` and hand off the batch to Phase 6.
+11. If `reviewCadence=final_only`, continue implementation without task-level review, keep the task at `ready_for_review`, and defer both the independent review gate and `completed` transition to final integration.
+12. If the reviewer later finds issues, update `super-plan.json` to `needs_fix` via script, dispatch a fix subagent, and re-review according to the same cadence.
+13. After clean review at the configured cadence, append a `completed` log entry with the task-local wrapper `log-task.sh` and update the JSON status to `completed` via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
 
 ## Parallel Dispatch
 
 For independent tasks with no file conflicts:
 
 1. Extract all task entries from `super-plan.json` at once.
-2. Do **not** create task directories in this phase.
-3. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.
-4. Wait for all to return.
-5. Mark returned tasks as `ready_for_review` via script so the ledger regenerates.
-6. Read `reviewCadence` from `super-plan.json`.
-7. If `reviewCadence=per_task`, set each finished task to `reviewing` via script, then dispatch a reviewer subagent immediately for each task as soon as that task's implementer finishes. Do not wait for sibling tasks in the same parallel batch.
-8. If `reviewCadence=per_batch`, wait for the full batch to reach `ready_for_review`, then set each task to `reviewing` and hand the batch to Phase 6 together.
-9. If `reviewCadence=final_only`, skip task-level review during the parallel wave, keep accepted tasks at `ready_for_review`, and defer independent review plus the `completed` transition to final integration.
-10. Dispatch fix subagents for any reviewed tasks that need fixes.
-11. Integrate all changes onto the working branch.
-12. After clean review at the configured cadence, append `completed` log entries with each task-local wrapper `log-task.sh` and update the JSON status for the accepted tasks via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
+2. Resolve which profiles are needed in the wave from each task's `task_profile`.
+3. Validate the configured `agents.quick|general|deep` entries needed for the wave and run a lightweight pre-flight dispatch/probe before the real batch when the platform supports it.
+4. For any failed configured profile, clear `model` and `agent` in `super-plan.json` before the batch and use the system defaults instead.
+5. Do **not** create task directories in this phase.
+6. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.
+7. Wait for all to return.
+8. Mark returned tasks as `ready_for_review` via script so the ledger regenerates.
+9. Read `reviewCadence` from `super-plan.json`.
+10. If `reviewCadence=per_task`, set each finished task to `reviewing` via script, then dispatch a reviewer subagent immediately for each task as soon as that task's implementer finishes. Do not wait for sibling tasks in the same parallel batch.
+11. If `reviewCadence=per_batch`, wait for the full batch to reach `ready_for_review`, then set each task to `reviewing` and hand the batch to Phase 6 together.
+12. If `reviewCadence=final_only`, skip task-level review during the parallel wave, keep accepted tasks at `ready_for_review`, and defer independent review plus the `completed` transition to final integration.
+13. Dispatch fix subagents for any reviewed tasks that need fixes.
+14. Integrate all changes onto the working branch.
+15. After clean review at the configured cadence, append `completed` log entries with each task-local wrapper `log-task.sh` and update the JSON status for the accepted tasks via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
 
 **Critical:** Multiple dispatch calls in one response = parallel execution. One per response = sequential. The dispatch pattern controls parallelism.
 
@@ -217,6 +259,7 @@ Before dispatching any subagent, verify:
 1. **Repository state:** clean working tree, correct base branch checked out
 2. **Tooling available:** test runner, linter, and build commands are accessible and work
 3. **Structured registry written:** `super-plan.json` exists with all tasks defined and set to `pending`, and the generated ledger matches it
+4. **Execution profiles validated:** any configured `agents.<profile>` used by the upcoming wave still exists on the current platform, or has already been cleared to default fallback
 
 If any check fails, fix it before dispatching.
 

@@ -4,6 +4,7 @@
 	const TOMBSTONE_AFTER_MS = 15000; // show the "paused" overlay after this long disconnected
 
 	// Pure: next backoff delay (doubles, capped). Exported for unit tests.
+	/** @param {number} current @param {number} max */
 	function nextReconnectDelay(current, max) {
 		return Math.min(current * 2, max);
 	}
@@ -19,10 +20,14 @@
 	// Everything below is browser-only; bail out when loaded in Node (tests).
 	if (typeof window === "undefined") return;
 
+	/** @type {WebSocket|null} */
 	let ws = null;
+	/** @type {object[]} */
 	let eventQueue = [];
 	let reconnectDelay = MIN_RECONNECT_MS;
+	/** @type {ReturnType<typeof setTimeout>|null} */
 	let reconnectTimer = null;
+	/** @type {number|null} */
 	let disconnectedSince = null;
 	let everConnected = false;
 	let tombstoneShown = false;
@@ -53,8 +58,11 @@
 	}
 
 	// Reflect connection state in the frame's status pill (absent on full-doc screens).
+	/** @param {"connecting"|"connected"|"reconnecting"|"disconnected"} state */
 	function setStatus(state) {
-		const el = document.querySelector(".status");
+		const el = /** @type {HTMLElement|null} */ (
+			document.querySelector(".status")
+		);
 		if (!el) return;
 		const map = {
 			connecting: ["Connecting…", "var(--text-tertiary)"],
@@ -62,7 +70,8 @@
 			reconnecting: ["Reconnecting…", "var(--warning)"],
 			disconnected: ["Disconnected", "var(--error)"],
 		};
-		const [text, color] = map[state] || map.disconnected;
+		const entry = map[state] || map.disconnected;
+		const [text, color] = entry;
 		el.textContent = text;
 		el.style.setProperty("--status-color", color);
 	}
@@ -100,7 +109,7 @@
 			reconnectDelay = MIN_RECONNECT_MS;
 			tombstoneShown = false;
 			setStatus("connected");
-			for (const e of eventQueue) ws.send(JSON.stringify(e));
+			for (const e of eventQueue) ws?.send(JSON.stringify(e));
 			eventQueue = [];
 			// Recovered from a tombstoned outage (e.g. the server restarted on the same
 			// port) — reload through the keyed bootstrap when possible so the cookie is
@@ -134,11 +143,12 @@
 		// Let onclose own reconnection so we don't schedule it twice.
 		ws.onerror = () => {
 			try {
-				ws.close();
+				ws?.close();
 			} catch (_e) {}
 		};
 	}
 
+	/** @param {{ type: string; text?: string; choice?: string; id?: string|null; value?: string; [key: string]: unknown }} event */
 	function sendEvent(event) {
 		event.timestamp = Date.now();
 		if (ws && ws.readyState === WebSocket.OPEN) {
@@ -150,7 +160,9 @@
 
 	// Capture clicks on choice elements
 	document.addEventListener("click", (e) => {
-		const target = e.target.closest("[data-choice]");
+		const target = /** @type {HTMLElement|null} */ (
+			/** @type {Element} */ (e.target).closest("[data-choice]")
+		);
 		if (!target) return;
 
 		sendEvent({
@@ -162,10 +174,14 @@
 	});
 
 	// Frame UI: selection tracking
-	window.selectedChoice = null;
+	/** @type {any} */ (window).selectedChoice = null;
 
-	window.toggleSelect = (el) => {
-		const container = el.closest(".options") || el.closest(".cards");
+	/** @type {any} */ (window).toggleSelect = (
+		/** @type {HTMLElement} */ el,
+	) => {
+		const container = /** @type {HTMLElement|null} */ (
+			el.closest(".options") || el.closest(".cards")
+		);
 		const multi = container && container.dataset.multiselect !== undefined;
 		if (container && !multi) {
 			for (const o of container.querySelectorAll(".option, .card"))
@@ -176,12 +192,13 @@
 		} else {
 			el.classList.add("selected");
 		}
-		window.selectedChoice = el.dataset.choice;
+		/** @type {any} */ (window).selectedChoice = el.dataset.choice;
 	};
 
 	// Expose API for explicit use
-	window.brainstorm = {
+	/** @type {any} */ (window).brainstorm = {
 		send: sendEvent,
+		/** @param {string} value @param {object} [metadata] */
 		choice: (value, metadata = {}) =>
 			sendEvent({ type: "choice", value, ...metadata }),
 	};

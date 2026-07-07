@@ -76,8 +76,78 @@ Structure and field definitions live in the schema file from the active helper p
 - `goal`, `architectureSummary`, `techStack`
 - `globalConstraints`, `fileStructure`, `requirementsChecklist`
 - `reviewCadence`
+- `agents.general|deep|quick` with `{ "model": "", "agent": "" }` defaults when discovery is unavailable
 - `taskDirectory`, `executionMode`, `branchStrategy`, `worktree`
 - `tasks`
+
+## Subagent Profile Discovery
+
+Before finalizing `super-plan.json`, the orchestrator must attempt platform-native auto-discovery for subagent execution profiles.
+
+Discover three profiles:
+
+- `general` — default/general-purpose subagent for most implementation tasks
+- `deep` — best available profile for difficult, ambiguous, or architecture-heavy tasks
+- `quick` — fastest/lightest profile for narrow, mechanical work
+
+Use the tools available in the current platform to discover:
+
+- subagents/agents that can be dispatched
+- models that can be paired with those subagents
+
+Use platform-native list/discovery tools first. When multiple discovery tools are available, prefer the ones that return callable/current options instead of static docs.
+
+After collecting the discovery result, the orchestrator must present it to the user and ask them to choose how to proceed.
+
+**Preferred interaction rule:** if the current platform exposes an ask/confirm/question tool for structured user input, and the current collaboration mode/session allows that tool to be called, the orchestrator must use that tool instead of a plain text question. Use the structured prompt to:
+
+1. show the discovered agents and models
+2. show the recommended `general`, `deep`, and `quick` configuration
+3. let the user choose one of these paths:
+   - accept the recommendation
+   - provide a manual override
+   - keep the configuration empty/default
+
+**Fallback interaction rule:** if the current platform does not expose a structured ask/confirm/question tool, or if the current collaboration mode/session does not allow calling it, the orchestrator must fall back to a normal text message asking the same question.
+
+After discovery:
+
+1. Recommend a configuration for `agents.general`, `agents.deep`, and `agents.quick`
+2. Ask the user to choose recommendation, manual override, or empty/default config
+3. Persist the user-approved result in `super-plan.json`
+4. If no compatible options are discoverable, leave all `model` and `agent` fields empty unless the user provides a manual override
+
+Required fallback behavior when discovery fails:
+
+1. Tell the user that auto-discovery did not find subagent/model options on the current platform
+2. Use the structured ask/confirm/question tool when available and allowed in the current mode/session to ask whether they want to provide a manual override
+3. If the platform has no structured ask/confirm/question tool, or the current mode/session disallows it, ask via plain text
+4. If the user does not provide an override, keep the fields empty
+
+Recommended structured prompt content:
+
+- available agents
+- available models
+- recommended configuration
+- a short note about platform limitations such as missing worktree isolation or missing explicit model selection
+
+Recommended user choices:
+
+- `Use Recommended`
+- `Manual Override`
+- `Use Defaults/Empty`
+
+Required shape:
+
+```json
+{
+  "agents": {
+    "general": { "model": "", "agent": "" },
+    "deep": { "model": "", "agent": "" },
+    "quick": { "model": "", "agent": "" }
+  }
+}
+```
 
 ## Review Cadence Decision
 
@@ -97,8 +167,17 @@ This field is required because it changes the dispatch and review loops in later
 
 Each task entry must still include:
 
+- `task_profile` — one of `general`, `deep`, or `quick`
 - `batch` — execution batch label such as `A`, `B`, `C`
 - `phase` — work classification such as `foundation`, `core`, `surface`, `final`
+
+`task_profile` is mandatory and represents the intended execution complexity/profile for that task:
+
+- `quick` — narrow, mechanical, low-risk work
+- `general` — normal implementation/debugging work
+- `deep` — harder debugging, architecture, cross-file integration, or subtle reasoning
+
+Do not leave tasks uncategorized. Every task in `super-plan.json` must have a `task_profile`.
 
 **Rules for status:**
 
