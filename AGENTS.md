@@ -1,6 +1,6 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-07-06 23:00:00 -0300
+**Generated:** 2026-07-07 00:00:00 -0300
 **Commit:** (pending)
 
 ## OVERVIEW
@@ -73,6 +73,7 @@ rtk bash .scripts/tests/bootstrap.sh
 rtk bash .scripts/tests/gitignore.sh
 rtk bash .scripts/tests/orchestrator.sh
 rtk bash super-planning/dev/tests.sh
+rtk tsc --noEmit
 rtk sh -n skills.sh .scripts/install.sh .scripts/update.sh
 ```
 

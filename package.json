@@ -6,6 +6,7 @@
 	"scripts": {
 		"format:md": "pnpx prettier --write \"**/*.{md,mdx}\" --log-level=warn --no-error-on-unmatched-pattern  --cache",
 		"format:ts": "pnpx @biomejs/biome check --write .",
+		"typecheck": "tsc --noEmit",
 		"format": "pnpm format:md && pnpm format:ts"
 	},
 	"keywords": [],
@@ -18,5 +19,8 @@
 			"onFail": "download"
 		}
 	},
-	"type": "module"
+	"type": "module",
+	"devDependencies": {
+		"typescript": "^6.0.3"
+	}
 }
