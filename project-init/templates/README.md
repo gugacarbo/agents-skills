@@ -39,7 +39,7 @@ _base -> <family> -> <family>/<derivative>
 6. Ask for project name and target directory.
 7. If the target directory exists and is not empty, list the files that would be overwritten and require explicit approval before continuing.
 8. Read `AGENTS.md` and `REQUIREMENTS.md` for every resolved layer before producing setup instructions.
-9. Copy resolved layers in order, preserving dotfiles. Deeper layers overwrite shallower files at the same path.
+9. Copy resolved layers in order, preserving dotfiles. Deeper layers overwrite shallower files at the same path. Files to be copied into the scaffolded project live under `<layer>/files/`, preserving the target directory structure. `AGENTS.md` and `REQUIREMENTS.md` at the layer root are template instructions, not scaffolded files.
 10. Merge optional tools across resolved layers by the `Tool` column. A deeper layer may override a tool's description or install command, but tools omitted deeper stay inherited.
 11. Do not offer a tool as optional when it is already mandatory in the resolved stack.
 12. Resolve setup instructions by concern section: the deepest layer that defines a concern wins for that concern.
@@ -108,5 +108,6 @@ Not every template needs every section. Only define the concerns that layer actu
 - Keep runtime-agnostic guidance in the family layer and runtime-specific boundaries in derivatives.
 - Put user-facing conventions in `AGENTS.md`.
 - Put dependency, file inventory, and install requirements in `REQUIREMENTS.md`.
+- Place files to be scaffolded into the target project under `<layer>/files/`, preserving the target directory structure (e.g. `files/.husky/pre-commit` → `.husky/pre-commit`).
 - Prefer overriding one concern cleanly instead of restating unrelated concerns.
 - When adding a new concern, add it here first so the router contract stays explicit.

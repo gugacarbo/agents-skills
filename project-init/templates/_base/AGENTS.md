@@ -64,6 +64,9 @@ Deeper template layers may override a tool from this table by reusing the same v
 | test-staged | dev     | Run tests only on staged/changed files    | `<pm> add -D test-staged`        |
 | t3oss       | runtime | Type-safe environment variable management | `<pm> add @t3-oss/env-core`      |
 
+When `lint-staged` is selected, add `pnpm lint-staged` before the `exec` line in `scripts/pre-commit`.
+When `test-staged` is selected, add `pnpm test-staged` before the `exec` line in `scripts/pre-commit`.
+
 ## Project Structure
 
 - **`.agents/`** — folder for custom skills, prompts, and agent definitions used by opencode.

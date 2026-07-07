@@ -73,3 +73,30 @@ pnpm prepare      # husky install (runs automatically on pnpm install)
 | Dead code       | Knip                     |
 | Git hooks       | Husky                    |
 | CI              | GitHub Actions           |
+
+## Optional Tools
+
+During scaffolding, the agent must use a question tool to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
+
+The `Install` column uses `<pm>` as a placeholder for the resolved package manager (e.g., `pnpm`, `bun`, `npm`). The agent must substitute `<pm>` with the package manager resolved from the template cascade before printing setup instructions. The `-w` flag is pnpm-specific; for other package managers, omit it or use the equivalent.
+
+Deeper template layers may override a tool from this table by reusing the same value in the `Tool` column and changing its description and/or install command. Tools omitted by deeper layers remain inherited.
+
+| Tool        | Type    | Purpose                                   | Install                          |
+| ----------- | ------- | ----------------------------------------- | -------------------------------- |
+| turbo       | global  | Monorepo orchestration (Turborepo)        | `<pm> add -w -D turbo`           |
+| lint-staged | dev     | Run linters only on staged files          | `pnpm add -D lint-staged`        |
+| test-staged | dev     | Run tests only on staged/changed files    | `<pm> add -D test-staged`        |
+| t3oss       | runtime | Type-safe environment variable management | `<pm> add @t3-oss/env-core`      |
+
+When `lint-staged` is selected, add `pnpm lint-staged` before the `exec` line in `scripts/pre-commit`.
+When `test-staged` is selected, add `pnpm test-staged` before the `exec` line in `scripts/pre-commit`.
+
+When `lint-staged` is selected for a TypeScript project, also add these scripts to `package.json`:
+
+```jsonc
+"format:md": "pnpx prettier --write \"**/*.{md,mdx}\" --log-level=warn --no-error-on-unmatched-pattern --cache",
+"lint-staged": "lint-staged"
+```
+
+And scaffold `.lintstagedrc.js` from the template file in this directory.
