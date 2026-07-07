@@ -72,7 +72,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 
 PLAN_STATUSES = {"pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed"}
-TASK_STATUSES = PLAN_STATUSES | {"cancelled"}
+TASK_STATUSES = PLAN_STATUSES | {"reviewing", "cancelled"}
 REVIEW_CADENCE = {"per_task", "per_batch", "final_only"}
 EXECUTION_MODE = {"subagent-driven", "sequential"}
 TASK_PHASES = {"foundation", "core", "surface", "final"}

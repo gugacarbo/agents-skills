@@ -54,13 +54,14 @@ status_map = {
     "pending": "⏳ pending",
     "in_progress": "🔄 in progress",
     "ready_for_review": "🔎 ready for review",
+    "reviewing": "🔍 reviewing",
     "needs_fix": "🔁 needs-fix",
     "blocked": "❌ blocked",
     "completed": "✅ completed",
     "cancelled": "⚪ cancelled",
 }
 
-summary_statuses = ["pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed", "cancelled"]
+summary_statuses = ["pending", "in_progress", "ready_for_review", "reviewing", "needs_fix", "blocked", "completed", "cancelled"]
 
 
 def resolve_workspace_root():

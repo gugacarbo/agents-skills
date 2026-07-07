@@ -77,7 +77,7 @@ Each task has a `tryCount` in `super-plan.json`. The default maximum is **3 atte
 ### Task Status Transitions
 
 ```
-pending → in_progress → ready_for_review → completed
+pending → in_progress → ready_for_review → reviewing → completed
                               ├──────────→ needs_fix → in_progress
                               ├──────────→ blocked
                               └──────────→ cancelled

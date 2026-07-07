@@ -117,8 +117,8 @@ For each task:
 4. If the subagent asks questions, answer before letting it proceed.
 5. When the subagent returns DONE/DONE_WITH_CONCERNS, update `super-plan.json` to `ready_for_review` via script so the ledger regenerates.
 6. Read `reviewCadence` from `super-plan.json`.
-7. If `reviewCadence=per_task`, hand off immediately to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
-8. If `reviewCadence=per_batch`, wait until the current batch is fully `ready_for_review`, then hand off the batch to Phase 6.
+7. If `reviewCadence=per_task`, set the task status to `reviewing` via script, then hand off immediately to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
+8. If `reviewCadence=per_batch`, wait until the current batch is fully `ready_for_review`, then set each task to `reviewing` and hand off the batch to Phase 6.
 9. If `reviewCadence=final_only`, continue implementation without task-level review, keep the task at `ready_for_review`, and defer both the independent review gate and `completed` transition to final integration.
 10. If the reviewer later finds issues, update `super-plan.json` to `needs_fix` via script, dispatch a fix subagent, and re-review according to the same cadence.
 11. After clean review at the configured cadence, append a `completed` log entry with the task-local wrapper `log-task.sh` and update the JSON status to `completed` via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
@@ -133,8 +133,8 @@ For independent tasks with no file conflicts:
 4. Wait for all to return.
 5. Mark returned tasks as `ready_for_review` via script so the ledger regenerates.
 6. Read `reviewCadence` from `super-plan.json`.
-7. If `reviewCadence=per_task`, dispatch a reviewer subagent immediately for each task as soon as that task's implementer finishes. Do not wait for sibling tasks in the same parallel batch.
-8. If `reviewCadence=per_batch`, wait for the full batch to reach `ready_for_review`, then hand the batch to Phase 6 together.
+7. If `reviewCadence=per_task`, set each finished task to `reviewing` via script, then dispatch a reviewer subagent immediately for each task as soon as that task's implementer finishes. Do not wait for sibling tasks in the same parallel batch.
+8. If `reviewCadence=per_batch`, wait for the full batch to reach `ready_for_review`, then set each task to `reviewing` and hand the batch to Phase 6 together.
 9. If `reviewCadence=final_only`, skip task-level review during the parallel wave, keep accepted tasks at `ready_for_review`, and defer independent review plus the `completed` transition to final integration.
 10. Dispatch fix subagents for any reviewed tasks that need fixes.
 11. Integrate all changes onto the working branch.

@@ -90,6 +90,19 @@ test_update_accepts_cancelled_task_status() {
   assert_contains_file "⚪ cancelled" "$tmp/docs/tasks/0001-auth-middleware/progress-ledger.md"
 }
 
+test_update_accepts_reviewing_task_status() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/tasks/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-0001].status=reviewing >/dev/null
+
+  assert_contains_file '"status": "reviewing"' "$registry"
+  assert_contains_file "🔍 reviewing" "$tmp/docs/tasks/0001-auth-middleware/progress-ledger.md"
+}
+
 test_render_progress_ledger_includes_timeline_and_requirements() {
   local tmp registry ledger
   tmp=$(mktemp -d)
@@ -249,6 +262,7 @@ main() {
   test_init_generates_valid_registry_and_rich_empty_ledger
   test_update_rejects_invalid_status_without_mutating_file
   test_update_accepts_cancelled_task_status
+  test_update_accepts_reviewing_task_status
   test_render_progress_ledger_includes_timeline_and_requirements
   test_materialized_logger_wrapper_writes_jsonl_events
   test_summarize_all_tasks_terminal_output

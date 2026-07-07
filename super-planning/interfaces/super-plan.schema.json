@@ -203,6 +203,7 @@
 						"pending",
 						"in_progress",
 						"ready_for_review",
+						"reviewing",
 						"needs_fix",
 						"blocked",
 						"completed",
@@ -271,6 +272,7 @@
 						"pending",
 						"in_progress",
 						"ready_for_review",
+						"reviewing",
 						"needs_fix",
 						"blocked",
 						"completed"
