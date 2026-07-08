@@ -104,14 +104,13 @@ STATUS_MAP = {
     "pending": "⏳ pending",
     "in_progress": "🔄 in progress",
     "ready_for_review": "🔎 ready for review",
-    "reviewing": "🔍 reviewing",
     "needs_fix": "🔁 needs-fix",
     "blocked": "❌ blocked",
     "completed": "✅ completed",
     "cancelled": "⚪ cancelled",
 }
 
-ALL_STATUSES = ["pending", "in_progress", "ready_for_review", "reviewing", "needs_fix", "blocked", "completed", "cancelled"]
+ALL_STATUSES = ["pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed", "cancelled"]
 
 
 def status_label(status: str) -> str:
