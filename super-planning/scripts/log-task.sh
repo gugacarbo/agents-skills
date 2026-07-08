@@ -6,14 +6,14 @@ set -euo pipefail
 # Usage:
 #   scripts/log-task.sh \
 #     --plan 0003-auth-middleware \
-#     --task Task-A-0001 \
+#     --task Task-A-1 \
 #     --event started|ready_for_review|failed|blocked|completed \
-#     [--log-dir /absolute/path/to/docs/tasks/0003-auth-middleware/Task-A-0001] \
+#     [--log-dir /absolute/path/to/docs/jobs/0003-auth-middleware/Task-A-1] \
 #     [--try 1] \
 #     [--max-tries 3] \
 #     [--message "optional message"]
 #
-# The log file is written to <workspace-root>/docs/tasks/<plan>/<task>/progress.log
+# The log file is written to <workspace-root>/docs/jobs/<plan>/<task>/progress.log
 # unless --log-dir is provided.
 #
 # The orchestrator should use one shared helper path and `materialize-task-logger`
@@ -202,7 +202,7 @@ find_workspace_root() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(find_workspace_root "$SCRIPT_DIR")"
-TASKS_DIR="${AGENTS_SKILLS_TASKS_DIR:-$WORKSPACE_ROOT/docs/tasks}"
+TASKS_DIR="${AGENTS_SKILLS_TASKS_DIR:-$WORKSPACE_ROOT/docs/jobs}"
 if [[ -z "$LOG_DIR" ]]; then
   LOG_DIR="${AGENTS_SKILLS_TASK_DIR:-$TASKS_DIR/$PLAN/$TASK}"
 fi

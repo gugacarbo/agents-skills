@@ -20,10 +20,10 @@ Usage:
     --feature-name <feature-name> \
     --spec <docs/specs/...-spec.md> \
     --plan <docs/plans/...md> \
-    --output <docs/tasks/.../super-plan.json> \
+    --output <docs/jobs/.../super-plan.json> \
     [--base-branch <branch>] \
     [--feature-branch <branch>] \
-    [--task-directory <docs/tasks/...>] \
+    [--task-directory <docs/jobs/...>] \
     [--worktree-enabled true|false] \
     [--worktree-path <relative-path>] \
     [--execution-mode subagent-driven|sequential] \
@@ -31,13 +31,13 @@ Usage:
     [--schema <path/to/interfaces/super-plan.schema.json>]
 
   super-plan.sh update \
-    --input <docs/tasks/.../super-plan.json> \
+    --input <docs/jobs/.../super-plan.json> \
     [   --set <path>=<json-or-string>] \
     [--append <path>=<json-or-@file>] ...
 
 Append-only update mode for tasks:
   super-plan.sh append-task \
-    --input <docs/tasks/.../super-plan.json> \
+    --input <docs/jobs/.../super-plan.json> \
     [--task <json-or-@file>] \
     [--tasks <json-array-or-@file>] \
     [--validate-only <json-array-or-@file>]
@@ -54,7 +54,7 @@ Notes:
   - If no subcommand is provided, `init` is assumed for backward compatibility.
   - Every successful write regenerates `progress-ledger.md`.
   - Paths support dot notation plus array selectors by id, e.g.:
-      tasks[Task-A-0001].status=ready_for_review
+      tasks[Task-A-1].status=ready_for_review
       requirementsChecklist[REQ-001].status=completed
 EOF
   exit 1

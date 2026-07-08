@@ -16,11 +16,11 @@ In parallel execution with `reviewCadence=per_task`, Phase 6 begins for an indiv
 
 Phase 6 is the first phase that creates the per-task persistent artifact structure. Before reviewing any task or reviewable batch member, materialize:
 
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/`
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/report.md`
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/review-package.diff.md`
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log`
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/log-task.sh`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/report.md`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/review-package.diff.md`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/progress.log`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/log-task.sh`
 
 Use [`templates/progress-template.txt`](../templates/progress-template.txt) for the task log format. The ledger itself is a generated artifact produced by the active `render-progress-ledger.sh` helper path, not a hand-maintained template.
 
@@ -31,8 +31,8 @@ The task-local `log-task.sh` is now a thin wrapper generated from the shared hel
 ```bash
 bash /absolute/path/to/workspace/.super-planning/log-task.sh materialize-task-logger \
   --plan 0003-auth-middleware \
-  --task Task-A-0001 \
-  --output /absolute/path/to/workspace/docs/tasks/0003-auth-middleware/Task-A-0001/log-task.sh
+  --task Task-A-1 \
+  --output /absolute/path/to/workspace/docs/jobs/0003-auth-middleware/Task-A-1/log-task.sh
 ```
 
 That wrapper must delegate back to the shared `.super-planning/log-task.sh` while prefilling the shared arguments for the plan, task, and task directory.
@@ -65,8 +65,8 @@ Is it well-built?
 The reviewer gets three things:
 
 1. The task entry from `super-plan.json` (same one the implementer used)
-2. The implementer's report file from `docs/tasks/{plan}/{task-id}/report.md`
-3. The review package from `docs/tasks/{plan}/{task-id}/review-package.diff.md`
+2. The implementer's report file from `docs/jobs/{plan}/{task-id}/report.md`
+3. The review package from `docs/jobs/{plan}/{task-id}/review-package.diff.md`
 
 **Do NOT** give the reviewer:
 

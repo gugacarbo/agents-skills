@@ -7,7 +7,7 @@ This file is append-only. Each line is a JSON object written through the task-lo
 The `log-task.sh` script appends one JSON object per line:
 
 ```json
-{"timestamp":"ISO8601","task":"Task-X-NNNN","event":"started|ready_for_review|failed|blocked|completed","try":1,"maxTries":3,"message":"human-readable note"}
+{"timestamp":"ISO8601","task":"Task-X-N","event":"started|ready_for_review|failed|blocked|completed","try":1,"maxTries":3,"message":"human-readable note"}
 ```
 
 ## Supported Events
@@ -23,13 +23,13 @@ Note: event values are **lowercase**. The script only accepts `started|ready_for
 ## Example Log
 
 ```json
-{"timestamp":"2026-06-30T20:15:10Z","task":"Task-A-0001","event":"started","try":1,"maxTries":3,"message":"Initializing task environment"}
-{"timestamp":"2026-06-30T20:15:45Z","task":"Task-A-0001","event":"ready_for_review","try":1,"maxTries":3,"message":"Tests pass, files committed"}
-{"timestamp":"2026-06-30T20:15:55Z","task":"Task-A-0001","event":"completed","try":1,"maxTries":3,"message":"Review clean; accepted by orchestrator"}
-{"timestamp":"2026-06-30T20:16:02Z","task":"Task-B-0001","event":"started","try":1,"maxTries":3,"message":"Starting core implementation"}
-{"timestamp":"2026-06-30T20:17:30Z","task":"Task-B-0001","event":"failed","try":1,"maxTries":3,"message":"Lint errors in src/core.py"}
-{"timestamp":"2026-06-30T20:18:05Z","task":"Task-B-0001","event":"started","try":2,"maxTries":3,"message":"Retrying after lint fixes"}
-{"timestamp":"2026-06-30T20:19:12Z","task":"Task-B-0001","event":"blocked","try":2,"maxTries":3,"message":"Needs decision on error handling approach"}
+{"timestamp":"2026-06-30T20:15:10Z","task":"Task-A-1","event":"started","try":1,"maxTries":3,"message":"Initializing task environment"}
+{"timestamp":"2026-06-30T20:15:45Z","task":"Task-A-1","event":"ready_for_review","try":1,"maxTries":3,"message":"Tests pass, files committed"}
+{"timestamp":"2026-06-30T20:15:55Z","task":"Task-A-1","event":"completed","try":1,"maxTries":3,"message":"Review clean; accepted by orchestrator"}
+{"timestamp":"2026-06-30T20:16:02Z","task":"Task-B-1","event":"started","try":1,"maxTries":3,"message":"Starting core implementation"}
+{"timestamp":"2026-06-30T20:17:30Z","task":"Task-B-1","event":"failed","try":1,"maxTries":3,"message":"Lint errors in src/core.py"}
+{"timestamp":"2026-06-30T20:18:05Z","task":"Task-B-1","event":"started","try":2,"maxTries":3,"message":"Retrying after lint fixes"}
+{"timestamp":"2026-06-30T20:19:12Z","task":"Task-B-1","event":"blocked","try":2,"maxTries":3,"message":"Needs decision on error handling approach"}
 ```
 
 ## Location

@@ -6,12 +6,12 @@ set -eu
 # Usage:
 #   scripts/summarize-all-tasks.sh [--base-dir <path>] [--plan-id <id>] [--task-id <id>] [--json]
 #
-# Scans <base-dir> (default: docs/tasks) for super-plan.json files and prints
+# Scans <base-dir> (default: docs/jobs) for super-plan.json files and prints
 # a consolidated progress summary. Use --plan-id to filter to a single plan.
 # Use --task-id to filter to a single task (requires --plan-id).
 # Use --json for machine-readable output.
 
-BASE_DIR="docs/tasks"
+BASE_DIR="docs/jobs"
 PLAN_ID=""
 TASK_ID=""
 OUTPUT_MODE="terminal"
@@ -21,9 +21,9 @@ usage() {
 Usage: summarize-all-tasks.sh [--base-dir <path>] [--plan-id <id>] [--task-id <id>] [--json]
 
 Options:
-  --base-dir <path>   Root directory to scan for super-plan.json files (default: docs/tasks)
+   --base-dir <path>   Root directory to scan for super-plan.json files (default: docs/jobs)
   --plan-id <id>      Filter to a single plan (e.g. 0001-auth-middleware)
-  --task-id <id>      Filter to a single task inside the given plan (e.g. Task-A-0001)
+  --task-id <id>      Filter to a single task inside the given plan (e.g. Task-A-1)
   --json              Output machine-readable JSON instead of terminal-friendly text
 EOF
   exit 1

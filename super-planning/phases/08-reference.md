@@ -11,9 +11,9 @@ Subagent tool results get injected verbatim into your context. Across many deleg
 Everything you paste into a dispatch prompt — and everything a subagent prints back — stays resident in your context. Hand artifacts over as files instead:
 
 - **Task entry** → `super-plan.json` (subagent reads its entry, you don't carry it)
-- **Report** → `docs/tasks/<plan>/<task-id>/report.md` (materialized in Phase 6; subagent writes or returns it, you get a one-line summary)
-- **Review package** → `docs/tasks/<plan>/<task-id>/review-package.diff.md` (materialized in Phase 6; reviewer reads the diff from a file, you don't paste it)
-- **Progress log/helper** → each task owns `docs/tasks/<plan>/<task-id>/progress.log` and `log-task.sh`, both first materialized in Phase 6
+- **Report** → `docs/jobs/<plan>/<task-id>/report.md` (materialized in Phase 6; subagent writes or returns it, you get a one-line summary)
+- **Review package** → `docs/jobs/<plan>/<task-id>/review-package.diff.md` (materialized in Phase 6; reviewer reads the diff from a file, you don't paste it)
+- **Progress log/helper** → each task owns `docs/jobs/<plan>/<task-id>/progress.log` and `log-task.sh`, both first materialized in Phase 6
 
 ### Compressed Output
 

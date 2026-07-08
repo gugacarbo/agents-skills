@@ -75,7 +75,7 @@ Call the script at minimum for these events:
 Example:
 
 ```bash
-bash /absolute/path/to/docs/tasks/0003-auth-middleware/Task-A-0001/log-task.sh \
+bash /absolute/path/to/docs/jobs/0003-auth-middleware/Task-A-1/log-task.sh \
   --event started \
   --try 1 \
   --max-tries 3 \

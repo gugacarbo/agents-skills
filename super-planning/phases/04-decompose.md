@@ -22,13 +22,13 @@ The goal is to avoid a duplicate helper directory when the skill already lives i
 Create the registry in the plan's task directory with the active helper path:
 
 ```
-docs/tasks/{NNNN-<feature-name>}/super-plan.json
+docs/jobs/{NNNN-<feature-name>}/super-plan.json
 ```
 
 Example for plan `docs/plans/0003-auth-middleware.md`:
 
 ```
-docs/tasks/0003-auth-middleware/super-plan.json
+docs/jobs/0003-auth-middleware/super-plan.json
 ```
 
 `super-plan.json` is the orchestrator-owned structured source of truth. It combines:
@@ -58,7 +58,7 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh init \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
-  --output docs/tasks/0003-auth-middleware/super-plan.json
+  --output docs/jobs/0003-auth-middleware/super-plan.json
 ```
 
 When the skill is not inside the target repository:
@@ -74,19 +74,34 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
-  --output docs/tasks/0003-auth-middleware/super-plan.json
+  --output docs/jobs/0003-auth-middleware/super-plan.json
 ```
 
 `init` produces a valid but empty registry with `tasks: []`, `requirementsChecklist: []`, placeholder agent profiles, and a generated `progress-ledger.md`.
 
 ### Step 2: add tasks one by one
 
+**Task ID naming convention:** `Task-[batch_id]-[task_batch_id]`
+
+- `batch_id` — the batch letter (A, B, C, …) that groups tasks meant to run in parallel.
+- `task_batch_id` — a sequential number **within that batch**, starting at 1.
+
+| Batch | Task | ID | Runs in parallel with |
+|-------|------|----|-----------------------|
+| A     | 1st  | `Task-A-1` | `Task-A-2` |
+| A     | 2nd  | `Task-A-2` | `Task-A-1` |
+| B     | 1st  | `Task-B-1` | `Task-B-2` |
+| B     | 2nd  | `Task-B-2` | `Task-B-1` |
+| C     | 1st  | `Task-C-1` | — (sole task in batch C) |
+
+Do **not** embed the plan number in the task ID. The plan context is already carried by the directory structure (`docs/jobs/NNNN-<feature-name>/`).
+
 For every task, build a JSON object matching the schema and append it with:
 
 ```bash
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
-  --input docs/tasks/0003-auth-middleware/super-plan.json \
-  --append tasks='{"id":"Task-A-0003","title":"...",...}'
+  --input docs/jobs/0003-auth-middleware/super-plan.json \
+  --append tasks='{"id":"Task-A-1","title":"...",...}'
 ```
 
 Use an external JSON file for multi-line payloads when the shell becomes unwieldy:
@@ -94,7 +109,7 @@ Use an external JSON file for multi-line payloads when the shell becomes unwield
 ```bash
 cat > /tmp/task-a.json <<'EOF'
 {
-  "id": "Task-A-0003",
+  "id": "Task-A-1",
   "title": "Implementar middleware de autenticação",
   "description": "...",
   "status": "pending",
@@ -102,10 +117,10 @@ cat > /tmp/task-a.json <<'EOF'
   "task_profile": "general",
   "batch": "A",
   "phase": "foundation",
-  "reportFile": "docs/tasks/0003-auth-middleware/Task-A-0003/report.md",
-  "reviewPackage": "docs/tasks/0003-auth-middleware/Task-A-0003/review-package.diff.md",
-  "progressLog": "docs/tasks/0003-auth-middleware/Task-A-0003/progress.log",
-  "logTaskScript": "docs/tasks/0003-auth-middleware/Task-A-0003/log-task.sh",
+  "reportFile": "docs/jobs/0003-auth-middleware/Task-A-1/report.md",
+  "reviewPackage": "docs/jobs/0003-auth-middleware/Task-A-1/review-package.diff.md",
+  "progressLog": "docs/jobs/0003-auth-middleware/Task-A-1/progress.log",
+  "logTaskScript": "docs/jobs/0003-auth-middleware/Task-A-1/log-task.sh",
   "dependencies": [],
   "acceptanceCriteria": [],
   "requirements": [],
@@ -122,7 +137,7 @@ cat > /tmp/task-a.json <<'EOF'
 EOF
 
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
-  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --input docs/jobs/0003-auth-middleware/super-plan.json \
   --append tasks=@/tmp/task-a.json
 ```
 
@@ -137,20 +152,20 @@ After all tasks are appended, set the remaining plan-level fields using `--set`:
 
 ```bash
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
-  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --input docs/jobs/0003-auth-middleware/super-plan.json \
   --set goal='Validar tokens JWT em todas as rotas protegidas.' \
   --set architectureSummary='Middleware em camadas separando parsing, validação e refresh de token.' \
   --set techStack='["Node.js","Express","jsonwebtoken"]' \
   --set globalConstraints='["Máximo 1 query por request","Sem estado de sessão no servidor"]' \
   --set rules='["Nunca iniciar implementação na main sem permissão","Nunca redespachar tarefas completadas"]' \
-  --set fileStructure='[{"path":"src/auth/middleware.ts","ownerTask":"Task-A-0003","notes":"Entry point do middleware"}]'
+  --set fileStructure='[{"path":"src/auth/middleware.ts","ownerTask":"Task-A-1","notes":"Entry point do middleware"}]'
 ```
 
 For large arrays or objects, prefer writing the JSON to a file and using `@file` syntax:
 
 ```bash
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
-  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --input docs/jobs/0003-auth-middleware/super-plan.json \
   --set requirementsChecklist=@/tmp/requirements.json
 ```
 
@@ -160,7 +175,7 @@ Run profile discovery and ask the user for the cadence first (see below). Then p
 
 ```bash
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
-  --input docs/tasks/0003-auth-middleware/super-plan.json \
+  --input docs/jobs/0003-auth-middleware/super-plan.json \
   --set reviewCadence=per_task \
   --set agents='{"general":{"model":"gpt-5","agent":"general"},"deep":{"model":"claude-opus-4","agent":"deep"},"quick":{"model":"gpt-5-mini","agent":"quick"}}'
 ```
@@ -304,8 +319,8 @@ Do not create per-task directories or `progress.log` in Phase 4.
 
 Phase 4 defines the executable registry in `super-plan.json` and also materializes `progress-ledger.md` from that registry. Phase 6 is still responsible for materializing:
 
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/`
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log`
-- `docs/tasks/{NNNN-<feature-name>}/{task-id}/log-task.sh`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/progress.log`
+- `docs/jobs/{NNNN-<feature-name>}/{task-id}/log-task.sh`
 
 Until Phase 6, treat only the per-task paths as planned artifact locations owned by later phases.

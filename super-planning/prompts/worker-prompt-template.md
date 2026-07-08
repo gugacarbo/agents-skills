@@ -12,7 +12,7 @@ description: Minimal dispatch prompt template for subagents. Copy, fill the plac
 
 ## Context (one line)
 
-You are implementing [Task-X-NNNN] for [Project Name]. This is part of the [NNNN-<feature-name>] plan: `docs/plans/NNNN-<feature-name>.md`.
+You are implementing [Task-X-N] for [Project Name]. This is part of the [NNNN-<feature-name>] plan: `docs/plans/NNNN-<feature-name>.md`.
 
 ## Working Directory
 
@@ -22,13 +22,13 @@ All file operations must use absolute paths.
 
 ## Your Task
 
-Read the task entry in `docs/tasks/[NNNN-<feature-name>]/super-plan.json` with `id: [Task-X-NNNN]`. That entry contains the complete requirements: files, interfaces, requirements, steps, acceptanceCriteria, and notes. You do not need to read any other file in the plan to do your work.
+Read the task entry in `docs/jobs/[NNNN-<feature-name>]/super-plan.json` with `id: [Task-X-N]`. That entry contains the complete requirements: files, interfaces, requirements, steps, acceptanceCriteria, and notes. You do not need to read any other file in the plan to do your work.
 
 ## Logging
 
 Use the task-local logging wrapper to record every state change. The script is at:
 
-`docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh`
+`docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh`
 
 If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. That wrapper delegates to the shared helper path chosen by the orchestrator, with the shared plan/task/log-dir arguments already filled in. If not, return your status and report content so the orchestrator can persist them during Phase 6.
 
@@ -45,23 +45,23 @@ If the orchestrator has already materialized Phase 6 task artifacts, use the abs
 
 ```sh
 # At the start
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event started --try 1 --max-tries 3 --message "Starting implementation"
+bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event started --try 1 --max-tries 3 --message "Starting implementation"
 
 # When ready for review
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event ready_for_review --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
+bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event ready_for_review --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
 
 # On failure (final retry)
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
+bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
 
 # When blocked
-bash /absolute/path/to/docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/log-task.sh --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-0003"
+bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-3"
 ```
 
-When present, the script appends a timestamped line to `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/progress.log`. Adjust the try count to your actual current attempt.
+When present, the script appends a timestamped line to `docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/progress.log`. Adjust the try count to your actual current attempt.
 
 ## Hard Constraints
 
-- Do **not** edit `docs/tasks/[NNNN-<feature-name>]/super-plan.json`. The orchestrator owns that file.
+- Do **not** edit `docs/jobs/[NNNN-<feature-name>]/super-plan.json`. The orchestrator owns that file.
 - Stay within the `filesTouched` and `files` block from your task entry.
 - Do not run the full test suite unless your task entry requires it.
 - Do not read the rest of the plan. You have everything you need in your task entry.
@@ -75,7 +75,7 @@ Return a one-line status to the orchestrator:
 - `NEEDS_CONTEXT` — describe what you need
 - `BLOCKED` — describe the blocker
 
-Then write or return the full report for `docs/tasks/[NNNN-<feature-name>]/[Task-X-NNNN]/report.md` with the following sections:
+Then write or return the full report for `docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/report.md` with the following sections:
 
 1. **What you implemented** (or what you attempted, if blocked)
 2. **What you tested** and test results

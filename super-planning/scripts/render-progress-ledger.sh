@@ -6,7 +6,7 @@ OUTPUT_PATH=""
 
 usage() {
   cat <<'EOF'
-Usage: render-progress-ledger.sh --input <docs/tasks/.../super-plan.json> [--output <docs/tasks/.../progress-ledger.md>]
+Usage: render-progress-ledger.sh --input <docs/jobs/.../super-plan.json> [--output <docs/jobs/.../progress-ledger.md>]
 EOF
   exit 1
 }

@@ -31,8 +31,8 @@ Every finding needs a concrete `file:line` location, what's wrong, why it matter
 The reviewer gets exactly three things:
 
 1. **The task entry** from `super-plan.json` (same one the implementer used)
-2. **The implementer's report file** from `docs/tasks/{plan}/{task-id}/report.md`
-3. **The review package** from `docs/tasks/{plan}/{task-id}/review-package.diff.md`
+2. **The implementer's report file** from `docs/jobs/{plan}/{task-id}/report.md`
+3. **The review package** from `docs/jobs/{plan}/{task-id}/review-package.diff.md`
 
 These task artifact files are first materialized in Phase 6.
 
