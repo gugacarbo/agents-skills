@@ -1,4 +1,4 @@
-# Task-B-0001: Implementar middleware requireAuth
+# Task-B-1: Implementar middleware requireAuth
 
 **Status:** ✅ completed
 **Batch:** B (core)
@@ -23,7 +23,7 @@ Implementado o middleware `requireAuth` que extrai o token Bearer do header `Aut
 - Header sem prefixo `Bearer ` → 401 `{ error: "Invalid authorization format" }`
 - Token válido → popula `req.user = { userId: payload.sub, role: payload.role }` e chama `next()`
 - Token inválido → loga erro com `pino` (`req.log.error`) e retorna 401 genérico
-- Usa `verifyToken` da Task-A-0002 — sem reimplementação
+- Usa `verifyToken` da Task-A-2 — sem reimplementação
 
 ## Test Cases (4/4 new, 9/9 total)
 

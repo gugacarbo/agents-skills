@@ -52,27 +52,27 @@
 	"fileStructure": [
 		{
 			"path": "src/types/auth.ts",
-			"ownerTask": "Task-A-0001",
+			"ownerTask": "Task-A-1",
 			"notes": "Interfaces JwtPayload, AuthUser, AuthOptions"
 		},
 		{
 			"path": "src/middleware/auth.ts",
-			"ownerTask": "Task-B-0001",
-			"notes": "verifyToken, requireAuth (Task-B-0001); requireRole (Task-B-0002)"
+			"ownerTask": "Task-B-1",
+			"notes": "verifyToken, requireAuth (Task-B-1); requireRole (Task-B-2)"
 		},
 		{
 			"path": "src/middleware/auth.test.ts",
-			"ownerTask": "Task-A-0002",
+			"ownerTask": "Task-A-2",
 			"notes": "Testes unitários — 12 casos cobrindo todos os edge cases"
 		},
 		{
 			"path": "src/app.ts",
-			"ownerTask": "Task-C-0001",
+			"ownerTask": "Task-C-1",
 			"notes": "Integração dos middlewares nas rotas existentes"
 		},
 		{
 			"path": "src/app.integration.test.ts",
-			"ownerTask": "Task-C-0001",
+			"ownerTask": "Task-C-1",
 			"notes": "Testes de integração — 3 casos"
 		}
 	],
@@ -88,7 +88,7 @@
 				"Token expirado retorna 401",
 				"Assinatura inválida retorna 401"
 			],
-			"coveredByTasks": ["Task-B-0001"],
+			"coveredByTasks": ["Task-B-1"],
 			"notes": ["Coberto por verifyToken + requireAuth"]
 		},
 		{
@@ -101,8 +101,8 @@
 				"Payload sem role retorna 401",
 				"Payload válido popula req.user com userId e role"
 			],
-			"coveredByTasks": ["Task-A-0001", "Task-B-0001"],
-			"notes": ["Tipos definidos em Task-A-0001, extração em Task-B-0001"]
+			"coveredByTasks": ["Task-A-1", "Task-B-1"],
+			"notes": ["Tipos definidos em Task-A-1, extração em Task-B-1"]
 		},
 		{
 			"id": "REQ-003",
@@ -114,7 +114,7 @@
 				"role=admin em rota admin passa",
 				"múltiplos roles permitidos funcionam"
 			],
-			"coveredByTasks": ["Task-B-0002"],
+			"coveredByTasks": ["Task-B-2"],
 			"notes": ["requireRole middleware"]
 		},
 		{
@@ -126,11 +126,11 @@
 				"TypeScript reconhece req.user como AuthUser após requireAuth",
 				"Handlers downstream acessam req.user.userId e req.user.role sem cast"
 			],
-			"coveredByTasks": ["Task-A-0001", "Task-C-0001"],
+			"coveredByTasks": ["Task-A-1", "Task-C-1"],
 			"notes": ["Usa declaration merging do Express"]
 		}
 	],
-	"taskDirectory": "docs/tasks/0001-auth-middleware",
+	"taskDirectory": "docs/jobs/0001-auth-middleware",
 	"rules": [
 		"Nunca re-despachar uma tarefa que o ledger ou log já marca como concluída",
 		"Subagentes não devem editar super-plan.json — apenas o orquestrador",
@@ -139,7 +139,7 @@
 	],
 	"tasks": [
 		{
-			"id": "Task-A-0001",
+			"id": "Task-A-1",
 			"title": "Definir tipos e interfaces de autenticação",
 			"description": "Criar src/types/auth.ts com as interfaces JwtPayload, AuthUser, AuthOptions e o declaration merging do Express para tipar req.user.",
 			"status": "completed",
@@ -147,10 +147,10 @@
 			"task_profile": "general",
 			"batch": "A",
 			"phase": "foundation",
-			"reportFile": "docs/tasks/0001-auth-middleware/Task-A-0001/report.md",
-			"reviewPackage": "docs/tasks/0001-auth-middleware/Task-A-0001/review-package.diff.md",
-			"progressLog": "docs/tasks/0001-auth-middleware/Task-A-0001/progress.log",
-			"logTaskScript": "docs/tasks/0001-auth-middleware/Task-A-0001/log-task.sh",
+			"reportFile": "docs/jobs/0001-auth-middleware/Task-A-1/report.md",
+			"reviewPackage": "docs/jobs/0001-auth-middleware/Task-A-1/review-package.diff.md",
+			"progressLog": "docs/jobs/0001-auth-middleware/Task-A-1/progress.log",
+			"logTaskScript": "docs/jobs/0001-auth-middleware/Task-A-1/log-task.sh",
 			"dependencies": [],
 			"acceptanceCriteria": [
 				"src/types/auth.ts existe com JwtPayload, AuthUser, AuthOptions exportados",
@@ -190,7 +190,7 @@
 			"notes": ["Foundation task — todas as outras tasks dependem destes tipos"]
 		},
 		{
-			"id": "Task-A-0002",
+			"id": "Task-A-2",
 			"title": "Implementar verifyToken com testes unitários",
 			"description": "Implementar a função verifyToken em src/middleware/auth.ts e escrever testes unitários cobrindo token válido, expirado, assinatura inválida, payload sem sub, payload sem role.",
 			"status": "completed",
@@ -198,11 +198,11 @@
 			"task_profile": "deep",
 			"batch": "A",
 			"phase": "foundation",
-			"reportFile": "docs/tasks/0001-auth-middleware/Task-A-0002/report.md",
-			"reviewPackage": "docs/tasks/0001-auth-middleware/Task-A-0002/review-package.diff.md",
-			"progressLog": "docs/tasks/0001-auth-middleware/Task-A-0002/progress.log",
-			"logTaskScript": "docs/tasks/0001-auth-middleware/Task-A-0002/log-task.sh",
-			"dependencies": ["Task-A-0001"],
+			"reportFile": "docs/jobs/0001-auth-middleware/Task-A-2/report.md",
+			"reviewPackage": "docs/jobs/0001-auth-middleware/Task-A-2/review-package.diff.md",
+			"progressLog": "docs/jobs/0001-auth-middleware/Task-A-2/progress.log",
+			"logTaskScript": "docs/jobs/0001-auth-middleware/Task-A-2/log-task.sh",
+			"dependencies": ["Task-A-1"],
 			"acceptanceCriteria": [
 				"verifyToken retorna JwtPayload para token válido",
 				"verifyToken lança para token expirado",
@@ -244,7 +244,7 @@
 			"notes": ["verifyToken é a fundação para os middlewares nas tasks B"]
 		},
 		{
-			"id": "Task-B-0001",
+			"id": "Task-B-1",
 			"title": "Implementar middleware requireAuth",
 			"description": "Implementar o middleware requireAuth que extrai o token do header Authorization, chama verifyToken, e popula req.user. Adicionar testes para os edge cases de header.",
 			"status": "completed",
@@ -252,11 +252,11 @@
 			"task_profile": "general",
 			"batch": "B",
 			"phase": "core",
-			"reportFile": "docs/tasks/0001-auth-middleware/Task-B-0001/report.md",
-			"reviewPackage": "docs/tasks/0001-auth-middleware/Task-B-0001/review-package.diff.md",
-			"progressLog": "docs/tasks/0001-auth-middleware/Task-B-0001/progress.log",
-			"logTaskScript": "docs/tasks/0001-auth-middleware/Task-B-0001/log-task.sh",
-			"dependencies": ["Task-A-0001", "Task-A-0002"],
+			"reportFile": "docs/jobs/0001-auth-middleware/Task-B-1/report.md",
+			"reviewPackage": "docs/jobs/0001-auth-middleware/Task-B-1/review-package.diff.md",
+			"progressLog": "docs/jobs/0001-auth-middleware/Task-B-1/progress.log",
+			"logTaskScript": "docs/jobs/0001-auth-middleware/Task-B-1/log-task.sh",
+			"dependencies": ["Task-A-1", "Task-A-2"],
 			"acceptanceCriteria": [
 				"Header ausente retorna 401 { error: 'Missing authorization header' }",
 				"Header sem prefixo Bearer retorna 401 { error: 'Invalid authorization format' }",
@@ -267,7 +267,7 @@
 			"requirements": ["REQ-001", "REQ-002"],
 			"rules": [
 				"Middleware deve ser uma função (req, res, next) => void",
-				"Usar verifyToken da Task-A-0002 — não reimplementar",
+				"Usar verifyToken da Task-A-2 — não reimplementar",
 				"Mensagens de erro genéricas — não expor detalhes do jwt.verify",
 				"Logar erros com pino (req.log.error) mas retornar mensagem genérica ao cliente"
 			],
@@ -295,10 +295,10 @@
 				"modified": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
 				"deleted": []
 			},
-			"notes": ["Depende de verifyToken (Task-A-0002) e tipos (Task-A-0001)"]
+			"notes": ["Depende de verifyToken (Task-A-2) e tipos (Task-A-1)"]
 		},
 		{
-			"id": "Task-B-0002",
+			"id": "Task-B-2",
 			"title": "Implementar middleware requireRole",
 			"description": "Implementar o middleware requireRole que verifica se req.user.role está na lista de roles permitidas. Adicionar testes para role autorizada e não autorizada.",
 			"status": "completed",
@@ -306,11 +306,11 @@
 			"task_profile": "quick",
 			"batch": "B",
 			"phase": "core",
-			"reportFile": "docs/tasks/0001-auth-middleware/Task-B-0002/report.md",
-			"reviewPackage": "docs/tasks/0001-auth-middleware/Task-B-0002/review-package.diff.md",
-			"progressLog": "docs/tasks/0001-auth-middleware/Task-B-0002/progress.log",
-			"logTaskScript": "docs/tasks/0001-auth-middleware/Task-B-0002/log-task.sh",
-			"dependencies": ["Task-B-0001"],
+			"reportFile": "docs/jobs/0001-auth-middleware/Task-B-2/report.md",
+			"reviewPackage": "docs/jobs/0001-auth-middleware/Task-B-2/review-package.diff.md",
+			"progressLog": "docs/jobs/0001-auth-middleware/Task-B-2/progress.log",
+			"logTaskScript": "docs/jobs/0001-auth-middleware/Task-B-2/log-task.sh",
+			"dependencies": ["Task-B-1"],
 			"acceptanceCriteria": [
 				"role na lista permitida chama next()",
 				"role fora da lista retorna 403 { error: 'Insufficient permissions' }",
@@ -347,10 +347,10 @@
 				"modified": ["src/middleware/auth.ts", "src/middleware/auth.test.ts"],
 				"deleted": []
 			},
-			"notes": ["Depende de requireAuth (Task-B-0001) para req.user populado"]
+			"notes": ["Depende de requireAuth (Task-B-1) para req.user populado"]
 		},
 		{
-			"id": "Task-C-0001",
+			"id": "Task-C-1",
 			"title": "Integrar middlewares nas rotas e testes de integração",
 			"description": "Adicionar requireAuth e requireRole nas rotas existentes em src/app.ts. Escrever testes de integração que fazem requisições HTTP reais.",
 			"status": "completed",
@@ -358,11 +358,11 @@
 			"task_profile": "deep",
 			"batch": "C",
 			"phase": "surface",
-			"reportFile": "docs/tasks/0001-auth-middleware/Task-C-0001/report.md",
-			"reviewPackage": "docs/tasks/0001-auth-middleware/Task-C-0001/review-package.diff.md",
-			"progressLog": "docs/tasks/0001-auth-middleware/Task-C-0001/progress.log",
-			"logTaskScript": "docs/tasks/0001-auth-middleware/Task-C-0001/log-task.sh",
-			"dependencies": ["Task-B-0001", "Task-B-0002"],
+			"reportFile": "docs/jobs/0001-auth-middleware/Task-C-1/report.md",
+			"reviewPackage": "docs/jobs/0001-auth-middleware/Task-C-1/review-package.diff.md",
+			"progressLog": "docs/jobs/0001-auth-middleware/Task-C-1/progress.log",
+			"logTaskScript": "docs/jobs/0001-auth-middleware/Task-C-1/log-task.sh",
+			"dependencies": ["Task-B-1", "Task-B-2"],
 			"acceptanceCriteria": [
 				"Rotas protegidas rejeitam requisições sem token (401)",
 				"Rotas admin rejeitam role=user (403)",

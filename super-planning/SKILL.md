@@ -32,7 +32,7 @@ Treat this file as an explicit, expandable router for entry phases.
 
 **Routing rule:** If no subcommand is provided, always choose `default`.
 
-**Stats rule:** When the user invokes `/super-planning stats`, `/super-planning progress`, `/super-planning task-stats`, or `/super-planning task-progress`, run the active `summarize-all-tasks.sh` helper. Prefer the in-repo script at `super-planning/scripts/summarize-all-tasks.sh` when the skill is vendored; otherwise use the repo-local `.super-planning/summarize-all-tasks.sh` copied by Phase 4. Default scan directory is `docs/tasks`. Accept optional flags exactly as the script does: `--base-dir`, `--plan-id`, `--task-id` (requires `--plan-id`), `--json`. Produce only the script output plus a one-line note about the command used.
+**Stats rule:** When the user invokes `/super-planning stats`, `/super-planning progress`, `/super-planning task-stats`, or `/super-planning task-progress`, run the active `summarize-all-tasks.sh` helper. Prefer the in-repo script at `super-planning/scripts/summarize-all-tasks.sh` when the skill is vendored; otherwise use the repo-local `.super-planning/summarize-all-tasks.sh` copied by Phase 4. Default scan directory is `docs/jobs`. Accept optional flags exactly as the script does: `--base-dir`, `--plan-id`, `--task-id` (requires `--plan-id`), `--json`. Produce only the script output plus a one-line note about the command used.
 
 **Forward-only rule:** When a phase name is provided, start at that phase and execute the remaining phases in order unless the user explicitly asks to stop earlier.
 
@@ -82,7 +82,7 @@ Have a feature idea or requirements for a multi-step task?
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 - **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
-- **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/tasks/0001-auth/super-plan.json, docs/tasks/0001-auth/Task-A-0001/log-task.sh, docs/tasks/0001-auth/progress-ledger.md`
+- **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/jobs/0001-auth/super-plan.json, docs/jobs/0001-auth/Task-A-1/log-task.sh, docs/jobs/0001-auth/progress-ledger.md`
 
 ## Outputs & Conventions
 
@@ -91,10 +91,10 @@ Have a feature idea or requirements for a multi-step task?
 | Brainstorm decisions (optional) | `docs/specs/{feature_number}_{feature_name}_decisions.md` | [`templates/decisions-template.md`](templates/decisions-template.md) |
 | Spec            | `docs/specs/NNNN-<feature-name>-spec.md`            | [`templates/spec-template.md`](templates/spec-template.md)                       |
 | Plan            | `docs/plans/NNNN-<feature-name>.md`                 | [`templates/plan-template.md`](templates/plan-template.md)                       |
-| Super plan      | `docs/tasks/NNNN-<feature-name>/super-plan.json`    | Created and later mutated only via the active helper path: the in-repo skill scripts when available, otherwise the repo-local `.super-planning/super-plan.sh`, backed by the matching schema file |
-| Task directory  | `docs/tasks/NNNN-<feature-name>/<task-id>/`         | Contains task report, review package, local logger, and task progress log        |
-| Task progress log | `docs/tasks/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
-| Progress ledger | `docs/tasks/NNNN-<feature-name>/progress-ledger.md` | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write |
+| Super plan      | `docs/jobs/NNNN-<feature-name>/super-plan.json`    | Created and later mutated only via the active helper path: the in-repo skill scripts when available, otherwise the repo-local `.super-planning/super-plan.sh`, backed by the matching schema file |
+| Task directory  | `docs/jobs/NNNN-<feature-name>/<task-id>/`         | Contains task report, review package, local logger, and task progress log        |
+| Task progress log | `docs/jobs/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
+| Progress ledger | `docs/jobs/NNNN-<feature-name>/progress-ledger.md` | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write |
 | Repo helpers     | `.super-planning/`                                  | Only created when the target repo does not already contain this `super-planning` skill; holds copied helper scripts and schema |
 
 ## Prompt Library

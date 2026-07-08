@@ -1,7 +1,7 @@
 # Auth Middleware Implementation Plan
 
 > **For agentic workers:** Use subagent-driven development to implement this plan task-by-task.
-> The executable source of truth is `docs/tasks/0001-auth-middleware/super-plan.json`.
+> The executable source of truth is `docs/jobs/0001-auth-middleware/super-plan.json`.
 
 **Goal:** Implementar middleware Express de autenticação JWT com validação de token e controle de role.
 
@@ -23,18 +23,18 @@
 
 | File/Directory                | Owner Task                                  | Notes                                              |
 | ----------------------------- | ------------------------------------------- | -------------------------------------------------- |
-| `src/types/auth.ts`           | `Task-A-0001`                               | Interfaces `JwtPayload`, `AuthUser`, `AuthOptions` |
-| `src/middleware/auth.ts`      | `Task-B-0001`, `Task-B-0002`                | `verifyToken`, `requireAuth`, `requireRole`        |
-| `src/middleware/auth.test.ts` | `Task-A-0002`, `Task-B-0001`, `Task-B-0002` | Testes unitários (12 casos)                        |
-| `src/app.ts`                  | `Task-C-0001`                               | Integração dos middlewares nas rotas               |
-| `src/app.integration.test.ts` | `Task-C-0001`                               | Testes de integração (3 casos)                     |
+| `src/types/auth.ts`           | `Task-A-1`                          | Interfaces `JwtPayload`, `AuthUser`, `AuthOptions` |
+| `src/middleware/auth.ts`      | `Task-B-1`, `Task-B-2`              | `verifyToken`, `requireAuth`, `requireRole`        |
+| `src/middleware/auth.test.ts` | `Task-A-2`, `Task-B-1`, `Task-B-2`  | Testes unitários (12 casos)                        |
+| `src/app.ts`                  | `Task-C-1`                          | Integração dos middlewares nas rotas               |
+| `src/app.integration.test.ts` | `Task-C-1`                          | Testes de integração (3 casos)                     |
 
 ## Structured Registry
 
-- **Registry:** `docs/tasks/0001-auth-middleware/super-plan.json`
-- **Progress ledger:** `docs/tasks/0001-auth-middleware/progress-ledger.md`
-- **Task directories:** `docs/tasks/0001-auth-middleware/<task-id>/`
-- **Task-local logs:** `docs/tasks/0001-auth-middleware/<task-id>/progress.log`
-- **Task-local logger:** `docs/tasks/0001-auth-middleware/<task-id>/log-task.sh`
+- **Registry:** `docs/jobs/0001-auth-middleware/super-plan.json`
+- **Progress ledger:** `docs/jobs/0001-auth-middleware/progress-ledger.md`
+- **Task directories:** `docs/jobs/0001-auth-middleware/<task-id>/`
+- **Task-local logs:** `docs/jobs/0001-auth-middleware/<task-id>/progress.log`
+- **Task-local logger:** `docs/jobs/0001-auth-middleware/<task-id>/log-task.sh`
 
 ---

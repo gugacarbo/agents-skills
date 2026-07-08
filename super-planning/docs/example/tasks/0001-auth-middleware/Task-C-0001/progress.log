@@ -1,3 +1,0 @@
-{"timestamp":"2026-07-04T15:15:00Z","task":"Task-C-0001","event":"started","try":1,"maxTries":3,"message":"Integrating middlewares into app routes"}
-{"timestamp":"2026-07-04T15:25:00Z","task":"Task-C-0001","event":"ready_for_review","try":1,"maxTries":3,"message":"All tests passing, integration complete"}
-{"timestamp":"2026-07-04T15:30:00Z","task":"Task-C-0001","event":"completed","try":1,"maxTries":3,"message":"Review clean; feature complete — ready for merge"}

@@ -1,6 +1,6 @@
-# Review Package: Task-B-0001
+# Review Package: Task-B-1
 
-- **Task:** Task-B-0001 — Implementar middleware requireAuth
+- **Task:** Task-B-1 — Implementar middleware requireAuth
 - **Plan:** 0001-auth-middleware
 - **Base:** main
 - **Head:** feature/0001-auth-middleware
@@ -27,6 +27,6 @@ jkl3456 feat(auth): implement requireAuth middleware with tests
 ✅ Erro de verificação logado com `pino` antes de retornar 401 genérico
 ✅ `req.user` populado com `userId` e `role` do payload
 ✅ Testes cobrem todos os branches do middleware
-✅ Não reimplementa `verifyToken` — reusa da Task-A-0002
+✅ Não reimplementa `verifyToken` — reusa da Task-A-2
 
 **Veredict:** APPROVED — sem alterações necessárias.

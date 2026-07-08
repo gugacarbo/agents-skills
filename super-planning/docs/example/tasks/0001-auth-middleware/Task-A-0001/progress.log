@@ -1,3 +1,0 @@
-{"timestamp":"2026-07-04T14:00:00Z","task":"Task-A-0001","event":"started","try":1,"maxTries":3,"message":"Initializing task — creating src/types/auth.ts"}
-{"timestamp":"2026-07-04T14:05:00Z","task":"Task-A-0001","event":"ready_for_review","try":1,"maxTries":3,"message":"Types defined, tsc --noEmit passes"}
-{"timestamp":"2026-07-04T14:10:00Z","task":"Task-A-0001","event":"completed","try":1,"maxTries":3,"message":"Review clean; accepted by orchestrator"}

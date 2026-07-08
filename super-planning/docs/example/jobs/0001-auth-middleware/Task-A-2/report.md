@@ -1,4 +1,4 @@
-# Task-A-0002: Implementar verifyToken com testes unitários
+# Task-A-2: Implementar verifyToken com testes unitários
 
 **Status:** ✅ completed
 **Batch:** A (foundation)

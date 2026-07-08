@@ -1,6 +1,6 @@
-# Review Package: Task-B-0002
+# Review Package: Task-B-2
 
-- **Task:** Task-B-0002 — Implementar middleware requireRole
+- **Task:** Task-B-2 — Implementar middleware requireRole
 - **Plan:** 0001-auth-middleware
 - **Base:** main
 - **Head:** feature/0001-auth-middleware

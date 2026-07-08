@@ -1,6 +1,6 @@
-# Review Package: Task-A-0002
+# Review Package: Task-A-2
 
-- **Task:** Task-A-0002 — Implementar verifyToken com testes unitários
+- **Task:** Task-A-2 — Implementar verifyToken com testes unitários
 - **Plan:** 0001-auth-middleware
 - **Base:** main
 - **Head:** feature/0001-auth-middleware

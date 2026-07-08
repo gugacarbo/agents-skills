@@ -1,4 +1,4 @@
-# Task-A-0001: Definir tipos e interfaces de autenticação
+# Task-A-1: Definir tipos e interfaces de autenticação
 
 **Status:** ✅ completed
 **Batch:** A (foundation)

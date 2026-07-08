@@ -1,4 +1,4 @@
-# Task-B-0002: Implementar middleware requireRole
+# Task-B-2: Implementar middleware requireRole
 
 **Status:** ✅ completed
 **Batch:** B (core)
