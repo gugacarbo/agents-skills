@@ -8,7 +8,7 @@ Cada fase do super-planning está representada com artefatos reais:
 
 | Fase           | Artefato               | Arquivo                                                                                                              |
 | -------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 1 — Brainstorm | Decisões de design     | [`specs/0001-auth-middleware_decisions.md`](specs/0001-auth-middleware_decisions.md)                                 |
+| 1 — Brainstorm | Decisões de design     | [`spec-decisions/0001-auth-middleware_decisions.md`](spec-decisions/0001-auth-middleware_decisions.md)               |
 | 2 — Spec       | Contrato com o usuário | [`specs/0001-auth-middleware-spec.md`](specs/0001-auth-middleware-spec.md)                                           |
 | 3 — Plan       | Plano de implementação | [`plans/0001-auth-middleware.md`](plans/0001-auth-middleware.md)                                                     |
 | 4 — Decompose  | Registro estruturado   | [`jobs/0001-auth-middleware/super-plan.json`](jobs/0001-auth-middleware/super-plan.json)                           |

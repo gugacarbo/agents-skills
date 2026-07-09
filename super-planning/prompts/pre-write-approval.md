@@ -9,14 +9,12 @@ Question: "Here's the spec summary for [feature name]:
 - Key requirements: [list]
 - Non-goals: [list]
 
-Should I write the full spec? If you want, I can also save the brainstorming decisions first in docs/specs/[feature_number]_[feature_name]_decisions.md."
+Should I write the full spec? I'll save the brainstorming decisions first in docs/spec-decisions/[feature_number]_[feature_name]_decisions.md."
 
 Options:
-  - "Approved — write the spec only"
   - "Approved — write the decisions file and the spec"
   - "Needs changes — [free text field for user to describe what to change]"
 ```
 
-If approved for spec only: write the spec file.
-If approved for decisions + spec: write the decisions file first, then the spec file.
+If approved: save the decisions file first using the template, then write the spec file.
 If changes requested: incorporate feedback and present the summary again.

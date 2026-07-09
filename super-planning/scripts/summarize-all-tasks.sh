@@ -76,7 +76,7 @@ if [ -n "$PLAN_ID" ]; then
   fi
   REGISTRY_PATH="$TARGET_DIR/super-plan.json"
   if [ ! -f "$REGISTRY_PATH" ]; then
-    echo "Error: super-plan.json not found in $TARGET_DIR" >&2
+    echo "Error: super-plan.json path not found: $REGISTRY_PATH" >&2
     exit 1
   fi
   set -- "$REGISTRY_PATH"
@@ -95,40 +95,42 @@ import json
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
+from typing import Optional, List, Dict, Any
 
 output_mode = sys.argv[1]
 task_id_filter = sys.argv[2] if sys.argv[2] else None
 registry_paths = sys.argv[3:]
 
 STATUS_MAP = {
-    "pending": "⏳ pending",
-    "in_progress": "🔄 in progress",
-    "ready_for_review": "🔎 ready for review",
-    "needs_fix": "🔁 needs-fix",
-    "blocked": "❌ blocked",
-    "completed": "✅ completed",
-    "cancelled": "⚪ cancelled",
+    "pending": "[PEND] pending",
+    "in_progress": "[RUN] in progress",
+    "ready_for_review": "[REVIEW] ready for review",
+    "reviewing": "[AUDIT] reviewing",
+    "needs_fix": "[FIX] needs-fix",
+    "blocked": "[BLK] blocked",
+    "completed": "[DONE] completed",
+    "cancelled": "[CANC] cancelled",
 }
 
-ALL_STATUSES = ["pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed", "cancelled"]
+ALL_STATUSES = ["pending", "in_progress", "ready_for_review", "reviewing", "needs_fix", "blocked", "completed", "cancelled"]
 
 
 def status_label(status: str) -> str:
     return STATUS_MAP.get(status, status or "unknown")
 
 
-def load_registry(path: str) -> dict | None:
+def load_registry(path: str) -> Optional[Dict[str, Any]]:
     try:
         with open(path, "r", encoding="utf-8") as fh:
             return json.load(fh)
     except (json.JSONDecodeError, OSError) as exc:
         if output_mode == "json":
             return None
-        print(f"  ⚠️  Skipping {path}: {exc}", file=sys.stderr)
+        print(f"  [SKIP] Skipping {path}: {exc}", file=sys.stderr)
         return None
 
 
-def read_progress_log(log_path: Path) -> list[dict]:
+def read_progress_log(log_path: Path) -> List[Dict[str, Any]]:
     """Read JSONL progress log if it exists."""
     events = []
     if log_path.exists():
@@ -146,7 +148,7 @@ def read_progress_log(log_path: Path) -> list[dict]:
     return events
 
 
-def read_report_summary(report_path: Path) -> str | None:
+def read_report_summary(report_path: Path) -> Optional[str]:
     """Extract the first meaningful line from a report.md."""
     if not report_path.exists():
         return None
@@ -161,7 +163,7 @@ def read_report_summary(report_path: Path) -> str | None:
     return None
 
 
-def count_tasks_by_status(tasks: list[dict]) -> dict[str, int]:
+def count_tasks_by_status(tasks: List[Dict[str, Any]]) -> Dict[str, int]:
     counts = {s: 0 for s in ALL_STATUSES}
     for task in tasks:
         status = task.get("status", "pending")
@@ -172,7 +174,7 @@ def count_tasks_by_status(tasks: list[dict]) -> dict[str, int]:
     return counts
 
 
-def count_requirements_by_status(requirements: list[dict]) -> dict[str, int]:
+def count_requirements_by_status(requirements: List[Dict[str, Any]]) -> Dict[str, int]:
     counts = {s: 0 for s in ALL_STATUSES}
     for req in requirements:
         status = req.get("status", "pending")
@@ -183,7 +185,7 @@ def count_requirements_by_status(requirements: list[dict]) -> dict[str, int]:
     return counts
 
 
-def build_plan_summary(registry_path: str, task_id_filter: str | None = None) -> dict | None:
+def build_plan_summary(registry_path: str, task_id_filter: Optional[str] = None) -> Optional[Dict[str, Any]]:
     registry = load_registry(registry_path)
     if registry is None:
         return None
@@ -216,8 +218,8 @@ def build_plan_summary(registry_path: str, task_id_filter: str | None = None) ->
         tstatus = task.get("status", "pending")
         ttitle = task.get("title", "")
         tbatch = task.get("batch", "")
-        tphase = task.get("phase", "")
-        ttry = task.get("try", 1)
+        tlayer = task.get("layer", "")
+        ttry = task.get("tryCount", 1)
         tmax = task.get("maxTries", 3)
         tdeps = task.get("dependencies", [])
 
@@ -236,7 +238,7 @@ def build_plan_summary(registry_path: str, task_id_filter: str | None = None) ->
             "id": tid,
             "title": ttitle,
             "batch": tbatch,
-            "phase": tphase,
+            "layer": tlayer,
             "status": tstatus,
             "try": ttry,
             "maxTries": tmax,
@@ -270,7 +272,7 @@ def build_plan_summary(registry_path: str, task_id_filter: str | None = None) ->
     }
 
 
-def format_terminal(summaries: list[dict]) -> str:
+def format_terminal(summaries: List[Dict[str, Any]]) -> str:
     lines = []
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     lines.append("=" * 72)
@@ -298,8 +300,8 @@ def format_terminal(summaries: list[dict]) -> str:
         pct = (grand_completed_tasks / grand_total_tasks) * 100
         bar_width = 30
         filled = int(bar_width * grand_completed_tasks / grand_total_tasks)
-        bar = "█" * filled + "░" * (bar_width - filled)
-        lines.append(f"\n  📊 OVERALL: {grand_completed_tasks}/{grand_total_tasks} tasks ({pct:.0f}%)  {bar}")
+        bar = "#" * filled + "." * (bar_width - filled)
+        lines.append(f"\n  OVERALL: {grand_completed_tasks}/{grand_total_tasks} tasks ({pct:.0f}%)  [{bar}]")
     lines.append("")
 
     # Per-plan sections
@@ -332,16 +334,16 @@ def format_terminal(summaries: list[dict]) -> str:
         # Per-task table
         if summary["taskDetails"]:
             lines.append(f"  │")
-            lines.append(f"  │  {'Task ID':<16s} {'Title':<40s} {'Phase':<12s} {'Status':<22s} {'Try':<5s} {'Log':<5s}")
+            lines.append(f"  │  {'Task ID':<16s} {'Title':<40s} {'Layer':<12s} {'Status':<22s} {'Try':<5s} {'Log':<5s}")
             lines.append(f"  │  {'─'*16} {'─'*40} {'─'*12} {'─'*22} {'─'*5} {'─'*5}")
             for td in summary["taskDetails"]:
                 tid = td["id"]
                 ttitle = td["title"][:38]
-                tphase = td["phase"]
+                tlayer = td["layer"]
                 tstatus = status_label(td["status"])
                 ttry = f"{td['try']}/{td['maxTries']}"
                 tevents = str(td["eventCount"])
-                lines.append(f"  │  {tid:<16s} {ttitle:<40s} {tphase:<12s} {tstatus:<22s} {ttry:<5s} {tevents:<5s}")
+                lines.append(f"  │  {tid:<16s} {ttitle:<40s} {tlayer:<12s} {tstatus:<22s} {ttry:<5s} {tevents:<5s}")
 
                 # Show last event if available
                 le = td.get("lastEvent")
@@ -376,7 +378,7 @@ def format_terminal(summaries: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def format_json(summaries: list[dict]) -> str:
+def format_json(summaries: List[Dict[str, Any]]) -> str:
     output = {
         "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "totalPlans": len(summaries),
@@ -408,7 +410,7 @@ def format_json(summaries: list[dict]) -> str:
                     "id": td["id"],
                     "title": td["title"],
                     "batch": td["batch"],
-                    "phase": td["phase"],
+                    "layer": td["layer"],
                     "status": td["status"],
                     "try": td["try"],
                     "maxTries": td["maxTries"],

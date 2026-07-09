@@ -37,7 +37,7 @@ Note: event values are **lowercase**. The script only accepts `started|ready_for
 Save the log in the individual task directory:
 
 ```
-docs/tasks/{NNNN-<feature-name>}/{task-id}/progress.log
+docs/jobs/{NNNN-<feature-name>}/{task-id}/progress.log
 ```
 
 ## Rules

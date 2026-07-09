@@ -51,30 +51,28 @@ with input_path.open("r", encoding="utf-8") as fh:
     payload = json.load(fh)
 
 status_map = {
-    "pending": "⏳ pending",
-    "in_progress": "🔄 in progress",
-    "ready_for_review": "🔎 ready for review",
-    "reviewing": "🔍 reviewing",
-    "needs_fix": "🔁 needs-fix",
-    "blocked": "❌ blocked",
-    "completed": "✅ completed",
-    "cancelled": "⚪ cancelled",
+    "pending": "[PEND] pending",
+    "in_progress": "[RUN] in progress",
+    "ready_for_review": "[REVIEW] ready for review",
+    "reviewing": "[AUDIT] reviewing",
+    "needs_fix": "[FIX] needs-fix",
+    "blocked": "[BLK] blocked",
+    "completed": "[DONE] completed",
+    "cancelled": "[CANC] cancelled",
 }
 
 summary_statuses = ["pending", "in_progress", "ready_for_review", "reviewing", "needs_fix", "blocked", "completed", "cancelled"]
 
 
 def resolve_workspace_root():
-    task_directory = payload.get("taskDirectory", "")
-    if isinstance(task_directory, str) and task_directory:
-        normalized_task_dir = task_directory.strip("/")
-        expected_suffix = normalized_task_dir.split("/") + [input_path.name]
+    task_dir = payload.get("taskDirectory", "")
+    if isinstance(task_dir, str) and task_dir:
+        trimmed = task_dir.strip("/")
+        parts = trimmed.split("/")
         input_parts = list(input_path.parts)
-        if len(input_parts) >= len(expected_suffix) and input_parts[-len(expected_suffix) :] == expected_suffix:
-            root_parts = input_parts[: -len(expected_suffix)]
-            if root_parts:
-                return Path(*root_parts)
-            return Path(input_path.anchor or "/")
+        for i in range(len(input_parts) - len(parts) + 1):
+            if input_parts[i : i + len(parts)] == parts:
+                return Path(*input_parts[:i])
     return input_path.parent
 
 
@@ -188,7 +186,7 @@ lines.extend(
         "",
         "## Tasks",
         "",
-        "| Task ID | Title | Profile | Batch | Phase | Status | Dependencies |",
+        "| Task ID | Title | Profile | Batch | Layer | Status | Dependencies |",
         "|---------|-------|---------|-------|-------|--------|-------------|",
     ]
 )
@@ -196,18 +194,18 @@ lines.extend(
 if tasks:
     for task in tasks:
         lines.append(
-            "| {id} | {title} | {profile} | {batch} | {phase} | {status} | {deps} |".format(
+            "| {id} | {title} | {profile} | {batch} | {layer} | {status} | {deps} |".format(
                 id=task.get("id", "—"),
                 title=task.get("title", "—"),
                 profile=task.get("task_profile", "—"),
                 batch=task.get("batch", "—"),
-                phase=task.get("phase", "—"),
+                layer=task.get("layer", "—"),
                 status=status_label(task.get("status")),
                 deps=display_dependencies(task.get("dependencies", [])),
             )
         )
 else:
-    lines.append("| — | no tasks defined yet | — | — | — | ⏳ pending | — |")
+    lines.append("| — | no tasks defined yet | — | — | — | [PEND] pending | — |")
 
 lines.extend(
     [

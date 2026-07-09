@@ -60,35 +60,42 @@ Treat this file as an explicit, expandable router for entry phases.
 
 **Default rule:** Always run Phase 1 first when the user starts from an idea, request, or loose requirements. Skip it only when there is already an approved spec in the repo or when the user explicitly invoked a later phase.
 
+> **Note:** `user-invocable: true` in the frontmatter marks this skill as a direct entry point for the planning workflow, invocable by users via `/super-planning` and its phase subcommands.
+
 ## Decision Flow
 
 ```
-Have a feature idea or requirements for a multi-step task?
-├─ No → Single trivial task? → Yes → Just do it inline, no skill needed
-├─ Yes → Approved spec already in docs/specs/?
-│   ├─ Yes → Skip to Phase 3 (PLAN), reference the spec number
-│   └─ No → Phase 1 (BRAINSTORM) → Phase 2 (SPEC)
-│       └─ After spec approval → Phase 3 (PLAN)
-│           └─ Tasks mostly independent AND no file conflicts?
-│               ├─ Yes → PARALLEL MODE (dispatch all in one message)
-│               └─ No  → SEQUENTIAL MODE (one at a time, review after each)
+Want progress stats?
+├─ Yes → Run `scripts/summarize-all-tasks.sh`
+└─ No → Have a feature idea or requirements for a multi-step task?
+    ├─ No → Single trivial task? → Yes → Just do it inline, no skill needed
+    └─ Yes → Approved spec already in docs/specs/?
+        ├─ Yes → Skip to Phase 3 (PLAN), reference the spec number
+        └─ No → Phase 1 (BRAINSTORM) → Phase 2 (SPEC)
+            └─ After spec approval → Phase 3 (PLAN)
+                └─ Tasks mostly independent AND no file conflicts?
+                    ├─ Yes → PARALLEL MODE (dispatch all in one message)
+                    └─ No  → SEQUENTIAL MODE (one at a time, review after each)
+                        └─ Phase 7 (INTEGRATE) → All tasks done?
+                            ├─ Yes → Done
+                            └─ No  → Return to Phase 3 (PLAN) → Rerun remaining phases
 ```
 
 ## Shared Rules
 
-- **Sequential mode:** one implementer + one reviewer according to `reviewCadence`. Best for dependent tasks or overlapping files.
+- **Sequential mode:** one implementer + one reviewer according to `reviewCadence` (defined in [Phase 5 — DISPATCH](phases/05-dispatch.md)). Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously. Review timing is controlled by `reviewCadence`; with `per_task`, each finished task is reviewed immediately. Requires file-level isolation.
 - **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it creates `.super-planning/` in the target repo and copies the registry helper stack there (`super-plan.sh`, `render-progress-ledger.sh`, `super-plan.schema.json`); it then writes the first `super-plan.json` plus `progress-ledger.md`. Every later `super-plan.json` mutation must go through that active helper path, which regenerates the ledger immediately. Phase 5 uses the shared logging helper from the same active helper path and Phase 6 materializes each task directory plus task-local artifacts such as `report.md`, `review-package.diff.md`, wrapper `log-task.sh`, and `progress.log`.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
-- **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
+- **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → reviewing → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
 - **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/jobs/0001-auth/super-plan.json, docs/jobs/0001-auth/Task-A-1/log-task.sh, docs/jobs/0001-auth/progress-ledger.md`
 
 ## Outputs & Conventions
 
 | Artifact        | Path                                                | Template                                                                         |
 | --------------- | --------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Brainstorm decisions (optional) | `docs/specs/{feature_number}_{feature_name}_decisions.md` | [`templates/decisions-template.md`](templates/decisions-template.md) |
+| Brainstorm decisions | `docs/spec-decisions/{feature_number}_{feature_name}_decisions.md` | [`templates/decisions-template.md`](templates/decisions-template.md) |
 | Spec            | `docs/specs/NNNN-<feature-name>-spec.md`            | [`templates/spec-template.md`](templates/spec-template.md)                       |
 | Plan            | `docs/plans/NNNN-<feature-name>.md`                 | [`templates/plan-template.md`](templates/plan-template.md)                       |
 | Super plan      | `docs/jobs/NNNN-<feature-name>/super-plan.json`    | Created and later mutated only via the active helper path: the in-repo skill scripts when available, otherwise the repo-local `.super-planning/super-plan.sh`, backed by the matching schema file |
@@ -103,10 +110,21 @@ Have a feature idea or requirements for a multi-step task?
 | ------------------------------------------------------------------------ | ----------------------------------- |
 | [`prompts/pre-write-approval.md`](prompts/pre-write-approval.md)         | Before writing the spec             |
 | [`prompts/post-write-approval.md`](prompts/post-write-approval.md)       | After writing the spec              |
-| [`prompts/spec-document-reviewer-prompt.md`](prompts/spec-document-reviewer-prompt.md) | Reviewing spec readiness |
+| [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md) | Reviewing spec readiness |
 | [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building a subagent dispatch prompt |
 | [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Dispatching an implementer subagent |
-| [`prompts/reviewer-guidance.md`](prompts/reviewer-guidance.md)           | Dispatching a reviewer subagent     |
+| [`agents/code-reviewer.md`](agents/code-reviewer.md)                   | Dispatching a Phase 6 per-task reviewer |
+| [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md) | Dispatching a Phase 2 spec document review before planning |
+| [`agents/spec-compliance-auditor.md`](agents/spec-compliance-auditor.md) | Dispatching a final whole-branch spec compliance audit in Phase 7 |
+
+## Dependencies
+
+| Dependency | Version | Required For | Notes |
+| ---------- | ------- | ------------ | ----- |
+| `python3` | ≥ 3.8 | All scripts (super-plan.sh, render-progress-ledger.sh, summarize-all-tasks.sh, render-task-md.sh) | Required for `Optional`, `List`, `Dict` typing support |
+| `node` | ≥ 18 | Visual companion (start-server.sh, stop-server.sh) | Optional — only needed when using Phase 1 visual companion |
+| `flock` | util-linux | log-task.sh file locking | Part of `util-linux` on Linux. Optional on macOS (uses `mkdir` fallback) |
+| `git` | any | Review packages, spec-compliance auditor | Required for Phase 6 review gates and Phase 7 audit |
 
 ## See Also
 
@@ -116,3 +134,5 @@ Have a feature idea or requirements for a multi-step task?
 - **Progress-ledger renderer:** [`scripts/render-progress-ledger.sh`](scripts/render-progress-ledger.sh)
 - **Super-plan interface:** [`interfaces/super-plan.schema.json`](interfaces/super-plan.schema.json)
 - **Progress logging helper:** [`scripts/log-task.sh`](scripts/log-task.sh)
+- **Task brief renderer:** [`scripts/render-task-md.sh`](scripts/render-task-md.sh)
+- **All-tasks summarizer:** [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh)

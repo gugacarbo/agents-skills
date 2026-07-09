@@ -2,7 +2,7 @@
 status: accepted
 date: 2026-07-04
 builds-on:
-  - docs/specs/0001-auth-middleware_decisions.md
+  - docs/spec-decisions/0001-auth-middleware_decisions.md
 implemented-by: []
 ---
 

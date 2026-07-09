@@ -20,13 +20,17 @@ Everything you paste into a dispatch prompt — and everything a subagent prints
 When the platform supports it, configure subagents to return compressed output (~60% less context than prose). Use the role-specific formats defined in the dispatch prompt templates:
 
 - **Implementer output:** see [`prompts/implementer-guidance.md`](../prompts/implementer-guidance.md) → Compressed Output Format
-- **Reviewer output:** see [`prompts/reviewer-guidance.md`](../prompts/reviewer-guidance.md) → Compressed Reviewer Output
+- **Reviewer output:** see [`agents/code-reviewer.md`](../agents/code-reviewer.md) → Compressed Output Format
 - **Investigator output:** used when dispatching an investigation subagent:
   ```
-  <path:line> — `symbol` — short note
-  totals: <counts>.
+  ## Output Format:
+  - Problem: <description>
+  - Root Cause: <analysis>
+  - Fix: <recommendation>
+  - Impact: <high/medium/low>
+  - Evidence: <file:line references>
   ```
-  Or `No match.` Always file-path-first, line-number-attached, backticked symbols.
+  Always file-path-first, line-number-attached, backticked symbols.
 
 **General principles:**
 
@@ -37,6 +41,8 @@ When the platform supports it, configure subagents to return compressed output (
 ### Narration Discipline
 
 Between tool calls, narrate at most one short line. The ledger and tool results carry the record. Progress summaries waste the user's time — they asked you to execute the plan, so execute it.
+
+> **Note:** This discipline applies to EXECUTION MODE (subagent dispatch, tool calls). During interactive planning phases with the user, maintain natural conversation.
 
 ## Continuous Execution
 
@@ -52,7 +58,7 @@ Do not pause to check in between tasks. Execute all tasks from the plan without 
 
 ### Retry Limits
 
-Each task has a `tryCount` in `super-plan.json`. The default maximum is **3 attempts**. After 3 failures on the same task:
+Each task has a `tryCount` in `super-plan.json`. The schema includes `maxTries` (default 3). The error recovery loop will not exceed `maxTries` attempts per task. After reaching the maximum:
 
 1. **Stop retrying** — do not dispatch a 4th attempt with the same approach
 2. **Assess the root cause** — re-read the task entry, the subagent's report, and the diff
@@ -80,7 +86,7 @@ Each task has a `tryCount` in `super-plan.json`. The default maximum is **3 atte
 pending → in_progress → ready_for_review → reviewing → completed
                               ├──────────→ needs_fix → in_progress
                               ├──────────→ blocked
-                              └──────────→ cancelled
+pending, in_progress ────────→ cancelled
 ```
 
 A task can only move to `completed` after both spec compliance and code quality reviews pass. The orchestrator updates `super-plan.json` after every state change through the active `super-plan.sh update` helper path, which also regenerates the ledger.
@@ -153,9 +159,8 @@ If the user requests a spec change during implementation:
 
 | Skill                   | When to use                                                                           |
 | ----------------------- | ------------------------------------------------------------------------------------- |
-| **brainstorming**       | Optional external companion only if you want to keep a standalone brainstorm workflow |
 | **commit-changes**      | After this skill — commit the final changes                                           |
-| **plan-with-subagents** | This skill itself — use for any implementation plan that delegates work to subagents  |
+| **super-planning**      | This skill itself — use for any implementation plan that delegates work to subagents  |
 
 ## Sources
 

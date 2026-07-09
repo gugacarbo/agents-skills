@@ -1,8 +1,8 @@
-# Fluxos de Trabalho
+# Workflows
 
-Diagramas detalhados dos fluxos de decisão, execução e revisão do super-planning.
+Detailed diagrams of super-planning decision, execution, and review flows.
 
-## Fluxo de Decisão: Quando Usar
+## Decision Flow: When to Use
 
 ```mermaid
 flowchart TD
@@ -21,7 +21,7 @@ flowchart TD
     H -->|No| K
 ```
 
-## Fluxo de 7 Fases
+## 7-Phase Flow
 
 ```mermaid
 flowchart LR
@@ -33,7 +33,7 @@ flowchart LR
     P6 --> P7[INTEGRATE]
 ```
 
-## Fluxo de Dispatch Sequencial
+## Sequential Dispatch Flow
 
 ```mermaid
 flowchart TD
@@ -66,18 +66,18 @@ flowchart TD
     TN --> INTEGRATE[Phase 7:<br/>Integrate & Finish]
 ```
 
-## Fluxo de Dispatch Paralelo
+## Parallel Dispatch Flow
 
 ```mermaid
 flowchart TD
     subgraph Batch A - Parallel Group
-        A1[Task 1<br/>task_profile: quick<br/>phase: foundation]
-        A2[Task 2<br/>task_profile: deep<br/>phase: foundation]
+        A1[Task 1<br/>task_profile: quick<br/>layer: foundation]
+        A2[Task 2<br/>task_profile: deep<br/>layer: foundation]
         A3[Validate quick/deep profiles<br/>then Dispatch All Parallel]
         A1 --> A3
         A2 --> A3
         A3 --> A4{reviewCadence}
-        A4 -->|per_task| A5[Review each task immediately<br/>as it finishes]
+        A4 -->|per_task| A5[Review each task in the<br/>response after implementers return]
         A4 -->|per_batch| A6[Review all after batch completes]
         A4 -->|final_only| A7[Defer review to Phase 7<br/>but review one batch at a time]
         A5 --> A8[Fix and re-review only affected tasks]
@@ -88,13 +88,13 @@ flowchart TD
     end
 
     subgraph Batch B - Parallel Group
-        B1[Task 3<br/>task_profile: general<br/>phase: core]
-        B2[Task 4<br/>task_profile: deep<br/>phase: surface]
+        B1[Task 3<br/>task_profile: general<br/>layer: core]
+        B2[Task 4<br/>task_profile: deep<br/>layer: surface]
         B3[Validate general/deep profiles<br/>then Dispatch All Parallel]
         B1 --> B3
         B2 --> B3
         B3 --> B4{reviewCadence}
-        B4 -->|per_task| B5[Review each task immediately<br/>as it finishes]
+        B4 -->|per_task| B5[Review each task in the<br/>response after implementers return]
         B4 -->|per_batch| B6[Review all after batch completes]
         B4 -->|final_only| B7[Defer review to Phase 7<br/>but review one batch at a time]
         B5 --> B8[Fix and re-review only affected tasks]
@@ -110,7 +110,7 @@ flowchart TD
     B10 --> INTEGRATE
 ```
 
-## Execução por Lotes (Batch)
+## Batch-Based Execution
 
 ```mermaid
 flowchart TB
@@ -122,7 +122,7 @@ flowchart TB
         WB[Task 3<br/>Task 4<br/>Run in parallel after Batch A]
     end
 
-    subgraph Phase Labels
+    subgraph Layer Labels
         P1[foundation]
         P2[core]
         P3[surface]
@@ -132,7 +132,7 @@ flowchart TB
     WA --> WB
 ```
 
-## Fluxo de Revisão (Review Gates)
+## Review Gates Flow
 
 ```mermaid
 flowchart TD
@@ -173,15 +173,16 @@ flowchart TD
     end
 ```
 
-## Ciclo de Vida da Tarefa
+## Task Lifecycle
 
 ```mermaid
 stateDiagram-v2
     [*] --> pending
     pending --> in_progress: Dispatch
     in_progress --> ready_for_review: Implementer done
-    ready_for_review --> completed: Review clean
-    ready_for_review --> needs_fix: Fix needed
+    ready_for_review --> reviewing: Review begins
+    reviewing --> completed: Review clean
+    reviewing --> needs_fix: Fix needed
     needs_fix --> in_progress: Re-dispatch
     in_progress --> blocked: Cannot proceed
     blocked --> in_progress: Re-assess<br/>more context / better model / smaller scope
@@ -190,7 +191,7 @@ stateDiagram-v2
     cancelled --> [*]
 ```
 
-## Tratamento de Status do Subagente
+## Subagent Status Handling
 
 ```mermaid
 flowchart TD
@@ -209,7 +210,7 @@ flowchart TD
     P --> REVIEW[Generate review package<br/>Review Gates]
 ```
 
-## Sequencial vs Paralelo: Quando Usar
+## Sequential vs Parallel: When to Use
 
 ```mermaid
 flowchart TD
@@ -227,7 +228,7 @@ flowchart TD
     GOOD --> COMPLETE[Mark batch complete<br/>Proceed to next batch]
 ```
 
-## Checks Pré-Voo
+## Pre-Flight Checks
 
 ```mermaid
 flowchart

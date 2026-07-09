@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+command -v python3 >/dev/null 2>&1 || { echo "SKIP: python3 required for schema validation and inline validator"; exit 0; }
+
 SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
@@ -46,7 +48,10 @@ test_init_generates_valid_registry_and_rich_empty_ledger() {
     --feature-name sample \
     --spec docs/specs/0001-sample-spec.md \
     --plan docs/plans/0001-sample.md \
-    --output "$registry" >/dev/null
+    --output "$registry" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   assert_exists "$registry"
   assert_exists "$ledger"
@@ -85,16 +90,35 @@ test_update_rejects_invalid_status_without_mutating_file() {
 }
 
 test_update_accepts_cancelled_task_status() {
-  local tmp registry
+  local tmp registry schema
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  schema="$REPO_ROOT/super-planning/interfaces/super-plan.schema.json"
   mkdir -p "$(dirname "$registry")"
   cp "$EXAMPLE_PLAN" "$registry"
 
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=cancelled >/dev/null
 
   assert_contains_file '"status": "cancelled"' "$registry"
-  assert_contains_file "⚪ cancelled" "$tmp/docs/jobs/0001-auth-middleware/progress-ledger.md"
+  assert_contains_file "[CANC] cancelled" "$tmp/docs/jobs/0001-auth-middleware/progress-ledger.md"
+
+  # Also validate against schema.json to avoid false positives
+  if python3 -c "import jsonschema" 2>/dev/null; then
+    python3 -c "
+import json, jsonschema, sys
+with open('$registry') as f:
+    data = json.load(f)
+with open('$schema') as f:
+    schema = json.load(f)
+try:
+    jsonschema.validate(data, schema)
+except jsonschema.ValidationError as e:
+    print(f'Schema validation failed: {e}', file=sys.stderr)
+    sys.exit(1)
+" || fail "cancelled task failed schema validation"
+  else
+    echo "SKIP: jsonschema module not available, skipping schema validation"
+  fi
 }
 
 test_update_accepts_reviewing_task_status() {
@@ -107,7 +131,7 @@ test_update_accepts_reviewing_task_status() {
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=reviewing >/dev/null
 
   assert_contains_file '"status": "reviewing"' "$registry"
-  assert_contains_file "🔍 reviewing" "$tmp/docs/jobs/0001-auth-middleware/progress-ledger.md"
+  assert_contains_file "[AUDIT] reviewing" "$tmp/docs/jobs/0001-auth-middleware/progress-ledger.md"
 }
 
 test_update_rejects_invalid_task_profile_without_mutating_file() {
@@ -161,6 +185,75 @@ test_errors_are_emitted_as_json() {
   assert_contains_file '"exit_code": 1' "$tmp/output.log"
 }
 
+test_schema_validator_agreement() {
+  if ! python3 -c "import jsonschema" 2>/dev/null; then
+    echo "SKIP: jsonschema module not available, skipping schema validator agreement test"
+    return
+  fi
+
+  local tmp schema
+  tmp=$(mktemp -d)
+  schema="$REPO_ROOT/super-planning/interfaces/super-plan.schema.json"
+
+  python3 -c "
+import json, jsonschema, sys
+from datetime import datetime, timezone
+
+# Build a minimal valid plan
+now = datetime.now(timezone.utc).isoformat()
+plan = {
+    '\$schema': 'https://raw.githubusercontent.com/gugacarbo/agents-skills/main/super-planning/interfaces/super-plan.schema.json',
+    'createdAt': now,
+    'planId': '0001-test',
+    'featureName': 'test-feature',
+    'status': 'pending',
+    'source': {'spec': 'docs/specs/test.md', 'plan': 'docs/plans/test.md'},
+    'goal': '',
+    'architectureSummary': '',
+    'techStack': [],
+    'executionMode': 'subagent-driven',
+    'reviewCadence': 'per_task',
+    'agents': {
+        'general': {'model': '', 'agent': ''},
+        'deep': {'model': '', 'agent': ''},
+        'quick': {'model': '', 'agent': ''},
+    },
+    'branchStrategy': {'baseBranch': 'main', 'featureBranch': '0001-test'},
+    'worktree': {'enabled': False, 'path': ''},
+    'globalConstraints': [],
+    'fileStructure': [],
+    'requirementsChecklist': [],
+    'taskDirectory': 'docs/jobs/0001-test',
+    'rules': [],
+    'tasks': [],
+}
+
+# Validate against schema.json
+with open('$schema') as f:
+    s = json.load(f)
+try:
+    jsonschema.validate(plan, s)
+    print('Schema: PASS')
+except jsonschema.ValidationError as e:
+    print(f'Schema: FAIL - {e}', file=sys.stderr)
+    sys.exit(1)
+"
+
+  # Also validate that schema accepts all valid status values
+  python3 -c "
+import json, jsonschema, sys
+with open('$schema') as f:
+    s = json.load(f)
+status_enum = s['properties']['status']['enum']
+expected = {'pending', 'in_progress', 'ready_for_review', 'reviewing', 'needs_fix', 'blocked', 'completed', 'cancelled'}
+actual = set(status_enum)
+if actual != expected:
+    print(f'Schema status enum mismatch: extra={actual-expected} missing={expected-actual}', file=sys.stderr)
+    sys.exit(1)
+print('Status enum: PASS')
+" || fail "schema and validator status enums disagree"
+}
+
 test_render_progress_ledger_includes_timeline_and_requirements() {
   local tmp registry ledger
   tmp=$(mktemp -d)
@@ -177,11 +270,11 @@ test_render_progress_ledger_includes_timeline_and_requirements() {
   assert_contains_file "## Agent Profiles" "$ledger"
   assert_contains_file "| quick | gpt-5-mini | quick |" "$ledger"
   assert_contains_file "## Tasks" "$ledger"
-  assert_contains_file "| Task-A-1 | Definir tipos e interfaces de autenticação | general | A | foundation | ✅ completed | — |" "$ledger"
+  assert_contains_file "| Task-A-1 | Definir tipos e interfaces de autenticação | general | A | foundation | [DONE] completed | — |" "$ledger"
   assert_contains_file "## Timeline" "$ledger"
   assert_contains_file "| 2026-07-04T14:10:00Z | Task-A-1 | completed | 1 |" "$ledger"
   assert_contains_file "## Requirements Coverage" "$ledger"
-  assert_contains_file "| REQ-001: Validar token JWT do header Authorization: Bearer <token> | ✅ completed | Task-B-1 |" "$ledger"
+  assert_contains_file "| REQ-001: Validar token JWT do header Authorization: Bearer <token> | [DONE] completed | Task-B-1 |" "$ledger"
 }
 
 test_incremental_decompose_appends_tasks_one_by_one() {
@@ -194,7 +287,10 @@ test_incremental_decompose_appends_tasks_one_by_one() {
     --feature-name sample \
     --spec docs/specs/0001-sample-spec.md \
     --plan docs/plans/0001-sample.md \
-    --output "$registry" >/dev/null
+    --output "$registry" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   assert_exists "$registry"
   assert_contains_file '"tasks": []' "$registry"
@@ -207,9 +303,10 @@ test_incremental_decompose_appends_tasks_one_by_one() {
   "description": "First task",
   "status": "pending",
   "tryCount": 3,
+  "maxTries": 3,
   "task_profile": "general",
   "batch": "A",
-  "phase": "foundation",
+  "layer": "foundation",
   "reportFile": "docs/jobs/0001-sample/Task-A-1/report.md",
   "reviewPackage": "docs/jobs/0001-sample/Task-A-1/review-package.diff.md",
   "progressLog": "docs/jobs/0001-sample/Task-A-1/progress.log",
@@ -237,9 +334,10 @@ EOF
   "description": "Second task",
   "status": "pending",
   "tryCount": 3,
+  "maxTries": 3,
   "task_profile": "quick",
   "batch": "B",
-  "phase": "core",
+  "layer": "core",
   "reportFile": "docs/jobs/0001-sample/Task-B-1/report.md",
   "reviewPackage": "docs/jobs/0001-sample/Task-B-1/review-package.diff.md",
   "progressLog": "docs/jobs/0001-sample/Task-B-1/progress.log",
@@ -305,14 +403,20 @@ test_summarize_all_tasks_terminal_output() {
     --feature-name sample \
     --spec docs/specs/0001-sample-spec.md \
     --plan docs/plans/0001-sample.md \
-    --output "$tmp/docs/jobs/0001-sample/super-plan.json" >/dev/null
+    --output "$tmp/docs/jobs/0001-sample/super-plan.json" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   "$SUPER_PLAN_SCRIPT" init \
     --plan-id 0002-other \
     --feature-name other \
     --spec docs/specs/0002-other-spec.md \
     --plan docs/plans/0002-other.md \
-    --output "$tmp/docs/jobs/0002-other/super-plan.json" >/dev/null
+    --output "$tmp/docs/jobs/0002-other/super-plan.json" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   local output
   output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/jobs" 2>&1) || fail "summarize-all-tasks.sh failed"
@@ -333,7 +437,10 @@ test_summarize_all_tasks_json_output() {
     --feature-name sample \
     --spec docs/specs/0001-sample-spec.md \
     --plan docs/plans/0001-sample.md \
-    --output "$tmp/docs/jobs/0001-sample/super-plan.json" >/dev/null
+    --output "$tmp/docs/jobs/0001-sample/super-plan.json" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   local json_output
   json_output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/jobs" --json 2>&1) || fail "summarize-all-tasks.sh --json failed"
@@ -354,14 +461,20 @@ test_summarize_all_tasks_with_plan_id_filter() {
     --feature-name sample \
     --spec docs/specs/0001-sample-spec.md \
     --plan docs/plans/0001-sample.md \
-    --output "$tmp/docs/jobs/0001-sample/super-plan.json" >/dev/null
+    --output "$tmp/docs/jobs/0001-sample/super-plan.json" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   "$SUPER_PLAN_SCRIPT" init \
     --plan-id 0002-other \
     --feature-name other \
     --spec docs/specs/0002-other-spec.md \
     --plan docs/plans/0002-other.md \
-    --output "$tmp/docs/jobs/0002-other/super-plan.json" >/dev/null
+    --output "$tmp/docs/jobs/0002-other/super-plan.json" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   local output
   output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/jobs" --plan-id 0001-sample 2>&1) || fail "summarize-all-tasks.sh with --plan-id failed"
@@ -431,9 +544,9 @@ test_render_task_md_full_plan() {
   assert_contains_file "## Requirements" "$md_file"
   assert_contains_file "## Plan Rules" "$md_file"
   assert_contains_file "## Tasks" "$md_file"
-  assert_contains_file "## Task Task-A-1:" "$md_file"
-  assert_contains_file "## Task Task-B-1:" "$md_file"
-  assert_contains_file "## Task Task-C-1:" "$md_file"
+  assert_contains_file "## Task-A-1:" "$md_file"
+  assert_contains_file "## Task-B-1:" "$md_file"
+  assert_contains_file "## Task-C-1:" "$md_file"
   assert_contains_file "### Acceptance Criteria" "$md_file"
   assert_contains_file "### Steps" "$md_file"
   assert_contains_file "### Files" "$md_file"
@@ -453,7 +566,7 @@ test_render_task_md_single_task() {
 
   md_file="$tmp/task-b-brief.md"
   assert_exists "$md_file"
-  assert_contains_file "## Task Task-B-1:" "$md_file"
+  assert_contains_file "## Task-B-1:" "$md_file"
   assert_contains_file "Implementar middleware requireAuth" "$md_file"
   assert_contains_file "### Acceptance Criteria" "$md_file"
   assert_contains_file "### Steps" "$md_file"
@@ -478,7 +591,10 @@ test_render_task_md_empty_plan() {
     --feature-name sample \
     --spec docs/specs/0001-sample-spec.md \
     --plan docs/plans/0001-sample.md \
-    --output "$registry" >/dev/null
+    --output "$registry" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
 
   "$RENDER_TASK_MD_SCRIPT" --input "$registry" --output "$tmp/brief.md" >/dev/null
 
@@ -488,6 +604,66 @@ test_render_task_md_empty_plan() {
   assert_contains_file "## Agent Profiles" "$md_file"
   assert_contains_file "| general | default | default |" "$md_file"
 }
+
+test_append_task_validate_only() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-sample/super-plan.json"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$registry" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
+
+  local task_json='[{"id":"Task-A-1","title":"A","description":"","status":"pending","tryCount":3,"maxTries":3,"task_profile":"general","batch":"A","layer":"foundation","reportFile":"a.md","reviewPackage":"b.md","progressLog":"c.log","logTaskScript":"d.sh","dependencies":[],"acceptanceCriteria":[],"requirements":[],"rules":[],"steps":[],"filesTouched":[],"files":{"created":[],"modified":[],"deleted":[]},"notes":[]}]'
+  local output
+  output=$("$SUPER_PLAN_SCRIPT" append-task --input "$registry" --validate-only "$task_json" 2>&1) || fail "append-task --validate-only failed"
+  echo "$output" | grep -q '"valid": true' || fail "expected valid:true in append-task --validate-only output"
+}
+
+test_update_set_requirement_status() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set 'requirementsChecklist[REQ-001].status=completed' >/dev/null
+
+  assert_contains_file '"status": "completed"' "$registry"
+
+  local req_line
+  req_line=$(grep -A5 '"id": "REQ-001"' "$registry" | grep '"status"' || true)
+  echo "$req_line" | grep -q '"completed"' || fail "requirement status not updated to completed"
+}
+
+test_log_task_log_command() {
+  local tmp log_file
+  tmp=$(mktemp -d)
+  log_file="$tmp/progress.log"
+  mkdir -p "$(dirname "$log_file")"
+
+  AGENTS_SKILLS_ORCHESTRATOR=1 "$LOG_TASK_SCRIPT" \
+    --plan 0001-test \
+    --task Task-A-1 \
+    --event ready_for_review \
+    --log-dir "$(dirname "$log_file")" \
+    --try 1 \
+    --max-tries 3 \
+    --message "Ready for review" >/dev/null
+
+  assert_exists "$log_file"
+  assert_contains_file '"event":"ready_for_review"' "$log_file"
+  assert_contains_file '"task":"Task-A-1"' "$log_file"
+}
+
+# TODO: Add visual companion tests (start-server.sh, stop-server.sh) — skipped
+# because they require node and a running server.
 
 test_render_task_md_invalid_task_id_exits_with_error() {
   local tmp registry
@@ -508,6 +684,7 @@ main() {
   test_update_accepts_reviewing_task_status
   test_update_rejects_invalid_task_profile_without_mutating_file
   test_render_progress_ledger_includes_timeline_and_requirements
+  test_schema_validator_agreement
   test_materialized_logger_wrapper_writes_jsonl_events
   test_summarize_all_tasks_terminal_output
   test_summarize_all_tasks_json_output
@@ -517,6 +694,9 @@ main() {
   test_render_task_md_single_task
   test_render_task_md_empty_plan
   test_render_task_md_invalid_task_id_exits_with_error
+  test_append_task_validate_only
+  test_update_set_requirement_status
+  test_log_task_log_command
 
   printf 'PASS: super-planning.sh\n'
 }

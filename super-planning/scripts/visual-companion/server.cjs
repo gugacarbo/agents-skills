@@ -85,12 +85,12 @@ function decodeFrame(buffer) {
 
 // ========== Configuration ==========
 
-const PORT_FILE = process.env.BRAINSTORM_PORT_FILE || null;
+const PORT_FILE = process.env.SESSION_PORT_FILE || null;
 const randomPort = () => 49152 + Math.floor(Math.random() * 16383);
 // Prefer an explicit port, else the port this session last bound (so a restart
 // reuses it and an already-open browser tab reconnects), else a random high port.
 function preferredPort() {
-	if (process.env.BRAINSTORM_PORT) return Number(process.env.BRAINSTORM_PORT);
+	if (process.env.SESSION_PORT) return Number(process.env.SESSION_PORT);
 	if (PORT_FILE) {
 		try {
 			const p = Number(fs.readFileSync(PORT_FILE, "utf-8").trim());
@@ -102,11 +102,11 @@ function preferredPort() {
 	return randomPort();
 }
 let PORT = preferredPort();
-const HOST = process.env.BRAINSTORM_HOST || "127.0.0.1";
+const HOST = process.env.SESSION_HOST || "127.0.0.1";
 const URL_HOST =
-	process.env.BRAINSTORM_URL_HOST ||
+	process.env.SESSION_URL_HOST ||
 	(HOST === "127.0.0.1" ? "localhost" : HOST);
-const SESSION_DIR = process.env.BRAINSTORM_DIR || "/tmp/brainstorm";
+const SESSION_DIR = process.env.SESSION_DIR || "/tmp/brainstorm";
 const CONTENT_DIR = path.join(SESSION_DIR, "content");
 const STATE_DIR = path.join(SESSION_DIR, "state");
 const SUPERPOWERS_VERSION = readSuperpowersVersion();
@@ -120,8 +120,8 @@ const TELEMETRY_DISABLE_ENV_VARS = [
 const SUPERPOWERS_TELEMETRY_DISABLED = TELEMETRY_DISABLE_ENV_VARS.some((name) =>
 	isTruthyEnv(process.env[name]),
 );
-let ownerPid = process.env.BRAINSTORM_OWNER_PID
-	? Number(process.env.BRAINSTORM_OWNER_PID)
+let ownerPid = process.env.SESSION_OWNER_PID
+	? Number(process.env.SESSION_OWNER_PID)
 	: null;
 
 // Per-session secret key. The companion is reachable by any local browser tab
@@ -130,9 +130,9 @@ let ownerPid = process.env.BRAINSTORM_OWNER_PID
 // remote binds — and defeats DNS rebinding — where a Host/Origin allowlist
 // cannot. It rides the served URL as ?key= and is mirrored into a cookie on
 // first load so same-origin subresources and the WebSocket carry it for free.
-// Persisted alongside the port (BRAINSTORM_TOKEN_FILE) so a restart keeps the
+// Persisted alongside the port (SESSION_TOKEN_FILE) so a restart keeps the
 // same key and an already-open tab's cookie still validates.
-const TOKEN_FILE = process.env.BRAINSTORM_TOKEN_FILE || null;
+const TOKEN_FILE = process.env.SESSION_TOKEN_FILE || null;
 function generateToken() {
 	return crypto.randomBytes(32).toString("hex");
 }
@@ -146,8 +146,8 @@ function chmodOwnerOnly(file) {
 }
 
 function initialToken() {
-	if (process.env.BRAINSTORM_TOKEN) {
-		return { value: process.env.BRAINSTORM_TOKEN, source: "env" };
+	if (process.env.SESSION_TOKEN) {
+		return { value: process.env.SESSION_TOKEN, source: "env" };
 	}
 	if (TOKEN_FILE) {
 		try {
@@ -604,21 +604,21 @@ function broadcast(msg) {
 
 // Best-effort: open the user's browser the first time a screen is actually ready
 // to show. Skips when disabled, on a non-loopback (remote) bind, or when a
-// browser is already connected. Override the launcher with BRAINSTORM_OPEN_CMD.
+// browser is already connected. Override the launcher with SESSION_OPEN_CMD.
 let browserOpened = false;
 function maybeOpenBrowser() {
 	if (browserOpened) return;
 	browserOpened = true;
-	if (!process.env.BRAINSTORM_OPEN) return; // opt-in: only after the user approves the companion
+	if (!process.env.SESSION_OPEN) return; // opt-in: only after the user approves the companion
 	if (HOST !== "127.0.0.1" && HOST !== "localhost") return;
 	if (clients.size > 0) return; // the user already opened it
 	const url = companionUrl(); // must carry the key or the gate 403s it
 	const cp = require("node:child_process");
 	// Operator-provided launcher: run as given (this env var is trusted operator input).
-	if (process.env.BRAINSTORM_OPEN_CMD) {
+	if (process.env.SESSION_OPEN_CMD) {
 		try {
 			cp.exec(
-				`${process.env.BRAINSTORM_OPEN_CMD} ${JSON.stringify(url)}`,
+				`${process.env.SESSION_OPEN_CMD} ${JSON.stringify(url)}`,
 				() => {},
 			);
 		} catch (_e) {
@@ -640,15 +640,15 @@ function maybeOpenBrowser() {
 // ========== Activity Tracking ==========
 
 // Idle timeout: shut down after this long with no activity. Default 4 hours;
-// override with BRAINSTORM_IDLE_TIMEOUT_MS (start-server.sh: --idle-timeout-minutes).
+// override with SESSION_IDLE_TIMEOUT_MS (start-server.sh: --idle-timeout-minutes).
 const IDLE_TIMEOUT_MS = (() => {
-	const ms = Number(process.env.BRAINSTORM_IDLE_TIMEOUT_MS);
+	const ms = Number(process.env.SESSION_IDLE_TIMEOUT_MS);
 	return Number.isFinite(ms) && ms > 0 ? ms : 4 * 60 * 60 * 1000;
 })();
 // How often the watchdog checks for owner-death / idleness. Configurable mainly
 // so tests can run fast; production default is 60s.
 const LIFECYCLE_CHECK_MS = (() => {
-	const ms = Number(process.env.BRAINSTORM_LIFECYCLE_CHECK_MS);
+	const ms = Number(process.env.SESSION_LIFECYCLE_CHECK_MS);
 	return Number.isFinite(ms) && ms > 0 ? ms : 60 * 1000;
 })();
 let lastActivity = Date.now();
@@ -822,7 +822,7 @@ function startServer() {
 		if (err.code === "EADDRINUSE" && !triedFallback) {
 			if (tokenSource === "env") {
 				console.error(
-					"Server failed to bind: preferred port is in use and BRAINSTORM_TOKEN is set; refusing fallback with explicit token",
+					"Server failed to bind: preferred port is in use and SESSION_TOKEN is set; refusing fallback with explicit token",
 				);
 				process.exit(1);
 			}

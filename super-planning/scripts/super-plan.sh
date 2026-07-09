@@ -74,11 +74,11 @@ from pathlib import Path
 
 path = Path(sys.argv[1])
 
-PLAN_STATUSES = {"pending", "in_progress", "ready_for_review", "needs_fix", "blocked", "completed"}
-TASK_STATUSES = PLAN_STATUSES | {"reviewing", "cancelled"}
+PLAN_STATUSES = {"pending", "in_progress", "ready_for_review", "reviewing", "needs_fix", "blocked", "completed", "cancelled"}
+TASK_STATUSES = PLAN_STATUSES
 REVIEW_CADENCE = {"per_task", "per_batch", "final_only"}
 EXECUTION_MODE = {"subagent-driven", "sequential"}
-TASK_PHASES = {"foundation", "core", "surface", "final"}
+TASK_LAYERS = {"foundation", "core", "surface", "final"}
 TASK_PROFILES = {"general", "deep", "quick"}
 
 
@@ -199,6 +199,13 @@ for index, entry in enumerate(payload["fileStructure"]):
     expect_type(entry["notes"], str, f"{path_label}.notes")
 
 expect_type(payload["requirementsChecklist"], list, "requirementsChecklist")
+req_ids = [r.get("id") for r in payload["requirementsChecklist"] if isinstance(r, dict)]
+seen_reqs = []
+for rid in req_ids:
+    if rid in seen_reqs:
+        fail(f"Duplicate requirement id: {rid}")
+    seen_reqs.append(rid)
+
 for index, requirement in enumerate(payload["requirementsChecklist"]):
     path_label = f"requirementsChecklist[{index}]"
     expect_keys(
@@ -215,6 +222,13 @@ for index, requirement in enumerate(payload["requirementsChecklist"]):
     expect_string_list(requirement["notes"], f"{path_label}.notes")
 
 expect_type(payload["tasks"], list, "tasks")
+task_ids = [t.get("id") for t in payload["tasks"] if isinstance(t, dict)]
+seen = []
+for tid in task_ids:
+    if tid in seen:
+        fail(f"Duplicate task id: {tid}")
+    seen.append(tid)
+
 for index, task in enumerate(payload["tasks"]):
     path_label = f"tasks[{index}]"
     expect_keys(
@@ -225,9 +239,10 @@ for index, task in enumerate(payload["tasks"]):
             "description",
             "status",
             "tryCount",
+            "maxTries",
             "task_profile",
             "batch",
-            "phase",
+            "layer",
             "reportFile",
             "reviewPackage",
             "progressLog",
@@ -249,13 +264,15 @@ for index, task in enumerate(payload["tasks"]):
     expect_status(task["status"], TASK_STATUSES, f"{path_label}.status")
     if not isinstance(task["tryCount"], int) or task["tryCount"] < 1:
         fail(f"{path_label}.tryCount must be an integer >= 1")
+    if not isinstance(task["maxTries"], int) or task["maxTries"] < 1:
+        fail(f"{path_label}.maxTries must be an integer >= 1")
     expect_non_empty_string(task["task_profile"], f"{path_label}.task_profile")
     if task["task_profile"] not in TASK_PROFILES:
         fail(f"{path_label}.task_profile must be one of: {', '.join(sorted(TASK_PROFILES))}")
     expect_non_empty_string(task["batch"], f"{path_label}.batch")
-    expect_non_empty_string(task["phase"], f"{path_label}.phase")
-    if task["phase"] not in TASK_PHASES:
-        fail(f"{path_label}.phase must be one of: {', '.join(sorted(TASK_PHASES))}")
+    expect_non_empty_string(task["layer"], f"{path_label}.layer")
+    if task["layer"] not in TASK_LAYERS:
+        fail(f"{path_label}.layer must be one of: {', '.join(sorted(TASK_LAYERS))}")
     expect_non_empty_string(task["reportFile"], f"{path_label}.reportFile")
     expect_non_empty_string(task["reviewPackage"], f"{path_label}.reviewPackage")
     expect_non_empty_string(task["progressLog"], f"{path_label}.progressLog")
@@ -293,7 +310,7 @@ MODE="init"
 
 if [ "$#" -gt 0 ]; then
   case "$1" in
-    init|update)
+    init|update|append-task)
       MODE="$1"
       shift
       ;;
@@ -315,10 +332,10 @@ if [ "$MODE" = "init" ]; then
   BASE_BRANCH="${BASE_BRANCH:-main}"
   FEATURE_BRANCH=""
   TASK_DIRECTORY=""
-  WORKTREE_ENABLED="${WORKTREE_ENABLED:-true}"
+  WORKTREE_ENABLED=""
   WORKTREE_PATH=""
-  EXECUTION_MODE="${EXECUTION_MODE:-subagent-driven}"
-  REVIEW_CADENCE="${REVIEW_CADENCE:-per_task}"
+  EXECUTION_MODE=""
+  REVIEW_CADENCE=""
   SCHEMA_PATH=""
 
   while [ "$#" -gt 0 ]; do
@@ -381,8 +398,8 @@ if [ "$MODE" = "init" ]; then
     esac
   done
 
-  if [ -z "$PLAN_ID" ] || [ -z "$FEATURE_NAME" ] || [ -z "$SPEC_PATH" ] || [ -z "$PLAN_PATH" ] || [ -z "$OUTPUT_PATH" ]; then
-    error_json 1 "Missing required argument for init: --plan-id, --feature-name, --spec, --plan, --output"
+  if [ -z "$PLAN_ID" ] || [ -z "$FEATURE_NAME" ] || [ -z "$SPEC_PATH" ] || [ -z "$PLAN_PATH" ] || [ -z "$OUTPUT_PATH" ] || [ -z "$WORKTREE_ENABLED" ] || [ -z "$EXECUTION_MODE" ] || [ -z "$REVIEW_CADENCE" ]; then
+    error_json 1 "Missing required argument for init: --plan-id, --feature-name, --spec, --plan, --output, --worktree-enabled, --execution-mode, --review-cadence"
   fi
 
   case "$WORKTREE_ENABLED" in
@@ -431,6 +448,7 @@ if [ "$MODE" = "init" ]; then
   python3 - "$PLAN_ID" "$FEATURE_NAME" "$SPEC_PATH" "$PLAN_PATH" "$OUTPUT_PATH" "$BASE_BRANCH" "$FEATURE_BRANCH" "$TASK_DIRECTORY" "$WORKTREE_ENABLED" "$WORKTREE_PATH" "$EXECUTION_MODE" "$REVIEW_CADENCE" "$SCHEMA_PATH" <<'PY'
 import json
 import sys
+from datetime import datetime, timezone
 
 (
     plan_id,
@@ -448,8 +466,11 @@ import sys
     schema_path,
 ) = sys.argv[1:]
 
+now = datetime.now(timezone.utc).isoformat()
+
 payload = {
-    "$schema": schema_path,
+    "$schema": "https://raw.githubusercontent.com/gugacarbo/agents-skills/main/super-planning/interfaces/super-plan.schema.json",
+    "createdAt": now,
     "planId": plan_id,
     "featureName": feature_name,
     "status": "pending",
@@ -578,6 +599,7 @@ def parse_path(path: str):
             if idx < len(path) and path[idx] == ".":
                 idx += 1
             continue
+        # NOTE: ids containing "]" are not supported by this parser
         current += char
         idx += 1
     if current:
@@ -587,17 +609,20 @@ def parse_path(path: str):
 
 def select_child(container, field, selector):
     if field:
-        container = container[field]
+        try:
+            container = container[field]
+        except (KeyError, TypeError):
+            emit_error(f"field '{field}' not found in object")
     if selector is None:
         return container
     if not isinstance(container, list):
-        emit_error(f"Path selector requires a list at {field!r}")
+        emit_error(f"Path selector requires a list at '{field}'")
     if selector.isdigit():
         return container[int(selector)]
     for item in container:
         if isinstance(item, dict) and item.get("id") == selector:
             return item
-    emit_error(f"Could not find list item with id {selector!r} in {field!r}")
+    emit_error(f"Could not find list item with id '{selector}' in '{field}'")
 
 
 def get_parent(root, tokens):
@@ -689,10 +714,127 @@ with ops_path.open("r", encoding="utf-8") as fh:
         except (KeyError, TypeError) as exc:
             emit_error(str(exc))
 
+from datetime import datetime, timezone
+data["updatedAt"] = datetime.now(timezone.utc).isoformat()
+
 with output_path.open("w", encoding="utf-8") as fh:
     json.dump(data, fh, indent=2)
     fh.write("\n")
 PY
+
+  validate_json "$TEMP_OUTPUT_PATH"
+  mv "$TEMP_OUTPUT_PATH" "$INPUT_PATH"
+  render_ledger "$INPUT_PATH"
+  printf '%s\n' "$INPUT_PATH"
+  exit 0
+fi
+
+if [ "$MODE" = "append-task" ]; then
+  INPUT_PATH=""
+  TASK_JSON=""
+  TASKS_JSON=""
+  VALIDATE_ONLY=""
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --input)
+        INPUT_PATH="$2"
+        shift 2
+        ;;
+      --task)
+        TASK_JSON="$2"
+        shift 2
+        ;;
+      --tasks)
+        TASKS_JSON="$2"
+        shift 2
+        ;;
+      --validate-only)
+        VALIDATE_ONLY="$2"
+        shift 2
+        ;;
+      *)
+        usage
+        ;;
+    esac
+  done
+
+  if [ -z "$INPUT_PATH" ]; then
+    error_json 1 "append-task requires --input"
+  fi
+
+  if [ -z "$TASK_JSON" ] && [ -z "$TASKS_JSON" ] && [ -z "$VALIDATE_ONLY" ]; then
+    error_json 1 "append-task requires at least one of --task, --tasks, or --validate-only"
+  fi
+
+  TEMP_OUTPUT_PATH="$(mktemp)"
+  trap 'rm -f "$TEMP_OUTPUT_PATH"' EXIT HUP INT TERM
+
+  python3 - "$INPUT_PATH" "$TASK_JSON" "$TASKS_JSON" "$VALIDATE_ONLY" "$TEMP_OUTPUT_PATH" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+input_path = Path(sys.argv[1])
+task_json = sys.argv[2] if sys.argv[2] else None
+tasks_json = sys.argv[3] if sys.argv[3] else None
+validate_only = sys.argv[4] if sys.argv[4] else None
+output_path = Path(sys.argv[5])
+
+
+def emit_error(message: str, code: int = 1):
+    print(json.dumps({"error": True, "message": message, "exit_code": code}), file=sys.stderr)
+    sys.exit(code)
+
+
+def parse_value(raw: str):
+    if raw.startswith("@"):
+        try:
+            with open(raw[1:], "r", encoding="utf-8") as fh:
+                return json.load(fh)
+        except FileNotFoundError:
+            emit_error(f"File not found: {raw[1:]}")
+        except json.JSONDecodeError as exc:
+            emit_error(f"Invalid JSON in file {raw[1:]}: {exc}")
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+
+
+with input_path.open("r", encoding="utf-8") as fh:
+    try:
+        data = json.load(fh)
+    except json.JSONDecodeError as exc:
+        emit_error(f"Invalid JSON in input file {input_path}: {exc}")
+
+if validate_only:
+    tasks_to_validate = parse_value(validate_only)
+    if not isinstance(tasks_to_validate, list):
+        emit_error("--validate-only value must be a JSON array")
+    print(json.dumps({"valid": True, "count": len(tasks_to_validate)}))
+    sys.exit(0)
+
+if task_json:
+    task = parse_value(task_json)
+    if not isinstance(task, dict):
+        emit_error("--task value must be a JSON object")
+    data.setdefault("tasks", []).append(task)
+
+if tasks_json:
+    tasks = parse_value(tasks_json)
+    if not isinstance(tasks, list):
+        emit_error("--tasks value must be a JSON array")
+    data.setdefault("tasks", []).extend(tasks)
+
+with output_path.open("w", encoding="utf-8") as fh:
+    json.dump(data, fh, indent=2)
+    fh.write("\n")
+PY
+
+  if [ -n "$VALIDATE_ONLY" ]; then
+    exit 0
+  fi
 
   validate_json "$TEMP_OUTPUT_PATH"
   mv "$TEMP_OUTPUT_PATH" "$INPUT_PATH"

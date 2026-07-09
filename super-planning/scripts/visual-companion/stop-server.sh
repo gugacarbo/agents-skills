@@ -43,7 +43,7 @@ command_line_for_pid() {
 command_has_server_id() {
   local pid="$1"
   local expected="$2"
-  local expected_arg="--brainstorm-server-id=$expected"
+  local expected_arg="--session-server-id=$expected"
   if [[ -r "/proc/$pid/cmdline" ]]; then
     local arg
     while IFS= read -r -d '' arg || [[ -n "$arg" ]]; do

@@ -102,6 +102,13 @@ materialize_task_logger() {
     ROOT_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
   fi
 
+  # Compute a relative path from the task directory to the shared script
+  # so the wrapper survives repo moves.
+  local task_dir
+  task_dir="$(dirname "$OUTPUT")"
+  local rel_root
+  rel_root="$(python3 -c "import os; print(os.path.relpath('$ROOT_SCRIPT', '$task_dir'))" 2>/dev/null || echo "$ROOT_SCRIPT")"
+
   mkdir -p "$(dirname "$OUTPUT")"
 
   cat >"$OUTPUT" <<EOF
@@ -109,7 +116,7 @@ materialize_task_logger() {
 set -euo pipefail
 
 SCRIPT_DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-ROOT_SCRIPT="$ROOT_SCRIPT"
+ROOT_SCRIPT="\$(cd "\$SCRIPT_DIR" && cd "$(dirname "$rel_root")" && pwd)/$(basename "$rel_root")"
 
 exec bash "\$ROOT_SCRIPT" \\
   --plan "$PLAN" \\
@@ -165,6 +172,13 @@ done
 
 if [[ -z "$PLAN" || -z "$TASK" || -z "$EVENT" ]]; then
   usage
+fi
+
+if [[ "$EVENT" == "completed" ]]; then
+  if [[ -z "${AGENTS_SKILLS_ORCHESTRATOR:-}" ]]; then
+    echo "Error: Only the orchestrator may set completed status. Subagents must set ready_for_review." >&2
+    exit 1
+  fi
 fi
 
 case "$EVENT" in
@@ -248,12 +262,35 @@ message_json() {
 
 LOCK_FILE="$LOG_FILE.lock"
 
-# Acquire exclusive lock; wait up to 10 seconds
-exec 200>"$LOCK_FILE"
-flock -x -w 10 200 || { echo "Could not acquire lock for $LOG_FILE" >&2; exit 1; }
+acquire_lock() {
+  if command -v flock >/dev/null 2>&1; then
+    exec 200>"$LOCK_FILE"
+    flock -x -w 10 200 || { echo "Could not acquire lock for $LOG_FILE" >&2; exit 1; }
+  else
+    # macOS fallback: atomic mkdir as mutex
+    local waited=0
+    while ! mkdir "$LOCK_FILE" 2>/dev/null; do
+      sleep 0.1
+      waited=$((waited + 1))
+      if [ "$waited" -gt 100 ]; then
+        echo "Could not acquire lock for $LOG_FILE" >&2
+        exit 1
+      fi
+    done
+  fi
+}
+
+release_lock() {
+  if command -v flock >/dev/null 2>&1; then
+    exec 200>&-
+  else
+    rmdir "$LOCK_FILE" 2>/dev/null || true
+  fi
+}
+
+acquire_lock
 
 printf '{"timestamp":"%s","task":"%s","event":"%s","try":%s,"maxTries":%s,"message":%s}\n' \
   "$TIMESTAMP" "$TASK" "$EVENT" "$(try_count)" "$(max_tries)" "$(message_json)" >> "$LOG_FILE"
 
-# Release lock by closing descriptor
-exec 200>&-
+release_lock

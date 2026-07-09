@@ -139,6 +139,8 @@ EOF
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
   --input docs/jobs/0003-auth-middleware/super-plan.json \
   --append tasks=@/tmp/task-a.json
+
+> **Forward-references:** The paths `reportFile`, `reviewPackage`, `progressLog`, and `logTaskScript` in the task JSON are forward-references — the files will be created in later phases (5-6). Do NOT create the directories now; just record the intended paths.
 ```
 
 Minimum number of script invocations in this phase:
@@ -159,6 +161,13 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
   --set globalConstraints='["Máximo 1 query por request","Sem estado de sessão no servidor"]' \
   --set rules='["Nunca iniciar implementação na main sem permissão","Nunca redespachar tarefas completadas"]' \
   --set fileStructure='[{"path":"src/auth/middleware.ts","ownerTask":"Task-A-1","notes":"Entry point do middleware"}]'
+```
+
+Example — updating a task status:
+```bash
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+  --input docs/jobs/0003-auth-middleware/super-plan.json \
+  --set 'tasks[Task-A-1].status=in_progress'
 ```
 
 For large arrays or objects, prefer writing the JSON to a file and using `@file` syntax:
@@ -192,6 +201,8 @@ Structure and field definitions live in the schema file from the active helper p
 - `taskDirectory`, `executionMode`, `branchStrategy`, `worktree`
 - `tasks`
 
+> **Worktree path:** Worktree path goes outside the main repo. Before enabling worktree mode, verify the repo supports worktrees (`git worktree list` should not error). Default `worktree.enabled=true` is safe only if the repo doesn't use submodules or hooks that break with worktrees.
+
 ## Subagent Profile Discovery
 
 Before finalizing `super-plan.json`, the orchestrator must attempt platform-native auto-discovery for subagent execution profiles.
@@ -211,7 +222,7 @@ Use platform-native list/discovery tools first. When multiple discovery tools ar
 
 After collecting the discovery result, the orchestrator must present it to the user and ask them to choose how to proceed.
 
-**Preferred interaction rule:** if the current platform exposes an ask/confirm/question tool for structured user input, including `request_user_input` / a request user input tool, and the current collaboration mode/session allows that tool to be called, the orchestrator must use that tool instead of a plain text question. Use the structured prompt to:
+**Preferred interaction rule:** if the current platform exposes an ask/confirm/question tool for structured user input, including `question` / a request user input tool, and the current collaboration mode/session allows that tool to be called, the orchestrator must use that tool instead of a plain text question. Use the structured prompt to:
 
 1. show the discovered agents and models
 2. show the recommended `general`, `deep`, and `quick` configuration
@@ -220,7 +231,7 @@ After collecting the discovery result, the orchestrator must present it to the u
    - provide a manual override
    - keep the configuration empty/default
 
-**Fallback interaction rule:** if the current platform does not expose a structured ask/confirm/question tool such as `request_user_input`, or if the current collaboration mode/session does not allow calling it, the orchestrator must fall back to a normal text message asking the same question.
+**Fallback interaction rule:** if the current platform does not expose a structured ask/confirm/question tool such as `question`, or if the current collaboration mode/session does not allow calling it, the orchestrator must fall back to a normal text message asking the same question.
 
 After discovery:
 
@@ -232,8 +243,8 @@ After discovery:
 Required fallback behavior when discovery fails:
 
 1. Tell the user that auto-discovery did not find subagent/model options on the current platform
-2. Use the structured ask/confirm/question tool, including `request_user_input` when available, and allowed in the current mode/session to ask whether they want to provide a manual override
-3. If the platform has no structured ask/confirm/question tool such as `request_user_input`, or the current mode/session disallows it, ask via plain text
+2. Use the structured ask/confirm/question tool, including `question` when available, and allowed in the current mode/session to ask whether they want to provide a manual override
+3. If the platform has no structured ask/confirm/question tool such as `question`, or the current mode/session disallows it, ask via plain text
 4. If the user does not provide an override, keep the fields empty
 
 Recommended structured prompt content:
@@ -263,11 +274,7 @@ Required shape:
 
 ## Review Cadence Decision
 
-Before finalizing `super-plan.json`, the orchestrator must explicitly ask the user when independent review should happen:
-
-1. after each completed task
-2. after each completed batch
-3. only at the end of implementation
+Before finalizing `super-plan.json`, the orchestrator MUST ask the user to choose `per_task`, `per_batch`, or `final_only`. Do NOT rely on the default — prompt explicitly. If the user has no preference, document `per_task` as default.
 
 Persist the answer in `reviewCadence` using one of these values:
 
@@ -317,10 +324,12 @@ Do not leave tasks uncategorized. Every task in `super-plan.json` must have a `t
 
 Do not create per-task directories or `progress.log` in Phase 4.
 
-Phase 4 defines the executable registry in `super-plan.json` and also materializes `progress-ledger.md` from that registry. Phase 6 is still responsible for materializing:
+Phase 4 defines the executable registry in `super-plan.json` and also materializes `progress-ledger.md` from that registry. Phase 5 is responsible for materializing (before dispatching implementers):
 
 - `docs/jobs/{NNNN-<feature-name>}/{task-id}/`
 - `docs/jobs/{NNNN-<feature-name>}/{task-id}/progress.log`
 - `docs/jobs/{NNNN-<feature-name>}/{task-id}/log-task.sh`
 
-Until Phase 6, treat only the per-task paths as planned artifact locations owned by later phases.
+The remaining artifacts (`report.md`, `review-package.diff.md`) are still materialized in Phase 6.
+
+Until Phase 5, treat only the per-task paths as planned artifact locations owned by later phases.

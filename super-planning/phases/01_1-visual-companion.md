@@ -42,6 +42,8 @@ Start the companion only after the user approves it:
 scripts/visual-companion/start-server.sh --project-dir /path/to/project --open
 ```
 
+> **Requirement:** Requires Node.js to run. If `node` is not available, skip the visual companion and proceed with text-only brainstorming.
+
 This returns JSON like:
 
 ```json
@@ -63,7 +65,7 @@ If the startup JSON is not captured, read `$STATE_DIR/server-info`.
 1. Confirm the server is alive before referring to the URL or pushing a screen.
 2. Write a new HTML file into `screen_dir`.
 3. Tell the user what is on screen and ask them to respond in the terminal.
-4. On the next turn, read `state_dir/events` if present and merge that with the user's terminal feedback.
+4. On the next turn, read `state_dir/events` if present and merge that with the user's terminal feedback. If `state_dir/events` exists, read it as JSONL (one JSON object per line). Each event has at least a `type` and `payload` field.
 5. Iterate by writing a fresh file each time; never reuse filenames.
 6. When returning to a text-only step, push a waiting screen so stale visuals are cleared.
 
@@ -114,3 +116,7 @@ The companion assets live here:
 - `scripts/visual-companion/frame-template.html`
 
 Use these files as-is unless you need to change companion behavior.
+
+> **Namespace note:** The `.super-planning/` directory is shared between the visual companion (`brainstorm/`) and the vendored helper stack (`super-plan.sh` etc.). Ensure files don't collide; brainstorm outputs go under `.super-planning/brainstorm/` only.
+
+> **Cleanup:** After completing the brainstorm session, run `stop-server.sh` to clean up the background server process.

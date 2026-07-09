@@ -1,12 +1,12 @@
 # Red Flags
 
-Regras críticas que **nunca** devem ser violadas durante o uso do super-planning.
+Critical rules that must **never** be violated when using super-planning.
 
-## Regras Fundamentais
+## Fundamental Rules
 
-- **Nunca pule a revisão** ou aceite "bom o suficiente" na conformidade com a spec
-- **Nunca despache subagentes paralelos** sem isolamento de arquivos ou um fallback de plataforma
-- **Nunca inicie implementação na main/master** sem consentimento explícito
-- **Nunca re-despache uma tarefa** que o log de progresso ou ledger marcam como concluída
+- **Never skip review** or accept "good enough" on spec compliance
+- **Never dispatch parallel subagents** without file isolation or a platform fallback
+- **Never start implementation on main/master** without explicit consent
+- **Never re-dispatch a task** that the progress log or ledger marks as completed
 
-> A lista completa está em [`SKILL.md`](../SKILL.md) → seção **Red Flags**.
+> The full list is in [`phases/08-reference.md`](../phases/08-reference.md) → **Red Flags** section.

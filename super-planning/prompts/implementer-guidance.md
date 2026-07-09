@@ -1,5 +1,7 @@
 # Implementer Guidance
 
+> This document is a SUPPLEMENT to the worker prompt template, not a replacement. Use both: the worker prompt template provides structure; this document adds detailed guidance on logging, reporting, and status conventions.
+
 Include these expectations when constructing dispatch prompts for implementers.
 
 ## Before Starting Work
@@ -52,7 +54,7 @@ Or one of: `too-big.` / `needs-confirm.` / `ambiguous.` / `regressed.` (terminal
 
 ## Report Format
 
-Write your full report to the report file path provided in the dispatch prompt, or return that content for Phase 6 persistence if the task artifact directory has not been materialized yet:
+Write your full report to the report file path provided in the dispatch prompt:
 
 - What you implemented (or what you attempted, if blocked)
 - What you tested and test results

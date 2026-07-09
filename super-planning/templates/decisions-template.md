@@ -8,8 +8,7 @@ related-spec: docs/specs/NNNN-<feature-name>-spec.md
 # Decisions for <feature name>
 
 > This file captures the decisions produced during Phase 1 brainstorming.
-> It is optional. Create it only when the user explicitly wants a durable
-> decision record before the spec is written.
+> It is always saved before writing the spec in Phase 2.
 
 ## Summary
 
@@ -65,6 +64,8 @@ related-spec: docs/specs/NNNN-<feature-name>-spec.md
      blockers rather than improvised later. -->
 
 - [ ]
+
+> **Note:** Open Questions here are ALL unresolved questions. When migrating to the spec template, only carry forward open questions that affect the specification's completeness. Resolved questions stay here for audit trail.
 
 ## Carry Forward to Spec
 

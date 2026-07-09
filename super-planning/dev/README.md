@@ -13,6 +13,6 @@ bash super-planning/dev/tests.sh
 Para executar a partir da raiz do workspace:
 
 ```bash
-cd /home/gustavo/.agents/skills
+cd <SKILLS_DIR>
 bash super-planning/dev/tests.sh
 ```

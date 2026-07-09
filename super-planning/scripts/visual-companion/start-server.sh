@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Bash required: uses [[ ]], local, process substitution, and OS-detection (is_windows_like_shell)
 # Start the brainstorm server and output connection info
 # Usage: start-server.sh [--project-dir <path>] [--host <bind-host>] [--url-host <display-host>] [--foreground] [--background]
 #
@@ -45,7 +46,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --open)
-      export BRAINSTORM_OPEN=1
+      export SESSION_OPEN=1
       shift
       ;;
     --foreground|--no-daemon)
@@ -76,7 +77,7 @@ if [[ -n "$IDLE_TIMEOUT_MINUTES" ]]; then
     echo "{\"error\": \"--idle-timeout-minutes must be a positive integer\"}"
     exit 1
   fi
-  export BRAINSTORM_IDLE_TIMEOUT_MS=$(( IDLE_TIMEOUT_MINUTES * 60 * 1000 ))
+  export SESSION_IDLE_TIMEOUT_MS=$(( IDLE_TIMEOUT_MINUTES * 60 * 1000 ))
 fi
 
 is_windows_like_shell() {
@@ -95,7 +96,8 @@ is_windows_like_shell() {
 }
 
 # Some environments reap detached/background processes. Auto-foreground when detected.
-if [[ -n "${CODEX_CI:-}" && "$FOREGROUND" != "true" && "$FORCE_BACKGROUND" != "true" ]]; then
+# Auto-foreground in platforms that reap background processes
+if [[ "$FOREGROUND" != "true" && "$FORCE_BACKGROUND" != "true" ]]; then
   FOREGROUND="true"
 fi
 
@@ -110,15 +112,15 @@ fi
 # keep everything this script and the server create owner-only.
 umask 077
 
-# Generate unique session directory
-SESSION_ID="$$-$(date +%s)"
+# Generate unique session directory with random component
+SESSION_ID="$$-$(date +%s)-${RANDOM:-0}${RANDOM:-0}"
 
 if [[ -n "$PROJECT_DIR" ]]; then
   SESSION_DIR="${PROJECT_DIR}/.super-planning/brainstorm/${SESSION_ID}"
   # Persist the bound port and key per project so a restart reuses them and an
   # already-open browser tab reconnects to the same URL with a valid cookie.
-  export BRAINSTORM_PORT_FILE="${PROJECT_DIR}/.super-planning/brainstorm/.last-port"
-  export BRAINSTORM_TOKEN_FILE="${PROJECT_DIR}/.super-planning/brainstorm/.last-token"
+  export SESSION_PORT_FILE="${PROJECT_DIR}/.super-planning/brainstorm/.last-port"
+  export SESSION_TOKEN_FILE="${PROJECT_DIR}/.super-planning/brainstorm/.last-token"
 else
   SESSION_DIR="/tmp/brainstorm-${SESSION_ID}"
 fi
@@ -168,7 +170,7 @@ fi
 
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
-  env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs "--brainstorm-server-id=$SERVER_ID" &
+  env SESSION_DIR="$SESSION_DIR" SESSION_HOST="$BIND_HOST" SESSION_URL_HOST="$URL_HOST" SESSION_OWNER_PID="$OWNER_PID" node server.cjs "--session-server-id=$SERVER_ID" &
   SERVER_PID=$!
   echo "$SERVER_PID" > "$PID_FILE"
   wait "$SERVER_PID"
@@ -177,7 +179,7 @@ fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs "--brainstorm-server-id=$SERVER_ID" > "$LOG_FILE" 2>&1 &
+nohup env SESSION_DIR="$SESSION_DIR" SESSION_HOST="$BIND_HOST" SESSION_URL_HOST="$URL_HOST" SESSION_OWNER_PID="$OWNER_PID" node server.cjs "--session-server-id=$SERVER_ID" > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2>/dev/null
 echo "$SERVER_PID" > "$PID_FILE"
@@ -185,6 +187,25 @@ echo "$SERVER_PID" > "$PID_FILE"
 # Wait for server-started message (check log file)
 for _ in {1..50}; do
   if grep -q "server-started" "$LOG_FILE" 2>/dev/null; then
+    # Extract port from log line
+    local server_line
+    server_line=$(grep "server-started" "$LOG_FILE" | head -1)
+    local server_port
+    server_port=$(echo "$server_line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['port'])" 2>/dev/null || true)
+    if [[ -n "$server_port" ]]; then
+      # Health check: verify server responds with a valid HTTP response
+      local health_result
+      health_result=$(curl -s -o /dev/null -w "%{http_code}" "http://$BIND_HOST:$server_port/?key=$TOKEN" 2>/dev/null || true)
+      if [[ "$health_result" != "403" && "$health_result" != "200" ]]; then
+        # Wait a bit and retry once
+        sleep 0.5
+        health_result=$(curl -s -o /dev/null -w "%{http_code}" "http://$BIND_HOST:$server_port/?key=$TOKEN" 2>/dev/null || true)
+      fi
+      if [[ "$health_result" != "403" && "$health_result" != "200" ]]; then
+        echo "{\"error\": \"Server started but health check failed (HTTP $health_result). Retry with: $SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
+        exit 1
+      fi
+    fi
     # Verify server is still alive after a short window (catches process reapers)
     alive="true"
     for _ in {1..20}; do
@@ -198,7 +219,7 @@ for _ in {1..50}; do
       echo "{\"error\": \"Server started but was killed. Retry in a persistent terminal with: $SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
       exit 1
     fi
-    grep "server-started" "$LOG_FILE" | head -1
+    echo "$server_line"
     exit 0
   fi
   sleep 0.1

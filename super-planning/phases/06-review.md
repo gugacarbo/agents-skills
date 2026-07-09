@@ -2,25 +2,24 @@
 
 Two-stage review according to `reviewCadence`: after each task, after each batch, or during final integration on a per-batch basis.
 
+> **Ownership:** Review package generation is owned by Phase 6. Phase 5 may prepare the inputs (diff, worktree) but the actual packaging (creating `review-package.json`, assembling artifacts) happens here.
+
 ## Review Cadence Routing
 
 Read `reviewCadence` from `super-plan.json` before dispatching reviewers:
 
 - `per_task` — review each task as soon as it reaches `ready_for_review`; set status to `reviewing` when review begins
 - `per_batch` — review all tasks in the batch together once the batch is `ready_for_review`; set each task to `reviewing` when review begins
-- `final_only` — skip Phase 6 review during implementation; Phase 7 must still dispatch one reviewer subagent per batch before any task is accepted as complete
+- `final_only` — materialize per-task artifacts normally during implementation, but defer reviewer dispatch to Phase 7; tasks stay at `ready_for_review` until final integration
 
-In parallel execution with `reviewCadence=per_task`, Phase 6 begins for an individual task immediately after that task's implementer finishes, even if sibling tasks in the same batch are still running.
+In parallel execution with `reviewCadence=per_task`, Phase 6 begins for individual tasks in the response immediately following the implementer batch return, even if sibling tasks in the same batch are still being reviewed.
 
 ## Materialize Task Artifacts Before Review
 
-Phase 6 is the first phase that creates the per-task persistent artifact structure. Before reviewing any task or reviewable batch member, materialize:
+Phase 5 already materialized the task directory, logging wrapper, and empty `progress.log`. Phase 6 materializes the remaining per-task artifacts **regardless of `reviewCadence`** — even in `final_only` mode, these artifacts must exist before Phase 7 can review them:
 
-- `docs/jobs/{NNNN-<feature-name>}/{task-id}/`
 - `docs/jobs/{NNNN-<feature-name>}/{task-id}/report.md`
 - `docs/jobs/{NNNN-<feature-name>}/{task-id}/review-package.diff.md`
-- `docs/jobs/{NNNN-<feature-name>}/{task-id}/progress.log`
-- `docs/jobs/{NNNN-<feature-name>}/{task-id}/log-task.sh`
 
 Use [`templates/progress-template.txt`](../templates/progress-template.txt) for the task log format. The ledger itself is a generated artifact produced by the active `render-progress-ledger.sh` helper path, not a hand-maintained template.
 
@@ -78,7 +77,7 @@ The reviewer gets three things:
 
 ## Reviewer Guidance
 
-When dispatching a reviewer, include the expectations from [`prompts/reviewer-guidance.md`](../prompts/reviewer-guidance.md). Key principles:
+When dispatching a reviewer, use the [`agents/code-reviewer.md`](../agents/code-reviewer.md) agent. Key principles:
 
 - **Do Not Trust the Report:** Treat the implementer's report as unverified claims; verify against the diff
 - **Scope-Limited:** Only review the task's changes, not the whole branch
@@ -93,7 +92,7 @@ When dispatching a reviewer, include the expectations from [`prompts/reviewer-gu
 | ------------- | -------------------------- | --------------------------------------------------------- |
 | **Critical**  | Must fix before proceeding | Dispatch fix subagent, re-review                          |
 | **Important** | Should fix, blocks merge   | Dispatch fix subagent, re-review                          |
-| **Minor**     | Nice to have               | Record in progress ledger, point final review at the list |
+| **Minor**     | Nice to have               | Record minor findings in the task's `progress.log` as an `info` event with the finding details. If the finding affects status, update the task's `status` in `super-plan.json`. |
 
 For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding.
 
@@ -103,4 +102,4 @@ Only mark a task `completed` once its required independent review has happened a
 
 - `per_task` — the task can be completed right after its own clean review
 - `per_batch` — tasks in the batch can be completed after the batch review is clean
-- `final_only` — tasks stay short of `completed` until their batch is reviewed during final integration
+- `final_only` — tasks stay at `ready_for_review` until their batch is reviewed during final integration in Phase 7; artifacts are still materialized now so Phase 7 has them

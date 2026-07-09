@@ -83,11 +83,8 @@ flowchart TD
     B --> C{"User approved pre-write summary?"}
     C -->|No| D["Revise summary and ask again"]
     D --> C
-    C -->|Yes| E{"Create optional decisions file?"}
-    E -->|Yes| F["Write decisions file from Phase 1 outputs"]
-    E -->|No| G["Skip decisions file"]
+    C -->|Yes| F["Save decisions file from Phase 1 outputs"]
     F --> H["Write spec file"]
-    G --> H
     H --> I["Run self-review: placeholders, consistency, scope, ambiguity"]
     I --> J{"Spec is complex / risky / ambiguous?"}
     J -->|Yes| K["Run optional spec reviewer pass and fix blockers"]
@@ -129,8 +126,8 @@ flowchart TD
     E --> F["Populate plan metadata, requirements, file structure, execution settings, tasks"]
     F --> G["Set every task status to pending"]
     G --> H{"Need per-task directories or progress.log now?"}
-    H -->|Yes| I["No: defer task artifacts to Phase 6"]
-    H -->|No| J["Keep only registry and ledger for now"]
+    H -->|Yes| I["Defer task artifacts to Phase 6"]
+    H -->|No| J["Materialize artifacts now"]
     I --> K["Proceed with registry as single source of truth"]
     J --> K
     K --> L{"Any future change to registry?"}
@@ -230,7 +227,7 @@ flowchart TD
 flowchart TD
     A{"Task failed or came back blocked?"}
     A -->|No| B["Continue normal flow"]
-    A -->|Yes| C{"tryCount < 3?"}
+    A -->|Yes| C{"tryCount < maxTries?"}
     C -->|Yes| D["Change something before retrying"]
     D --> E{"Best intervention?"}
     E -->|More context| F["Update prompt or task context"]
@@ -254,12 +251,14 @@ stateDiagram-v2
     [*] --> pending
     pending --> in_progress: dispatch
     in_progress --> ready_for_review: implementer done
-    ready_for_review --> needs_fix: review found issues
+    ready_for_review --> reviewing: review begins
+    reviewing --> needs_fix: review found issues
     needs_fix --> in_progress: fix dispatched
     in_progress --> blocked: cannot proceed
     blocked --> in_progress: context/model/scope changed
-    ready_for_review --> completed: review clean and orchestrator closes task
-    ready_for_review --> cancelled: orchestrator retires task but keeps audit trail
+    reviewing --> completed: review clean and orchestrator closes task
+    pending --> cancelled: orchestrator retires task but keeps audit trail
+    in_progress --> cancelled: orchestrator retires task but keeps audit trail
     completed --> [*]
     cancelled --> [*]
 ```

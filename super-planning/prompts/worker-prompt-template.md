@@ -20,6 +20,8 @@ You are implementing [Task-X-N] for [Project Name]. This is part of the [NNNN-<f
 
 All file operations must use absolute paths.
 
+If using worktree isolation, each subagent's working directory is the worktree root, not the main repo root. Adjust the `Working Directory` placeholder accordingly.
+
 ## Your Task
 
 Read the task entry in `docs/jobs/[NNNN-<feature-name>]/super-plan.json` with `id: [Task-X-N]`. That entry contains the complete requirements: files, interfaces, requirements, steps, acceptanceCriteria, and notes. You do not need to read any other file in the plan to do your work.
@@ -30,7 +32,7 @@ Use the task-local logging wrapper to record every state change. The script is a
 
 `docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh`
 
-If the orchestrator has already materialized Phase 6 task artifacts, use the absolute path it provided. That wrapper delegates to the shared helper path chosen by the orchestrator, with the shared plan/task/log-dir arguments already filled in. If not, return your status and report content so the orchestrator can persist them during Phase 6.
+The orchestrator materialized this wrapper before dispatch. It delegates to the shared helper path chosen by the orchestrator, with the shared plan/task/log-dir arguments already filled in.
 
 ### Log on these events
 
@@ -64,7 +66,7 @@ When present, the script appends a timestamped line to `docs/jobs/[NNNN-<feature
 - Do **not** edit `docs/jobs/[NNNN-<feature-name>]/super-plan.json`. The orchestrator owns that file.
 - Stay within the `filesTouched` and `files` block from your task entry.
 - Do not run the full test suite unless your task entry requires it.
-- Do not read the rest of the plan. You have everything you need in your task entry.
+- Do NOT read other tasks' briefs or the full plan markdown. You MAY read the spec document referenced in `source.spec` and any files explicitly listed in the task brief.
 
 ## What to Return
 

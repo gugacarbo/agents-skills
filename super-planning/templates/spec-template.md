@@ -4,8 +4,8 @@ status: draft
 # do not skip states; only move to implemented after Phase 7 closes.
 date: YYYY-MM-DD
 builds-on: []
-# List ADRs/decision docs this spec relies on, including the optional
-# docs/specs/{feature_number}_{feature_name}_decisions.md when it exists.
+# List ADRs/decision docs this spec relies on, including the required
+# docs/spec-decisions/{feature_number}_{feature_name}_decisions.md when it exists.
 # The spec CONSUMES decisions; it does not redefine them here.
 implemented-by: []
 # Filled in at close: real paths (code, migrations, functions) that deliver this spec.

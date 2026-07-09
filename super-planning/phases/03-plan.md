@@ -15,12 +15,16 @@ Start from [`templates/plan-template.md`](../templates/plan-template.md). The pl
 
 The executable part of the plan lives in `super-plan.json`. The plan file provides context and constraints; `super-plan.json` provides the structured specification, requirement coverage, and executable tasks after Phase 4 materializes it.
 
-## Execution Batches and Delivery Phases
+> **Single source of truth:** `super-plan.json` is the single source of truth for task structure and ownership. The plan markdown file is a human-readable summary. Always update `super-plan.json` first, then regenerate if needed.
 
-Assign each task both a `batch` and a `phase` before writing steps:
+> **Note:** Task definitions live in `super-plan.json`, not in the plan markdown file. The plan markdown is a human-readable overview; the JSON registry is the machine-readable source of truth.
+
+## Execution Batches and Delivery Layers
+
+Assign each task both a `batch` and a `layer` before writing steps:
 
 - `batch` = execution group. Tasks with the same batch label are intended to run in the same parallel batch when they are file-isolated and dependency-safe.
-- `phase` = delivery layer. Use this to classify the work as foundation/core/surface/final without overloading the execution grouping.
+- `layer` = delivery layer. Use this to classify the work as foundation/core/surface/final without overloading the execution grouping.
 
 ### `batch` rules
 
@@ -30,9 +34,9 @@ Assign each task both a `batch` and a `phase` before writing steps:
 - If two tasks should definitely run together in the same parallel batch, give them the same batch label.
 - If a task must wait for another batch to finish, move it to a later batch.
 
-### `phase` values
+### `layer` values
 
-| Phase        | Contents                                                      |
+| Layer        | Contents                                                      |
 | ------------ | ------------------------------------------------------------- |
 | `foundation` | Infrastructure, types, shared utilities, config, schemas      |
 | `core`       | Primary business logic                                        |
@@ -41,9 +45,9 @@ Assign each task both a `batch` and a `phase` before writing steps:
 
 Rules:
 
-- `phase` describes the type of work; it does NOT control parallelism.
+- `layer` describes the type of work; it does NOT control parallelism.
 - Prefer dependencies that point to earlier batches.
-- Use `phase` to communicate architectural layering and review expectations.
+- Use `layer` to communicate architectural layering and review expectations.
 - Use `batch` to communicate execution order and parallel batches.
 
 ## Task Right-Sizing
@@ -53,7 +57,7 @@ A task is the smallest unit that carries its own test cycle and is worth a fresh
 - Fold setup, scaffolding, and docs into the task whose deliverable needs them.
 - Split only where a reviewer could meaningfully reject one task while approving its neighbor.
 - Each task ends with an independently testable deliverable.
-- Target 2–5 minutes of subagent work per task.
+- Target 3-7 steps or 1-2 testable deliverables per task.
 - Each step within a task is ONE action.
 
 ## No Placeholders
@@ -84,9 +88,4 @@ After writing the plan and preparing its decomposition inputs, check:
 
 ## Execution Handoff
 
-After saving the plan, offer the user:
-
-1. **Subagent-Driven (recommended)** — fresh subagent per task, review between tasks
-2. **Sequential** — execute tasks one at a time with review after each
-
-If the user chose parallel dispatch during decomposition, default to subagent-driven with parallel batches.
+The parallel vs sequential execution mode was already decided in the decision flow (SKILL.md). Do NOT re-prompt — just document the mode in the plan. If mode is not set, reference the decision flow to decide.

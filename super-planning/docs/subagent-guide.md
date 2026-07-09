@@ -1,28 +1,28 @@
-# Guia de Subagentes
+# Subagent Guide
 
-Seleção de modelo, compressão de contexto e estratégias de handoff para subagentes.
+Model selection, context compression, and handoff strategies for subagents.
 
-## Seleção de Modelo
+## Model Selection
 
-Consulte a tabela de seleção de modelo e estratégia em [`SKILL.md`](../SKILL.md) Fase 5.
+See the model and strategy selection table in [`phases/05-dispatch.md`](../phases/05-dispatch.md).
 
-## Perfis de Task
+## Task Profiles
 
-Cada task no `super-plan.json` deve ter `task_profile` e cada perfil deve apontar para uma configuração em `agents`:
+Each task in `super-plan.json` must have a `task_profile` and each profile must point to a configuration in `agents`:
 
-- `quick`: tarefas rápidas, mecânicas e bem delimitadas
-- `general`: tarefas normais de implementação e debugging
-- `deep`: tarefas difíceis, ambíguas, multi-arquivo ou de maior julgamento
+- `quick`: fast, mechanical, well-scoped tasks
+- `general`: normal implementation and debugging tasks
+- `deep`: hard, ambiguous, multi-file, or high-judgment tasks
 
-Quando `agents.<perfil>.model` e `agents.<perfil>.agent` estiverem preenchidos, o orquestrador deve tentar usar essa configuração. Quando estiverem vazios, deve usar o default da plataforma.
+When `agents.<profile>.model` and `agents.<profile>.agent` are populated, the orchestrator should try to use that configuration. When empty, it should use the platform default.
 
-Antes de disparar um subagente, o orquestrador deve verificar se o `agent/model` configurado ainda está disponível na plataforma atual. Se não estiver, deve limpar os campos no `super-plan.json` e cair para o default do sistema.
+Before dispatching a subagent, the orchestrator must verify that the configured `agent/model` is still available on the current platform. If not, it should clear the fields in `super-plan.json` and fall back to the system default.
 
-## Compressão de Contexto
+## Context Compression
 
-Formatos de saída comprimida por papel (implementer, reviewer, investigator) estão documentados em [`SKILL.md`](../SKILL.md).
+Compressed output formats by role (implementer, reviewer, investigator) are documented in [`SKILL.md`](../SKILL.md).
 
-### Princípio: Handoff Baseado em Arquivos
+### Principle: File-Based Handoff
 
 ```mermaid
 flowchart LR
@@ -38,4 +38,4 @@ flowchart LR
     end
 ```
 
-**Princípio chave:** Tudo que os subagentes produzem vai para um arquivo, não de volta para o seu contexto.
+**Key principle:** Everything subagents produce goes into a file, not back into your context.

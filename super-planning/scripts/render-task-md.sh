@@ -261,7 +261,7 @@ def render_task(task):
     tstatus = task.get("status", "pending")
     tprofile = task.get("task_profile", "—")
     tbatch = task.get("batch", "—")
-    tphase = task.get("phase", "—")
+    tlayer = task.get("layer", "—")
     ttry = task.get("tryCount", 1)
     deps = task.get("dependencies", [])
     criteria = task.get("acceptanceCriteria", [])
@@ -274,14 +274,14 @@ def render_task(task):
     fdeleted = task.get("files", {}).get("deleted", [])
     tnotes = task.get("notes", [])
 
-    lines.append(f"## Task {tid}: {ttitle}")
+    lines.append(f"## {tid}: {ttitle}")
     lines.append("")
     lines.append(f"| Field | Value |")
     lines.append(f"|-------|-------|")
     lines.append(f"| ID | `{tid}` |")
     lines.append(f"| Status | {status_label(tstatus)} |")
     lines.append(f"| Profile | {tprofile} |")
-    lines.append(f"| Phase | {tphase} |")
+    lines.append(f"| Layer | {tlayer} |")
     lines.append(f"| Batch | {tbatch} |")
     lines.append(f"| Try Count | {ttry} |")
     if deps:
@@ -410,16 +410,16 @@ if not task_id_filter:
         all_lines.append("")
 
         summary_lines = []
-        summary_lines.append("| Task ID | Title | Phase | Status | Dependencies |")
+        summary_lines.append("| Task ID | Title | Layer | Status | Dependencies |")
         summary_lines.append("|---------|-------|-------|--------|-------------|")
         for task in filtered_tasks:
             tid = task.get("id", "—")
             ttitle = task.get("title", "—")
-            tphase = task.get("phase", "—")
+            tlayer = task.get("layer", "—")
             tstatus = status_label(task.get("status"))
             deps = task.get("dependencies", [])
             deps_str = ", ".join(deps) if deps else "—"
-            summary_lines.append(f"| `{tid}` | {ttitle} | {tphase} | {tstatus} | {deps_str} |")
+            summary_lines.append(f"| `{tid}` | {ttitle} | {tlayer} | {tstatus} | {deps_str} |")
         summary_lines.append("")
         all_lines.extend(summary_lines)
 
