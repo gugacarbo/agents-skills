@@ -1,85 +1,147 @@
 ---
 name: init-deep
-description: Generate hierarchical AGENTS.md files. Root + complexity-scored subdirectories.
+description: Generate hierarchical AGENTS.md documentation across the codebase. Use whenever the user wants to initialize, regenerate, or update AGENTS.md files. Supports two modes: default (complete) generates AGENTS.md for every directory with a full template; --light uses selective scoring and telegraphic style. Invoked as /init-deep or /init-deep --light.
 user-invocable: true
-argument-hint: "[project path]"
-effort: medium
+argument-hint: "[project path] [--light] [--max-depth=N] [--create-new]"
+effort: high
 ---
 
 # /init-deep
 
-Generate hierarchical AGENTS.md files. Root + complexity-scored subdirectories.
+Generate hierarchical AGENTS.md files. Two modes:
+
+- **Default (complete)** — AGENTS.md in every directory, full template with Key Files, Subdirectories, For AI Agents, Dependencies. Use for comprehensive documentation across the whole codebase.
+- **`--light`** — Scoring-based selection (only dirs with score > 8), telegraphic 30-80 line templates. Use for minimal, essential-only documentation.
 
 ## Usage
 
 ```
-/init-deep                      # Update mode: modify existing + create new where warranted
-/init-deep --create-new         # Read existing → remove all → regenerate from scratch
-/init-deep --max-depth=2        # Limit directory depth (default: 3)
+/init-deep                              # Full mode: all directories, verbose template
+/init-deep --light                      # Light mode: selective directories, telegraphic template
+/init-deep --light --max-depth=2        # Light mode, limit depth
+/init-deep --create-new                 # Full mode: regenerate from scratch
+/init-deep --light --create-new         # Light mode: regenerate from scratch
 ```
 
-## Workflow
+## Mode Comparison
 
-1. **Discovery + Analysis** (concurrent) — explore agents + bash structure + codemap + existing AGENTS.md
-2. **Score & Decide** — AGENTS.md locations from merged findings
-3. **Generate** — root first, subdirs in parallel
-4. **Review** — deduplicate, trim, validate
+| Aspect                    | Default (full)                     | --light                             |
+| ------------------------- | ---------------------------------- | ----------------------------------- |
+| **Where**                 | Every directory                    | Only score > 8 (see Scoring Matrix) |
+| **Template size**         | Full (Key Files, Subdirs, AI Agents, Dependencies) | Telegraphic (OVERVIEW, WHERE TO LOOK, CONVENTIONS, ANTI-PATTERNS, COMMANDS) |
+| **Root target**           | ~100-200 lines                     | 50-150 lines                        |
+| **Subdir target**         | ~50-100 lines                      | 30-80 lines                         |
+| **Parent references**     | `<!-- Parent: ../AGENTS.md -->`       | None                                |
+| **Key content**           | Everything is documented           | Only non-obvious, project-specific info |
+| **Best for**              | New projects, team onboarding      | Mature codebases, personal projects   |
 
-Use TaskCreate for ALL phases. Mark in_progress → completed in real-time.
+## Common Workflow (both modes)
 
-## Phase 1: Discovery + Analysis (Concurrent)
+### Phase 1: Discovery + Analysis (parallel)
 
-### Background Explore Agents (launch immediately)
+1. **Explore agents** — launch concurrent explore agents for structure, entry points, conventions, anti-patterns, build/CI, test patterns
+2. **Bash analysis** — directory depth, file distribution, code hotspots, existing AGENTS.md
+3. **Read existing** — extract current AGENTS.md content, conventions, manual sections
+4. **LSP codemap** — if available, get entry points and symbol density
+
+For `--light` mode, also compute the **Scoring Matrix** (see separate section below).
+
+### Phase 2: Decide locations
+
+- **Default**: use every directory with content (skip empty dirs, generated-only dirs, config-only dirs — see Empty Directory Handling)
+- **`--light`**: apply Scoring Matrix, only create where score > 8
+
+### Phase 3: Generate (root first, subdirs in parallel)
+
+Generate root AGENTS.md first, then spawn parallel agents for subdirectories.
+
+### Phase 4: Review
+
+Deduplicate, trim to limits, verify telegraphic style (light) or completeness (full).
+
+## Default Mode: Deep Init
+
+### AGENTS.md Template (full)
+
+```markdown
+<!-- Parent: {relative_path_to_parent}/AGENTS.md -->
+<!-- Generated: {timestamp} | Updated: {timestamp} -->
+
+# {Directory Name}
+
+## Purpose
+{One-paragraph description}
+
+## Key Files
+| File      | Description                  |
+| --------- | ---------------------------- |
+| `file.ts` | Brief description of purpose |
+
+## Subdirectories
+| Directory | Purpose                                   |
+| --------- | ----------------------------------------- |
+| `subdir/` | What it contains (see `subdir/AGENTS.md`) |
+
+## For AI Agents
+
+### Working In This Directory
+{Special instructions for AI agents modifying files here}
+
+### Testing Requirements
+{How to test changes in this directory}
+
+### Common Patterns
+{Code patterns or conventions used here}
+
+## Dependencies
+
+### Internal
+{References to other parts of the codebase this depends on}
+
+### External
+{Key external packages/libraries used}
+
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->
+```
+
+### Hierarchy
+
+Every AGENTS.md (except root) includes a `<!-- Parent: -->` tag:
 
 ```
-Agent(subagent_type="oh-my-claudeagent:explore", prompt="Project structure: PREDICT standard patterns for detected language → REPORT deviations only")
-Agent(subagent_type="oh-my-claudeagent:explore", prompt="Entry points: FIND main files → REPORT non-standard organization")
-Agent(subagent_type="oh-my-claudeagent:explore", prompt="Conventions: FIND config files (.eslintrc, pyproject.toml, .editorconfig) → REPORT project-specific rules")
-Agent(subagent_type="oh-my-claudeagent:explore", prompt="Anti-patterns: FIND 'DO NOT', 'NEVER', 'ALWAYS', 'DEPRECATED' comments → LIST forbidden patterns")
-Agent(subagent_type="oh-my-claudeagent:explore", prompt="Build/CI: FIND .github/workflows, Makefile → REPORT non-standard patterns")
-Agent(subagent_type="oh-my-claudeagent:explore", prompt="Test patterns: FIND test configs, test structure → REPORT unique conventions")
+/AGENTS.md                          ← Root (no parent tag)
+├── src/AGENTS.md                   ← <!-- Parent: ../AGENTS.md -->
+│   ├── src/components/AGENTS.md    ← <!-- Parent: ../AGENTS.md -->
+│   └── src/utils/AGENTS.md         ← <!-- Parent: ../AGENTS.md -->
+└── docs/AGENTS.md                  ← <!-- Parent: ../AGENTS.md -->
 ```
 
-### Background Agent Barrier
+### Empty Directory Handling (Default Mode)
 
-Agent completes but others running → acknowledge briefly, END response. Do NOT merge or proceed until ALL reported.
+| Condition                                  | Action                                                  |
+| ------------------------------------------ | ------------------------------------------------------- |
+| No files, no subdirectories                | **Skip**                                                |
+| No files, has subdirectories               | Minimal AGENTS.md with subdirectory listing only         |
+| Has only generated files (*.min.js, *.map) | Skip or minimal AGENTS.md                               |
+| Has only config files                      | Create AGENTS.md describing configuration purpose        |
 
-### Main Session (concurrent with agents)
+### Parallelization Rules
 
-#### 1. Bash Structural Analysis
+1. **Same-level directories**: Process in parallel
+2. **Different levels**: Sequential (parent first)
+3. **Large directories**: Spawn dedicated agent per directory
+4. **Small directories**: Batch multiple into one agent
 
-```bash
-find . -type d -not -path '*/\.*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/dist/*' -not -path '*/build/*' | awk -F/ '{print NF-1}' | sort -n | uniq -c
-find . -type f -not -path '*/\.*' -not -path '*/node_modules/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -30
-find . -type f \( -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.go" -o -name "*.rs" \) -not -path '*/node_modules/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -20
-find . -type f \( -name "AGENTS.md" -o -name "CLAUDE.md" \) -not -path '*/node_modules/*' 2>/dev/null
-```
+### Update Mode (existing AGENTS.md)
 
-#### 2. Read Existing AGENTS.md
+1. Detect existing files first
+2. Read and parse existing content
+3. Analyze current directory state
+4. Compare and merge (update auto-generated, preserve `<!-- MANUAL -->` sections)
 
-Extract key insights, conventions, anti-patterns. `--create-new`: read first (preserve context) → delete → regenerate.
+---
 
-#### 3. LSP Codemap (if available)
-
-Optional Claude-native/plugin LSP tools for entry points: `lsp_servers()`, `lsp_document_symbols()`, `lsp_workspace_symbols()`. If unavailable, rely on explore agents and bash only.
-
-#### 4. Dynamic Agent Spawning
-
-Additional explore agents based on project scale (max 5 total):
-
-| Factor                   | Threshold | Additional Agents          |
-| ------------------------ | --------- | -------------------------- |
-| Total files              | >100      | +1 per 100 files           |
-| Total lines              | >10k      | +1 per 10k lines           |
-| Directory depth          | ≥4        | +2 for deep exploration    |
-| Large files (>500 lines) | >10 files | +1 for complexity hotspots |
-| Multiple languages       | >1        | +1 per language            |
-
-```bash
-total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | wc -l)
-```
-
-## Phase 2: Scoring & Location Decision
+## Light Mode: Scoring-Based Documentation
 
 ### Scoring Matrix
 
@@ -89,11 +151,11 @@ total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*'
 | Subdir count         | 2x     | >5                       | bash                        |
 | Code ratio           | 2x     | >70%                     | bash                        |
 | Unique patterns      | 1x     | Has own config           | explore                     |
-| Module boundary      | 2x     | Has index.ts/**init**.py | bash                        |
+| Module boundary      | 2x     | Has index.ts/__init__.py | bash                        |
 | Symbol density       | 2x     | >30 symbols              | lsp_workspace_symbols count |
 | Reference centrality | 3x     | >20 refs                 | lsp_find_references count   |
 
-### Decision Rules
+### Decision Rules (Light Mode)
 
 | Score        | Action                    |
 | ------------ | ------------------------- |
@@ -102,9 +164,7 @@ total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*'
 | **8-15**     | Create if distinct domain |
 | **<8**       | Skip (parent covers)      |
 
-## Phase 3: Generate AGENTS.md
-
-### Root AGENTS.md
+### AGENTS.md Template (Light Mode)
 
 ```markdown
 # PROJECT KNOWLEDGE BASE
@@ -137,21 +197,15 @@ total_files=$(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*'
 {dev/test/build}
 ```
 
-Quality gates: 50-150 lines, no generic advice, no obvious info.
+---
 
-### Subdirectory AGENTS.md (Parallel)
+## Anti-Patterns (both modes)
 
-30-80 lines max per location.
-
-## Phase 4: Review & Deduplicate
-
-Remove: generic advice, parent duplicates. Trim to limits. Verify telegraphic style.
-
-## Anti-Patterns
-
-- Sequential execution → MUST parallel
+- Sequential execution → MUST parallel where possible
 - Ignoring existing → ALWAYS read first, even with --create-new
-- Over-documenting → not every dir needs AGENTS.md
+- Over-documenting (light) → not every dir needs AGENTS.md
 - Redundancy → child never repeats parent
 - Generic content → remove anything applying to ALL projects
 - Static agent count → vary by project size/depth
+- Generic boilerplate → every file must have accurate descriptions
+- Broken parent references (full mode) → validate after generation

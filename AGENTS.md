@@ -42,7 +42,7 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
 | Test planning scripts          | `super-planning/dev/tests.sh`              | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
 | Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
-| Work on skill eval tooling    | `skill-creator/`                            | Python/HTML resources; currently not broadly tracked.            |
+| Work on init-deep skill       | `init-deep/SKILL.md`                        | Unified skill with --light flag for telegraphic mode.            |
 
 ## CONVENTIONS
 
