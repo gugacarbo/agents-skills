@@ -12,8 +12,9 @@
 ```
 skill-creator/
 ├── SKILL.md                 # workflow for creating/improving skills
+├── dev/tests.sh             # focused integration checks for the unified workflow
 ├── agents/                  # analyzer/comparator/grader prompts
-├── references/schemas.md    # eval schema reference
+├── references/              # authoring, testing, discipline, and eval schemas
 ├── scripts/                 # Python eval, benchmark, packaging, validation helpers
 ├── eval-viewer/             # prompt-approval + result-review viewer HTML and generators
 └── assets/                  # bundled review UI asset
@@ -30,6 +31,7 @@ skill-creator/
 | Prompt approval UI    | `eval-viewer/generate_prompt_review.py`                        | Lets the user approve or edit draft eval prompts before execution.                    |
 | Report generation     | `scripts/generate_report.py`, `eval-viewer/generate_review.py` | Produces human-reviewable output.                                                     |
 | Eval schema           | `references/schemas.md`                                        | Read before changing eval JSON shape.                                                 |
+| Integration checks    | `dev/tests.sh`                                                 | Verifies routing references and extended eval metadata.                                |
 
 ## CONVENTIONS
 
@@ -55,4 +57,5 @@ rtk python3 skill-creator/scripts/quick_validate.py <skill-path>
 rtk python3 skill-creator/eval-viewer/generate_prompt_review.py --help
 rtk python3 skill-creator/scripts/run_eval.py --help
 rtk python3 skill-creator/eval-viewer/generate_review.py --help
+rtk bash skill-creator/dev/tests.sh
 ```
