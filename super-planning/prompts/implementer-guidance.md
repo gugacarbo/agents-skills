@@ -1,6 +1,6 @@
 # Implementer Guidance
 
-> This document is a SUPPLEMENT to the worker prompt template, not a replacement. Use both: the worker prompt template provides structure; this document adds detailed guidance on logging, reporting, and status conventions.
+> This document is a SUPPLEMENT to the worker prompt template, not a replacement. Use both: the worker prompt template provides the dispatch structure; this document adds detailed guidance on logging, reporting, and status conventions.
 
 Include these expectations when constructing dispatch prompts for implementers.
 

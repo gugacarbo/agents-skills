@@ -102,7 +102,7 @@ A dispatch prompt contains exactly five things — nothing more:
 4. **Your resolution** of any ambiguity you noticed in the task entry
 5. **The report-file path** and report contract
 
-Use the minimal template at [`prompts/worker-prompt-template.md`](../prompts/worker-prompt-template.md) as the starting point.
+Use [`prompts/worker-prompt-template.md`](../prompts/worker-prompt-template.md) as the starting point for implementer dispatches.
 
 If using worktree isolation, each subagent's working directory is the worktree root, not the main repo root. Adjust the `Working Directory` placeholder accordingly.
 

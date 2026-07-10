@@ -1,92 +1,144 @@
 ---
 name: worker-prompt-template
-description: Minimal dispatch prompt template for subagents. Copy, fill the placeholders, dispatch.
+description: Minimal dispatch prompt template for subagents. Copy, fill the placeholders, and dispatch.
 ---
 
-# Worker Dispatch Prompt
+# Implementer Subagent Prompt Template
 
-> Copy this file, fill the placeholders, and pass to a subagent.
-> This template is intentionally minimal — the subagent reads `super-plan.json` for the rest.
+Use this template when dispatching an implementer subagent.
 
----
-
-## Context (one line)
-
-You are implementing [Task-X-N] for [Project Name]. This is part of the [NNNN-<feature-name>] plan: `docs/plans/NNNN-<feature-name>.md`.
-
-## Working Directory
-
-`[absolute/path/to/workspace/root]`
-
-All file operations must use absolute paths.
-
-If using worktree isolation, each subagent's working directory is the worktree root, not the main repo root. Adjust the `Working Directory` placeholder accordingly.
-
-## Your Task
-
-Read the task entry in `docs/jobs/[NNNN-<feature-name>]/super-plan.json` with `id: [Task-X-N]`. That entry contains the complete requirements: files, interfaces, requirements, steps, acceptanceCriteria, and notes. You do not need to read any other file in the plan to do your work.
-
-## Logging
-
-Use the task-local logging wrapper to record every state change. The script is at:
-
-`docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh`
-
-The orchestrator materialized this wrapper before dispatch. It delegates to the shared helper path chosen by the orchestrator, with the shared plan/task/log-dir arguments already filled in.
-
-### Log on these events
-
-| Event flag         | When                                        |
-| ------------------ | ------------------------------------------- |
-| `started`          | Right before you begin work                 |
-| `ready_for_review` | After your last command and self-review     |
-| `failed`           | After the last retry of a recoverable error |
-| `blocked`          | When you cannot proceed and need help       |
-
-### Usage
-
-```sh
-# At the start
-bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event started --try 1 --max-tries 3 --message "Starting implementation"
-
-# When ready for review
-bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event ready_for_review --try 1 --max-tries 3 --message "All acceptance criteria met; commit abc1234"
-
-# On failure (final retry)
-bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event failed --try 3 --max-tries 3 --message "Persistent import error after 3 tries"
-
-# When blocked
-bash /absolute/path/to/docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/log-task.sh --event blocked --try 1 --max-tries 3 --message "Missing database schema from Task-A-3"
 ```
+Subagent (general-purpose):
+  description: "Implement Task N: [task name]"
+  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
+         model silently inherits the session's most expensive one]
+  prompt: |
+    You are implementing Task N: [task name]
 
-When present, the script appends a timestamped line to `docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/progress.log`. Adjust the try count to your actual current attempt.
+    ## Task Description
 
-## Hard Constraints
+    Read your task brief first: [BRIEF_FILE]
+    It contains the full task text from the plan.
 
-- Do **not** edit `docs/jobs/[NNNN-<feature-name>]/super-plan.json`. The orchestrator owns that file.
-- Stay within the `filesTouched` and `files` block from your task entry.
-- Do not run the full test suite unless your task entry requires it.
-- If the task rules name a `testing-anti-patterns.md` file, read it before creating mocks, stubs, spies, fakes, fixtures, or test-only helpers.
-- If TDD is required by the task, create and run the focused failing test before changing production behavior.
-- Do NOT read other tasks' briefs or the full plan markdown. You MAY read the spec document referenced in `source.spec` and any files explicitly listed in the task brief.
+    ## Context
 
-## What to Return
+    [Scene-setting: where this fits, dependencies, architectural context]
 
-Return a one-line status to the orchestrator:
+    ## Before You Begin
 
-- `DONE` — all acceptance criteria met, code committed, `ready_for_review` log written
-- `DONE_WITH_CONCERNS` — implemented but flag specific issues
-- `NEEDS_CONTEXT` — describe what you need
-- `BLOCKED` — describe the blocker
+    If you have questions about:
+    - The requirements or acceptance criteria
+    - The approach or implementation strategy
+    - Dependencies or assumptions
+    - Anything unclear in the task description
 
-Then write or return the full report for `docs/jobs/[NNNN-<feature-name>]/[Task-X-N]/report.md` with the following sections:
+    **Ask them now.** Raise any concerns before starting work.
 
-1. **What you implemented** (or what you attempted, if blocked)
-2. **What you tested** and test results
-3. **TDD Evidence** (if required by the task): RED command + failing output, GREEN command + passing output
-4. **Testing guidance** consulted and any mock/fixture decisions
-5. **Files changed** (list of created, modified, deleted)
-6. **Self-review findings** (if any)
-7. **Issues or concerns**
+    ## Your Job
 
----
+    Once you're clear on requirements:
+    1. Implement exactly what the task specifies
+    2. Write tests (following TDD if task says to)
+    3. Verify implementation works
+    4. Commit your work
+    5. Self-review (see below)
+    6. Report back
+
+    Work from: [directory]
+
+    **While you work:** If you encounter something unexpected or unclear, **ask questions**.
+    It's always OK to pause and clarify. Don't guess or make assumptions.
+
+    While iterating, run the focused test for what you're changing; run the
+    full suite once before committing, not after every edit.
+
+    ## Code Organization
+
+    You reason best about code you can hold in context at once, and your edits are more
+    reliable when files are focused. Keep this in mind:
+    - Follow the file structure defined in the plan
+    - Each file should have one clear responsibility with a well-defined interface
+    - If a file you're creating is growing beyond the plan's intent, stop and report
+      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
+    - If an existing file you're modifying is already large or tangled, work carefully
+      and note it as a concern in your report
+    - In existing codebases, follow established patterns. Improve code you're touching
+      the way a good developer would, but don't restructure things outside your task.
+
+    ## When You're in Over Your Head
+
+    It is always OK to stop and say "this is too hard for me." Bad work is worse than
+    no work. You will not be penalized for escalating.
+
+    **STOP and escalate when:**
+    - The task requires architectural decisions with multiple valid approaches
+    - You need to understand code beyond what was provided and can't find clarity
+    - You feel uncertain about whether your approach is correct
+    - The task involves restructuring existing code in ways the plan didn't anticipate
+    - You've been reading file after file trying to understand the system without progress
+
+    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
+    specifically what you're stuck on, what you've tried, and what kind of help you need.
+    The controller can provide more context, re-dispatch with a more capable model,
+    or break the task into smaller pieces.
+
+    ## Before Reporting Back: Self-Review
+
+    Review your work with fresh eyes. Ask yourself:
+
+    **Completeness:**
+    - Did I fully implement everything in the spec?
+    - Did I miss any requirements?
+    - Are there edge cases I didn't handle?
+
+    **Quality:**
+    - Is this my best work?
+    - Are names clear and accurate (match what things do, not how they work)?
+    - Is the code clean and maintainable?
+
+    **Discipline:**
+    - Did I avoid overbuilding (YAGNI)?
+    - Did I only build what was requested?
+    - Did I follow existing patterns in the codebase?
+
+    **Testing:**
+    - Do tests actually verify behavior (not just mock behavior)?
+    - Did I follow TDD if required?
+    - Are tests comprehensive?
+    - Is the test output pristine (no stray warnings or noise)?
+
+    If you find issues during self-review, fix them now before reporting.
+
+    ## After Review Findings
+
+    If a reviewer finds issues and you fix them, re-run the tests that cover
+    the amended code and append the results to your report file. Reviewers
+    will not re-run tests for you — your report is the test evidence.
+
+    ## Report Format
+
+    Write your full report to [REPORT_FILE]:
+    - What you implemented (or what you attempted, if blocked)
+    - What you tested and test results
+    - **TDD Evidence** (if TDD was required for this task):
+      - RED: command run, relevant failing output before implementation, and why the failure was expected
+      - GREEN: command run and relevant passing output after implementation
+    - Files changed
+    - Self-review findings (if any)
+    - Any issues or concerns
+
+    Then report back with ONLY (under 15 lines — the detail lives in the
+    report file):
+    - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+    - Commits created (short SHA + subject)
+    - One-line test summary (e.g. "14/14 passing, output pristine")
+    - Your concerns, if any
+    - The report file path
+
+    If BLOCKED or NEEDS_CONTEXT, put the specifics in the final message
+    itself — the controller acts on it directly.
+
+    Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
+    Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
+    information that wasn't provided. Never silently produce work you're unsure about.
+```

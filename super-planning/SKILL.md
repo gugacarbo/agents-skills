@@ -136,8 +136,8 @@ Want progress stats?
 | [`prompts/post-write-approval.md`](prompts/post-write-approval.md)       | After writing the spec              |
 | [`prompts/find-docs.md`](prompts/find-docs.md)                           | Verifying library/framework documentation during Phase 3 |
 | [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md) | Reviewing spec readiness |
-| [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building a subagent dispatch prompt |
-| [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Dispatching an implementer subagent |
+| [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building the implementer dispatch prompt |
+| [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Supplementing the implementer dispatch prompt |
 | [`agents/code-reviewer.md`](agents/code-reviewer.md)                   | Dispatching a Phase 6 per-task reviewer |
 | [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md) | Dispatching a Phase 2 spec document review before planning |
 | [`agents/spec-compliance-auditor.md`](agents/spec-compliance-auditor.md) | Dispatching a final whole-branch spec compliance audit in Phase 7 |

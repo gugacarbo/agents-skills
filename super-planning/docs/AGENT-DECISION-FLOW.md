@@ -187,7 +187,7 @@ flowchart TD
     V --> W{"Any pre-flight check failed?"}
     W -->|Yes| X["Fix before dispatching"]
     X --> V
-    W -->|No| Y["Build minimal dispatch prompt"]
+    W -->|No| Y["Build minimal dispatch prompt from the implementer prompt"]
     Y --> Z{"Implementer returned status?"}
     Z -->|DONE| AA["Mark ready_for_review and hand off to Phase 6"]
     Z -->|DONE_WITH_CONCERNS| AB["Resolve correctness/scope concerns<br/>or record observation before review"]

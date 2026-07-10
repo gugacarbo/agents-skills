@@ -68,6 +68,14 @@ SOURCE="$CHECKOUT/super-planning"
 [ -d "$SOURCE" ] || { printf '%s\n' "Error: remote has no super-planning/ directory" >&2; exit 1; }
 mkdir -p "$TARGET"
 
+if [ "$TARGET_LAYOUT" = "flat" ] && [ ! -e "$TARGET/.gitignore" ]; then
+  [ -f "$SOURCE/templates/.gitignore-template" ] || {
+    printf '%s\n' "Error: remote file missing: super-planning/templates/.gitignore-template" >&2
+    exit 1
+  }
+  cp "$SOURCE/templates/.gitignore-template" "$TARGET/.gitignore"
+fi
+
 for file in \
   scripts/super-plan.sh \
   scripts/super-update.sh \

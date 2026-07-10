@@ -28,6 +28,11 @@ flowchart TB
     PLAN --> TASKS
 ```
 
+When the target repository does not vendor the skill, the bootstrap directory
+also contains `<repo>/.super-planning/.gitignore`. Its complete contents are
+the single entry `brainstorm/`, so only the visual companion session tree is
+ignored; helper scripts and `super-planning-reference.json` remain visible.
+
 ## File Relationships
 
 - **Spec** (`docs/specs/NNNN-<name>-spec.md`): Contract with the user — what will be built
@@ -35,4 +40,5 @@ flowchart TB
 - **super-plan.json** (`docs/jobs/NNNN-<name>/super-plan.json`): Single source of truth, created and mutated by the active `super-plan.sh` helper path
 - **progress-ledger.md**: Regenerated from `super-plan.json` on every write
 - **Skill reference** (`.super-planning/super-planning-reference.json`): Exact Git remote/ref/commit used by the helper stack
+- **Visual companion ignore file** (`.super-planning/.gitignore`): Contains only `brainstorm/`
 - **Task dirs**: Each task has its own directory with `report.md`, `review-package.diff.md`, `progress.log`, and `log-task.sh`

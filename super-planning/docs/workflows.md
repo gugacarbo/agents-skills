@@ -1,245 +1,337 @@
 # Workflows
 
-Detailed diagrams of super-planning decision, execution, and review flows.
+> Process: super-planning — this is the operational map. The authoritative
+> rules remain in [`super-planning/SKILL.md`](../SKILL.md) and the linked files
+> under [`super-planning/phases/`](../phases/).
 
-## Decision Flow: When to Use
+These diagrams include the actions, gates, artifacts, decisions, recovery
+paths, and handoffs required by the current skill. Labels point to the source
+file when a rule is too detailed to duplicate safely in a diagram.
+
+Path convention: `super-planning/...` means this skill directory;
+`<repo>/...` means the target project; `.super-planning/...` means the helper
+copy created inside `<repo>` when the skill is not vendored there.
+
+## Complete End-to-End Flow
 
 ```mermaid
 flowchart TD
-    START{Feature idea or<br/>multi-step task?}
-    START -->|No| L{Single trivial task?}
-    L -->|Yes| L1[Just do it inline,<br/>no skill needed]
-    L -->|No| L2[End — no work to plan]
-    START -->|Yes| D{Approved spec in<br/>docs/specs/?}
-    D -->|Yes| E[Skip to Phase 3:<br/>PLAN]
-    D -->|No| F[Phase 1: BRAINSTORM<br/>then Phase 2: SPEC]
-    F -->|After spec approval| G[Phase 3: PLAN]
-    G --> H{Tasks mostly<br/>independent?}
-    H -->|Yes| I{Can run in parallel<br/>without file conflicts?}
-    I -->|Yes| J[PARALLEL MODE<br/>dispatch all in one message]
-    I -->|No| K[SEQUENTIAL MODE<br/>one at a time, review after each]
-    H -->|No| K
+    A["Receive /super-planning invocation"] --> B{"Subcommand"}
+    B -->|stats, progress, task-stats, task-progress| S1["Resolve super-planning/scripts/summarize-all-tasks.sh or <repo>/.super-planning/summarize-all-tasks.sh"]
+    S1 --> S2["Run with --base-dir / --plan-id / --task-id / --json"] --> S3["Return script output only + one-line command note"]
+    B -->|phase name| R1["Load super-planning/phases/<NN>-<phase>.md"]
+    B -->|none| R2["Show entry-point orientation"]
+    R2 --> R3{"Approved spec exists?"}
+    R3 -->|yes| R4["Enter Phase 3"]
+    R3 -->|no| R5["Enter Phase 1"]
+    R1 --> P["Run selected phase and every later phase"]
+    R4 --> P
+    R5 --> P
+
+    P --> P1["1. Brainstorm"] --> P2["2. Spec"] --> P3["3. Plan"]
+    P3 --> P4["4. Decompose"] --> P5["5. Dispatch"]
+    P5 --> C{"reviewCadence"}
+    C -->|per_task / per_batch| P6["6. Review"]
+    C -->|final_only| P7["7. Integrate; review batches here"]
+    P6 --> P7
+    P7 --> Q{"All gates clean?"}
+    Q -->|no: blocker or user decision| X["Stop, document, and escalate"]
+    Q -->|yes| Y["Mark plan completed, update spec, commit, offer merge/PR/next work"]
 ```
 
-## 7-Phase Flow
+## Cross-Phase Invariants
 
 ```mermaid
 flowchart LR
-    P1[BRAINSTORM] --> P2[SPEC]
-    P2 --> P3[PLAN]
-    P3 --> P4[DECOMPOSE]
-    P4 --> P5[DISPATCH]
-    P5 --> P6[REVIEW]
-    P6 --> P7[INTEGRATE]
+    A["super-planning/SKILL.md router"] --> B["super-planning/phases/<NN>-<phase>.md is authoritative"]
+    B --> C["Artifacts are file-based handoffs"]
+    C --> D["<repo>/docs/jobs/<NNNN>-<feature>/super-plan.json is registry source of truth"]
+    D --> E["Mutate registry only via super-planning/scripts/super-plan.sh or <repo>/.super-planning/super-plan.sh"]
+    E --> F["Regenerate <repo>/docs/jobs/<NNNN>-<feature>/progress-ledger.md"]
+    F --> G["Never edit registry by hand"]
+    G --> H["Never dispatch completed task"]
+    H --> I["Never start implementation on main/master without consent"]
 ```
 
-## Sequential Dispatch Flow
+## Phase 1: Brainstorm — Complete Flow
 
 ```mermaid
 flowchart TD
-    T1[Task 1] --> D1[Dispatch Implementer]
-    D1 --> RC1{reviewCadence}
-    RC1 -->|per_task| R1[Review]
-    RC1 -->|per_batch| H1[Hold review until batch gate]
-    RC1 -->|final_only| H1A[Keep task ready_for_review<br/>queue batch review for Phase 7]
-    R1 -->|Issues Found| F1[Fix Subagent]
-    F1 --> RR1[Re-review]
-    RR1 -->|Clean| C1[Mark Complete]
-    R1 -->|Clean| C1
-    H1 --> C1
-    H1A --> T1[Do not mark completed yet]
-    C1 --> T2[Task 2]
-    T1 --> T2
-    T2 --> D2[Dispatch Implementer]
-    D2 --> RC2{reviewCadence}
-    RC2 -->|per_task| R2[Review]
-    RC2 -->|per_batch| H2[Hold review until batch gate]
-    RC2 -->|final_only| H2A[Keep task ready_for_review<br/>queue batch review for Phase 7]
-    R2 -->|Issues Found| F2[Fix Subagent]
-    F2 --> RR2[Re-review]
-    RR2 -->|Clean| C2[Mark Complete]
-    R2 -->|Clean| C2
-    H2 --> C2
-    H2A --> T3[Do not mark completed yet]
-    C2 --> TN[All Tasks Complete]
-    T3 --> TN
-    TN --> INTEGRATE[Phase 7:<br/>Integrate & Finish]
+    A["Read relevant files, docs, recent changes"] --> B{"Multiple independent systems?"}
+    B -->|yes| C["Split into sub-projects"]
+    C --> C1["Write <repo>/.super-planning/brainstorm/BRAINSTORM-<date>.md"]
+    C1 --> C2["Create one <repo>/docs/specs/<NNNN>-<sub-project>-spec.md per sub-project"] --> D
+    B -->|no| D["Keep one focused scope"]
+    D --> E["Ask one scoped question at a time"]
+    E --> F["Clarify purpose, constraints, success criteria, non-goals"]
+    F --> G{"Next question is genuinely visual?"}
+    G -->|yes| H["Offer Phase 1.1 in a separate message"]
+    H --> I{"User accepts?"}
+    I -->|yes| J["Load super-planning/phases/01_1-visual-companion.md and run visual loop"]
+    I -->|no| K["Continue in terminal; do not offer again"]
+    G -->|no| K
+    J --> L["Return to text brainstorm and merge visual feedback"]
+    K --> L
+    L --> M["Propose 2–3 approaches with recommendation and trade-offs"]
+    M --> N{"User agrees with direction?"}
+    N -->|no| O["Record concerns in <repo>/docs/spec-decisions/<feature_name>_decisions.md"]
+    O --> E
+    N -->|yes| P["Collect requirements, constraints, assumptions, non-goals, risks, decisions"]
+    P --> Q["Record visualCompanionUsed when applicable"]
+    Q --> R["Save <repo>/docs/spec-decisions/<feature_name>_decisions.md before spec gate"]
+    R --> S{"Required outputs complete?"}
+    S -->|no| E
+    S -->|yes| T["Handoff: decisions + context to Phase 2"]
 ```
 
-## Parallel Dispatch Flow
+## Phase 1.1: Visual Companion — Complete Flow
 
 ```mermaid
 flowchart TD
-    subgraph Batch A - Parallel Group
-        A1[Task 1<br/>task_profile: quick<br/>layer: foundation]
-        A2[Task 2<br/>task_profile: deep<br/>layer: foundation]
-        A3[Validate quick/deep profiles<br/>then Dispatch All Parallel]
-        A1 --> A3
-        A2 --> A3
-        A3 --> A4{reviewCadence}
-        A4 -->|per_task| A5[Review each task in the<br/>response after implementers return]
-        A4 -->|per_batch| A6[Review all after batch completes]
-        A4 -->|final_only| A7[Defer review to Phase 7<br/>but review one batch at a time]
-        A5 --> A8[Fix and re-review only affected tasks]
-        A6 -->|Issues Found| A8
-        A8 --> A9[Mark accepted tasks complete]
-        A6 -->|Clean| A9
-        A7 --> A10[Keep batch moving]
-    end
-
-    subgraph Batch B - Parallel Group
-        B1[Task 3<br/>task_profile: general<br/>layer: core]
-        B2[Task 4<br/>task_profile: deep<br/>layer: surface]
-        B3[Validate general/deep profiles<br/>then Dispatch All Parallel]
-        B1 --> B3
-        B2 --> B3
-        B3 --> B4{reviewCadence}
-        B4 -->|per_task| B5[Review each task in the<br/>response after implementers return]
-        B4 -->|per_batch| B6[Review all after batch completes]
-        B4 -->|final_only| B7[Defer review to Phase 7<br/>but review one batch at a time]
-        B5 --> B8[Fix and re-review only affected tasks]
-        B6 -->|Issues Found| B8
-        B8 --> B9[Mark accepted tasks complete]
-        B6 -->|Clean| B9
-        B7 --> B10[Keep batch moving]
-    end
-
-    A9 --> B9
-    A10 --> B10
-    B9 --> INTEGRATE[Phase 7:<br/>Integrate & Finish]
-    B10 --> INTEGRATE
+    A["Visual need approved"] --> B["Warn about temporary files and token cost"]
+    B --> C{"node available?"}
+    C -->|no| D["Skip companion; continue text-only"]
+    C -->|yes| E["Start super-planning/scripts/visual-companion/start-server.sh --project-dir <repo> --open"]
+    E --> F["Capture JSON: url, screen_dir=<repo>/.super-planning/brainstorm/<session>/content, state_dir=<repo>/.super-planning/brainstorm/<session>/state"]
+    F --> G["Share complete URL including ?key=..."]
+    G --> H["Confirm server is alive"]
+    H --> I["Write a fresh HTML fragment into <repo>/.super-planning/brainstorm/<session>/content"]
+    I --> J["Tell user what is shown; request terminal feedback"]
+    J --> K["Read state_dir/events as JSONL when present"]
+    K --> L["Read <repo>/.super-planning/brainstorm/<session>/state/events as JSONL and merge with terminal feedback"]
+    L --> M{"Another visual iteration?"}
+    M -->|yes| N["Write a new filename; never reuse prior file"]
+    N --> H
+    M -->|no| O["Push waiting screen when returning to text-only"]
+    O --> P["Run super-planning/scripts/visual-companion/stop-server.sh and clean up process"]
+    P --> Q["Return to Phase 1"]
 ```
 
-## Batch-Based Execution
-
-```mermaid
-flowchart TB
-    subgraph Batch A
-        WA[Task 1<br/>Task 2<br/>Run in parallel]
-    end
-
-    subgraph Batch B
-        WB[Task 3<br/>Task 4<br/>Run in parallel after Batch A]
-    end
-
-    subgraph Layer Labels
-        P1[foundation]
-        P2[core]
-        P3[surface]
-        P4[final]
-    end
-
-    WA --> WB
-```
-
-## Review Gates Flow
+## Phase 2: Spec — Complete Flow
 
 ```mermaid
 flowchart TD
-    subgraph Two-Stage Review
-        S1[Stage 1:<br/>SPEC COMPLIANCE] --> S2{Does implementation<br/>match requirements?}
-        S2 -->|Missing| M1[Requirements skipped<br/>or missed]
-        S2 -->|Extra| M2[Features not requested<br/>overbuilding]
-        S2 -->|Misunderstood| M3[Right feature<br/>wrong approach]
-        M1 --> S3[Flag as ⚠️]
-        M2 --> S3
-        M3 --> S3
-
-        S3 --> S4[Stage 2:<br/>CODE QUALITY]
-        S4 --> S5{Is it well-built?}
-        S5 -->|Separation of concerns?| Q1[✓/✗]
-        S5 -->|Error handling?| Q2[✓/✗]
-        S5 -->|DRY without premature<br/>abstraction?| Q3[✓/✗]
-        S5 -->|Edge cases handled?| Q4[✓/✗]
-        S5 -->|Tests verify real<br/>behavior?| Q5[✓/✗]
-        S5 -->|Single responsibility<br/>per file?| Q6[✓/✗]
-        Q1 --> S6
-        Q2 --> S6
-        Q3 --> S6
-        Q4 --> S6
-        Q5 --> S6
-        Q6 --> S6
-    end
-
-    subgraph Findings Handling
-        S6{Findings?} -->|Critical| FH1[Fix before proceeding<br/>re-review]
-        S6{Findings?} -->|Important| FH2[Should fix<br/>blocks merge<br/>re-review]
-        S6{Findings?} -->|Minor| FH3[Record in task progress.log<br/>final review triages]
-        S6{Findings?} -->|No issues| FH4[Proceed]
-        FH1 --> COMPLETE
-        FH2 --> COMPLETE
-        FH3 --> COMPLETE
-        FH4 --> COMPLETE
-    end
+    A["Read Phase 1 handoff"] --> B["Scan <repo>/docs/specs, <repo>/specs, <repo>/docs, and templates for naming/format"]
+    B --> C["Find testing-anti-patterns.md or infer repo convention"]
+    C --> D{"Guidance exists?"}
+    D -->|no| E["Copy super-planning/templates/testing-anti-patterns.md to <repo>/docs/context/testing-anti-patterns.md or the repo convention"]
+    D -->|yes| F["Use existing guidance without overwriting"]
+    E --> G
+    F --> G["Ask whether behavior changes require TDD"]
+    G --> H["Allocate next NNNN and canonical spec/decision paths"]
+    H --> I["Rename <repo>/docs/spec-decisions/<feature_name>_decisions.md to <repo>/docs/spec-decisions/NNNN_<name>_decisions.md"]
+    I --> J["Draft summary: problem, goal, requirements, non-goals, approach, tests, open questions"]
+    J --> K{"Pre-write approval?"}
+    K -->|no| L["Incorporate feedback and redraft summary"]
+    L --> J
+    K -->|yes| M["Write <repo>/docs/specs/NNNN-<feature>-spec.md"]
+    M --> N["Self-review: placeholders, consistency, scope, ambiguity"]
+    N --> O["Append # Self-Review with verdict and date"]
+    O --> P{"Optional spec reviewer requested?"}
+    P -->|yes| Q["Dispatch super-planning/agents/spec-document-reviewer.md"]
+    Q --> R{"Critical issue?"}
+    R -->|yes| S["Fix spec and repeat self-review"]
+    S --> P
+    R -->|no| T["Continue"]
+    P -->|no| T
+    T --> U{"Post-write user approval?"}
+    U -->|no| V["Update spec and ask again"]
+    V --> U
+    U -->|yes| W["Transition draft → accepted"]
+    W --> X["Handoff: approved spec, decisions, TDD mode, guidance path to Phase 3"]
 ```
 
-## Task Lifecycle
-
-```mermaid
-stateDiagram-v2
-    [*] --> pending
-    pending --> in_progress: Dispatch
-    in_progress --> ready_for_review: Implementer done
-    ready_for_review --> reviewing: Review begins
-    reviewing --> completed: Review clean
-    reviewing --> needs_fix: Fix needed
-    needs_fix --> in_progress: Re-dispatch
-    in_progress --> blocked: Cannot proceed
-    blocked --> in_progress: Re-assess<br/>more context / better model / smaller scope
-    ready_for_review --> cancelled: Orchestrator retires task
-    completed --> [*]
-    cancelled --> [*]
-```
-
-## Subagent Status Handling
+## Phase 3: Plan — Complete Flow
 
 ```mermaid
 flowchart TD
-    S[Subagent Returns] --> ST{Status?}
-    ST -->|DONE| P[Mark ready_for_review]
-    ST -->|DONE_WITH_CONCERNS| C[Resolve correctness/scope<br/>or record observation before review]
-    ST -->|NEEDS_CONTEXT| CT[Provide context<br/>re-dispatch]
-    ST -->|BLOCKED| B{Assess}
-    B -->|Provide context| CT
-    B -->|Upgrade model| RD[Re-dispatch]
-    B -->|Break into smaller tasks| RD
-    B -->|Escalate to user| U[Escalate]
-    C --> P
-    CT --> in_progress
-    RD --> in_progress
-    P --> REVIEW[Generate review package<br/>Review Gates]
+    A["Read approved spec and decisions"] --> B["Extract requirements, constraints, technology choices"]
+    B --> C["Search manifests, lockfiles, imports, adapters, tests, nearby features"]
+    C --> D{"Repository pattern fully covers each choice?"}
+    D -->|yes| E["Record repository-pattern and source paths"]
+    D -->|no| F["Load super-planning/prompts/find-docs.md"]
+    F --> G["Resolve library in Context7; query one focused decision"]
+    G --> H{"Context7 authoritative and version-matched?"}
+    H -->|no| I["Use official docs/repository/spec web fallback"]
+    H -->|yes| J["Record Context7 source"]
+    I --> K
+    J --> K["Compare docs with installed version and app context"]
+    K --> L{"Architecture or task boundaries invalidated?"}
+    L -->|yes| M{"Product decision needed?"}
+    M -->|yes| N["Stop and ask user"]
+    M -->|no| O["Update architecture and task split"]
+    O --> P
+    L -->|no| P["Write Documentation Verification section"]
+    E --> P
+    P --> Q["Write summary, design, references, task intent, verification, risks, handoff"]
+    Q --> R["Define execution mode, batches, delivery layers, task sizing"]
+    R --> S["Remove placeholders; run scope and no-overbuild checks"]
+    S --> T["Run plan self-review for coverage, ordering, conflicts, ownership"]
+    T --> U{"Conflicting task/dependency/global rule?"}
+    U -->|yes| V["Ask one batched conflict question and resolve"]
+    V --> T
+    U -->|no| W["Handoff: <repo>/docs/plans/NNNN-<feature>.md to Phase 4"]
 ```
 
-## Sequential vs Parallel: When to Use
+## Phase 4: Decompose — Complete Flow
 
 ```mermaid
 flowchart TD
-    START{Task type?} -->|Dependent on each other| SEQ[SEQUENTIAL MODE]
-    START -->|Independent, file-isolated| PAR[PARALLEL MODE]
-    START -->|Failures are related| SEQ
-    START -->|Need full context| SEQ
-    START -->|Exploratory debugging| SEQ
-    START -->|Shared state/modified<br/>same tables or config| SEQ
-
-    PAR --> LIMIT{Check practical limit}
-    LIMIT -->|2-4 subagents| GOOD[Execute parallel batch]
-    LIMIT -->|>4 subagents| SPLIT[Split into batches of 2-4]
-    SPLIT --> GOOD
-    GOOD --> COMPLETE[Mark batch complete<br/>Proceed to next batch]
+    A["Read <repo>/docs/plans/NNNN-<feature>.md and testing handoff"] --> B["Resolve active helper: super-planning/scripts/ or <repo>/.super-planning/"]
+    B --> C{"Target repo already contains super-planning?"}
+    C -->|yes| D["Use in-repo scripts and schema"]
+    C -->|no| E["Bootstrap <repo>/.super-planning helpers + <repo>/.super-planning/super-planning-reference.json"]
+    D --> F["Initialize <repo>/docs/jobs/NNNN-<feature>/super-plan.json"]
+    E --> F
+    F --> G["Build task entries incrementally through helper"]
+    G --> H["Populate requirementsChecklist, fileStructure, dependencies, batches, phases"]
+    H --> I["Set every task pending; set plan metadata and source paths"]
+    I --> J["Discover general/deep/quick profiles and available slots"]
+    J --> K["Run pre-dispatch dependency, acceptance, and ownership conflict scan"]
+    K --> L{"Conflict found?"}
+    L -->|yes| M["Resolve in one batched user question"]
+    M --> K
+    L -->|no| N["Ask and persist executionMode, worktree, profile, reviewCadence decisions"]
+    N --> O{"reviewCadence"}
+    O -->|per_task| P["Review after each ready task"]
+    O -->|per_batch| Q["Review after each ready batch"]
+    O -->|final_only| R["Defer reviewer dispatch to Phase 7; still materialize artifacts"]
+    P --> S
+    Q --> S
+    R --> S
+    S["Generate <repo>/docs/jobs/NNNN-<feature>/progress-ledger.md through active helper"] --> T["Persist statuses only via super-planning/scripts/super-plan.sh update or <repo>/.super-planning/super-plan.sh update"]
+    T --> U["Handoff: <repo>/docs/jobs/NNNN-<feature>/super-plan.json, ledger, profiles, cadence, helper paths to Phase 5"]
 ```
 
-## Pre-Flight Checks
+## Phase 5: Dispatch — Complete Flow
 
 ```mermaid
-flowchart
-    START[Before Dispatch] --> F1{Repository state<br/>clean working tree<br/>correct base branch?}
-    F1 -->|No| FIX1[Fix repo state]
-    F1 -->|Yes| F2{Tooling available<br/>test runner<br/>linter<br/>build commands?}
-    FIX1 --> F1
-    F2 -->|No| FIX2[Fix tooling]
-    F2 -->|Yes| F3{super-plan.json written<br/>all tasks defined?}
-    FIX2 --> F2
-    F3 -->|No| FIX3[Write super-plan.json<br/>and generate ledger]
-    F3 -->|Yes| READY[Ready to dispatch]
-    FIX3 --> F3
+flowchart TD
+    A["Select next pending task or ready batch"] --> B["Read task entry and task_profile only"]
+    B --> C["Resolve configured agent/model slot"]
+    C --> D{"Profile valid and capability available?"}
+    D -->|no| E["Fallback to platform default; record fallback"]
+    D -->|yes| F["Use configured profile"]
+    E --> G
+    F --> G["Apply capability adapter: worktree, file handoff, compressed output"]
+    G --> H["Resolve super-planning/scripts/log-task.sh and super-planning/scripts/review-package.sh, or their <repo>/.super-planning copies"]
+    H --> I["Materialize <repo>/docs/jobs/<NNNN>-<feature>/<Task-ID>/task-brief.md, log-task.sh, progress.log"]
+    I --> J["Build prompt from super-planning/prompts/worker-prompt-template.md + super-planning/prompts/implementer-guidance.md"]
+    J --> K["Prompt contains task, context, working dir, constraints, tests, report, status format"]
+    K --> L["Run pre-flight: branch, ownership, scope, dependencies, guidance path"]
+    L --> M{"Pre-flight clean?"}
+    M -->|no| N["Resolve or escalate before dispatch"]
+    N --> L
+    M -->|yes| O["Update task pending → in_progress via helper"]
+    O --> P["Dispatch implementer; require started log event"]
+    P --> Q{"Returned status"}
+    Q -->|DONE| R["Verify report, tests, commit, ready_for_review log"]
+    Q -->|DONE_WITH_CONCERNS| S["Resolve concerns or carry them into review"]
+    Q -->|NEEDS_CONTEXT| T["Add context and re-dispatch"]
+    Q -->|BLOCKED| U{"Blocker removable?"}
+    U -->|yes| T
+    U -->|no| V["Document blocker and escalate to user"]
+    T --> J
+    S --> R
+    R --> W["Update task in_progress → ready_for_review"]
+    W --> X{"Review cadence"}
+    X -->|per_task| Y["Phase 6 now: review this task"]
+    X -->|per_batch| Z["Wait until all tasks in batch are ready"]
+    X -->|final_only| AA["Keep ready_for_review; defer reviewer to Phase 7"]
+    Z --> Y
+    Y --> AB{"Review clean?"}
+    AB -->|no| AC["needs_fix → one fix subagent with all Critical/Important findings"]
+    AC --> AD["Regenerate package from original base and re-review"]
+    AD --> AB
+    AB -->|yes| AE["Log completed with BASE..HEAD; set task completed via helper"]
+```
+
+## Phase 6: Review — Complete Flow
+
+```mermaid
+flowchart TD
+    A["Receive ready task/batch from Phase 5"] --> B["Read <repo>/docs/jobs/<NNNN>-<feature>/super-plan.json task entry and reviewCadence"]
+    B --> C["Materialize <repo>/docs/jobs/<NNNN>-<feature>/<Task-ID>/report.md and <repo>/docs/jobs/<NNNN>-<feature>/<Task-ID>/review-package.diff.md"]
+    C --> D["Ensure <repo>/docs/jobs/<NNNN>-<feature>/<Task-ID>/log-task.sh and progress.log exist"]
+    D --> E["Set ready_for_review → reviewing via helper"]
+    E --> F["Dispatch reviewer with task entry from <repo>/docs/jobs/<NNNN>-<feature>/super-plan.json, report.md, and review-package.diff.md"]
+    F --> G["Do not pass whole plan, open-ended directives, or suppressed findings"]
+    G --> H["Stage 1: spec compliance"]
+    H --> I{"Complete, in scope, correctly interpreted?"}
+    I -->|no| J["Record file:line findings"]
+    I -->|yes| K["Stage 2: code quality"]
+    J --> K
+    K --> L{"Severity"}
+    L -->|Critical / Important| M["Set needs_fix; dispatch ONE fix subagent with all findings"]
+    M --> N["Require focused test evidence in report"]
+    N --> O["Regenerate package from original task base"]
+    O --> F
+    L -->|Minor| P["Append info event to progress.log; update status if needed"]
+    L -->|none| Q["Record review clean with BASE..HEAD"]
+    P --> Q
+    Q --> R{"final_only?"}
+    R -->|yes| S["Keep ready_for_review; Phase 7 owns completion"]
+    R -->|no| T["Append completed log event; set task completed via helper"]
+    S --> U["Handoff: reviewed artifacts and outcomes to Phase 7"]
+    T --> U
+```
+
+## Phase 7: Integrate — Complete Flow
+
+```mermaid
+flowchart TD
+    A["Read <repo>/docs/jobs/NNNN-<feature>/super-plan.json and <repo>/docs/jobs/NNNN-<feature>/progress-ledger.md"] --> B["Verify all tasks terminal: completed/cancelled/blocked with reason"]
+    B --> C{"Branch clean and task branches merged?"}
+    C -->|no| D["Merge/clean or stop and document blocker"]
+    C -->|yes| E{"final_only batches pending?"}
+    E -->|yes| F["Review each ready batch; resolve findings; then complete tasks"]
+    F --> E
+    E -->|no| G["Run full test suite once"]
+    G --> H{"Tests fail?"}
+    H -->|related| I["Fix before continuing"]
+    I --> G
+    H -->|unrelated/pre-existing| J["Document failure and obtain user approval"]
+    J --> K
+    H -->|pass| K["Read spec Definition of Done and Test Strategy"]
+    K --> L["Verify every DoD item, TDD mode, guidance path, RED/GREEN evidence, scenarios"]
+    L --> M{"DoD and test strategy pass?"}
+    M -->|no| N["Fix or document deferred item; re-run verification"]
+    N --> K
+    M -->|yes| O["Compute BASE=git merge-base base HEAD"]
+    O --> P["Generate final review package"]
+    P --> Q["Dispatch super-planning/agents/spec-compliance-auditor.md with <repo>/docs/specs/NNNN-<feature>-spec.md, code, package, registry"]
+    Q --> R{"Critical/Important or Cannot verify findings?"}
+    R -->|yes| S["Dispatch ONE fix subagent with all findings"]
+    S --> P
+    R -->|no| T["Build complete File Map"]
+    T --> U["Resolve blocked/cancelled/needs_fix task consequences and dependencies"]
+    U --> V["Update status via super-planning/scripts/super-plan.sh or <repo>/.super-planning/super-plan.sh; regenerate ledger"]
+    V --> W["Fill <repo>/docs/specs/NNNN-<feature>-spec.md implemented-by from fileStructure"]
+    W --> X["Commit implementation, <repo>/docs/jobs/NNNN-<feature>/super-plan.json, progress-ledger.md, and updated spec"]
+    X --> Y["Output File Map, audit report, DoD results, <repo>/docs/jobs/NNNN-<feature>/progress-ledger.md"]
+    Y --> Z["Offer merge, PR, or additional work"]
+```
+
+## Phase 8: Reference, Recovery, and Modification — Complete Flow
+
+```mermaid
+flowchart TD
+    A["Need guidance during execution"] --> B{"Situation"}
+    B -->|context pressure| C["Use <repo>/docs/jobs/<NNNN>-<feature>/super-plan.json, <Task-ID>/report.md, review-package.diff.md, and progress.log"]
+    C --> C1["Use formats in super-planning/prompts/implementer-guidance.md and super-planning/agents/code-reviewer.md"] --> R
+    B -->|retryable failure| D["Classify: lint/type, test, scope, missing context, architecture"]
+    D --> E{"tryCount < maxTries?"}
+    E -->|yes| F["Fix in task or add context and retry"] --> R
+    E -->|no| G["Stop same approach; change context/model/scope/approach"]
+    G --> H{"Still blocked?"}
+    H -->|yes| I["Escalate with evidence"]
+    H -->|no| R
+    B -->|new task discovered| J["Add task through helper; set batch, phase, dependencies"] --> R
+    B -->|task no longer needed| K["Set cancelled; preserve record; update dependents and log"] --> R
+    B -->|dependency changed| L["Update dependencies; move only pending tasks between batches"] --> R
+    B -->|spec changed| M["Pause dispatch; assess impact; update and re-approve spec"]
+    M --> N["Update plan/registry; re-review affected completed tasks; resume"] --> R
+    B -->|red flag or safety issue| O["Stop: never skip review, isolation, ledger update, or user decision"]
+    O --> I
+    R["Resume current phase"]
 ```

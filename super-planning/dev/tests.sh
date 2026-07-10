@@ -797,6 +797,17 @@ test_log_task_log_command() {
   assert_contains_file '"task":"Task-A-1"' "$log_file"
 }
 
+test_gitignore_template_contains_only_visual_companion_directory() {
+  local template expected
+  template="$REPO_ROOT/super-planning/templates/.gitignore-template"
+  expected='brainstorm/'
+
+  assert_exists "$template"
+  if [ "$(cat "$template")" != "$expected" ]; then
+    fail "$template must contain only: $expected"
+  fi
+}
+
 # TODO: Add visual companion tests (start-server.sh, stop-server.sh) — skipped
 # because they require node and a running server.
 
@@ -842,6 +853,7 @@ main() {
   test_append_task_validate_only
   test_update_set_requirement_status
   test_log_task_log_command
+  test_gitignore_template_contains_only_visual_companion_directory
 
   printf 'PASS: super-planning.sh\n'
 }

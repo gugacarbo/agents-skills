@@ -15,6 +15,7 @@ Fallback helper files when bootstrap is required:
 - `.super-planning/super-update.sh`
 - `.super-planning/render-progress-ledger.sh`
 - `.super-planning/super-plan.schema.json`
+- `.super-planning/.gitignore` (contains only `brainstorm/`, protecting the visual companion session directory)
 
 The goal is to avoid a duplicate helper directory when the skill already lives in the repository, while still keeping the flow self-contained for repositories that do not vendor the skill.
 
@@ -70,6 +71,7 @@ cp /absolute/path/to/skills/super-planning/scripts/super-plan.sh /absolute/path/
 cp /absolute/path/to/skills/super-planning/scripts/super-update.sh /absolute/path/to/workspace/.super-planning/super-update.sh
 cp /absolute/path/to/skills/super-planning/scripts/render-progress-ledger.sh /absolute/path/to/workspace/.super-planning/render-progress-ledger.sh
 cp /absolute/path/to/skills/super-planning/interfaces/super-plan.schema.json /absolute/path/to/workspace/.super-planning/super-plan.schema.json
+cp /absolute/path/to/skills/super-planning/templates/.gitignore-template /absolute/path/to/workspace/.super-planning/.gitignore
 
 sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
   --plan-id 0003-auth-middleware \
@@ -84,7 +86,8 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh reference \
 
 `super-planning-reference.json` records the skill name, GitHub remote, ref,
 full commit SHA, helper path, and generation timestamp. It is a local runtime
-reference and must not be added to `.gitignore` automatically.
+reference and remains visible; the generated `.super-planning/.gitignore`
+contains only `brainstorm/` for visual companion session files.
 
 `init` produces a valid but empty registry with `tasks: []`, `requirementsChecklist: []`, placeholder agent profiles, and a generated `progress-ledger.md`.
 

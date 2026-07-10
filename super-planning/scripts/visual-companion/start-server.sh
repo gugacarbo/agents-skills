@@ -116,6 +116,11 @@ umask 077
 SESSION_ID="$$-$(date +%s)-${RANDOM:-0}${RANDOM:-0}"
 
 if [[ -n "$PROJECT_DIR" ]]; then
+  PROJECT_GITIGNORE="${PROJECT_DIR}/.super-planning/.gitignore"
+  if [[ ! -e "$PROJECT_GITIGNORE" ]]; then
+    mkdir -p "${PROJECT_DIR}/.super-planning"
+    cp "$SCRIPT_DIR/../../templates/.gitignore-template" "$PROJECT_GITIGNORE"
+  fi
   SESSION_DIR="${PROJECT_DIR}/.super-planning/brainstorm/${SESSION_ID}"
   # Persist the bound port and key per project so a restart reuses them and an
   # already-open browser tab reconnects to the same URL with a valid cookie.
