@@ -60,7 +60,7 @@ flowchart TD
     A -->|Yes| C["Offer companion in its own message"]
     C --> D{"User approved?"}
     D -->|No| B
-    D -->|Yes| E["Warn about temporary .super-planning files and suggest .gitignore entry"]
+    D -->|Yes| E["Warn about temporary .super-planning files"]
     E --> F["Start visual companion server"]
     F --> G{"Startup info captured?"}
     G -->|Yes| H["Save URL, screen_dir, state_dir"]
@@ -103,18 +103,31 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Write plan from approved spec"] --> B["Assign batch and phase for each task"]
-    B --> C{"Spec covers multiple independent subsystems?"}
-    C -->|Yes| D["Suggest separate plans"]
-    C -->|No| E["Continue current plan"]
-    D --> E
-    E --> F["Right-size tasks to independent testable deliverables"]
-    F --> G["Run self-review: coverage, placeholders, type consistency, dependency order, file conflicts, decomposition readiness"]
-    G --> H{"Tasks in same batch are file-isolated and dependency-safe?"}
-    H -->|Yes| I["Default toward subagent-driven execution with parallel batches"]
-    H -->|No| J["Use sequential execution"]
-    I --> K["Proceed to Phase 4"]
-    J --> K
+    A["Write plan from approved spec"] --> B["Search repository patterns first"]
+    B --> C{"Suitable local pattern exists?"}
+    C -->|Yes| D["Record repository-pattern and source paths"]
+    C -->|No / new or ambiguous| E["Verify current docs with Context7"]
+    E --> F{"Context7 available and authoritative?"}
+    F -->|No| G["Fetch official documentation via web"]
+    F -->|Yes| H["Compare documented APIs with app context"]
+    G --> H
+    D --> I["Record versions, sources, contracts, and context mapping"]
+    H --> J{"Finding changes architecture or task boundaries?"}
+    J -->|Yes| K["Update plan or ask user for product decision"]
+    J -->|No| I
+    K --> I
+    I --> L["Assign batch and phase for each task"]
+    L --> M{"Spec covers multiple independent subsystems?"}
+    M -->|Yes| N["Suggest separate plans"]
+    M -->|No| O["Continue current plan"]
+    N --> O
+    O --> P["Right-size tasks to independent testable deliverables"]
+    P --> Q["Run self-review: coverage, docs verification, placeholders, type consistency, dependency order, file conflicts, decomposition readiness"]
+    Q --> R{"Tasks in same batch are file-isolated and dependency-safe?"}
+    R -->|Yes| S["Default toward subagent-driven execution with parallel batches"]
+    R -->|No| T["Use sequential execution"]
+    S --> U["Proceed to Phase 4"]
+    T --> U
 ```
 
 ## Phase 4: Decompose

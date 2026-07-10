@@ -28,11 +28,11 @@ A question about a UI topic is not automatically a visual question. "What kind o
 
 Do NOT offer the companion upfront. Offer it only when the next question would genuinely be easier to understand visually. The offer must be its own message:
 
-> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. To do that, I'll create temporary files under `.super-planning/` in the project. If we use it, it's a good idea to add `.super-planning` to `.gitignore` if it isn't there yet. It's still new and can be token-intensive. Want me to open it for you?"
+> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. To do that, I'll create temporary files under `.super-planning/` in the project. It's still new and can be token-intensive. Want me to open it for you?"
 
 Wait for the user's response. If they decline, continue text-only and do not offer it again unless they raise it.
 
-Before starting the companion, explicitly warn that it will create temporary files under `.super-planning/` in the project directory and suggest adding `.super-planning` to `.gitignore` if the repo does not already ignore it.
+Before starting the companion, explicitly warn that it will create temporary files under `.super-planning/` in the project directory.
 
 ## Starting a Session
 

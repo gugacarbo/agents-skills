@@ -4,6 +4,8 @@ Crie planos de implementação decompostos em tarefas e execute-os via subagente
 
 ## Modos de Invocação
 
+Quando invocada sem subcomando, a skill primeiro apresenta ao usuário um resumo das opções de entrada (`default`, `brainstorm`, `spec`, `plan`, `decompose`, `dispatch`, `review`, `integrate` e `stats/progress`) e depois segue automaticamente pelo fluxo `default`.
+
 | Comando                      | O que faz                                         |
 | ---------------------------- | ------------------------------------------------- |
 | `/super-planning`            | Executa o fluxo completo padrão (todas as fases). |
@@ -21,11 +23,16 @@ Crie planos de implementação decompostos em tarefas e execute-os via subagente
 | ------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | 1. Brainstorm | Requisitos, restrições, decisões de design                      | Fluxo completo de brainstorm integrado                                                                     |
 | 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                                | Aprovação do usuário                                                                                       |
-| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                     | Checklist de auto-revisão                                                                                  |
+| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                     | Verificação da documentação atual das bibliotecas/frameworks + checklist de auto-revisão                  |
 | 4. Decompose  | `docs/jobs/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers, descoberta de perfis `general/deep/quick`, `task_profile` por task, e ledger gerado |
 | 5. Dispatch   | Trabalho dos subagentes                                         | Checks pré-voo, validação de `agent/model`, e fallback para default                                        |
 | 6. Review     | Revisão em dois estágios                                        | Issues críticos/importantes devem ser corrigidos                                                           |
 | 7. Integrate  | Revisão final, preparação para merge                            | Suite de testes completa passa                                                                             |
+
+Quando a skill não está vendorizada no repositório-alvo, a Fase 4 cria
+`.super-planning/` com os helpers, `super-planning-reference.json` e
+`super-update.sh`. A atualização usa o remote GitHub do repositório e não
+altera `.gitignore` automaticamente.
 
 ## Documentação Detalhada
 

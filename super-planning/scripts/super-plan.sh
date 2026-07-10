@@ -2,7 +2,11 @@
 set -eu
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+if [ "$(basename "$SCRIPT_DIR")" = "scripts" ]; then
+  SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+else
+  SKILL_DIR="$SCRIPT_DIR"
+fi
 LEDGER_SCRIPT="$SCRIPT_DIR/render-progress-ledger.sh"
 
 error_json() {
@@ -41,6 +45,8 @@ Append-only update mode for tasks:
     [--task <json-or-@file>] \
     [--tasks <json-array-or-@file>] \
     [--validate-only <json-array-or-@file>]
+
+  super-plan.sh reference [--output <path>] [--repo-url <url>] [--ref <name>] [--commit <sha>]
 
 Notes:
   - `append-task` appends task objects to `tasks` and can validate an entire
@@ -314,7 +320,7 @@ MODE="init"
 
 if [ "$#" -gt 0 ]; then
   case "$1" in
-    init|update|append-task)
+    init|update|append-task|reference)
       MODE="$1"
       shift
       ;;
@@ -325,6 +331,59 @@ if [ "$#" -gt 0 ]; then
       error_json 1 "Unknown subcommand: $1"
       ;;
   esac
+fi
+
+if [ "$MODE" = "reference" ]; then
+  OUTPUT_PATH="$SKILL_DIR/super-planning-reference.json"
+  REPOSITORY_URL=""
+  REF_NAME=""
+  COMMIT_SHA=""
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --output) OUTPUT_PATH="$2"; shift 2 ;;
+      --repo-url) REPOSITORY_URL="$2"; shift 2 ;;
+      --ref) REF_NAME="$2"; shift 2 ;;
+      --commit) COMMIT_SHA="$2"; shift 2 ;;
+      *) usage ;;
+    esac
+  done
+
+  REPO_ROOT="$(git -C "$SKILL_DIR" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$SKILL_DIR")"
+  if [ -z "$REPOSITORY_URL" ]; then
+    REPOSITORY_URL="$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)"
+  fi
+  if [ -z "$REF_NAME" ]; then
+    REF_NAME="$(git -C "$REPO_ROOT" symbolic-ref --quiet --short HEAD 2>/dev/null || printf '%s' detached)"
+  fi
+  if [ -z "$COMMIT_SHA" ]; then
+    COMMIT_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || printf '%s' unknown)"
+  fi
+  VERSION="$(git -C "$REPO_ROOT" describe --tags --always --dirty 2>/dev/null || printf '%s' "$COMMIT_SHA")"
+
+  mkdir -p "$(dirname "$OUTPUT_PATH")"
+  python3 - "$OUTPUT_PATH" "$REPOSITORY_URL" "$REF_NAME" "$COMMIT_SHA" "$VERSION" "$SKILL_DIR" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+
+output, repository, ref_name, commit, version, skill_path = sys.argv[1:]
+payload = {
+    "format": 1,
+    "skill": "super-planning",
+    "repository": repository,
+    "ref": ref_name,
+    "commit": commit,
+    "version": version,
+    "skillPath": skill_path,
+    "generatedAt": datetime.now(timezone.utc).isoformat(),
+}
+with open(output, "w", encoding="utf-8") as handle:
+    json.dump(payload, handle, indent=2)
+    handle.write("\n")
+PY
+  printf '%s\n' "$OUTPUT_PATH"
+  exit 0
 fi
 
 if [ "$MODE" = "init" ]; then

@@ -34,4 +34,5 @@ flowchart TB
 - **Plan** (`docs/plans/NNNN-<name>.md`): Linked to the spec by number — how it will be built
 - **super-plan.json** (`docs/jobs/NNNN-<name>/super-plan.json`): Single source of truth, created and mutated by the active `super-plan.sh` helper path
 - **progress-ledger.md**: Regenerated from `super-plan.json` on every write
+- **Skill reference** (`.super-planning/super-planning-reference.json`): Exact Git remote/ref/commit used by the helper stack
 - **Task dirs**: Each task has its own directory with `report.md`, `review-package.diff.md`, `progress.log`, and `log-task.sh`

@@ -151,6 +151,9 @@ for task in tasks:
         status_counts[task_status] += 1
 
 lines = [
+    "> **Process:** `super-planning` — this ledger is generated from `super-plan.json` by the active super-planning helper.",
+    "> Follow `super-planning/SKILL.md` and the active phase instructions when interpreting or updating this work.",
+    "",
     f"# Progress Ledger: {feature_name}",
     "",
     f"> **Plan:** `{plan_id}`",

@@ -21,6 +21,35 @@ description: >-
 
 Retrieve current documentation and code examples for any library using the Context7 CLI.
 
+## Phase 3 Plan Verification Mode
+
+When this prompt is loaded by `super-planning` during Phase 3, use it only when repository inspection shows that external documentation is needed. The repository is the first source of truth; this prompt validates new, ambiguous, version-sensitive, or otherwise unsupported implementation decisions rather than forcing a lookup for every technology.
+
+Before planning tasks:
+
+1. Read the approved spec's technology choices and inspect the repository manifests, lockfiles, runtime configuration, existing imports, wrappers, adapters, utilities, tests, examples, and neighboring implementations.
+2. For each technology, decide whether the repository already provides a complete applicable pattern. If it does, do not run an external lookup; record `repository-pattern` and cite the relevant source paths.
+3. Build an inventory of only the technologies that still require external verification: new integrations, missing precedent, unclear APIs, version-sensitive behavior, migration questions, or conflicting local patterns. Record installed or targeted versions.
+4. Create one focused lookup question per remaining implementation decision. Include the repository context needed to distinguish framework versions, runtime constraints, and integration assumptions, but never include secrets, credentials, private data, or proprietary source code.
+5. Verify each remaining decision with Context7 first. Resolve the library ID before querying docs, and use a version-specific ID when the project pins a version.
+6. If Context7 is unavailable, errors, cannot resolve the library, reaches a quota limit, or lacks authoritative coverage, use web fetch/search against the official documentation, official repository, or governing specification. This fallback is mandatory; do not silently answer from model memory.
+7. Compare the documentation result with the actual application context. Check that the documented API exists in the targeted version, that its runtime assumptions match the repository, and that the proposed use fits existing adapters, conventions, and constraints.
+8. If a finding changes the architecture, task boundaries, dependency order, or acceptance criteria, update the plan before Phase 4. If it requires a product decision, stop and ask the user.
+
+Return a documentation verification record for each researched technology with:
+
+- technology and installed/targeted version;
+- implementation question;
+- lookup method: `repository-pattern`, `Context7`, or `official-web-fallback`;
+- selected library ID when Context7 was used;
+- authoritative source URL(s);
+- verified API/configuration contract and version caveats;
+- application-context mapping: relevant files, runtime, existing integration, and planned task;
+- resulting plan decision;
+- unresolved risk or explicit `none`.
+
+The Phase 3 plan must preserve these records in its **Documentation Verification** section. A plan is not ready for decomposition until every material technology choice has a repository-pattern assessment and every required external lookup is complete.
+
 Run commands with `npx ctx7@latest` so setup always uses the latest CLI without a global install:
 
 ```bash
@@ -146,9 +175,9 @@ npx ctx7@latest login
 If a command fails with a quota error ("Monthly quota reached" or "quota exceeded"):
 1. Inform the user their Context7 quota is exhausted
 2. Suggest they authenticate for higher limits: `npx ctx7@latest login`
-3. If they cannot or choose not to authenticate, answer from training knowledge and clearly note it may be outdated
+3. Use official documentation through web fetch/search for the current lookup and record `official-web-fallback` in the verification record
 
-Do not silently fall back to training data — always tell the user why Context7 was not used.
+If Context7 is unavailable for any other reason, use the same official-web fallback and record why Context7 was not used. Do not silently fall back to training data.
 
 ## Common Mistakes
 

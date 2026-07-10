@@ -59,6 +59,13 @@ Or one of: `too-big.` / `needs-confirm.` / `ambiguous.` / `regressed.` (terminal
 
 Write your full report to the report file path provided in the dispatch prompt:
 
+Start the report with this marker so future agents recognize the governing
+workflow:
+
+```markdown
+> **Process:** `super-planning` — task implementation report generated under the active `super-plan.json` registry.
+```
+
 - What you implemented (or what you attempted, if blocked)
 - What you tested and test results
 - TDD Evidence (if required): RED command + failing output, GREEN command + passing output

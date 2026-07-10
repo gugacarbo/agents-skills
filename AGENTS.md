@@ -19,7 +19,6 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 ├── find-docs/             # documentation retrieval skill
 ├── skill-creator/         # complex skill authoring and evaluation workflow
 ├── subagent-driven-development/ # sequential implementation workflow
-├── writing-skills/        # reusable skill-writing guidance and examples
 └── super-planning/        # tracked planning/orchestration skill
     ├── docs/              # reference docs: workflows, decision flow, examples
     ├── scripts/           # super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh
@@ -49,7 +48,7 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Work on documentation retrieval | `find-docs/SKILL.md`                       | Current library and service documentation lookup workflow.       |
 | Work on skill authoring       | `skill-creator/`                            | Authoring, evaluation, and discipline references plus dev tests. |
 | Work on subagent development  | `subagent-driven-development/`             | Sequential implementation prompts and task helper scripts.      |
-| Work on skill-writing guidance | `writing-skills/`                          | Skill authoring best practices, examples, and test guidance.     |
+| Work on documentation lookup guidance | `super-planning/prompts/find-docs.md` | Phase 3 lookup workflow for new or version-sensitive libraries. |
 
 ## CONVENTIONS
 

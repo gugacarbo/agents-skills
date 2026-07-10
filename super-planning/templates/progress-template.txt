@@ -1,5 +1,9 @@
 # Task Progress Log
 
+# Process: super-planning
+# This file is generated and consumed by the super-planning task workflow.
+# Follow super-planning/SKILL.md and the active task entry before editing it.
+
 This file is append-only. Each line is a JSON object written through the task-local `log-task.sh`.
 
 ## Event Format

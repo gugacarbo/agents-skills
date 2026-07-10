@@ -12,6 +12,7 @@ Before using the registry script, decide which helper path is active for this ru
 Fallback helper files when bootstrap is required:
 
 - `.super-planning/super-plan.sh`
+- `.super-planning/super-update.sh`
 - `.super-planning/render-progress-ledger.sh`
 - `.super-planning/super-plan.schema.json`
 
@@ -66,6 +67,7 @@ When the skill is not inside the target repository:
 ```bash
 mkdir -p /absolute/path/to/workspace/.super-planning
 cp /absolute/path/to/skills/super-planning/scripts/super-plan.sh /absolute/path/to/workspace/.super-planning/super-plan.sh
+cp /absolute/path/to/skills/super-planning/scripts/super-update.sh /absolute/path/to/workspace/.super-planning/super-update.sh
 cp /absolute/path/to/skills/super-planning/scripts/render-progress-ledger.sh /absolute/path/to/workspace/.super-planning/render-progress-ledger.sh
 cp /absolute/path/to/skills/super-planning/interfaces/super-plan.schema.json /absolute/path/to/workspace/.super-planning/super-plan.schema.json
 
@@ -75,7 +77,14 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
   --output docs/jobs/0003-auth-middleware/super-plan.json
+
+sh /absolute/path/to/workspace/.super-planning/super-plan.sh reference \
+  --output /absolute/path/to/workspace/.super-planning/super-planning-reference.json
 ```
+
+`super-planning-reference.json` records the skill name, GitHub remote, ref,
+full commit SHA, helper path, and generation timestamp. It is a local runtime
+reference and must not be added to `.gitignore` automatically.
 
 `init` produces a valid but empty registry with `tasks: []`, `requirementsChecklist: []`, placeholder agent profiles, and a generated `progress-ledger.md`.
 

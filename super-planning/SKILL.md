@@ -32,6 +32,23 @@ Treat this file as an explicit, expandable router for entry phases.
 
 **Routing rule:** If no subcommand is provided, always choose `default`.
 
+**No-command orientation rule:** When the skill is invoked without a subcommand, do not silently enter the default workflow. First show the user a concise summary of the available entry options and what each one starts:
+
+```text
+Available super-planning entry points:
+- default: full workflow; starts at Phase 1 unless an approved spec already exists
+- brainstorm: start at Phase 1 — refine requirements and decisions
+- spec: start at Phase 2 — write and approve the specification
+- plan: start at Phase 3 — write the implementation plan
+- decompose: start at Phase 4 — create the executable task registry
+- dispatch: start at Phase 5 — dispatch implementation tasks
+- review: start at Phase 6 — run review gates
+- integrate: start at Phase 7 — run final verification and close the plan
+- stats/progress: summarize task progress
+```
+
+After presenting this summary, continue with the normal routing rule: use `default`, and resolve whether to begin at Phase 1 or Phase 3 based on the presence of an approved spec. The summary is informational; do not pause for a choice unless the user explicitly asks to choose an entry phase.
+
 **Stats rule:** When the user invokes `/super-planning stats`, `/super-planning progress`, `/super-planning task-stats`, or `/super-planning task-progress`, run the active `summarize-all-tasks.sh` helper. Prefer the in-repo script at `super-planning/scripts/summarize-all-tasks.sh` when the skill is vendored; otherwise use the repo-local `.super-planning/summarize-all-tasks.sh` copied by Phase 4. Default scan directory is `docs/jobs`. Accept optional flags exactly as the script does: `--base-dir`, `--plan-id`, `--task-id` (requires `--plan-id`), `--json`. Produce only the script output plus a one-line note about the command used.
 
 **Forward-only rule:** When a phase name is provided, start at that phase and execute the remaining phases in order unless the user explicitly asks to stop earlier.
@@ -40,11 +57,12 @@ Treat this file as an explicit, expandable router for entry phases.
 
 ## Quick Start
 
-1. **Announce the selected entry phase:** for example, "I'm using the super-planning skill starting at Phase 3: PLAN."
-2. **Resolve the entry through the router above** before loading any phase file.
-3. **Load the matching phase file first**, then continue through the remaining phases in order.
-4. **Default entry:** if no subcommand is provided, use the normal workflow selection and start at Phase 1 unless there is already an approved spec.
-5. **If Phase 1 becomes visual:** load [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) before launching the companion.
+1. **If no subcommand was provided, show the available entry options summary** defined by the no-command orientation rule above.
+2. **Announce the selected entry phase:** for example, "I'm using the super-planning skill starting at Phase 3: PLAN."
+3. **Resolve the entry through the router above** before loading any phase file.
+4. **Load the matching phase file first**, then continue through the remaining phases in order.
+5. **Default entry:** if no subcommand is provided, use the normal workflow selection and start at Phase 1 unless there is already an approved spec.
+6. **If Phase 1 becomes visual:** load [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) before launching the companion.
 
 ## Phase Router
 
@@ -85,11 +103,12 @@ Want progress stats?
 
 - **Sequential mode:** one implementer + one reviewer according to `reviewCadence` (defined in [Phase 5 — DISPATCH](phases/05-dispatch.md)). Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously. Review timing is controlled by `reviewCadence`; with `per_task`, launch all finished-task reviewers immediately after the implementer wave returns. Requires file-level isolation.
-- **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it creates `.super-planning/` in the target repo and copies the registry helper stack there (`super-plan.sh`, `render-progress-ledger.sh`, `super-plan.schema.json`); it then writes the first `super-plan.json` plus `progress-ledger.md`. Every later `super-plan.json` mutation must go through that active helper path, which regenerates the ledger immediately. Phase 5 uses the shared logging helper from the same active helper path and Phase 6 materializes each task directory plus task-local artifacts such as `report.md`, `review-package.diff.md`, wrapper `log-task.sh`, and `progress.log`.
+- **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it creates `.super-planning/` in the target repo and copies the registry/update helper stack there (`super-plan.sh`, `super-update.sh`, `render-progress-ledger.sh`, `super-plan.schema.json`); it also creates `super-planning-reference.json` with the current Git remote/ref/commit. Every later `super-plan.json` mutation must go through that active helper path, which regenerates the ledger immediately. Phase 5 uses the shared logging helper from the same active helper path and Phase 6 materializes each task directory plus task-local artifacts such as `report.md`, `review-package.diff.md`, wrapper `log-task.sh`, and `progress.log`.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 - **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → reviewing → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
 - **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/jobs/0001-auth/super-plan.json, docs/jobs/0001-auth/Task-A-1/log-task.sh, docs/jobs/0001-auth/progress-ledger.md`
+- **Generated-document header** — every generated Markdown or text artifact must begin with a visible `Process: super-planning` marker and point the reader back to this skill and the active phase instructions. Preserve the marker when updating the artifact.
 - **Testing strategy** — Phase 2 asks whether TDD is required for behavior changes, records the decision in the spec, and resolves the repository's `testing-anti-patterns.md` guidance file. Later phases propagate that decision and guidance path into task rules, acceptance criteria, dispatch, review, and final verification.
 - **Pre-dispatch conflict gate** — before decomposition, scan task dependencies, global constraints, acceptance criteria, and parallel file ownership for contradictions. Resolve real conflicts in one batched user question before dispatch.
 - **Review package** — record each task's base commit before dispatch and generate its package with `scripts/review-package.sh`; use the same base for fixes and `git merge-base` for the final branch audit.
@@ -107,6 +126,7 @@ Want progress stats?
 | Task progress log | `docs/jobs/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
 | Progress ledger | `docs/jobs/NNNN-<feature-name>/progress-ledger.md` | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write |
 | Repo helpers     | `.super-planning/`                                  | Only created when the target repo does not already contain this `super-planning` skill; holds copied helper scripts and schema |
+| Skill reference  | `.super-planning/super-planning-reference.json`     | Created by `super-plan.sh reference`; records the GitHub remote and exact helper commit |
 
 ## Prompt Library
 
@@ -114,6 +134,7 @@ Want progress stats?
 | ------------------------------------------------------------------------ | ----------------------------------- |
 | [`prompts/pre-write-approval.md`](prompts/pre-write-approval.md)         | Before writing the spec             |
 | [`prompts/post-write-approval.md`](prompts/post-write-approval.md)       | After writing the spec              |
+| [`prompts/find-docs.md`](prompts/find-docs.md)                           | Verifying library/framework documentation during Phase 3 |
 | [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md) | Reviewing spec readiness |
 | [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building a subagent dispatch prompt |
 | [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Dispatching an implementer subagent |
@@ -135,6 +156,7 @@ Want progress stats?
 - **Full visual flows:** [`README.md`](README.md)
 - **Phase 1 visual companion:** [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md)
 - **Super-plan generator:** [`scripts/super-plan.sh`](scripts/super-plan.sh)
+- **Helper updater:** [`scripts/super-update.sh`](scripts/super-update.sh)
 - **Progress-ledger renderer:** [`scripts/render-progress-ledger.sh`](scripts/render-progress-ledger.sh)
 - **Super-plan interface:** [`interfaces/super-plan.schema.json`](interfaces/super-plan.schema.json)
 - **Progress logging helper:** [`scripts/log-task.sh`](scripts/log-task.sh)
