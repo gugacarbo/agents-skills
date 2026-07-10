@@ -54,6 +54,11 @@ def validate_evals(data: dict) -> dict:
         expected_output = item.get("expected_output", "")
         files = item.get("files", [])
         expectations = item.get("expectations", [])
+        skill_type = item.get("skill_type")
+        baseline_failure = item.get("baseline_failure")
+        failure_form = item.get("failure_form")
+        pressures = item.get("pressures", [])
+        rationalizations = item.get("rationalizations", [])
 
         if not isinstance(prompt, str):
             raise ValueError(f"eval {eval_id} prompt must be a string")
@@ -63,16 +68,33 @@ def validate_evals(data: dict) -> dict:
             raise ValueError(f"eval {eval_id} files must be an array of strings")
         if not isinstance(expectations, list) or any(not isinstance(text, str) for text in expectations):
             raise ValueError(f"eval {eval_id} expectations must be an array of strings")
+        for field_name, value in (
+            ("skill_type", skill_type),
+            ("baseline_failure", baseline_failure),
+            ("failure_form", failure_form),
+        ):
+            if value is not None and not isinstance(value, str):
+                raise ValueError(f"eval {eval_id} {field_name} must be a string")
+        for field_name, value in (("pressures", pressures), ("rationalizations", rationalizations)):
+            if not isinstance(value, list) or any(not isinstance(text, str) for text in value):
+                raise ValueError(f"eval {eval_id} {field_name} must be an array of strings")
 
-        validated.append(
-            {
-                "id": eval_id,
-                "prompt": prompt,
-                "expected_output": expected_output,
-                "files": files,
-                "expectations": expectations,
-            }
-        )
+        validated_item = {
+            "id": eval_id,
+            "prompt": prompt,
+            "expected_output": expected_output,
+            "files": files,
+            "expectations": expectations,
+        }
+        optional_fields = {
+            "skill_type": skill_type,
+            "baseline_failure": baseline_failure,
+            "failure_form": failure_form,
+            "pressures": pressures,
+            "rationalizations": rationalizations,
+        }
+        validated_item.update({key: value for key, value in optional_fields.items() if value is not None})
+        validated.append(validated_item)
 
     return {"skill_name": skill_name.strip(), "evals": validated}
 

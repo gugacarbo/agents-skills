@@ -23,6 +23,9 @@ You receive these parameters in your prompt:
 1. Read the transcript file completely
 2. Note the eval prompt, execution steps, and final result
 3. Identify any issues or errors documented
+4. If eval metadata includes `baseline_failure`, `pressures`, or
+   `rationalizations`, use them to check whether the run addressed the intended
+   behavioral failure rather than merely echoing the skill text
 
 ### Step 2: Examine Output Files
 

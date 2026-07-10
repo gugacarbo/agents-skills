@@ -17,7 +17,12 @@ Defines the evals for a skill. Located at `evals/evals.json` within the skill di
       "prompt": "User's example prompt",
       "expected_output": "Description of expected result",
       "files": ["evals/files/sample1.pdf"],
-      "expectations": ["The output includes X", "The skill used script Y"]
+      "expectations": ["The output includes X", "The skill used script Y"],
+      "skill_type": "discipline",
+      "baseline_failure": "violates_rule_under_pressure",
+      "failure_form": "prohibition",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["The change is trivial"]
     }
   ]
 }
@@ -31,6 +36,13 @@ Defines the evals for a skill. Located at `evals/evals.json` within the skill di
 - `evals[].expected_output`: Human-readable description of success
 - `evals[].files`: Optional list of input file paths (relative to skill root)
 - `evals[].expectations`: List of verifiable statements
+- `evals[].skill_type`: Optional category: `discipline`, `technique`, `pattern`, or `reference`
+- `evals[].baseline_failure`: Optional observed failure that motivated the eval
+- `evals[].failure_form`: Optional guidance form selected for that failure
+- `evals[].pressures`: Optional list of pressures used in a discipline scenario
+- `evals[].rationalizations`: Optional shortcuts observed in the baseline
+
+The extended fields are optional so existing eval files remain compatible.
 
 ---
 
