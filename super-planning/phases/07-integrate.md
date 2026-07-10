@@ -38,7 +38,7 @@ Generate a final review package before dispatching the auditor:
 
 ```bash
 BASE=$(git merge-base <base-branch> HEAD)
-sh super-planning/scripts/review-package.sh "$BASE" HEAD \
+sh "$ACTIVE_REVIEW_PACKAGE_SCRIPT" "$BASE" HEAD \
   docs/jobs/{NNNN-<feature-name>}/final-review-package.diff.md
 ```
 
@@ -60,7 +60,12 @@ Produce a File Map listing all files created or modified during implementation. 
 Address any findings from the final audit. Dispatch ONE fix subagent with ALL
 findings — not one fixer per finding. Require focused test evidence in its
 report, regenerate the final package from the same merge base, and repeat the
-audit until there are no Critical/Important findings.
+audit until there are no Critical/Important findings and no unresolved
+`⚠️ Cannot verify` items. Every unverifiable item must either be closed by a
+focused read-only check or escalated with the relevant spec text and an
+explicit user decision. Escalation alone is not resolution; pause integration
+and leave the plan incomplete until that decision is recorded in the final
+review notes.
 
 ## Step 6: Handle Non-Complete Tasks
 

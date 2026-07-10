@@ -207,9 +207,9 @@ find . -path "*/test*" -name "*.test.ts" | xargs grep -l "functionName"
 # Check git log for recent changes to a file
 git log --oneline -10 -- path/to/file.ts
 
-# See what actually changed in this branch vs the base branch
-git diff main...HEAD --name-only
-git diff main...HEAD -- path/to/file.ts
+# Inspect a named risk outside the package only when the package is insufficient
+# and record the risk and focused check in the audit report.
+git show <commit>:path/to/file.ts
 ```
 
 Using `git diff` against the base branch is especially powerful — it shows exactly what was added or changed, making it easy to cross-reference with the spec's requirements.

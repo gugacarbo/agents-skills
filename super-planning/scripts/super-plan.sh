@@ -247,6 +247,7 @@ for index, task in enumerate(payload["tasks"]):
             "reviewPackage",
             "progressLog",
             "logTaskScript",
+            "baseCommit",
             "dependencies",
             "acceptanceCriteria",
             "requirements",
@@ -277,8 +278,9 @@ for index, task in enumerate(payload["tasks"]):
     expect_non_empty_string(task["reviewPackage"], f"{path_label}.reviewPackage")
     expect_non_empty_string(task["progressLog"], f"{path_label}.progressLog")
     expect_non_empty_string(task["logTaskScript"], f"{path_label}.logTaskScript")
-    if "baseCommit" in task:
-        expect_non_empty_string(task["baseCommit"], f"{path_label}.baseCommit")
+    expect_non_empty_string(task["baseCommit"], f"{path_label}.baseCommit")
+    if task["status"] in {"in_progress", "ready_for_review", "reviewing", "needs_fix"} and task["baseCommit"] == "pending":
+        fail(f"{path_label}.baseCommit must be a commit SHA before the task leaves pending")
     expect_string_list(task["dependencies"], f"{path_label}.dependencies")
     expect_string_list(task["acceptanceCriteria"], f"{path_label}.acceptanceCriteria")
     expect_string_list(task["requirements"], f"{path_label}.requirements")

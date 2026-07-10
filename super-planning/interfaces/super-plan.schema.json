@@ -290,6 +290,7 @@
 				"reviewPackage",
 				"progressLog",
 				"logTaskScript",
+				"baseCommit",
 				"dependencies",
 				"acceptanceCriteria",
 				"requirements",
@@ -362,7 +363,8 @@
 				},
 				"baseCommit": {
 					"type": "string",
-					"minLength": 1
+					"minLength": 1,
+					"description": "Required on every task; use pending during decomposition and replace it with the current HEAD immediately before dispatch."
 				},
 				"dependencies": {
 					"type": "array",

@@ -141,6 +141,7 @@ cat > /tmp/task-a.json <<'EOF'
   "reviewPackage": "docs/jobs/0003-auth-middleware/Task-A-1/review-package.diff.md",
   "progressLog": "docs/jobs/0003-auth-middleware/Task-A-1/progress.log",
   "logTaskScript": "docs/jobs/0003-auth-middleware/Task-A-1/log-task.sh",
+  "baseCommit": "pending",
   "dependencies": [],
   "acceptanceCriteria": [],
   "requirements": [],

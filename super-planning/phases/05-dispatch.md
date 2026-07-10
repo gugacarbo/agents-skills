@@ -86,6 +86,12 @@ All later commands must use the resolved active helper path, just like the
 logging helper. Do not create a second review-package convention under
 `.superpowers/`.
 
+Every task entry carries `baseCommit`. During decomposition, pending tasks may
+use the literal placeholder `pending`; immediately before dispatch, replace it
+with the current `HEAD` through the active `super-plan.sh` helper and only then
+move the task to `in_progress`. A task cannot enter `ready_for_review`,
+`reviewing`, `needs_fix`, or `completed` with the placeholder still present.
+
 ## Constructing the Dispatch Prompt
 
 A dispatch prompt contains exactly five things — nothing more:
@@ -157,7 +163,7 @@ implementer. The package must use that recorded base, never `HEAD~1`, because
 one task may produce multiple commits:
 
 ```bash
-sh super-planning/scripts/review-package.sh "$BASE_COMMIT" HEAD \
+sh "$ACTIVE_REVIEW_PACKAGE_SCRIPT" "$BASE_COMMIT" HEAD \
   docs/jobs/{NNNN-<feature-name>}/{task-id}/review-package.diff.md
 ```
 

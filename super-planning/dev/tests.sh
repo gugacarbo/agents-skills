@@ -233,10 +233,37 @@ test_update_accepts_reviewing_task_status() {
   mkdir -p "$(dirname "$registry")"
   cp "$EXAMPLE_PLAN" "$registry"
 
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set "tasks[Task-A-1].baseCommit=$(git -C "$REPO_ROOT" rev-parse HEAD)" >/dev/null
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=reviewing >/dev/null
 
   assert_contains_file '"status": "reviewing"' "$registry"
   assert_contains_file "[AUDIT] reviewing" "$tmp/docs/jobs/0001-auth-middleware/progress-ledger.md"
+}
+
+test_active_task_requires_base_commit() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  cp "$EXAMPLE_PLAN" "$registry"
+  python3 - "$registry" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    payload = json.load(handle)
+for task in payload["tasks"]:
+    task.pop("baseCommit", None)
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(payload, handle)
+PY
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=reviewing >"$tmp/output.log" 2>&1; then
+    fail "expected active task without baseCommit to fail"
+  fi
+
+  assert_contains_file "baseCommit" "$tmp/output.log"
 }
 
 test_update_rejects_invalid_task_profile_without_mutating_file() {
@@ -417,6 +444,7 @@ test_incremental_decompose_appends_tasks_one_by_one() {
   "reviewPackage": "docs/jobs/0001-sample/Task-A-1/review-package.diff.md",
   "progressLog": "docs/jobs/0001-sample/Task-A-1/progress.log",
   "logTaskScript": "docs/jobs/0001-sample/Task-A-1/log-task.sh",
+  "baseCommit": "pending",
   "dependencies": [],
   "acceptanceCriteria": [],
   "requirements": [],
@@ -448,6 +476,7 @@ EOF
   "reviewPackage": "docs/jobs/0001-sample/Task-B-1/review-package.diff.md",
   "progressLog": "docs/jobs/0001-sample/Task-B-1/progress.log",
   "logTaskScript": "docs/jobs/0001-sample/Task-B-1/log-task.sh",
+  "baseCommit": "pending",
   "dependencies": ["Task-A-1"],
   "acceptanceCriteria": [],
   "requirements": [],
@@ -726,7 +755,7 @@ test_append_task_validate_only() {
     --execution-mode subagent-driven \
     --review-cadence per_task >/dev/null
 
-  local task_json='[{"id":"Task-A-1","title":"A","description":"","status":"pending","tryCount":3,"maxTries":3,"task_profile":"general","batch":"A","layer":"foundation","reportFile":"a.md","reviewPackage":"b.md","progressLog":"c.log","logTaskScript":"d.sh","dependencies":[],"acceptanceCriteria":[],"requirements":[],"rules":[],"steps":[],"filesTouched":[],"files":{"created":[],"modified":[],"deleted":[]},"notes":[]}]'
+  local task_json='[{"id":"Task-A-1","title":"A","description":"","status":"pending","tryCount":3,"maxTries":3,"task_profile":"general","batch":"A","layer":"foundation","reportFile":"a.md","reviewPackage":"b.md","progressLog":"c.log","logTaskScript":"d.sh","baseCommit":"pending","dependencies":[],"acceptanceCriteria":[],"requirements":[],"rules":[],"steps":[],"filesTouched":[],"files":{"created":[],"modified":[],"deleted":[]},"notes":[]}]'
   local output
   output=$("$SUPER_PLAN_SCRIPT" append-task --input "$registry" --validate-only "$task_json" 2>&1) || fail "append-task --validate-only failed"
   echo "$output" | grep -q '"valid": true' || fail "expected valid:true in append-task --validate-only output"
@@ -797,6 +826,7 @@ main() {
   test_update_rejects_invalid_status_without_mutating_file
   test_update_accepts_cancelled_task_status
   test_update_accepts_reviewing_task_status
+  test_active_task_requires_base_commit
   test_update_rejects_invalid_task_profile_without_mutating_file
   test_render_progress_ledger_includes_timeline_and_requirements
   test_schema_validator_agreement
