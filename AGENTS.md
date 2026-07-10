@@ -16,7 +16,10 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 ├── commit-changes/        # tracked skill directory; includes README with flowchart
 ├── find-skills/           # local skill directory, ignored by git allowlist
 ├── init-deep/             # local skill directory, ignored by git allowlist
-├── skill-creator/         # complex local skill, mostly ignored except AGENTS.md
+├── find-docs/             # documentation retrieval skill
+├── skill-creator/         # complex skill authoring and evaluation workflow
+├── subagent-driven-development/ # sequential implementation workflow
+├── writing-skills/        # reusable skill-writing guidance and examples
 └── super-planning/        # tracked planning/orchestration skill
     ├── docs/              # reference docs: workflows, decision flow, examples
     ├── scripts/           # super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh
@@ -43,6 +46,10 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Test planning scripts          | `super-planning/dev/tests.sh`              | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
 | Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
 | Work on init-deep skill       | `init-deep/SKILL.md`                        | Unified skill with --light flag for telegraphic mode.            |
+| Work on documentation retrieval | `find-docs/SKILL.md`                       | Current library and service documentation lookup workflow.       |
+| Work on skill authoring       | `skill-creator/`                            | Authoring, evaluation, and discipline references plus dev tests. |
+| Work on subagent development  | `subagent-driven-development/`             | Sequential implementation prompts and task helper scripts.      |
+| Work on skill-writing guidance | `writing-skills/`                          | Skill authoring best practices, examples, and test guidance.     |
 
 ## CONVENTIONS
 
