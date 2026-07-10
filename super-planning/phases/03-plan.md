@@ -15,6 +15,18 @@ Start from [`templates/plan-template.md`](../templates/plan-template.md). The pl
 
 The executable part of the plan lives in `super-plan.json`. The plan file provides context and constraints; `super-plan.json` provides the structured specification, requirement coverage, and executable tasks after Phase 4 materializes it.
 
+## Testing Strategy Handoff
+
+Read the spec's **Test Strategy** section and carry it into the plan:
+
+- preserve the selected TDD or conventional-coverage mode;
+- preserve the effective `testing-anti-patterns.md` path;
+- map each main test scenario to one or more tasks;
+- convert TDD requirements into exact global constraints and task acceptance criteria;
+- keep documentation, static configuration, and confirmed exceptions outside TDD unless the spec explicitly includes them.
+
+Every behavior-changing task must end with an independently testable deliverable. If a task adds or changes tests, its rules must tell the implementer to read the effective testing guidance file first.
+
 > **Single source of truth:** `super-plan.json` is the single source of truth for task structure and ownership. The plan markdown file is a human-readable summary. Always update `super-plan.json` first, then regenerate if needed.
 
 > **Note:** Task definitions live in `super-plan.json`, not in the plan markdown file. The plan markdown is a human-readable overview; the JSON registry is the machine-readable source of truth.
@@ -85,6 +97,21 @@ After writing the plan and preparing its decomposition inputs, check:
 4. **Dependency order:** Are dependencies acyclic and aligned with the intended batch order?
 5. **File conflicts:** Can tasks in the same batch run in parallel without touching the same files?
 6. **Decomposition readiness:** Is the plan concrete enough that Phase 4 can write a complete `super-plan.json` without inventing missing details?
+
+## Pre-Dispatch Conflict Review
+
+Before Phase 4 creates the executable registry, scan the plan once for:
+
+- tasks that contradict one another or the copied Global Constraints;
+- dependencies that point forward incorrectly or create a cycle;
+- acceptance criteria that the review rubric would reject, such as tests that assert nothing;
+- parallel tasks that declare overlapping files or shared mutable state.
+
+If the scan finds a real conflict, present one batched question containing the
+conflicting plan text and ask which requirement governs. Do not start
+decomposition or dispatch until the conflict is resolved. If the scan is
+clean, record that result in the plan handoff and continue without another
+confirmation gate.
 
 ## Execution Handoff
 

@@ -35,9 +35,11 @@ Read the review package once. It contains everything you need. **Do not re-run g
 
 **Do Not Trust the Report:** Treat the implementer's report as unverified claims. Verify claims against the diff. Design rationales in the report are claims too — judge the code on its merits.
 
-**Scope-Limited:** Only review the task's changes (the diff from base to head), not the whole branch. This keeps the review focused and context-efficient.
+**Scope-Limited:** Only review the task's changes (the diff from base to head), not the whole branch. This keeps the review focused and context-efficient. If a hunk is insufficient to judge a concrete named risk, perform at most one focused read-only check outside the diff and name that risk and check in the report; do not crawl the repository.
 
 **Tests:** The implementer already ran tests and reported results. Do not re-run the suite. If reading the code raises a specific doubt, you may suggest a test command for the user to run, or use read-only test commands (e.g., `dry-run`, `--check` flags). Do NOT run commands that could mutate files.
+
+When the task requires TDD, verify the report contains RED and GREEN evidence and that the diff includes the focused behavior test. If the task names a `testing-anti-patterns.md` guidance file, verify the implementation does not test mock configuration instead of behavior and does not add production APIs solely for tests.
 
 **Calibrated Severity:** Not everything is Critical. Use severity levels honestly:
 
@@ -62,7 +64,9 @@ Does the implementation match the task requirements from `super-plan.json`?
 - **Misunderstood:** right feature, wrong approach
 - **Partial:** requirement exists but is incomplete or shallow
 
-If a requirement cannot be verified from the diff alone, flag it as unverifiable and explain why.
+If a requirement cannot be verified from the diff alone, flag it as
+unverifiable and explain exactly what the orchestrator must check. The
+orchestrator, not the reviewer, owns closing that item before completion.
 
 ### Cross-Check the Report
 
@@ -106,6 +110,7 @@ Is the code well-built? Review the diff for the following categories.
 - Edge cases and error paths are tested
 - Test names clearly describe the scenario
 - No missing tests for new public functions or API endpoints
+- When applicable, RED/GREEN evidence and the effective testing guidance path are present in the implementer's report
 
 ### Performance
 
@@ -160,9 +165,11 @@ Findings sorted file then line ascending. Emoji severity: 🔴 Critical, 🟡 Im
 | ---------------- | ---------------------------- | ------------------------------------------- |
 | **Critical**    | Must fix before proceeding   | Dispatch fix subagent, re-review            |
 | **Important**   | Should fix, blocks merge     | Dispatch fix subagent, re-review            |
-| **Minor**       | Nice to have                 | Record in progress ledger for final review  |
+| **Minor**       | Nice to have                 | Record in the task `progress.log` with file/line, impact, and recommended follow-up |
 
-Only mark a task `completed` once its review is clean for the configured `reviewCadence`. If issues are found, the task transitions to `needs_fix`.
+Only mark a task `completed` once its review is clean for the configured
+`reviewCadence` and all unverifiable items have been resolved by the
+orchestrator. If issues are found, the task transitions to `needs_fix`.
 
 ## What NOT to Do
 

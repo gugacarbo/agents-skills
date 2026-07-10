@@ -79,21 +79,24 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Scan workspace spec conventions"] --> B["Draft summary before writing file"]
-    B --> C{"User approved pre-write summary?"}
-    C -->|No| D["Revise summary and ask again"]
-    D --> C
-    C -->|Yes| F["Save decisions file from Phase 1 outputs"]
-    F --> H["Write spec file"]
-    H --> I["Run self-review: placeholders, consistency, scope, ambiguity"]
-    I --> J{"Spec is complex / risky / ambiguous?"}
-    J -->|Yes| K["Run optional spec reviewer pass and fix blockers"]
-    J -->|No| L["Send spec for post-write approval"]
-    K --> L
-    L --> M{"User approved spec?"}
-    M -->|No| N["Update spec and ask again"]
-    N --> L
-    M -->|Yes| O["Mark spec accepted and proceed to Phase 3"]
+    A["Scan workspace spec conventions"] --> B["Resolve testing-anti-patterns.md guidance path"]
+    B --> C{"Ask whether TDD is required for behavior changes"}
+    C --> D["Record testing mode and main scenarios"]
+    D --> E["Draft summary before writing file"]
+    E --> F{"User approved pre-write summary?"}
+    F -->|No| G["Revise summary and ask again"]
+    G --> F
+    F -->|Yes| H["Save decisions file from Phase 1 outputs"]
+    H --> I["Write spec file"]
+    I --> J["Run self-review: placeholders, consistency, scope, ambiguity, test strategy"]
+    J --> K{"Spec is complex / risky / ambiguous?"}
+    K -->|Yes| L["Run optional spec reviewer pass and fix blockers"]
+    K -->|No| M["Send spec for post-write approval"]
+    L --> M
+    M --> N{"User approved spec?"}
+    N -->|No| O["Update spec and ask again"]
+    O --> M
+    N -->|Yes| P["Mark spec accepted and proceed to Phase 3"]
 ```
 
 ## Phase 3: Plan
@@ -174,7 +177,7 @@ flowchart TD
     W -->|No| Y["Build minimal dispatch prompt"]
     Y --> Z{"Implementer returned status?"}
     Z -->|DONE| AA["Mark ready_for_review and hand off to Phase 6"]
-    Z -->|DONE_WITH_CONCERNS| AB["Read concerns, then mark ready_for_review or address first"]
+    Z -->|DONE_WITH_CONCERNS| AB["Resolve correctness/scope concerns<br/>or record observation before review"]
     Z -->|NEEDS_CONTEXT| AC["Provide context and re-dispatch"]
     Z -->|BLOCKED| AD{"Can unblock with context, better model, or smaller scope?"}
     AD -->|Yes| AE["Change something and re-dispatch"]
@@ -199,7 +202,7 @@ flowchart TD
     H --> I{"Critical or important findings?"}
     I -->|Yes| J["Set needs_fix, dispatch fix subagent, then re-review"]
     I -->|No| K{"Minor findings only?"}
-    K -->|Yes| L["Record in ledger for final review"]
+    K -->|Yes| L["Record in task progress.log for final triage"]
     K -->|No| M["Review is clean"]
     J --> C
     L --> N["Mark task completed through orchestrator after clean review state unless reviewCadence=final_only"]

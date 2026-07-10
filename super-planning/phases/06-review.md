@@ -2,7 +2,7 @@
 
 Two-stage review according to `reviewCadence`: after each task, after each batch, or during final integration on a per-batch basis.
 
-> **Ownership:** Review package generation is owned by Phase 6. Phase 5 may prepare the inputs (diff, worktree) but the actual packaging (creating `review-package.json`, assembling artifacts) happens here.
+> **Ownership:** Review package generation is owned by Phase 6. Phase 5 may prepare the inputs (diff, worktree, and recorded `baseCommit`) but the actual packaging happens here through `scripts/review-package.sh`.
 
 ## Review Cadence Routing
 
@@ -22,6 +22,10 @@ Phase 5 already materialized the task directory, logging wrapper, and empty `pro
 - `docs/jobs/{NNNN-<feature-name>}/{task-id}/review-package.diff.md`
 
 Use [`templates/progress-template.txt`](../templates/progress-template.txt) for the task log format. The ledger itself is a generated artifact produced by the active `render-progress-ledger.sh` helper path, not a hand-maintained template.
+
+Generate the review package with the task's recorded base commit and current
+head. Never substitute `HEAD~1`; that silently omits earlier commits from a
+multi-commit task.
 
 The ledger should already exist from Phase 4. Regenerate it through the `super-plan.json` script path after every registry update, then keep it synchronized through review, fixes, and final integration.
 
@@ -46,7 +50,15 @@ Does the implementation match the requirements?
 - **Extra:** features not requested (overbuilding)
 - **Misunderstood:** right feature, wrong approach
 
-If a requirement cannot be verified from the diff alone, flag it as ⚠️ and verify it yourself.
+If a requirement cannot be verified from the diff alone, flag it as ⚠️ and
+explain the focused check the orchestrator must perform. The orchestrator owns
+the resolution of every ⚠️ item: before marking the task complete, either
+verify it with one focused read-only check or return it to the implementer as
+a real spec gap.
+
+If a finding conflicts with text explicitly mandated by the plan, present the
+finding beside the governing plan text to the user. Do not silently dismiss
+the finding or dispatch a fix that contradicts the approved plan.
 
 ## Stage 2: Code Quality
 
@@ -58,6 +70,8 @@ Is it well-built?
 - Edge cases handled?
 - Tests verify real behavior (not mocks)?
 - Each file has one clear responsibility?
+- When TDD is required, does the report show RED/GREEN evidence and a focused behavior test?
+- When the task names testing guidance, were mocks, fixtures, and test-only helpers evaluated against that guidance?
 
 ## Reviewer Dispatch
 
@@ -94,11 +108,17 @@ When dispatching a reviewer, use the [`agents/code-reviewer.md`](../agents/code-
 | **Important** | Should fix, blocks merge   | Dispatch fix subagent, re-review                          |
 | **Minor**     | Nice to have               | Record minor findings in the task's `progress.log` as an `info` event with the finding details. If the finding affects status, update the task's `status` in `super-plan.json`. |
 
-For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding.
+For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding. Record Minor findings in the task's `progress.log` with file/line, impact, and recommended follow-up so the final audit can triage them.
 
 ## Completion Rule
 
-Only mark a task `completed` once its required independent review has happened and is clean for the configured `reviewCadence`. Set the task status to `reviewing` when review begins, then transition to `completed` (clean) or `needs_fix` (issues found).
+Only mark a task `completed` once its required independent review has happened,
+is clean for the configured `reviewCadence`, and all ⚠️ items have been
+resolved by the orchestrator. Set the task status to `reviewing` when review
+begins, then transition to `completed` (clean) or `needs_fix` (issues found).
+When logging the clean completion, include `BASE..HEAD` and `review clean` in
+the event message so the generated ledger retains the commit range and review
+outcome after context compaction.
 
 - `per_task` — the task can be completed right after its own clean review
 - `per_batch` — tasks in the batch can be completed after the batch review is clean

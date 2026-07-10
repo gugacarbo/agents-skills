@@ -1,0 +1,23 @@
+{
+  "skill_name": "super-planning",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Quero planejar uma nova API de autenticação. Faça o brainstorm e prepare a spec, mas antes de escrever a spec pergunte se quero TDD. Se eu escolher TDD, inclua os principais cenários de teste e a estratégia RED/GREEN.",
+      "expected_output": "O agente inspeciona as convenções, pergunta a decisão de TDD antes da spec e inclui Test Strategy, cenários, comandos e evidências na spec.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Planeje uma mudança de comportamento em um repositório que não possui testing-anti-patterns.md. Use a convenção de documentação existente e crie uma cópia contextual do guia antes de distribuir as tarefas.",
+      "expected_output": "O agente procura o arquivo, detecta a convenção do repositório, copia o template apenas quando necessário e registra o caminho nas regras de teste.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Planeje uma atualização puramente documental. Não há mudança de comportamento nem código para implementar.",
+      "expected_output": "O agente não impõe RED/GREEN automaticamente; registra a estratégia convencional ou pede confirmação se a necessidade de TDD for ambígua.",
+      "files": []
+    }
+  ]
+}

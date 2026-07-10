@@ -24,12 +24,30 @@ Open the spec document (`source.spec` from `super-plan.json`) and locate its **D
 - If a DoD item is not met, either fix it or document why it is deferred.
 - Record the DoD verification result in the final review notes.
 
+Also verify the spec's **Test Strategy**:
+
+- the selected TDD/conventional mode was propagated to the task registry;
+- the effective `testing-anti-patterns.md` file exists at the recorded path;
+- required RED/GREEN evidence is present for behavior-changing tasks;
+- the main test scenarios and regression tests are covered;
+- unrelated or pre-existing failures are documented and approved before closure.
+
 ## Step 3: Final Whole-Branch Audit
+
+Generate a final review package before dispatching the auditor:
+
+```bash
+BASE=$(git merge-base <base-branch> HEAD)
+sh super-planning/scripts/review-package.sh "$BASE" HEAD \
+  docs/jobs/{NNNN-<feature-name>}/final-review-package.diff.md
+```
 
 Dispatch a final whole-branch review using the most capable model. Use [`agents/spec-compliance-auditor.md`](../agents/spec-compliance-auditor.md) as the audit prompt, providing:
 
 1. The full spec document
 2. Access to the codebase on the feature branch
+3. The final review package
+4. `super-plan.json`, including `requirementsChecklist` and task review outcomes
 
 The auditor produces a **Spec Compliance Audit Report** covering every checkable item from the spec.
 
@@ -39,7 +57,10 @@ Produce a File Map listing all files created or modified during implementation. 
 
 ## Step 5: Address Remaining Findings
 
-Address any findings from the final audit. For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding.
+Address any findings from the final audit. Dispatch ONE fix subagent with ALL
+findings — not one fixer per finding. Require focused test evidence in its
+report, regenerate the final package from the same merge base, and repeat the
+audit until there are no Critical/Important findings.
 
 ## Step 6: Handle Non-Complete Tasks
 

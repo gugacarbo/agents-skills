@@ -79,6 +79,26 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
 
 `init` produces a valid but empty registry with `tasks: []`, `requirementsChecklist: []`, placeholder agent profiles, and a generated `progress-ledger.md`.
 
+### Testing rules for tasks
+
+Use the spec's **Test Strategy** when filling `rules`, `acceptanceCriteria`, and `steps`:
+
+- Behavior-changing tasks in TDD mode must include a rule to read the effective `testing-anti-patterns.md` before adding mocks or test utilities.
+- Their acceptance criteria must require a focused RED test, the expected failure reason, the minimum implementation, GREEN verification, and the relevant broader suite.
+- Bug-fix tasks must retain the reproduction as a regression test.
+- Legacy areas without coverage must specify the approved integration test, critical unit coverage, and explicit untouched-legacy exclusions.
+- Non-behavior tasks must not receive TDD requirements unless the user explicitly confirmed that scope.
+
+Example task rules:
+
+```json
+[
+  "TDD required for this behavior-changing task.",
+  "Read docs/context/testing-anti-patterns.md before adding mocks, fakes, fixtures, or test-only helpers.",
+  "Report RED and GREEN commands and results in the task report."
+]
+```
+
 ### Step 2: add tasks one by one
 
 **Task ID naming convention:** `Task-[batch_id]-[task_batch_id]`

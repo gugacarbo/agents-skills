@@ -360,6 +360,10 @@
 					"type": "string",
 					"minLength": 1
 				},
+				"baseCommit": {
+					"type": "string",
+					"minLength": 1
+				},
 				"dependencies": {
 					"type": "array",
 					"items": {

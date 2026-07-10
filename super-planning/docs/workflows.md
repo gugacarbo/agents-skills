@@ -164,7 +164,7 @@ flowchart TD
     subgraph Findings Handling
         S6{Findings?} -->|Critical| FH1[Fix before proceeding<br/>re-review]
         S6{Findings?} -->|Important| FH2[Should fix<br/>blocks merge<br/>re-review]
-        S6{Findings?} -->|Minor| FH3[Record in ledger<br/>final review addresses]
+        S6{Findings?} -->|Minor| FH3[Record in task progress.log<br/>final review triages]
         S6{Findings?} -->|No issues| FH4[Proceed]
         FH1 --> COMPLETE
         FH2 --> COMPLETE
@@ -197,7 +197,7 @@ stateDiagram-v2
 flowchart TD
     S[Subagent Returns] --> ST{Status?}
     ST -->|DONE| P[Mark ready_for_review]
-    ST -->|DONE_WITH_CONCERNS| C[Read concerns<br/>decide whether to address]
+    ST -->|DONE_WITH_CONCERNS| C[Resolve correctness/scope<br/>or record observation before review]
     ST -->|NEEDS_CONTEXT| CT[Provide context<br/>re-dispatch]
     ST -->|BLOCKED| B{Assess}
     B -->|Provide context| CT

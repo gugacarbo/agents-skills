@@ -130,6 +130,7 @@ def collect_timeline(tasks):
                         "task": event.get("task", task.get("id", "—")),
                         "event": event.get("event", "—"),
                         "try": event.get("try", "—"),
+                        "message": event.get("message", "—"),
                     }
                 )
     events.sort(key=lambda item: (item["timestamp"], item["task"], item["event"]))
@@ -212,16 +213,16 @@ lines.extend(
         "",
         "## Timeline",
         "",
-        "| Timestamp | Task | Event | Try |",
-        "|-----------|------|-------|-----|",
+        "| Timestamp | Task | Event | Try | Message |",
+        "|-----------|------|-------|-----|---------|",
     ]
 )
 
 if timeline:
     for event in timeline:
-        lines.append(f"| {event['timestamp']} | {event['task']} | {event['event']} | {event['try']} |")
+        lines.append(f"| {event['timestamp']} | {event['task']} | {event['event']} | {event['try']} | {event['message']} |")
 else:
-    lines.append("| — | — | no task events logged yet | — |")
+    lines.append("| — | — | no task events logged yet | — | — |")
 
 lines.extend(
     [

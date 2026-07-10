@@ -57,6 +57,25 @@ implemented-by: []
 <focused test command>            # N/N passing
 ```
 
+## Test Strategy
+
+<!-- Decide this before writing the spec. For behavior-changing work, the
+     default TDD mode is: focused test first, observed RED failure, minimum
+     implementation, observed GREEN pass, then refactor. -->
+
+- **Mode:** TDD for behavior changes | conventional coverage | confirmed exception
+- **Guidance file:** `<effective testing-anti-patterns.md path>`
+- **Runner and commands:** `<commands discovered from the repository>`
+- **Main scenarios:**
+
+| ID | Behavior | Test level | Expected evidence |
+| --- | --- | --- | --- |
+| T1 | `<observable behavior>` | unit / integration / e2e | `<RED/GREEN or pass criterion>` |
+
+- **Edge and error scenarios:** `<enumerate the important failure paths>`
+- **Legacy coverage:** `<integration/unit coverage and explicit exclusions>`
+- **TDD exceptions:** `<none, or the user-confirmed scope>`
+
 ## Human review
 
 <!-- What requires human eyes and is NOT in the agent loop. -->

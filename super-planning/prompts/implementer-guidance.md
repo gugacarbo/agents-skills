@@ -39,9 +39,12 @@ Escalate with BLOCKED or NEEDS_CONTEXT status, describing specifically what you'
 
 ## TDD Evidence (When Task Specifies TDD)
 
+- Before writing tests, identify the repository's test runner and read the `testing-anti-patterns.md` path named in the task rules.
 - RED: show the failing test command and its output
 - GREEN: show the passing test command and its output
 - Not just "tests pass" — prove they failed first
+
+When the task is a behavior-changing bug fix, keep the reproducing test as a permanent regression test. When the task is legacy code without coverage, follow the integration/unit coverage and explicit exclusions written in the task.
 
 ## Compressed Output Format
 
@@ -59,6 +62,7 @@ Write your full report to the report file path provided in the dispatch prompt:
 - What you implemented (or what you attempted, if blocked)
 - What you tested and test results
 - TDD Evidence (if required): RED command + failing output, GREEN command + passing output
+- Effective testing guidance path and whether it was consulted
 - Files changed
 - Self-review findings (if any)
 - Any issues or concerns

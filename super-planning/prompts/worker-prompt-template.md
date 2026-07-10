@@ -66,6 +66,8 @@ When present, the script appends a timestamped line to `docs/jobs/[NNNN-<feature
 - Do **not** edit `docs/jobs/[NNNN-<feature-name>]/super-plan.json`. The orchestrator owns that file.
 - Stay within the `filesTouched` and `files` block from your task entry.
 - Do not run the full test suite unless your task entry requires it.
+- If the task rules name a `testing-anti-patterns.md` file, read it before creating mocks, stubs, spies, fakes, fixtures, or test-only helpers.
+- If TDD is required by the task, create and run the focused failing test before changing production behavior.
 - Do NOT read other tasks' briefs or the full plan markdown. You MAY read the spec document referenced in `source.spec` and any files explicitly listed in the task brief.
 
 ## What to Return
@@ -82,8 +84,9 @@ Then write or return the full report for `docs/jobs/[NNNN-<feature-name>]/[Task-
 1. **What you implemented** (or what you attempted, if blocked)
 2. **What you tested** and test results
 3. **TDD Evidence** (if required by the task): RED command + failing output, GREEN command + passing output
-4. **Files changed** (list of created, modified, deleted)
-5. **Self-review findings** (if any)
-6. **Issues or concerns**
+4. **Testing guidance** consulted and any mock/fixture decisions
+5. **Files changed** (list of created, modified, deleted)
+6. **Self-review findings** (if any)
+7. **Issues or concerns**
 
 ---

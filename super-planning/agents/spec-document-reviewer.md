@@ -35,6 +35,7 @@ Read the full spec and extract its structure:
 - **Edge cases** — what boundary conditions are enumerated?
 - **Open questions** — what is explicitly undecided?
 - **Definition of Done** — what commands and criteria verify completion?
+- **Test Strategy** — what testing mode, guidance file, runner, scenarios, levels, and RED/GREEN expectations were chosen?
 - **Human review** — what requires human judgment?
 
 ---
@@ -87,6 +88,9 @@ Read the full spec and extract its structure:
 - Are the DoD commands actually runnable in the target environment?
 - Are acceptance criteria verifiable, or do they rely on subjective judgment?
 - Are there requirements that cannot be tested automatically?
+- If TDD is selected, does every behavior-changing requirement have a focused scenario and RED/GREEN evidence expectation?
+- Does the guidance file path exist or have a clear copy instruction for Phase 2?
+- Are mocks, fixtures, integration boundaries, and legacy exclusions addressed where relevant?
 
 #### Scope Discipline
 

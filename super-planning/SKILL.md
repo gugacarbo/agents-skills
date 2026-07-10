@@ -84,12 +84,16 @@ Want progress stats?
 ## Shared Rules
 
 - **Sequential mode:** one implementer + one reviewer according to `reviewCadence` (defined in [Phase 5 — DISPATCH](phases/05-dispatch.md)). Best for dependent tasks or overlapping files.
-- **Parallel mode:** dispatch 2–4 subagents simultaneously. Review timing is controlled by `reviewCadence`; with `per_task`, each finished task is reviewed immediately. Requires file-level isolation.
+- **Parallel mode:** dispatch 2–4 subagents simultaneously. Review timing is controlled by `reviewCadence`; with `per_task`, launch all finished-task reviewers immediately after the implementer wave returns. Requires file-level isolation.
 - **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it creates `.super-planning/` in the target repo and copies the registry helper stack there (`super-plan.sh`, `render-progress-ledger.sh`, `super-plan.schema.json`); it then writes the first `super-plan.json` plus `progress-ledger.md`. Every later `super-plan.json` mutation must go through that active helper path, which regenerates the ledger immediately. Phase 5 uses the shared logging helper from the same active helper path and Phase 6 materializes each task directory plus task-local artifacts such as `report.md`, `review-package.diff.md`, wrapper `log-task.sh`, and `progress.log`.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 - **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → reviewing → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
 - **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/jobs/0001-auth/super-plan.json, docs/jobs/0001-auth/Task-A-1/log-task.sh, docs/jobs/0001-auth/progress-ledger.md`
+- **Testing strategy** — Phase 2 asks whether TDD is required for behavior changes, records the decision in the spec, and resolves the repository's `testing-anti-patterns.md` guidance file. Later phases propagate that decision and guidance path into task rules, acceptance criteria, dispatch, review, and final verification.
+- **Pre-dispatch conflict gate** — before decomposition, scan task dependencies, global constraints, acceptance criteria, and parallel file ownership for contradictions. Resolve real conflicts in one batched user question before dispatch.
+- **Review package** — record each task's base commit before dispatch and generate its package with `scripts/review-package.sh`; use the same base for fixes and `git merge-base` for the final branch audit.
+- **Review closure** — unresolved `⚠️ Cannot verify` items and plan-mandated reviewer conflicts block completion until the orchestrator verifies them or gets a user decision.
 
 ## Outputs & Conventions
 
@@ -134,5 +138,6 @@ Want progress stats?
 - **Progress-ledger renderer:** [`scripts/render-progress-ledger.sh`](scripts/render-progress-ledger.sh)
 - **Super-plan interface:** [`interfaces/super-plan.schema.json`](interfaces/super-plan.schema.json)
 - **Progress logging helper:** [`scripts/log-task.sh`](scripts/log-task.sh)
+- **Review package helper:** [`scripts/review-package.sh`](scripts/review-package.sh)
 - **Task brief renderer:** [`scripts/render-task-md.sh`](scripts/render-task-md.sh)
 - **All-tasks summarizer:** [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh)

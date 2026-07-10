@@ -14,6 +14,17 @@ Before writing, scan the workspace for existing conventions:
 
 Follow existing patterns. If none exist, use [`templates/spec-template.md`](../templates/spec-template.md).
 
+## Resolve Testing Guidance and TDD
+
+Before presenting the pre-write summary, inspect the target repository for testing guidance:
+
+1. Search for an existing `testing-anti-patterns.md`. If found, use it and do not overwrite it.
+2. If it is absent, identify the repository's documentation/context convention from `AGENTS.md`, existing docs directories, and nearby guidance files.
+3. Copy [`../templates/testing-anti-patterns.md`](../templates/testing-anti-patterns.md) to that convention. Use `docs/context/testing-anti-patterns.md` when no convention exists.
+4. Record the effective guidance path in the spec's **Test Strategy** section and carry it into task rules for tasks that add or modify tests.
+
+Before writing the spec, ask the user whether this spec should use TDD for behavior changes. If TDD is selected, apply it to features, bugs, behavior-changing refactors, and integrations. Documentation, static configuration, and ambiguous tasks require confirmation before being treated as TDD work.
+
 ## Spec File Location
 
 ```
@@ -40,6 +51,7 @@ Key sections:
 - **Edge cases** — enumerated and decided using EARS (`WHEN <trigger> the system MUST <response>`); undecided cases go to Open questions
 - **Open questions** — each item blocks an implementation point; do not improvise
 - **Definition of Done** — runnable commands with binary pass/fail criteria
+- **Test Strategy** — selected TDD mode, guidance path, runner/commands, main scenarios, test levels, and RED/GREEN evidence expectations
 - **Human review** — what requires human eyes and is NOT in the agent loop
 
 ## Pre-Write Approval Gate
@@ -48,7 +60,7 @@ Key sections:
 Do NOT write the spec file until the user has approved the summary. This applies regardless of perceived simplicity.
 </HARD-GATE>
 
-1. **Present a summary:** problem statement (1–2 sentences), goal (1 sentence), key requirements (3–7 bullets), non-goals, architecture approach (1–2 sentences), open questions (if any).
+1. **Present a summary:** problem statement (1–2 sentences), goal (1 sentence), key requirements (3–7 bullets), non-goals, architecture approach (1–2 sentences), testing decision, main test scenarios, and open questions (if any).
 2. **Ask for approval** using [`prompts/pre-write-approval.md`](../prompts/pre-write-approval.md).
 3. **If approved:** first rename the decisions file from `docs/spec-decisions/<feature_name>_decisions.md` to `docs/spec-decisions/NNNN_<feature_name>_decisions.md` using the allocated number, then write the spec file.
 4. **If changes requested:** incorporate feedback and present the summary again.

@@ -15,6 +15,7 @@ RENDER_LEDGER_SCRIPT="$REPO_ROOT/super-planning/scripts/render-progress-ledger.s
 LOG_TASK_SCRIPT="$REPO_ROOT/super-planning/scripts/log-task.sh"
 SUMMARIZE_SCRIPT="$REPO_ROOT/super-planning/scripts/summarize-all-tasks.sh"
 RENDER_TASK_MD_SCRIPT="$REPO_ROOT/super-planning/scripts/render-task-md.sh"
+REVIEW_PACKAGE_SCRIPT="$REPO_ROOT/super-planning/scripts/review-package.sh"
 EXAMPLE_PLAN="$REPO_ROOT/super-planning/docs/example/jobs/0001-auth-middleware/super-plan.json"
 
 fail() {
@@ -35,6 +36,110 @@ assert_contains_file() {
   if ! grep -Fq "$needle" "$path"; then
     fail "expected $path to contain: $needle"
   fi
+}
+
+test_review_package_preserves_multiple_commits() {
+  local tmp repo base head output
+  tmp=$(mktemp -d)
+  repo="$tmp/repo"
+  output="$tmp/review.diff"
+  mkdir -p "$repo"
+
+  git -C "$repo" init -q
+  git -C "$repo" config user.email test@example.com
+  git -C "$repo" config user.name "Review Package Test"
+  printf 'initial\n' > "$repo/first.txt"
+  git -C "$repo" add first.txt
+  git -C "$repo" commit -qm initial
+  base=$(git -C "$repo" rev-parse HEAD)
+
+  printf 'first change\n' >> "$repo/first.txt"
+  git -C "$repo" add first.txt
+  git -C "$repo" commit -qm "first task commit"
+  printf 'second change\n' > "$repo/second.txt"
+  git -C "$repo" add second.txt
+  git -C "$repo" commit -qm "second task commit"
+  head=$(git -C "$repo" rev-parse HEAD)
+
+  (cd "$repo" && "$REVIEW_PACKAGE_SCRIPT" "$base" "$head" "$output") >/dev/null
+
+  assert_contains_file "first task commit" "$output"
+  assert_contains_file "second task commit" "$output"
+  assert_contains_file "first change" "$output"
+  assert_contains_file "second change" "$output"
+}
+
+test_review_package_rejects_invalid_ref() {
+  local tmp repo output
+  tmp=$(mktemp -d)
+  repo="$tmp/repo"
+  output="$tmp/review.diff"
+  mkdir -p "$repo"
+  git -C "$repo" init -q
+  git -C "$repo" config user.email test@example.com
+  git -C "$repo" config user.name "Review Package Test"
+  printf 'initial\n' > "$repo/file.txt"
+  git -C "$repo" add file.txt
+  git -C "$repo" commit -qm initial
+
+  if (cd "$repo" && "$REVIEW_PACKAGE_SCRIPT" missing-ref HEAD "$output") >"$tmp/output.log" 2>&1; then
+    fail "expected review-package.sh to reject an invalid ref"
+  fi
+
+  assert_contains_file "bad BASE: missing-ref" "$tmp/output.log"
+  if [ -e "$output" ]; then
+    fail "review package was created after invalid ref"
+  fi
+
+  if (cd "$repo" && "$REVIEW_PACKAGE_SCRIPT" HEAD missing-ref "$output") >"$tmp/head-output.log" 2>&1; then
+    fail "expected review-package.sh to reject an invalid HEAD"
+  fi
+
+  assert_contains_file "bad HEAD: missing-ref" "$tmp/head-output.log"
+}
+
+test_review_package_uses_full_hashes_for_default_output() {
+  local tmp repo base head output full_base full_head
+  tmp=$(mktemp -d)
+  repo="$tmp/repo"
+  mkdir -p "$repo"
+
+  git -C "$repo" init -q
+  git -C "$repo" config user.email test@example.com
+  git -C "$repo" config user.name "Review Package Test"
+  printf 'initial\n' > "$repo/file.txt"
+  git -C "$repo" add file.txt
+  git -C "$repo" commit -qm initial
+  base=$(git -C "$repo" rev-parse HEAD)
+  printf 'change\n' >> "$repo/file.txt"
+  git -C "$repo" add file.txt
+  git -C "$repo" commit -qm change
+  head=$(git -C "$repo" rev-parse HEAD)
+  full_base=$(git -C "$repo" rev-parse "$base")
+  full_head=$(git -C "$repo" rev-parse "$head")
+
+  output=$(cd "$repo" && "$REVIEW_PACKAGE_SCRIPT" "$base" "$head")
+  output=${output#wrote }
+  output=${output%%:*}
+  assert_exists "$output"
+  case "$output" in
+    *"$full_base..$full_head.diff") : ;;
+    *) fail "default review package path did not use full hashes: $output" ;;
+  esac
+}
+
+test_testing_guidance_and_spec_strategy_are_integrated() {
+  local template evals
+  template="$REPO_ROOT/super-planning/templates/testing-anti-patterns.md"
+  evals="$REPO_ROOT/super-planning/evals/evals.json"
+
+  assert_exists "$template"
+  assert_exists "$evals"
+  assert_contains_file "## Test Strategy" "$REPO_ROOT/super-planning/templates/spec-template.md"
+  assert_contains_file "testing-anti-patterns.md" "$REPO_ROOT/super-planning/phases/02-spec.md"
+  assert_contains_file "Should this spec use TDD" "$REPO_ROOT/super-planning/prompts/pre-write-approval.md"
+  assert_contains_file "TDD required for this behavior-changing task" "$REPO_ROOT/super-planning/phases/04-decompose.md"
+  assert_contains_file "testing-anti-patterns.md" "$REPO_ROOT/super-planning/prompts/implementer-guidance.md"
 }
 
 test_init_generates_valid_registry_and_rich_empty_ledger() {
@@ -272,7 +377,8 @@ test_render_progress_ledger_includes_timeline_and_requirements() {
   assert_contains_file "## Tasks" "$ledger"
   assert_contains_file "| Task-A-1 | Definir tipos e interfaces de autenticação | general | A | foundation | [DONE] completed | — |" "$ledger"
   assert_contains_file "## Timeline" "$ledger"
-  assert_contains_file "| 2026-07-04T14:10:00Z | Task-A-1 | completed | 1 |" "$ledger"
+  assert_contains_file "| 2026-07-04T14:10:00Z | Task-A-1 | completed | 1 | Review clean; accepted by orchestrator |" "$ledger"
+  assert_contains_file "Review clean; accepted by orchestrator" "$ledger"
   assert_contains_file "## Requirements Coverage" "$ledger"
   assert_contains_file "| REQ-001: Validar token JWT do header Authorization: Bearer <token> | [DONE] completed | Task-B-1 |" "$ledger"
 }
@@ -678,6 +784,15 @@ test_render_task_md_invalid_task_id_exits_with_error() {
 }
 
 main() {
+  if [ "${SUPER_PLANNING_REVIEW_PACKAGE_ONLY:-0}" = "1" ]; then
+    test_review_package_preserves_multiple_commits
+    test_review_package_rejects_invalid_ref
+    test_review_package_uses_full_hashes_for_default_output
+    printf 'PASS: review-package.sh\n'
+    return 0
+  fi
+
+  test_testing_guidance_and_spec_strategy_are_integrated
   test_init_generates_valid_registry_and_rich_empty_ledger
   test_update_rejects_invalid_status_without_mutating_file
   test_update_accepts_cancelled_task_status
