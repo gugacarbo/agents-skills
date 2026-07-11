@@ -249,6 +249,24 @@ if requirements:
 else:
     lines.append("| — | no requirements defined yet | — |")
 
+lines.extend(
+    [
+        "",
+        "## Registry Parameters",
+        "",
+        "Every parameter from `super-plan.json` is preserved below. This section is generated directly from the registry so the ledger remains a complete, auditable representation of the plan configuration and task data.",
+        "",
+        "<details>",
+        "<summary>Complete <code>super-plan.json</code></summary>",
+        "",
+        "````json",
+        json.dumps(payload, indent=2, ensure_ascii=False),
+        "````",
+        "",
+        "</details>",
+    ]
+)
+
 with output_path.open("w", encoding="utf-8") as fh:
     fh.write("\n".join(lines))
     fh.write("\n")

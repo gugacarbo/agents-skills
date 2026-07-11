@@ -16,7 +16,6 @@ LOG_TASK_SCRIPT="$REPO_ROOT/super-planning/scripts/log-task.sh"
 SUMMARIZE_SCRIPT="$REPO_ROOT/super-planning/scripts/summarize-all-tasks.sh"
 RENDER_TASK_MD_SCRIPT="$REPO_ROOT/super-planning/scripts/render-task-md.sh"
 REVIEW_PACKAGE_SCRIPT="$REPO_ROOT/super-planning/scripts/review-package.sh"
-EXAMPLE_PLAN="$REPO_ROOT/super-planning/docs/example/jobs/0001-auth-middleware/super-plan.json"
 
 fail() {
   printf 'FAIL: %s\n' "$1" >&2
@@ -36,6 +35,99 @@ assert_contains_file() {
   if ! grep -Fq "$needle" "$path"; then
     fail "expected $path to contain: $needle"
   fi
+}
+
+create_test_plan_fixture() {
+  local registry="$1"
+  local task_directory
+  task_directory="docs/jobs/$(basename "$(dirname "$registry")")"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-auth-middleware \
+    --feature-name auth-middleware \
+    --spec docs/specs/0001-auth-spec.md \
+    --plan docs/plans/0001-auth.md \
+    --output "$registry" \
+    --task-directory "$task_directory" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
+
+  python3 - "$registry" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+registry = Path(sys.argv[1])
+payload = json.loads(registry.read_text(encoding="utf-8"))
+payload.update({
+    "goal": "Implement authentication middleware",
+    "architectureSummary": "Shared middleware validates bearer tokens before protected routes.",
+    "techStack": ["TypeScript", "Cloudflare Workers"],
+    "agents": {
+        "general": {"model": "gpt-5", "agent": "general"},
+        "deep": {"model": "gpt-5", "agent": "deep"},
+        "quick": {"model": "gpt-5-mini", "agent": "quick"},
+    },
+    "globalConstraints": ["Do not expose secrets"],
+    "fileStructure": [{"path": "src/middleware/auth.ts", "ownerTask": "Task-B-1", "notes": "Protected route middleware"}],
+    "rules": ["Use the repository test runner"],
+    "requirementsChecklist": [{
+        "id": "REQ-001",
+        "title": "Validar token JWT do header Authorization: Bearer <token>",
+        "source": "spec",
+        "status": "completed",
+        "acceptanceCriteria": ["Reject missing tokens"],
+        "coveredByTasks": ["Task-B-1"],
+        "notes": [],
+    }],
+})
+
+def task(task_id, title, profile, batch, layer, status="completed", dependencies=None, files=None):
+    return {
+        "id": task_id,
+        "title": title,
+        "description": "Implement and verify this task.",
+        "status": status,
+        "tryCount": 1,
+        "maxTries": 3,
+        "task_profile": profile,
+        "batch": batch,
+        "layer": layer,
+        "reportFile": f"{payload['taskDirectory']}/{task_id}/report.md",
+        "reviewPackage": f"{payload['taskDirectory']}/{task_id}/review-package.diff.md",
+        "progressLog": f"{payload['taskDirectory']}/{task_id}/progress.log",
+        "logTaskScript": f"{payload['taskDirectory']}/{task_id}/log-task.sh",
+        "baseCommit": "pending",
+        "dependencies": dependencies or [],
+        "acceptanceCriteria": ["Focused tests pass"],
+        "requirements": ["REQ-001"] if task_id == "Task-B-1" else [],
+        "rules": ["Keep the middleware reusable"],
+        "steps": [{"order": 1, "title": "Implement", "description": "Write the implementation.", "command": "npm test", "expectedResult": "Tests pass", "codeExample": "const result = true;"}],
+        "filesTouched": files or [],
+        "files": {"created": [], "modified": files or [], "deleted": []},
+        "notes": [],
+    }
+
+payload["tasks"] = [
+    task("Task-A-1", "Definir tipos e interfaces de autenticação", "general", "A", "foundation"),
+    task("Task-B-1", "Implementar middleware requireAuth", "deep", "B", "core", dependencies=["Task-A-1"], files=["src/middleware/auth.ts"]),
+    task("Task-C-1", "Adicionar testes de autenticação", "quick", "C", "surface", dependencies=["Task-B-1"]),
+    task("Task-D-1", "Integrar middleware nas rotas", "general", "D", "surface", dependencies=["Task-B-1"]),
+    task("Task-E-1", "Revisar documentação", "quick", "E", "final", dependencies=["Task-D-1"]),
+]
+payload["tasks"][0]["filesTouched"] = ["src/types/auth.ts"]
+payload["tasks"][0]["files"]["created"] = ["src/types/auth.ts"]
+registry.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+root = registry.parent
+log_dir = root / "Task-A-1"
+log_dir.mkdir(parents=True, exist_ok=True)
+(log_dir / "progress.log").write_text(
+    '{"timestamp":"2026-07-04T14:10:00Z","task":"Task-A-1","event":"completed","try":1,"message":"Review clean; accepted by orchestrator"}\n',
+    encoding="utf-8",
+)
+PY
 }
 
 test_review_package_preserves_multiple_commits() {
@@ -175,12 +267,45 @@ test_init_generates_valid_registry_and_rich_empty_ledger() {
   assert_contains_file "no requirements defined yet" "$ledger"
 }
 
+test_render_progress_ledger_includes_complete_registry_snapshot() {
+  local tmp registry ledger
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-sample/super-plan.json"
+  ledger="$tmp/docs/jobs/0001-sample/progress-ledger.md"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$registry" \
+    --worktree-enabled true \
+    --execution-mode subagent-driven \
+    --review-cadence per_task >/dev/null
+
+  "$SUPER_PLAN_SCRIPT" update \
+    --input "$registry" \
+    --set 'goal=Keep every registry parameter visible in the ledger' \
+    --set 'agents.quick.model=gpt-5-mini' \
+    --set 'worktree.enabled=false' >/dev/null
+
+  assert_contains_file "## Registry Parameters" "$ledger"
+  assert_contains_file '"createdAt":' "$ledger"
+  assert_contains_file '"goal": "Keep every registry parameter visible in the ledger"' "$ledger"
+  assert_contains_file '"executionMode": "subagent-driven"' "$ledger"
+  assert_contains_file '"reviewCadence": "per_task"' "$ledger"
+  assert_contains_file '"featureBranch": "0001-sample"' "$ledger"
+  assert_contains_file '"enabled": false' "$ledger"
+  assert_contains_file '"requirementsChecklist": []' "$ledger"
+  assert_contains_file '"tasks": []' "$ledger"
+}
+
 test_update_rejects_invalid_status_without_mutating_file() {
   local tmp registry before
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
   before=$(cat "$registry")
 
   if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=banana >"$tmp/output.log" 2>&1; then
@@ -200,7 +325,7 @@ test_update_accepts_cancelled_task_status() {
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   schema="$REPO_ROOT/super-planning/interfaces/super-plan.schema.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
 
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=cancelled >/dev/null
 
@@ -231,7 +356,7 @@ test_update_accepts_reviewing_task_status() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
 
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set "tasks[Task-A-1].baseCommit=$(git -C "$REPO_ROOT" rev-parse HEAD)" >/dev/null
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=reviewing >/dev/null
@@ -245,7 +370,7 @@ test_active_task_requires_base_commit() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
   python3 - "$registry" <<'PY'
 import json
 import sys
@@ -271,7 +396,7 @@ test_update_rejects_invalid_task_profile_without_mutating_file() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
   before=$(cat "$registry")
 
   if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].task_profile=banana >"$tmp/output.log" 2>&1; then
@@ -308,7 +433,7 @@ test_errors_are_emitted_as_json() {
   local registry
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
   if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=banana >"$tmp/output.log" 2>&1; then
     fail "expected invalid status update to fail"
   fi
@@ -392,8 +517,7 @@ test_render_progress_ledger_includes_timeline_and_requirements() {
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   ledger="$tmp/progress-ledger.md"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
-  cp -R "$REPO_ROOT/super-planning/docs/example/jobs/0001-auth-middleware"/Task-* "$tmp/docs/jobs/0001-auth-middleware/"
+  create_test_plan_fixture "$registry"
 
   "$RENDER_LEDGER_SCRIPT" --input "$registry" --output "$ledger" >/dev/null
 
@@ -625,8 +749,7 @@ test_summarize_all_tasks_with_example_data() {
   tmp=$(mktemp -d)
 
   mkdir -p "$tmp/docs/jobs/0001-auth-middleware"
-  cp "$EXAMPLE_PLAN" "$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
-  cp -R "$REPO_ROOT/super-planning/docs/example/jobs/0001-auth-middleware"/Task-* "$tmp/docs/jobs/0001-auth-middleware/"
+  create_test_plan_fixture "$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
 
   local output
   output=$("$SUMMARIZE_SCRIPT" --base-dir "$tmp/docs/jobs" 2>&1) || fail "summarize-all-tasks.sh with example data failed"
@@ -662,7 +785,7 @@ test_render_task_md_full_plan() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
 
   output=$("$RENDER_TASK_MD_SCRIPT" --input "$registry" 2>&1) || fail "render-task-md.sh --input failed"
 
@@ -695,7 +818,7 @@ test_render_task_md_single_task() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
 
   output=$("$RENDER_TASK_MD_SCRIPT" --input "$registry" --task-id Task-B-1 --output "$tmp/task-b-brief.md" 2>&1) || fail "render-task-md.sh --task-id failed"
 
@@ -766,7 +889,7 @@ test_update_set_requirement_status() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
 
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set 'requirementsChecklist[REQ-001].status=completed' >/dev/null
 
@@ -816,7 +939,7 @@ test_render_task_md_invalid_task_id_exits_with_error() {
   tmp=$(mktemp -d)
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
-  cp "$EXAMPLE_PLAN" "$registry"
+  create_test_plan_fixture "$registry"
 
   if "$RENDER_TASK_MD_SCRIPT" --input "$registry" --task-id Task-Z-9999 --output "$tmp/nowhere.md" 2>/dev/null; then
     fail "expected render-task-md.sh with invalid --task-id to fail"
@@ -834,6 +957,7 @@ main() {
 
   test_testing_guidance_and_spec_strategy_are_integrated
   test_init_generates_valid_registry_and_rich_empty_ledger
+  test_render_progress_ledger_includes_complete_registry_snapshot
   test_update_rejects_invalid_status_without_mutating_file
   test_update_accepts_cancelled_task_status
   test_update_accepts_reviewing_task_status
