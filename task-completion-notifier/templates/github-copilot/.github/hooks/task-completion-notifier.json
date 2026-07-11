@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "python3 __RUNTIME_ROOT__/.task-completion-notifier/scripts/hook-dispatch.py --agent github-copilot --event agentStop --state-dir __RUNTIME_ROOT__/.task-completion-notifier/state --notifier __RUNTIME_ROOT__/.task-completion-notifier/scripts/notify.sh",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}
