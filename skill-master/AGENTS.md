@@ -1,16 +1,16 @@
-# skill-creator KNOWLEDGE BASE
+# skill-master KNOWLEDGE BASE
 
 **Generated:** 2026-06-11 09:55:28 -0300
 **Commit:** 1e1ebb6
 
 ## OVERVIEW
 
-`skill-creator` is a local skill for drafting, evaluating, benchmarking, and improving Codex/Claude skills. It is more complex than the tracked `commit-changes` skill and contains Python tooling, agent prompt templates, references, assets, and an HTML eval viewer.
+`skill-master` is a local skill for drafting, evaluating, benchmarking, and improving Codex/Claude skills. It is more complex than the tracked `commit-changes` skill and contains Python tooling, agent prompt templates, references, assets, and an HTML eval viewer.
 
 ## STRUCTURE
 
 ```
-skill-creator/
+skill-master/
 ├── SKILL.md                 # workflow for creating/improving skills
 ├── dev/tests.sh             # focused integration checks for the unified workflow
 ├── agents/                  # analyzer/comparator/grader prompts
@@ -53,9 +53,9 @@ skill-creator/
 ## COMMANDS
 
 ```sh
-rtk python3 skill-creator/scripts/quick_validate.py <skill-path>
-rtk python3 skill-creator/eval-viewer/generate_prompt_review.py --help
-rtk python3 skill-creator/scripts/run_eval.py --help
-rtk python3 skill-creator/eval-viewer/generate_review.py --help
-rtk bash skill-creator/dev/tests.sh
+rtk python3 skill-master/scripts/quick_validate.py <skill-path>
+rtk python3 skill-master/eval-viewer/generate_prompt_review.py --help
+rtk python3 skill-master/scripts/run_eval.py --help
+rtk python3 skill-master/eval-viewer/generate_review.py --help
+rtk bash skill-master/dev/tests.sh
 ```

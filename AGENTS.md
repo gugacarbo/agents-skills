@@ -17,7 +17,8 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 ├── find-skills/           # local skill directory, ignored by git allowlist
 ├── init-deep/             # local skill directory, ignored by git allowlist
 ├── find-docs/             # documentation retrieval skill
-├── skill-creator/         # complex skill authoring and evaluation workflow
+├── skill-master/          # complex skill authoring and evaluation workflow
+├── task-completion-notifier/ # completion notification hook and templates
 ├── subagent-driven-development/ # sequential implementation workflow
 └── super-planning/        # tracked planning/orchestration skill
     ├── docs/              # reference docs: workflows, decision flow, examples
@@ -46,7 +47,8 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
 | Work on init-deep skill       | `init-deep/SKILL.md`                        | Unified skill with --light flag for telegraphic mode.            |
 | Work on documentation retrieval | `find-docs/SKILL.md`                       | Current library and service documentation lookup workflow.       |
-| Work on skill authoring       | `skill-creator/`                            | Authoring, evaluation, and discipline references plus dev tests. |
+| Work on skill authoring       | `skill-master/`                             | Authoring, evaluation, and discipline references plus dev tests. |
+| Work on completion notifier  | `task-completion-notifier/`                | Notification scripts, hook adapters, templates, and runtime tests. |
 | Work on subagent development  | `subagent-driven-development/`             | Sequential implementation prompts and task helper scripts.      |
 | Work on documentation lookup guidance | `super-planning/prompts/find-docs.md` | Phase 3 lookup workflow for new or version-sensitive libraries. |
 

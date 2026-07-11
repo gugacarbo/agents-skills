@@ -1,9 +1,9 @@
 ---
-name: skill-creator
+name: skill-master
 description: Use when creating, editing, evaluating, or preparing reusable agent skills for deployment, including skill discovery, test scenarios, benchmark results, or triggering accuracy.
 ---
 
-# Skill Creator
+# Skill Master
 
 Create skills through a short authoring loop and a reproducible evaluation loop.
 The main document is a router. Read only the reference that matches the current

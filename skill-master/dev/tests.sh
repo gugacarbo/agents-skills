@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-skill_root="$repo_root/skill-creator"
+skill_root="$repo_root/skill-master"
 
 assert_contains() {
   local file=$1
@@ -62,4 +62,4 @@ assert validated["evals"][0]["pressures"] == ["deadline"]
 assert validated["evals"][0]["rationalizations"] == ["The change is trivial"]
 PY
 
-printf 'skill-creator integration checks passed\n'
+printf 'skill-master integration checks passed\n'

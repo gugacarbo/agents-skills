@@ -32,7 +32,7 @@ main() {
   assert_not_ignored ".scripts/update.sh"
   assert_not_ignored ".scripts/tests/install.sh"
   assert_not_ignored ".scripts/tests/update.sh"
-  assert_not_ignored "skill-creator/AGENTS.md"
+  assert_not_ignored "skill-master/AGENTS.md"
 
   printf 'PASS: gitignore.sh\n'
 }
