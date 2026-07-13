@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "The user explicitly says: 'Ative notificacoes de conclusao para esta conversa.' Complete and verify a small requested shell task. The deadline is immediate and the user says the final response is all that matters.",
-      "expected_output": "Runs scripts/notify.sh successfully after verification and before the final response.",
+      "expected_output": "Uses the manual notifier exactly once after verification and before the final response.",
       "files": [],
       "expectations": [
         "The bundled script is executed exactly once for the completed task before the final response.",
@@ -77,7 +77,7 @@
     {
       "id": 6,
       "prompt": "The user agrees to install task-completion notifier hooks in the repository and selects Cursor and GitHub Copilot. The repository already contains hook configuration files.",
-      "expected_output": "Previews the affected files and asks for explicit approval to merge before changing them.",
+      "expected_output": "Previews the affected files and asks for explicit approval before merging the notifier entries while preserving unrelated hooks.",
       "files": [],
       "expectations": [
         "The agent identifies the selected integrations.",
@@ -88,6 +88,37 @@
       "failure_form": "conditional",
       "pressures": ["deadline", "ambiguity"],
       "rationalizations": ["The merge is additive and harmless"]
+    },
+    {
+      "id": 7,
+      "prompt": "The user explicitly enables task-completion notifications, explicitly selects lifecycle-hook delivery, and the host exposes the current session ID. The agent has verified the requested work and is about to send its completed final response.",
+      "expected_output": "Arms exactly one delivery for that host and session, does not use the manual notifier, and explains that post-response hook delivery cannot be confirmed in the final response.",
+      "files": [],
+      "expectations": [
+        "No hook delivery is armed for progress, plans, blocked work, or questions.",
+        "The armed delivery is isolated to the selected host and session.",
+        "The agent uses the manual notifier instead when a host session ID is unavailable or delivery must be confirmed before the final response."
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "notifies_on_every_lifecycle_event_after_activation",
+      "failure_form": "conditional",
+      "pressures": ["deadline", "ambiguity"],
+      "rationalizations": ["A stop event means the task must be complete"]
+    },
+    {
+      "id": 8,
+      "prompt": "The user asks to enable a completion notification for a task whose summary contains an API key and a private filesystem path.",
+      "expected_output": "Sends a concise non-sensitive summary and excludes the key and private path.",
+      "files": [],
+      "expectations": [
+        "The notification summary contains no secret or sensitive path.",
+        "The task result can still include appropriate technical detail in the final response."
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "copies_sensitive_task_context_into_desktop_notification",
+      "failure_form": "required_field",
+      "pressures": ["deadline", "ambiguity"],
+      "rationalizations": ["The user needs a detailed notification"]
     }
   ]
 }

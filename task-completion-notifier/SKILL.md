@@ -1,76 +1,87 @@
 ---
 name: task-completion-notifier
-description: Use only when the user explicitly asks to enable task-completion system notifications. After completing and verifying each requested task, run the bundled notifier before the final response; do not infer this mode from a task or send notifications for progress updates.
-compatibility: Ubuntu desktop only in v1; requires notify-send and an active graphical D-Bus session.
+description: Use only when the user explicitly asks to be notified on the desktop or system when a task finishes, including phrases such as "me avise quando terminar", "manda uma notificacao", "notify me when done", or "desktop alert on completion". Send one notification attempt only after verified completion; never infer this preference or notify plans, progress, questions, cancellations, or blocked work.
+metadata:
+  compatibility: Python 3.9+; Linux with notify-send and a graphical D-Bus session, macOS with osascript, or Windows with PowerShell toast support.
 ---
 
 # Task Completion Notifier
 
-Activate this skill only after the user explicitly requests completion
-notifications. Do not activate it from an implied preference, a task title, or
-an earlier unrelated request.
+Activate only for the task or conversation scope the user explicitly selected.
+If the user does not specify a scope, notify once for the current request only.
 
-## Hook installation
+## Delivery contract
 
-At the start of an explicitly activated use, ask whether the user wants to
-install repository hooks. If they decline, continue with the manual workflow
-below and do not modify the repository.
-
-If they accept, ask which integrations to install: Codex, GitHub Copilot,
-OpenCode, Cursor, or any combination. Preview the selected changes with:
+Use **manual delivery** by default. After verification and before the completed
+final response, make one attempt:
 
 ```sh
-sh scripts/install-hooks.sh --repo "<repository-root>" --targets "<comma-separated-targets>"
+python3 "<skill-root>/scripts/notify.py" \
+  --message "<concise, non-sensitive completed-task summary>"
 ```
 
-When the preview reports an existing hook configuration or marketplace entry,
-show the affected files and ask for explicit approval to merge. Only after the
-user approves, rerun the same command with `--approve-merge`. Never overwrite
-an existing runtime or unrelated hook entry automatically.
+Wait for the command. If it fails, say that no OS notification was delivered
+and include the error while still returning the task result unless delivery was
+an explicit completion requirement.
 
-Installed templates all call the repository-local shared dispatcher at
-`.task-completion-notifier/scripts/hook-dispatch.py`; they must never call
-`notify-send` directly.
-
-## When to notify
-
-A task is complete only when the requested work and its appropriate verification
-are complete. Progress updates, partial results, plans, and blocked work are
-not completed tasks.
-
-Before sending the final response for a completed task, run:
+Use a **lifecycle hook** only when the user explicitly requested installation
+and the selected host provides the current session ID. Do not send a manual
+notification in this mode. Arm a delivery after verification:
 
 ```sh
-sh scripts/notify.sh --message "<concise completed-task summary>"
+python3 "<skill-root>/scripts/session-state.py" arm \
+  --repo-root "<repository-root>" \
+  --agent "<github-copilot|cursor|opencode>" \
+  --session-id "<host-session-id>" \
+  --delivery-id "<stable-id-for-this-completed-task>" \
+  --message "<concise, non-sensitive completed-task summary>"
 ```
 
-Use `--title` only when a task-specific title is clearer. Wait for the command
-to finish successfully before the final response.
+Hook delivery is **at-least-once until acknowledgment**. A crash after the OS
+notification but before its acknowledgment can produce a later duplicate; do
+not claim confirmed delivery in the final response. If confirmation before the
+final response matters, use manual delivery instead.
 
-When hooks are installed, first activate the shared state before completing the
-task:
+## Installation and lifecycle management
+
+Ask whether the user wants repository or supported user-level integration;
+never create configuration without consent. Preview first:
 
 ```sh
-python3 .task-completion-notifier/scripts/session-state.py activate \
-  --state-dir .task-completion-notifier/state \
-  --session-id default
+sh "<skill-root>/scripts/install-hooks.sh" \
+  --repo "<repository-root>" --targets "<comma-separated-targets>"
 ```
 
-The installed lifecycle hook then calls the dispatcher automatically when the
-agent reaches its completion event. Deactivate the same `default` session when
-the user explicitly turns notification mode off.
+Show listed conflicts, obtain explicit approval, then rerun with `--apply`.
+Use `--scope user --targets copilot` for the supported Copilot user-level
+installation. Cursor and GitHub Copilot hook entries are merged; modified
+dedicated runtime, OpenCode, or Codex files are never overwritten.
 
-## Failure contract
+```sh
+# Safely update an unmodified managed installation.
+sh "<skill-root>/scripts/install-hooks.sh" \
+  --repo "<repository-root>" --targets "<targets>" --update --apply
 
-If the notifier exits non-zero, tell the user that the operating-system
-notification was not delivered and include the command error. Do not claim that
-the notification was sent. Still provide the task result unless the user made
-notification delivery a completion requirement.
+# Diagnose dependencies, managed version, and selected configuration.
+sh "<skill-root>/scripts/install-hooks.sh" \
+  --repo "<repository-root>" --targets "<targets>" --doctor
 
-## Boundaries
+# Preview removal; add --purge-state only when pending local state should go too.
+sh "<skill-root>/scripts/install-hooks.sh" \
+  --repo "<repository-root>" --targets "<targets>" --uninstall
+```
 
-- The v1 script supports Ubuntu desktop only.
-- Do not run the script for an intermediate commentary update.
-- Do not run it after the final response.
-- Do not replace the script with a hand-written notification command; the
-  bundled dispatcher owns platform selection and capability checks.
+Pending summaries live under `XDG_STATE_HOME` (or `~/.local/state`) and have a
+one-hour expiry. The Codex target is a manual skill plugin, not a lifecycle
+hook: after registration in a repository marketplace, install or reinstall it
+there to activate changes.
+
+## Privacy and boundaries
+
+- Use a generic completion summary; never include secrets, tokens, private
+  prompts, or sensitive paths. The notifier also shortens messages and redacts
+  common token and user-path patterns.
+- Never invoke `notify-send`, `osascript`, or PowerShell directly; use the
+  bundled notifier.
+- Do not notify a cancelled or blocked task, even if the user previously opted
+  into notifications.

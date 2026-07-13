@@ -34,5 +34,6 @@ coverage/
 # Cache
 .cache/
 *.tsbuildinfo
+__pycache__/
 
 .super-planning
