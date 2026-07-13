@@ -22,6 +22,7 @@ RUNTIME = (
     "scripts/hook-dispatch.py",
 )
 MANIFEST_NAME = "manifest.json"
+CODEX_SKILL_TEMPLATE = SOURCE / "templates/codex-skill/SKILL.md.template"
 
 
 def die(message):
@@ -89,6 +90,10 @@ def rendered_text(source, root, runtime_root):
     value = source.read_text(encoding="utf-8")
     for placeholder, replacement in replacements(root, runtime_root).items():
         value = value.replace(placeholder, replacement)
+    if source.name == "plugin.json" and source.parent.name == ".codex-plugin":
+        manifest = json.loads(value)
+        manifest["skills"] = "./skills/"
+        value = json.dumps(manifest, indent=2) + "\n"
     return value
 
 
@@ -116,8 +121,44 @@ def rendered_tree_matches(template_root, destination_root, root, runtime_root):
     )
 
 
+def rendered_tree_is_managed(template_root, destination_root, root, manifest):
+    if not manifest:
+        return False
+    return all(
+        managed_matches(destination, str(destination.relative_to(root)), manifest)
+        for source in template_root.rglob("*")
+        if source.is_file()
+        for destination in (rendered_destination(source, template_root, destination_root),)
+    )
+
+
 def rendered_file_matches(template, destination, root, runtime_root):
     return destination.is_file() and destination.read_text(encoding="utf-8") == rendered_text(template, root, runtime_root)
+
+
+def codex_skill_destination(destination_root):
+    return destination_root / "skills/task-completion-notifier/SKILL.md"
+
+
+def render_codex_plugin(destination_root, root, runtime_root):
+    render_tree(SOURCE / "templates/codex-local", destination_root, root, runtime_root)
+    destination = codex_skill_destination(destination_root)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(rendered_text(CODEX_SKILL_TEMPLATE, root, runtime_root), encoding="utf-8")
+
+
+def rendered_codex_plugin_matches(destination_root, root, runtime_root):
+    return (
+        rendered_tree_matches(SOURCE / "templates/codex-local", destination_root, root, runtime_root)
+        and rendered_file_matches(CODEX_SKILL_TEMPLATE, codex_skill_destination(destination_root), root, runtime_root)
+    )
+
+
+def rendered_codex_plugin_is_managed(destination_root, root, manifest):
+    return (
+        rendered_tree_is_managed(SOURCE / "templates/codex-local", destination_root, root, manifest)
+        and managed_matches(codex_skill_destination(destination_root), str(codex_skill_destination(destination_root).relative_to(root)), manifest)
+    )
 
 
 def hook_entry(template, root, runtime_root, event):
@@ -253,7 +294,7 @@ def planned_conflicts(args, root, runtime_root, destinations, marketplace, manif
             unsafe.append(target)
     if args.scope == "repo" and "codex" in args.targets:
         target = destinations["codex"]
-        if target.exists() and not rendered_tree_matches(SOURCE / "templates/codex-local", target, root, runtime_root) and not managed_matches(target / ".codex-plugin/plugin.json", "plugins/task-completion-notifier/.codex-plugin/plugin.json", manifest):
+        if target.exists() and not rendered_codex_plugin_matches(target, root, runtime_root) and not rendered_codex_plugin_is_managed(target, root, manifest):
             conflicts.append(target)
             unsafe.append(target)
     if args.scope == "repo" and "opencode" in args.targets:
@@ -283,7 +324,7 @@ def install_or_update(args, root, runtime_root, destinations, marketplace, manif
         if not destination.exists() or destination.read_bytes() != source.read_bytes():
             shutil.copy2(source, destination)
     if args.scope == "repo" and "codex" in args.targets:
-        render_tree(SOURCE / "templates/codex-local", destinations["codex"], root, runtime_root)
+        render_codex_plugin(destinations["codex"], root, runtime_root)
         data = load_json(marketplace) if marketplace.exists() else {"name": "repository", "interface": {"displayName": "Repository plugins"}, "plugins": []}
         if not any(isinstance(item, dict) and item.get("name") == "task-completion-notifier" for item in data["plugins"]):
             data["plugins"].append(marketplace_entry())
@@ -299,7 +340,7 @@ def install_or_update(args, root, runtime_root, destinations, marketplace, manif
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(rendered_text(SOURCE / "templates/opencode/.opencode/plugin/task-completion-notifier.ts", root, runtime_root), encoding="utf-8")
 
-    files = {}
+    files = dict(manifest.get("files", {})) if manifest else {}
     for relative in RUNTIME:
         record_file(files, runtime_root, runtime_root / relative)
     if args.scope == "repo":
@@ -314,7 +355,8 @@ def install_or_update(args, root, runtime_root, destinations, marketplace, manif
                     if path.is_file():
                         record_file(files, root, path)
     manifest_path = runtime_root / MANIFEST_NAME
-    save_json(manifest_path, {"schema": 1, "version": VERSION, "scope": args.scope, "repository": str(root), "files": files})
+    managed_targets = sorted(set(manifest.get("targets", [])) | set(args.targets)) if manifest else sorted(args.targets)
+    save_json(manifest_path, {"schema": 1, "version": VERSION, "scope": args.scope, "repository": str(root), "targets": managed_targets, "files": files})
 
 
 def uninstall(args, root, runtime_root, destinations, marketplace, manifest):
@@ -349,7 +391,14 @@ def uninstall(args, root, runtime_root, destinations, marketplace, manifest):
                 data["plugins"] = kept
                 save_json(marketplace, data)
                 changed.append(marketplace)
-    if runtime_root.exists():
+    remaining_targets = set(manifest.get("targets", [])) - set(args.targets) if manifest else set()
+    if runtime_root.exists() and remaining_targets:
+        files = dict(manifest["files"])
+        for prefix in ("plugins/task-completion-notifier/", ".opencode/plugin/task-completion-notifier.ts"):
+            if (prefix.startswith("plugins") and "codex" in args.targets) or (prefix.startswith(".opencode") and "opencode" in args.targets):
+                files = {key: value for key, value in files.items() if not key.startswith(prefix)}
+        save_json(runtime_root / MANIFEST_NAME, {**manifest, "version": VERSION, "targets": sorted(remaining_targets), "files": files})
+    elif runtime_root.exists():
         if not manifest:
             die(f"refusing to remove unmanaged runtime: {runtime_root}")
         for relative, expected in manifest["files"].items():
@@ -422,7 +471,8 @@ def main():
     if unsafe:
         die("refusing unsafe overwrite; resolve the listed modified file manually")
     install_or_update(args, root, runtime_root, destinations, marketplace, manifest)
-    print(f"{args.action.capitalize()}ed task-completion-notifier integration.")
+    verb = "Installed" if args.action == "install" else "Updated"
+    print(f"{verb} task-completion-notifier integration.")
     if args.scope == "repo" and "codex" in args.targets:
         print("The Codex target is registered in the repository marketplace; reinstall it there to activate the update.")
     return 0

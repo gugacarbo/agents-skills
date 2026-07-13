@@ -5,7 +5,6 @@
   "author": {
     "name": "gugacarbo"
   },
-  "skills": "./skills/",
   "interface": {
     "displayName": "Task Completion Notifier",
     "shortDescription": "Notify after a verified task finishes.",

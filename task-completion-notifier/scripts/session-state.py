@@ -231,7 +231,9 @@ def main():
     now = time.time()
     try:
         with locked_state(state_path) as (state, migrated):
-            changed = migrated or remove_expired(state, now) or recover_expired_claims(state, now)
+            changed = migrated
+            changed = remove_expired(state, now) or changed
+            changed = recover_expired_claims(state, now) or changed
             key = session_key(args.agent, session_id) if session_id else None
             if args.action == "gc":
                 if changed:

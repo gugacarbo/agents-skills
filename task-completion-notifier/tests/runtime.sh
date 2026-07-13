@@ -83,6 +83,21 @@ wait "$first" "$second"
 claims=$(cat "$tmpdir/claim-a" "$tmpdir/claim-b" | python3 -c 'import json,sys; print(sum(json.loads(line)["claimed"] for line in sys.stdin))')
 [[ "$claims" == 1 ]]
 
+# A stale claim is recovered into the pending queue by garbage collection.
+STATE_FILE=$(find "$state_home" -name sessions.json -print -quit)
+python3 - "$STATE_FILE" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+state = json.load(open(path, encoding="utf-8"))
+for delivery in state["deliveries"].values():
+    delivery["claim_deadline"] = 0
+json.dump(state, open(path, "w", encoding="utf-8"))
+PY
+[[ "$(run_state gc --repo-root "$repo" | json_field changed)" == true ]]
+[[ "$(run_state status --repo-root "$repo" --agent cursor --session-id race | json_field active)" == true ]]
+
 if dispatch --agent cursor --event agentStop --repo-root "$repo" --notifier "$fake" --session-id race >/dev/null; then
   echo 'expected invalid host event' >&2
   exit 1
@@ -96,5 +111,12 @@ if output=$(run_state status --repo-root "$repo" --agent cursor --session-id ret
 fi
 [[ "$output" == *'state file has an invalid format'* ]]
 [[ "$output" != *Traceback* ]]
+
+# Version 2 state is migrated without losing a pending delivery.
+legacy="$tmpdir/legacy"
+mkdir -p "$legacy"
+printf '%s\n' '{"version":2,"sessions":{"cursor:legacy":{"message":"legacy","title":null,"expires_at":9999999999}},"deliveries":{}}' >"$legacy/sessions.json"
+[[ "$(python3 "$skill_root/scripts/session-state.py" status --state-dir "$legacy" --agent cursor --session-id legacy | json_field active)" == true ]]
+grep -Fq '"version": 3' "$legacy/sessions.json"
 
 printf 'task-completion-notifier runtime tests passed\n'
