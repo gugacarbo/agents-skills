@@ -1,6 +1,6 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-07-04 12:00:00 -0300
+**Generated:** 2026-07-13 12:00:00 -0300
 **Commit:** (pending)
 
 ## OVERVIEW
@@ -42,13 +42,13 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Work on commit flowchart      | `commit-changes/README.md`                  | Mermaid flowchart for commit decision flow.                      |
 | Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
 | Work on planning reference     | `super-planning/docs/`                     | Workflows, decision flow, file structure, and examples.          |
-| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
+| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, bootstrap.sh, doctor.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
 | Test planning scripts          | `super-planning/dev/tests.sh`              | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
 | Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
 | Work on init-deep skill       | `init-deep/SKILL.md`                        | Unified skill with --light flag for telegraphic mode.            |
 | Work on documentation retrieval | `find-docs/SKILL.md`                       | Current library and service documentation lookup workflow.       |
 | Work on skill authoring       | `skill-master/`                             | Authoring, evaluation, and discipline references plus dev tests. |
-| Work on completion notifier  | `task-completion-notifier/`                | Notification scripts, hook adapters, templates, and runtime tests. |
+| Work on completion notifier  | `task-completion-notifier/`                | Python runtime (`notify.py`, `session-state.py`, `hook-dispatch.py`), installer, templates, and runtime tests. |
 | Work on subagent development  | `subagent-driven-development/`             | Sequential implementation prompts and task helper scripts.      |
 | Work on documentation lookup guidance | `super-planning/prompts/find-docs.md` | Phase 3 lookup workflow for new or version-sensitive libraries. |
 
