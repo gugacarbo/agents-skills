@@ -6,10 +6,10 @@ SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
 REPO_ROOT=$(
-  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
+  CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
 )
-INSTALLER="$REPO_ROOT/.scripts/install.sh"
-BUILD_SCRIPT="$REPO_ROOT/.scripts/build.sh"
+INSTALLER="$REPO_ROOT/src/install.sh"
+BUILD_SCRIPT="$REPO_ROOT/src/build.sh"
 FIXTURE_SKILL="install-test-fixture-skill"
 FIXTURE_DIR="$REPO_ROOT/skills/$FIXTURE_SKILL"
 BUILT_FIXTURE_DIR="$REPO_ROOT/dist/skills/$FIXTURE_SKILL"
@@ -164,7 +164,7 @@ setup_fixture_git_source() {
   local source_dir="$1"
 
   git -C "$source_dir" init -b main >/dev/null 2>&1
-  cp -R "$REPO_ROOT/.scripts" "$source_dir/.scripts"
+  cp -R "$REPO_ROOT/src" "$source_dir/src"
   cp "$REPO_ROOT/skills.sh" "$source_dir/skills.sh"
   mkdir -p "$source_dir/dist/skills/$FIXTURE_SKILL"
   printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$source_dir/dist/skills/$FIXTURE_SKILL/SKILL.md"

@@ -6,10 +6,10 @@ SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
 REPO_ROOT=$(
-  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
+  CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
 )
 ORCHESTRATOR="$REPO_ROOT/skills.sh"
-BUILD_SCRIPT="$REPO_ROOT/.scripts/build.sh"
+BUILD_SCRIPT="$REPO_ROOT/src/build.sh"
 FIXTURE_SKILL="orchestrator-test-fixture-skill"
 FIXTURE_DIR="$REPO_ROOT/skills/$FIXTURE_SKILL"
 BUILT_FIXTURE_DIR="$REPO_ROOT/dist/skills/$FIXTURE_SKILL"
@@ -85,10 +85,10 @@ test_update_subcommand_delegates_to_inner_script() {
   archive_path="$tmp/agents-skills-main.tar.gz"
   target="$tmp/custom-skills"
 
-  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/.scripts" "$target/dist/skills/$FIXTURE_SKILL" "$tmp/work"
+  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/src" "$target/dist/skills/$FIXTURE_SKILL" "$tmp/work"
   printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' 'version: remote' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
   printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/skills.sh"
-  printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/.scripts/install.sh"
+  printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/src/install.sh"
   printf '%s\n' 'version: local' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
 
@@ -104,8 +104,8 @@ main() {
   trap cleanup_fixture_skill EXIT
   setup_fixture_skill
 
-  assert_exists "$REPO_ROOT/.scripts/install.sh"
-  assert_exists "$REPO_ROOT/.scripts/update.sh"
+  assert_exists "$REPO_ROOT/src/install.sh"
+  assert_exists "$REPO_ROOT/src/update.sh"
   assert_exists "$ORCHESTRATOR"
 
   test_install_subcommand_delegates_to_inner_script

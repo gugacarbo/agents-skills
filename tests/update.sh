@@ -6,9 +6,9 @@ SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
 REPO_ROOT=$(
-  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
+  CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
 )
-UPDATER="$REPO_ROOT/.scripts/update.sh"
+UPDATER="$REPO_ROOT/src/update.sh"
 FIXTURE_SKILL="update-test-fixture-skill"
 
 LAST_OUTPUT=''
@@ -58,11 +58,11 @@ create_archive() {
   archive_root="$tmp/archive-src/agents-skills-main"
   archive_path="$tmp/agents-skills-main.tar.gz"
 
-  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/.scripts"
+  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/src"
   printf '%s\n' '---' "name: $FIXTURE_SKILL" "---" "version: $version" >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
   printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' remote-$version" >"$archive_root/skills.sh"
   printf '%s\n' "remote readme $version" >"$archive_root/README.md"
-  printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' install-$version" >"$archive_root/.scripts/install.sh"
+  printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' install-$version" >"$archive_root/src/install.sh"
 
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
   printf '%s\n' "$archive_path"

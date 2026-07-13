@@ -3,9 +3,9 @@
 	"version": "1.0.0",
 	"description": "Installable coding-agent skills and their shell orchestrator.",
 	"scripts": {
-		"dev": "sh .scripts/dev.sh",
-		"build": "sh .scripts/build.sh",
-		"test": "bash -lc 'for test_script in .scripts/tests/*.sh skills/*/dev/tests.sh skills/*/tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done'",
+		"dev": "sh src/dev.sh",
+		"build": "sh src/build.sh",
+		"test": "bash -lc 'for test_script in tests/*.sh skills/*/dev/tests.sh skills/*/tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done'",
 		"lint": "biome check .",
 		"format:md": "pnpx prettier --write \"**/*.{md,mdx}\" --log-level=warn --no-error-on-unmatched-pattern  --cache",
 		"format:ts": "biome check --write .",

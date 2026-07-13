@@ -19,7 +19,7 @@ esac
 if [ "$IS_STREAMED" -eq 1 ]; then
   INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/.agents-skills-streamed-bootstrap
 else
-  INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/.scripts
+    INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/src
 fi
 
 AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}

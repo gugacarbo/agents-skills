@@ -68,7 +68,7 @@ read_reply_from() {
 
 usage() {
   cat <<'EOF'
-Uso: ./.scripts/install.sh [opcoes]
+Uso: ./src/install.sh [opcoes]
 
 Opcoes:
   -p, --path PATH   Instala as skills no PATH informado

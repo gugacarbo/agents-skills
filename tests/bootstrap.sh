@@ -6,7 +6,7 @@ SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
 REPO_ROOT=$(
-  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
+  CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
 )
 BOOTSTRAP="$REPO_ROOT/install.sh"
 ORCHESTRATOR="$REPO_ROOT/skills.sh"
@@ -41,7 +41,7 @@ test_bootstrap_uses_archive_and_runs_install() {
   archive_path="$tmp/agents-skills-main.tar.gz"
 
   mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL"
-  cp -R "$REPO_ROOT/.scripts" "$archive_root/.scripts"
+  cp -R "$REPO_ROOT/src" "$archive_root/src"
   cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
   printf '%s\n' '---' 'name: sample-skill' '---' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
@@ -66,7 +66,7 @@ test_bootstrap_uses_archive_and_runs_update() {
   target="$tmp/custom-skills"
 
   mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$target/dist/skills/$FIXTURE_SKILL"
-  cp -R "$REPO_ROOT/.scripts" "$archive_root/.scripts"
+  cp -R "$REPO_ROOT/src" "$archive_root/src"
   cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
   printf '%s\n' '---' 'name: sample-skill' '---' 'version: remote' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
   printf '%s\n' 'version: local' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"

@@ -1,6 +1,6 @@
 # Scripts Internos
 
-Esta pasta contem os comandos internos usados pelo orquestrador da raiz:
+Os comandos internos usados pelo orquestrador da raiz ficam em `src/`:
 
 ```sh
 ./skills.sh install
@@ -15,10 +15,10 @@ O usuario final deve preferir `./skills.sh <comando>` ou o fluxo remoto com `cur
 
 | Arquivo      | Funcao                                                                            |
 | ------------ | --------------------------------------------------------------------------------- |
-| `install.sh` | Instala skills em um destino local, global, explicito ou repo-local.              |
-| `update.sh`  | Compara a instalacao local com o snapshot remoto e sobrescreve apos confirmacao.  |
-| `build.sh`   | Copia `skills/` para o artefato versionável `dist/skills/`.                        |
-| `dev.sh`     | Observa `skills/`, executa o build e publica no destino selecionado.               |
+| `src/install.sh` | Instala skills em um destino local, global, explicito ou repo-local.              |
+| `src/update.sh`  | Compara a instalacao local com o snapshot remoto e sobrescreve apos confirmacao.  |
+| `src/build.sh`   | Copia `skills/` para `dist/skills/` e publica o resultado em `~/.agents/skills`.   |
+| `src/dev.sh`     | Observa `skills/`, executa o build e publica no destino selecionado.               |
 | `tests/*.sh` | Testes Bash de instalacao, update, bootstrap, orquestrador e regras de gitignore. |
 
 ## Desenvolvimento
@@ -26,25 +26,25 @@ O usuario final deve preferir `./skills.sh <comando>` ou o fluxo remoto com `cur
 Scripts de runtime devem continuar POSIX `sh`:
 
 ```sh
-rtk sh -n skills.sh .scripts/build.sh .scripts/dev.sh .scripts/install.sh .scripts/update.sh
+rtk sh -n skills.sh src/build.sh src/dev.sh src/install.sh src/update.sh
 ```
 
 Testes devem ser executados com `bash`, porque nem todos os arquivos em `tests/` precisam ser executaveis:
 
 ```sh
-rtk bash -lc 'for test_script in .scripts/tests/*.sh; do bash "$test_script"; done'
+rtk bash -lc 'for test_script in tests/*.sh; do bash "$test_script"; done'
 ```
 
 Ou individualmente:
 
 ```sh
-rtk bash .scripts/tests/install.sh
-rtk bash .scripts/tests/update.sh
-rtk bash .scripts/tests/bootstrap.sh
-rtk bash .scripts/tests/build.sh
-rtk bash .scripts/tests/dev.sh
-rtk bash .scripts/tests/gitignore.sh
-rtk bash .scripts/tests/orchestrator.sh
+rtk bash tests/install.sh
+rtk bash tests/update.sh
+rtk bash tests/bootstrap.sh
+rtk bash tests/build.sh
+rtk bash tests/dev.sh
+rtk bash tests/gitignore.sh
+rtk bash tests/orchestrator.sh
 ```
 
 ## Cuidados

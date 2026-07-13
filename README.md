@@ -1,6 +1,6 @@
 # agents-skills
 
-Pacote de skills para agentes de codificação (VS Code, Codex, Cursor, etc.), com script orquestrador em `./skills.sh`, scripts internos em `.scripts/` e as skills publicadas em `skills/`.
+Pacote de skills para agentes de codificação (VS Code, Codex, Cursor, etc.), com script orquestrador em `./skills.sh`, scripts internos em `src/` e as skills publicadas em `skills/`.
 
 ## Instalação rápida
 
@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 | --------- | ----------------------------------------------------- |
 | `install` | Instala as skills no diretório de destino             |
 | `update`  | Atualiza uma instalação existente com a versão remota |
-| `build`   | Gera o artefato versionável em `dist/skills/`         |
+| `build`   | Gera `dist/skills/` e copia as skills para `~/.agents/skills` |
 | `dev`     | Observa as fontes e publica builds no destino escolhido |
 | `help`    | Exibe a ajuda com os comandos disponíveis             |
 
@@ -93,7 +93,7 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 ### Desenvolvimento local
 
 ```sh
-# Gera dist/skills/, que é a fonte usada pelo instalador e publicada no GitHub.
+# Gera dist/skills/ e copia as skills para ~/.agents/skills.
 ./skills.sh build
 
 # Pergunta o destino (padrão: ~/.agents/skills), publica o build inicial
@@ -131,7 +131,8 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 ```
 .
 ├── skills.sh              # Entrypoint público; suporta bootstrap via curl | sh
-├── .scripts/              # Scripts de instalação, atualização e testes
+├── src/                   # Scripts de instalação, atualização e desenvolvimento
+├── scripts/               # Utilitários de documentação e hooks
 ├── dist/skills/            # Artefato gerado e versionado, usado pelo instalador
 └── skills/                # Fonte das skills instaláveis
     ├── commit-changes/        # Commits com Conventional Commits

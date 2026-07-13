@@ -65,7 +65,7 @@ read_reply_from() {
 
 usage() {
   cat <<'EOF'
-Uso: ./.scripts/update.sh [opcoes]
+Uso: ./src/update.sh [opcoes]
 
 Opcoes:
   -p, --path PATH   Atualiza as skills no PATH informado
