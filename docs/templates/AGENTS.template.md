@@ -1,10 +1,10 @@
 # AGENTS.md
 
 ```yaml
-casa-repo-id: agent-skills   # usado em referências cross-repo (repo:ADR-0001)
-casa-tier: T0                            # T0 (leve) | T1 (padrão) — STANDARD §3
+casa-repo-id: <nome-canonico-do-repo>   # usado em referências cross-repo (repo:ADR-0001)
+casa-tier: T1                            # T0 (leve) | T1 (padrão) — STANDARD §3
 casa-version: 1.8                        # versão do contrato CASA adotado (promessa do repo, ADR-0010)
-casa-standard-ref: 7cdb964                 # versão do casa-standard de origem — o casa-init carimba
+casa-standard-ref: <sha>                 # versão do casa-standard de origem — o casa-init carimba
 ```
 
 > Padrão: https://github.com/atplus-digital/casa-standard (STANDARD.md)
@@ -42,15 +42,15 @@ npm test                 # tudo verde
 <!-- Conhecimento NÃO-INFERÍVEL que já custou tentativas falhas. Todo gotcha
      descoberto pelo agente DEVE ser registrado aqui. -->
 
--
+- 
 
 ## Mapa de contexto
 <!-- Índice dos capítulos (docs/context/), cada um com QUANDO carregar.
      Capítulo = estado atual, imperativo, atemporal. Decisão datada = ADR. -->
 
-| Capítulo       | Quando carregar |
-| -------------- | --------------- |
-| (nenhum ainda) | —               |
+| Capítulo | Quando carregar |
+|---|---|
+| (nenhum ainda) | — |
 
 ## Mapa de docs
 - Decisões: `docs/adr/` · Comportamento: `docs/specs/` (READMEs GERADOS — não editar)

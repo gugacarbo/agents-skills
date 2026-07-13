@@ -1,0 +1,12 @@
+[
+  {
+    "id": "SPEC-0001",
+    "path": "docs/specs/0001-realtime-jobs-dashboard-spec.md",
+    "layer": "specs",
+    "title": "Observe super-planning jobs through an authenticated real-time web dashboard",
+    "status": "draft",
+    "builds-on": [],
+    "superseded-by": null,
+    "implemented-by": []
+  }
+]
