@@ -67,6 +67,8 @@ Exemplos:
   ./skills.sh install --path ~/.codex/skills
   ./skills.sh update
   ./skills.sh update --yes
+  ./skills.sh build
+  ./skills.sh dev
 EOF
 }
 

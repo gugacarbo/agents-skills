@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": "python3 __DISPATCH_SH__ --agent cursor --event stop --repo-root __REPO_ROOT_SH__ --notifier __NOTIFIER_PY_SH__"
+      }
+    ]
+  }
+}

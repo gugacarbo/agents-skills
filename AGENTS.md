@@ -13,20 +13,20 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 .
 ├── skills.sh              # public entrypoint; also supports curl | sh bootstrap
 ├── .scripts/              # install/update command implementations and tests
-├── commit-changes/        # tracked skill directory; includes README with flowchart
-├── find-skills/           # local skill directory, ignored by git allowlist
-├── init-deep/             # local skill directory, ignored by git allowlist
-├── find-docs/             # documentation retrieval skill
-├── skill-master/          # complex skill authoring and evaluation workflow
-├── task-completion-notifier/ # completion notification hook and templates
-├── subagent-driven-development/ # sequential implementation workflow
-└── super-planning/        # tracked planning/orchestration skill
-    ├── docs/              # reference docs: workflows, decision flow, examples
-    ├── scripts/           # super-plan.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh
-    ├── phases/            # phase guidance (01–08)
-    ├── prompts/           # worker and implementer prompt templates
-    ├── templates/         # plan and tasks templates
-    └── dev/               # tests and aux scripts for the super-planning skill
+└── skills/                # source of every installable skill
+    ├── commit-changes/    # conventional-commit workflow and flowchart
+    ├── find-docs/         # documentation retrieval skill
+    ├── init-deep/         # hierarchical AGENTS.md generator
+    ├── project-init/      # layered convention templates
+    ├── skill-master/      # skill authoring and evaluation tooling
+    ├── super-planning/    # planning/orchestration skill
+    │   ├── docs/          # workflows, decision flow, examples
+    │   ├── scripts/       # super-plan.sh and task helpers
+    │   ├── phases/        # phase guidance (01–08)
+    │   ├── prompts/       # worker and implementer prompts
+    │   ├── templates/     # plan and tasks templates
+    │   └── dev/           # tests and auxiliary scripts
+    └── task-completion-notifier/ # completion notification runtime and tests
 ```
 
 ## WHERE TO LOOK
@@ -34,23 +34,24 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 | Task                          | Location                                    | Notes                                                            |
 | ----------------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
 | Add a public command          | `skills.sh` + `.scripts/<command>.sh`       | Root script delegates by command name.                           |
+| Change generated skill output | `.scripts/build.sh` + `dist/skills/`        | The output is versioned and is the install source.               |
+| Change live publishing        | `.scripts/dev.sh`                           | Prompts for a target, rebuilds, then publishes on source changes. |
 | Change install behavior       | `.scripts/install.sh`                       | Tests live in `.scripts/tests/install.sh`.                       |
 | Change update behavior        | `.scripts/update.sh`                        | Tests live in `.scripts/tests/update.sh` and bootstrap coverage. |
 | Validate curl bootstrap       | `.scripts/tests/bootstrap.sh`               | Uses local tarballs and `sh -s -- <command>`.                    |
 | Validate git allowlist        | `.gitignore`, `.scripts/tests/gitignore.sh` | The repo ignores everything by default.                          |
-| Work on commit skill content  | `commit-changes/SKILL.md`                   | Conventional-commit workflow skill.                              |
-| Work on commit flowchart      | `commit-changes/README.md`                  | Mermaid flowchart for commit decision flow.                      |
-| Work on planning skill content | `super-planning/`                          | Phase docs, prompts, templates, and orchestration helpers.       |
-| Work on planning reference     | `super-planning/docs/`                     | Workflows, decision flow, file structure, and examples.          |
-| Work on planning scripts       | `super-planning/scripts/`                  | super-plan.sh, bootstrap.sh, doctor.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
-| Test planning scripts          | `super-planning/dev/tests.sh`              | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
-| Work on planning dev tooling   | `super-planning/dev/`                      | Tests and auxiliary scripts for the super-planning skill. |
-| Work on init-deep skill       | `init-deep/SKILL.md`                        | Unified skill with --light flag for telegraphic mode.            |
-| Work on documentation retrieval | `find-docs/SKILL.md`                       | Current library and service documentation lookup workflow.       |
-| Work on skill authoring       | `skill-master/`                             | Authoring, evaluation, and discipline references plus dev tests. |
-| Work on completion notifier  | `task-completion-notifier/`                | Python runtime (`notify.py`, `session-state.py`, `hook-dispatch.py`), installer, templates, and runtime tests. |
-| Work on subagent development  | `subagent-driven-development/`             | Sequential implementation prompts and task helper scripts.      |
-| Work on documentation lookup guidance | `super-planning/prompts/find-docs.md` | Phase 3 lookup workflow for new or version-sensitive libraries. |
+| Work on commit skill content  | `skills/commit-changes/SKILL.md`            | Conventional-commit workflow skill.                              |
+| Work on commit flowchart      | `skills/commit-changes/README.md`           | Mermaid flowchart for commit decision flow.                      |
+| Work on planning skill content | `skills/super-planning/`                  | Phase docs, prompts, templates, and orchestration helpers.       |
+| Work on planning reference     | `skills/super-planning/docs/`             | Workflows, decision flow, file structure, and examples.          |
+| Work on planning scripts       | `skills/super-planning/scripts/`          | super-plan.sh, bootstrap.sh, doctor.sh, log-task.sh, render-progress-ledger.sh, summarize-all-tasks.sh. |
+| Test planning scripts          | `skills/super-planning/dev/tests.sh`      | Integration tests for super-plan.sh, render-progress-ledger.sh, log-task.sh, summarize-all-tasks.sh. |
+| Work on planning dev tooling   | `skills/super-planning/dev/`              | Tests and auxiliary scripts for the super-planning skill. |
+| Work on init-deep skill       | `skills/init-deep/SKILL.md`                 | Unified skill with --light flag for telegraphic mode.            |
+| Work on documentation retrieval | `skills/find-docs/SKILL.md`              | Current library and service documentation lookup workflow.       |
+| Work on skill authoring       | `skills/skill-master/`                      | Authoring, evaluation, and discipline references plus dev tests. |
+| Work on completion notifier  | `skills/task-completion-notifier/`          | Python runtime (`notify.py`, `session-state.py`, `hook-dispatch.py`), installer, templates, and runtime tests. |
+| Work on documentation lookup guidance | `skills/super-planning/prompts/find-docs.md` | Phase 3 lookup workflow for new or version-sensitive libraries. |
 
 ## CONVENTIONS
 
@@ -60,7 +61,7 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 - Run tests through `bash`; do not assume every file under `.scripts/tests/` is executable.
 - Public commands should be reachable as `./skills.sh <command>` and through `curl .../skills.sh | sh -s -- <command>`.
 - Default remote is `gugacarbo/agents-skills` on `main`; keep env overrides working: `AGENTS_SKILLS_OWNER`, `AGENTS_SKILLS_REPO`, `AGENTS_SKILLS_REF`, `AGENTS_SKILLS_REPO_URL`, `AGENTS_SKILLS_ARCHIVE_URL`.
-- Installable skills are root child directories containing `SKILL.md`; installer skips non-skill directories.
+- Installable skills are direct children of `skills/` containing `SKILL.md`; `build.sh` copies them to versioned `dist/skills/`, which the installer reads.
 - `.gitignore` is allowlist-only. New files are ignored unless explicitly unignored.
 
 ## ANTI-PATTERNS (THIS PROJECT)
@@ -78,10 +79,12 @@ This repo is a small skills bundle plus a public `skills.sh` orchestrator for in
 rtk bash .scripts/tests/install.sh
 rtk bash .scripts/tests/update.sh
 rtk bash .scripts/tests/bootstrap.sh
+rtk bash .scripts/tests/build.sh
+rtk bash .scripts/tests/dev.sh
 rtk bash .scripts/tests/gitignore.sh
 rtk bash .scripts/tests/orchestrator.sh
-rtk bash super-planning/dev/tests.sh
-rtk sh -n skills.sh .scripts/install.sh .scripts/update.sh
+rtk bash skills/super-planning/dev/tests.sh
+rtk sh -n skills.sh .scripts/build.sh .scripts/dev.sh .scripts/install.sh .scripts/update.sh
 ```
 
 Full local test loop:

@@ -58,8 +58,8 @@ create_archive() {
   archive_root="$tmp/archive-src/agents-skills-main"
   archive_path="$tmp/agents-skills-main.tar.gz"
 
-  mkdir -p "$archive_root/$FIXTURE_SKILL" "$archive_root/.scripts"
-  printf '%s\n' '---' "name: $FIXTURE_SKILL" "---" "version: $version" >"$archive_root/$FIXTURE_SKILL/SKILL.md"
+  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/.scripts"
+  printf '%s\n' '---' "name: $FIXTURE_SKILL" "---" "version: $version" >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
   printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' remote-$version" >"$archive_root/skills.sh"
   printf '%s\n' "remote readme $version" >"$archive_root/README.md"
   printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' install-$version" >"$archive_root/.scripts/install.sh"
@@ -96,8 +96,8 @@ test_update_prompts_before_overwriting_changed_files() {
   tmp=$(mktemp -d)
   target="$tmp/skills"
   archive_path=$(create_archive "$tmp" "remote")
-  mkdir -p "$target/$FIXTURE_SKILL"
-  printf '%s\n' 'local version' >"$target/$FIXTURE_SKILL/SKILL.md"
+  mkdir -p "$target/dist/skills/$FIXTURE_SKILL"
+  printf '%s\n' 'local version' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
   printf 'y\n' >"$tmp/tty-input"
 
   run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
@@ -105,7 +105,7 @@ test_update_prompts_before_overwriting_changed_files() {
     "$UPDATER" --path "$target" < /dev/null
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
-  grep -q 'version: remote' "$target/$FIXTURE_SKILL/SKILL.md"
+  grep -q 'version: remote' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
   assert_contains "Atualizacao concluida"
 }
 
@@ -114,8 +114,8 @@ test_update_cancels_without_confirmation() {
   tmp=$(mktemp -d)
   target="$tmp/skills"
   archive_path=$(create_archive "$tmp" "remote")
-  mkdir -p "$target/$FIXTURE_SKILL"
-  printf '%s\n' 'local version' >"$target/$FIXTURE_SKILL/SKILL.md"
+  mkdir -p "$target/dist/skills/$FIXTURE_SKILL"
+  printf '%s\n' 'local version' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
   printf 'n\n' >"$tmp/tty-input"
 
   if run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
@@ -125,7 +125,7 @@ test_update_cancels_without_confirmation() {
   fi
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
-  grep -qx 'local version' "$target/$FIXTURE_SKILL/SKILL.md"
+  grep -qx 'local version' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
   assert_contains "Atualizacao cancelada"
 }
 
@@ -134,12 +134,12 @@ test_update_yes_overwrites_without_prompt() {
   tmp=$(mktemp -d)
   target="$tmp/skills"
   archive_path=$(create_archive "$tmp" "remote")
-  mkdir -p "$target/$FIXTURE_SKILL"
-  printf '%s\n' 'local version' >"$target/$FIXTURE_SKILL/SKILL.md"
+  mkdir -p "$target/dist/skills/$FIXTURE_SKILL"
+  printf '%s\n' 'local version' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
   run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" "$UPDATER" --path "$target" --yes < /dev/null
 
-  grep -q 'version: remote' "$target/$FIXTURE_SKILL/SKILL.md"
+  grep -q 'version: remote' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
 }
 
 test_update_fails_when_target_does_not_exist() {

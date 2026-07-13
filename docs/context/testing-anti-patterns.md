@@ -1,6 +1,6 @@
 > **Process:** `super-planning` — this guidance file was materialized during
-> Phase 2. Follow [`super-planning/SKILL.md`](../../super-planning/SKILL.md) and
-> [`super-planning/phases/02-spec.md`](../../super-planning/phases/02-spec.md)
+> Phase 2. Follow [`skills/super-planning/SKILL.md`](../../skills/super-planning/SKILL.md) and
+> [`skills/super-planning/phases/02-spec.md`](../../skills/super-planning/phases/02-spec.md)
 > when applying it.
 
 # Testing anti-patterns

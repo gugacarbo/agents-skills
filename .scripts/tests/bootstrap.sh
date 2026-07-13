@@ -40,11 +40,10 @@ test_bootstrap_uses_archive_and_runs_install() {
   archive_root="$tmp/archive-src/agents-skills-main"
   archive_path="$tmp/agents-skills-main.tar.gz"
 
-  mkdir -p "$archive_root"
+  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL"
   cp -R "$REPO_ROOT/.scripts" "$archive_root/.scripts"
   cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
-  mkdir -p "$archive_root/$FIXTURE_SKILL"
-  printf '%s\n' '---' 'name: sample-skill' '---' >"$archive_root/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: sample-skill' '---' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
 
@@ -66,12 +65,11 @@ test_bootstrap_uses_archive_and_runs_update() {
   archive_path="$tmp/agents-skills-main.tar.gz"
   target="$tmp/custom-skills"
 
-  mkdir -p "$archive_root" "$target/$FIXTURE_SKILL"
+  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$target/dist/skills/$FIXTURE_SKILL"
   cp -R "$REPO_ROOT/.scripts" "$archive_root/.scripts"
   cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
-  mkdir -p "$archive_root/$FIXTURE_SKILL"
-  printf '%s\n' '---' 'name: sample-skill' '---' 'version: remote' >"$archive_root/$FIXTURE_SKILL/SKILL.md"
-  printf '%s\n' 'version: local' >"$target/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: sample-skill' '---' 'version: remote' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' 'version: local' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
 
@@ -83,7 +81,7 @@ test_bootstrap_uses_archive_and_runs_update() {
       sh -s -- update --path "$target" --yes >"$tmp/output-update.log" 2>&1
   )
 
-  grep -q 'version: remote' "$target/$FIXTURE_SKILL/SKILL.md"
+  grep -q 'version: remote' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
 }
 
 test_bootstrap_missing_command_does_not_loop() {

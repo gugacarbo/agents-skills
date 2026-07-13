@@ -9,8 +9,10 @@ REPO_ROOT=$(
   CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
 )
 INSTALLER="$REPO_ROOT/.scripts/install.sh"
+BUILD_SCRIPT="$REPO_ROOT/.scripts/build.sh"
 FIXTURE_SKILL="install-test-fixture-skill"
-FIXTURE_DIR="$REPO_ROOT/$FIXTURE_SKILL"
+FIXTURE_DIR="$REPO_ROOT/skills/$FIXTURE_SKILL"
+BUILT_FIXTURE_DIR="$REPO_ROOT/dist/skills/$FIXTURE_SKILL"
 
 LAST_OUTPUT=''
 
@@ -62,10 +64,12 @@ run_capture() {
 setup_fixture_skill() {
   mkdir -p "$FIXTURE_DIR"
   printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$FIXTURE_DIR/SKILL.md"
+  sh "$BUILD_SCRIPT" >/dev/null
 }
 
 cleanup_fixture_skill() {
   rm -rf "$FIXTURE_DIR"
+  rm -rf "$BUILT_FIXTURE_DIR"
 }
 
 test_explicit_path_installs_to_target() {
@@ -162,8 +166,8 @@ setup_fixture_git_source() {
   git -C "$source_dir" init -b main >/dev/null 2>&1
   cp -R "$REPO_ROOT/.scripts" "$source_dir/.scripts"
   cp "$REPO_ROOT/skills.sh" "$source_dir/skills.sh"
-  mkdir -p "$source_dir/$FIXTURE_SKILL"
-  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$source_dir/$FIXTURE_SKILL/SKILL.md"
+  mkdir -p "$source_dir/dist/skills/$FIXTURE_SKILL"
+  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$source_dir/dist/skills/$FIXTURE_SKILL/SKILL.md"
   git -C "$source_dir" add . >/dev/null 2>&1
   git -C "$source_dir" -c user.email=test@example.com -c user.name=test commit -m "fixture" >/dev/null 2>&1
 }
@@ -183,7 +187,7 @@ test_init_clones_repo_to_target() {
       "$INSTALLER" --init --path "$clone_dest"
   )
 
-  assert_exists "$clone_dest/$FIXTURE_SKILL/SKILL.md"
+  assert_exists "$clone_dest/dist/skills/$FIXTURE_SKILL/SKILL.md"
   assert_exists "$clone_dest/.git"
   git -C "$clone_dest" rev-parse --is-inside-work-tree >/dev/null
 }
@@ -208,7 +212,7 @@ test_init_merges_nonempty_destination_with_confirmation() {
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
   assert_exists "$clone_dest/existing.txt"
-  assert_exists "$clone_dest/$FIXTURE_SKILL/SKILL.md"
+  assert_exists "$clone_dest/dist/skills/$FIXTURE_SKILL/SKILL.md"
   assert_exists "$clone_dest/.git"
   assert_contains "mantendo os arquivos existentes na worktree"
   grep -qx 'occupied' "$clone_dest/existing.txt"
@@ -268,7 +272,7 @@ test_init_nonempty_without_confirmation_cancels() {
   LAST_OUTPUT=$(cat "$tmp/output.log")
   assert_exists "$clone_dest/existing.txt"
   assert_not_exists "$clone_dest/.git"
-  assert_not_exists "$clone_dest/$FIXTURE_SKILL/SKILL.md"
+  assert_not_exists "$clone_dest/dist/skills/$FIXTURE_SKILL/SKILL.md"
 }
 
 test_confirmation_reads_from_terminal_when_stdin_is_pipe() {
@@ -289,7 +293,7 @@ main() {
   trap cleanup_fixture_skill EXIT
   setup_fixture_skill
 
-  assert_exists "$REPO_ROOT/$FIXTURE_SKILL/SKILL.md"
+  assert_exists "$REPO_ROOT/dist/skills/$FIXTURE_SKILL/SKILL.md"
   assert_exists "$INSTALLER"
 
   test_explicit_path_installs_to_target

@@ -1,0 +1,19 @@
+{
+  "name": "task-completion-notifier",
+  "version": "2.0.0",
+  "description": "Send a verified task-completion notification on the local desktop.",
+  "author": {
+    "name": "gugacarbo"
+  },
+  "interface": {
+    "displayName": "Task Completion Notifier",
+    "shortDescription": "Notify after a verified task finishes.",
+    "longDescription": "Adds an opt-in manual completion notification workflow for Codex on Linux, macOS, and Windows.",
+    "developerName": "gugacarbo",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Enable a completion notification for this task."
+    ]
+  }
+}

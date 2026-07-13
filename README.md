@@ -1,6 +1,6 @@
 # agents-skills
 
-Pacote de skills para agentes de codificação (VS Code, Codex, Cursor, etc.), com script orquestrador em `./skills.sh` e scripts internos em `.scripts/`.
+Pacote de skills para agentes de codificação (VS Code, Codex, Cursor, etc.), com script orquestrador em `./skills.sh`, scripts internos em `.scripts/` e as skills publicadas em `skills/`.
 
 ## Instalação rápida
 
@@ -14,6 +14,8 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 | --------- | ----------------------------------------------------- |
 | `install` | Instala as skills no diretório de destino             |
 | `update`  | Atualiza uma instalação existente com a versão remota |
+| `build`   | Gera o artefato versionável em `dist/skills/`         |
+| `dev`     | Observa as fontes e publica builds no destino escolhido |
 | `help`    | Exibe a ajuda com os comandos disponíveis             |
 
 ## Opções do `install`
@@ -88,6 +90,17 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install --global
 ```
 
+### Desenvolvimento local
+
+```sh
+# Gera dist/skills/, que é a fonte usada pelo instalador e publicada no GitHub.
+./skills.sh build
+
+# Pergunta o destino (padrão: ~/.agents/skills), publica o build inicial
+# e o atualiza sempre que skills/ mudar.
+./skills.sh dev
+```
+
 ### Atualização
 
 ```sh
@@ -119,11 +132,15 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 .
 ├── skills.sh              # Entrypoint público; suporta bootstrap via curl | sh
 ├── .scripts/              # Scripts de instalação, atualização e testes
-├── commit-changes/        # Skill: commits com Conventional Commits
-├── find-docs/             # Skill: busca de documentação
-├── init-deep/             # Skill: geração de AGENTS.md
-├── project-init/          # Skill: scaffold de projetos
-├── skill-master/          # Skill: autoria e avaliação de skills
-├── super-planning/        # Skill: planejamento com subagentes
-└── task-completion-notifier/  # Skill: notificação de conclusão
+├── dist/skills/            # Artefato gerado e versionado, usado pelo instalador
+└── skills/                # Fonte das skills instaláveis
+    ├── commit-changes/        # Commits com Conventional Commits
+    ├── find-docs/             # Busca de documentação
+    ├── init-deep/             # Geração de AGENTS.md
+    ├── project-init/          # Scaffold de projetos
+    ├── skill-master/          # Autoria e avaliação de skills
+    ├── super-planning/        # Planejamento com subagentes
+    └── task-completion-notifier/ # Notificação de conclusão
 ```
+
+O comando `./skills.sh install` copia cada skill de `dist/skills/` diretamente para o destino escolhido. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de publicar alterações.

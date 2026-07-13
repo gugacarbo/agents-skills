@@ -8,6 +8,7 @@ SCRIPT_DIR=$(
 SKILLS_REPO_ROOT=$(
   CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
 )
+SKILLS_SOURCE_DIR=$SKILLS_REPO_ROOT/dist/skills
 
 AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}
 AGENTS_SKILLS_REPO=${AGENTS_SKILLS_REPO:-agents-skills}
@@ -151,7 +152,9 @@ copy_skills() {
   mkdir -p "$destination"
   info "Instalando skills em $destination"
 
-  for skill_dir in "$SKILLS_REPO_ROOT"/*; do
+  [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas nao encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
+
+  for skill_dir in "$SKILLS_SOURCE_DIR"/*; do
     [ -d "$skill_dir" ] || continue
     [ -f "$skill_dir/SKILL.md" ] || continue
 
