@@ -14,8 +14,12 @@ Fallback helper files when bootstrap is required:
 - `.super-planning/super-plan.sh`
 - `.super-planning/super-update.sh`
 - `.super-planning/render-progress-ledger.sh`
+- `.super-planning/log-task.sh`
+- `.super-planning/review-package.sh`
+- `.super-planning/render-task-md.sh`
+- `.super-planning/summarize-all-tasks.sh`
 - `.super-planning/super-plan.schema.json`
-- `.super-planning/.gitignore` (contains only `brainstorm/`, protecting the visual companion session directory)
+- `.super-planning/super-planning-reference.json`
 
 The goal is to avoid a duplicate helper directory when the skill already lives in the repository, while still keeping the flow self-contained for repositories that do not vendor the skill.
 
@@ -60,16 +64,37 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh init \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
+  --worktree-enabled true \
+  --execution-mode subagent-driven \
+  --review-cadence per_task \
   --output docs/jobs/0003-auth-middleware/super-plan.json
 ```
 
 When the skill is not inside the target repository:
 
 ```bash
+# Capture this from the source skill installation, never from the target app.
+SOURCE_SKILL_REPOSITORY="$(git -C /absolute/path/to/skills remote get-url origin)"
+SOURCE_SKILL_REF="$(git -C /absolute/path/to/skills branch --show-current)"
+SOURCE_SKILL_COMMIT="$(git -C /absolute/path/to/skills rev-parse HEAD)"
+
 mkdir -p /absolute/path/to/workspace/.super-planning
+# Preferred: copy the complete, versioned helper manifest and record source
+# provenance in one operation.
+sh /absolute/path/to/skills/super-planning/scripts/bootstrap.sh \
+  --target-dir /absolute/path/to/workspace/.super-planning
+
+# Manual fallback: keep this list in sync with bootstrap.sh.
 cp /absolute/path/to/skills/super-planning/scripts/super-plan.sh /absolute/path/to/workspace/.super-planning/super-plan.sh
 cp /absolute/path/to/skills/super-planning/scripts/super-update.sh /absolute/path/to/workspace/.super-planning/super-update.sh
 cp /absolute/path/to/skills/super-planning/scripts/render-progress-ledger.sh /absolute/path/to/workspace/.super-planning/render-progress-ledger.sh
+cp /absolute/path/to/skills/super-planning/scripts/log-task.sh /absolute/path/to/workspace/.super-planning/log-task.sh
+cp /absolute/path/to/skills/super-planning/scripts/review-package.sh /absolute/path/to/workspace/.super-planning/review-package.sh
+cp /absolute/path/to/skills/super-planning/scripts/render-task-md.sh /absolute/path/to/workspace/.super-planning/render-task-md.sh
+cp /absolute/path/to/skills/super-planning/scripts/summarize-all-tasks.sh /absolute/path/to/workspace/.super-planning/summarize-all-tasks.sh
+cp /absolute/path/to/skills/super-planning/scripts/doctor.sh /absolute/path/to/workspace/.super-planning/doctor.sh
+cp /absolute/path/to/skills/super-planning/scripts/bootstrap.sh /absolute/path/to/workspace/.super-planning/bootstrap.sh
+cp -R /absolute/path/to/skills/super-planning/scripts/visual-companion /absolute/path/to/workspace/.super-planning/visual-companion
 cp /absolute/path/to/skills/super-planning/interfaces/super-plan.schema.json /absolute/path/to/workspace/.super-planning/super-plan.schema.json
 cp /absolute/path/to/skills/super-planning/templates/.gitignore-template /absolute/path/to/workspace/.super-planning/.gitignore
 
@@ -78,16 +103,30 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
+  --worktree-enabled true \
+  --execution-mode subagent-driven \
+  --review-cadence per_task \
   --output docs/jobs/0003-auth-middleware/super-plan.json
 
 sh /absolute/path/to/workspace/.super-planning/super-plan.sh reference \
-  --output /absolute/path/to/workspace/.super-planning/super-planning-reference.json
+  --output /absolute/path/to/workspace/.super-planning/super-planning-reference.json \
+  --repo-url "$SOURCE_SKILL_REPOSITORY" \
+  --ref "$SOURCE_SKILL_REF" \
+  --commit "$SOURCE_SKILL_COMMIT"
 ```
 
-`super-planning-reference.json` records the skill name, GitHub remote, ref,
-full commit SHA, helper path, and generation timestamp. It is a local runtime
-reference and remains visible; the generated `.super-planning/.gitignore`
-contains only `brainstorm/` for visual companion session files.
+For a detached source checkout, pass the intended published ref explicitly
+instead of an empty branch name. If any value cannot be discovered, do not
+guess from the target application's remote: obtain the skill source metadata
+from its installer/release record or ask the user for the source repository and
+ref before creating the reference.
+
+`super-planning-reference.json` records the source skill name, source GitHub
+remote, ref, full commit SHA, helper path, and generation timestamp. The
+complete manifest is the copied helper set listed above. Provenance comes from
+the source skill installation, not the target repository remote; otherwise
+`super-update.sh` would attempt to download the skill from the application
+repository. It remains visible as a runtime reference.
 
 `init` produces a valid but empty registry with `tasks: []`, `requirementsChecklist: []`, placeholder agent profiles, and a generated `progress-ledger.md`.
 
@@ -145,10 +184,11 @@ cat > /tmp/task-a.json <<'EOF'
   "title": "Implementar middleware de autenticação",
   "description": "...",
   "status": "pending",
-  "tryCount": 3,
+  "tryCount": 1,
+  "maxTries": 3,
   "task_profile": "general",
   "batch": "A",
-  "phase": "foundation",
+  "layer": "foundation",
   "reportFile": "docs/jobs/0003-auth-middleware/Task-A-1/report.md",
   "reviewPackage": "docs/jobs/0003-auth-middleware/Task-A-1/review-package.diff.md",
   "progressLog": "docs/jobs/0003-auth-middleware/Task-A-1/progress.log",
@@ -196,12 +236,17 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
   --set fileStructure='[{"path":"src/auth/middleware.ts","ownerTask":"Task-A-1","notes":"Entry point do middleware"}]'
 ```
 
-Example — updating a task status:
+Example — transitioning a task status:
 ```bash
-sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
+sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh transition-task \
   --input docs/jobs/0003-auth-middleware/super-plan.json \
-  --set 'tasks[Task-A-1].status=in_progress'
+  --task-id Task-A-1 \
+  --status in_progress
 ```
+
+Use the active helper's `transition-task` or `complete-task` command for all
+lifecycle changes. The commands validate the prior state, allowed transition,
+recorded base commit, and completion gate; never edit a status directly in JSON.
 
 For large arrays or objects, prefer writing the JSON to a file and using `@file` syntax:
 
@@ -327,7 +372,7 @@ Each task entry must still include:
 
 - `task_profile` — one of `general`, `deep`, or `quick`
 - `batch` — execution batch label such as `A`, `B`, `C`
-- `phase` — work classification such as `foundation`, `core`, `surface`, `final`
+- `layer` — work classification such as `foundation`, `core`, `surface`, `final`
 
 `task_profile` is mandatory and represents the intended execution complexity/profile for that task:
 
@@ -341,7 +386,7 @@ Do not leave tasks uncategorized. Every task in `super-plan.json` must have a `t
 
 - Set all tasks to `pending` when creating the registry.
 - Update status after each dispatch/review cycle.
-- Use only these status values: `pending`, `in_progress`, `ready_for_review`, `needs_fix`, `blocked`, `completed`, `cancelled`.
+- Use only these status values: `pending`, `in_progress`, `ready_for_review`, `reviewing`, `needs_fix`, `blocked`, `completed`, `cancelled`.
 - A task cannot move to `completed` until its review is clean.
 - Use `cancelled` only when the orchestrator decides to retire a task while keeping the audit trail in the registry.
 

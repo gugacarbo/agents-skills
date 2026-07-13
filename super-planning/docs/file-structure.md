@@ -39,6 +39,7 @@ ignored; helper scripts and `super-planning-reference.json` remain visible.
 - **Plan** (`docs/plans/NNNN-<name>.md`): Linked to the spec by number — how it will be built
 - **super-plan.json** (`docs/jobs/NNNN-<name>/super-plan.json`): Single source of truth, created and mutated by the active `super-plan.sh` helper path
 - **progress-ledger.md**: Regenerated from `super-plan.json` on every write
-- **Skill reference** (`.super-planning/super-planning-reference.json`): Exact Git remote/ref/commit used by the helper stack
+- **Skill reference** (`.super-planning/super-planning-reference.json`): Exact source-skill Git remote/ref/commit used by the helper stack; never infer it from the target application's remote
+- **Bootstrap and diagnosis** (`.super-planning/bootstrap.sh`, `.super-planning/doctor.sh`): Materialize the full helper manifest and run a read-only environment preflight
 - **Visual companion ignore file** (`.super-planning/.gitignore`): Contains only `brainstorm/`
 - **Task dirs**: Each task has its own directory with `report.md`, `review-package.diff.md`, `progress.log`, and `log-task.sh`

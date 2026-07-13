@@ -116,7 +116,7 @@ flowchart TD
     J -->|Yes| K["Update plan or ask user for product decision"]
     J -->|No| I
     K --> I
-    I --> L["Assign batch and phase for each task"]
+    I --> L["Assign batch and layer for each task"]
     L --> M{"Spec covers multiple independent subsystems?"}
     M -->|Yes| N["Suggest separate plans"]
     M -->|No| O["Continue current plan"]
@@ -142,7 +142,7 @@ flowchart TD
     E --> F["Populate plan metadata, requirements, file structure, execution settings, tasks"]
     F --> G["Set every task status to pending"]
     G --> H{"Need per-task directories or progress.log now?"}
-    H -->|Yes| I["Defer task artifacts to Phase 6"]
+    H -->|Yes| I["Defer report and review package to Phase 6; Phase 5 owns logger/progress"]
     H -->|No| J["Materialize artifacts now"]
     I --> K["Proceed with registry as single source of truth"]
     J --> K

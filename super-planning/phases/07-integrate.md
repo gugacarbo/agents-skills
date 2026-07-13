@@ -10,6 +10,20 @@ Before starting integration, verify:
 2. The feature branch is clean and all task branches have been merged.
 3. The working tree has no uncommitted changes.
 
+When these checks pass, transition the plan to `ready_for_review` through the
+active helper. Immediately before the whole-branch audit, transition it to
+`reviewing`. These transitions make the final `complete-plan` gate auditable:
+
+```bash
+sh "$ACTIVE_SUPER_PLAN_SCRIPT" transition-plan \
+  --input docs/jobs/NNNN-<feature-name>/super-plan.json \
+  --status ready_for_review
+
+sh "$ACTIVE_SUPER_PLAN_SCRIPT" transition-plan \
+  --input docs/jobs/NNNN-<feature-name>/super-plan.json \
+  --status reviewing
+```
+
 ## Step 1: Run the Full Test Suite
 
 Run the project's full test suite once on the feature branch. Do not skip this step.
@@ -80,9 +94,8 @@ For any task that is not `completed`:
 Update `super-plan.json` through the active helper path:
 
 ```bash
-bash super-planning/scripts/super-plan.sh update \
-  --input docs/jobs/NNNN-<feature-name>/super-plan.json \
-  --set status=completed
+bash super-planning/scripts/super-plan.sh complete-plan \
+  --input docs/jobs/NNNN-<feature-name>/super-plan.json
 ```
 
 This regenerates the progress ledger automatically.
@@ -131,4 +144,4 @@ If `reviewCadence=final_only`, this phase must also perform the first independen
 
 When `reviewCadence=final_only`, run that review batch by batch: for each batch that reached `ready_for_review` during implementation, dispatch one reviewer subagent for the batch, resolve findings, and only then append the `completed` log entries, transition the affected tasks from `ready_for_review` to `completed`, and regenerate the ledger before moving on.
 
-Phase 6 already materialized all per-task artifacts (directories, logging wrappers, `progress.log`, `report.md`, `review-package.diff.md`) during implementation. In `final_only` mode, only the reviewer dispatch was deferred to this phase.
+Phase 5 already materialized task directories, logging wrappers, and `progress.log`; Phase 6 materialized `report.md` and `review-package.diff.md`. In `final_only` mode, only reviewer dispatch was deferred to this phase.

@@ -11,9 +11,9 @@ Subagent tool results get injected verbatim into your context. Across many deleg
 Everything you paste into a dispatch prompt — and everything a subagent prints back — stays resident in your context. Hand artifacts over as files instead:
 
 - **Task entry** → `super-plan.json` (subagent reads its entry, you don't carry it)
-- **Report** → `docs/jobs/<plan>/<task-id>/report.md` (materialized in Phase 6; subagent writes or returns it, you get a one-line summary)
+- **Report** → `docs/jobs/<plan>/<task-id>/report.md` (materialized in Phase 6; the implementer writes it during Phase 5, and the controller gets a one-line summary)
 - **Review package** → `docs/jobs/<plan>/<task-id>/review-package.diff.md` (materialized in Phase 6; reviewer reads the diff from a file, you don't paste it)
-- **Progress log/helper** → each task owns `docs/jobs/<plan>/<task-id>/progress.log` and `log-task.sh`, both first materialized in Phase 6
+- **Progress log/helper** → each task owns `docs/jobs/<plan>/<task-id>/progress.log` and `log-task.sh`, both first materialized in Phase 5 before dispatch
 
 ### Compressed Output
 
@@ -99,7 +99,7 @@ Implementer subagents log `ready_for_review`; only the orchestrator logs `comple
 
 When a gap is discovered during implementation:
 
-1. Add the new task to `super-plan.json` through the script with the next available ID, appropriate `batch`, and appropriate `phase`
+1. Add the new task to `super-plan.json` through the script with the next available ID, appropriate `batch`, and appropriate `layer`
 2. Set its `dependencies` to any tasks it depends on
 3. Update the plan file's File Structure section if the new task touches files not previously listed
 4. Dispatch the new task in the next batch
@@ -174,6 +174,6 @@ Key patterns in this skill were consolidated from:
 | obra/superpowers `executing-plans`                    | Sequential execution with checkpoints, when to stop and ask for help                                                           |
 | juliusbrussee/caveman (cavecrew)                      | Compressed output format per subagent role, ~60% context reduction per delegation                                              |
 | obra/superpowers `implementer-prompt`                 | Template for implementer dispatch: before-you-begin, code organization, escalation, self-review                                |
-| obra/superpowers `task-reviewer-prompt`               | Template for reviewer dispatch: do-not-trust-report, scope-limited, calibrated severity, output format                         |
+| obra/superpowers `task-reviewer-prompt`               | Consolidated into [`agents/code-reviewer.md`](../agents/code-reviewer.md): do-not-trust-report, scope limits, calibrated severity, and output format |
 | nibzard/awesome-agentic-patterns `sub-agent-spawning` | Three scales of spawning, practical 2-4 limit, trade-offs of parallelism                                                       |
 | kaicianflone/parallel-orchestrate                     | Wave-based execution, pre-flight checks, scope violation detection, checkpoint recovery                                        |

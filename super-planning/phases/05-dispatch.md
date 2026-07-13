@@ -1,5 +1,14 @@
 # Phase 5: Dispatch Subagents
 
+Before the first implementation wave, move the registry plan from `pending` to
+`in_progress` through the active helper. Do not write its status directly:
+
+```bash
+sh "$ACTIVE_SUPER_PLAN_SCRIPT" transition-plan \
+  --input docs/jobs/NNNN-<feature-name>/super-plan.json \
+  --status in_progress
+```
+
 ## Model Selection
 
 Use the least powerful model that can handle each role:
@@ -75,16 +84,10 @@ Before dispatching implementers, resolve the shared logging helper path that mat
 
 The orchestrator owns this shared helper path. Task directories should not receive a full copy of the logging implementation anymore.
 
-Resolve the review-package helper at the same time:
-
-1. If the target repo already contains this skill, use
-   `super-planning/scripts/review-package.sh`.
-2. Otherwise copy this skill's `scripts/review-package.sh` to
-   `.super-planning/review-package.sh` before the first reviewer dispatch.
-
-All later commands must use the resolved active helper path, just like the
-logging helper. Do not create a second review-package convention under
-`.superpowers/`.
+Resolve the review-package helper at the same time. It is part of the Phase 4
+bootstrap manifest, so select `super-planning/scripts/review-package.sh` in a
+vendored repository or `.super-planning/review-package.sh` otherwise. Do not
+create a second convention under `.superpowers/`.
 
 Every task entry carries `baseCommit`. During decomposition, pending tasks may
 use the literal placeholder `pending`; immediately before dispatch, replace it
@@ -198,7 +201,8 @@ For each task:
 1. Read the task entry from `docs/jobs/{NNNN-<feature-name>}/super-plan.json`.
 2. Resolve the task's `task_profile` and the corresponding `agents.<task_profile>` config.
 3. Validate the configured model/agent if present; otherwise use the system default.
-4. Do **not** create task directories in this phase.
+4. Ensure the Phase 5 task directory, task-local logger, and empty
+   `progress.log` were materialized before dispatching the implementer.
 5. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
 6. If the subagent asks questions, answer before letting it proceed.
 7. When the subagent returns `DONE`, update `super-plan.json` to `ready_for_review` via script so the ledger regenerates. For `DONE_WITH_CONCERNS`, read the concerns first: resolve correctness or scope concerns before review; observations may proceed to review but must be recorded in the report.
@@ -217,7 +221,8 @@ For independent tasks with no file conflicts:
 2. Resolve which profiles are needed in the wave from each task's `task_profile`.
 3. Validate the configured `agents.quick|general|deep` entries needed for the wave and run a lightweight pre-flight dispatch/probe before the real batch when the platform supports it.
 4. For any failed configured profile, clear `model` and `agent` in `super-plan.json` before the batch and use the system defaults instead.
-5. Do **not** create task directories in this phase.
+5. Ensure every task in the wave has its directory, task-local logger, and
+   empty `progress.log` before launching the wave.
 6. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.
 7. Wait for all to return.
 8. Mark returned tasks as `ready_for_review` via script so the ledger regenerates.

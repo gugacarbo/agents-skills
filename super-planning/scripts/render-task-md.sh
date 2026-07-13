@@ -108,6 +108,8 @@ def bullet_list(items):
 
 def render_plan_header():
     lines = []
+    lines.append("> **Process:** `super-planning` — generated from `super-plan.json` by the active super-planning helper.")
+    lines.append("")
     lines.append(f"# Task Brief: {feature_name}")
     lines.append("")
     lines.append(f"| Field | Value |")
@@ -274,7 +276,12 @@ def render_task(task):
     fdeleted = task.get("files", {}).get("deleted", [])
     tnotes = task.get("notes", [])
 
-    lines.append(f"## {tid}: {ttitle}")
+    # A task-only render has no plan header, so it still needs the mandatory
+    # process marker used by downstream handoff tooling.
+    if task_id_filter:
+        lines.append("> **Process:** `super-planning` — generated from `super-plan.json` by the active super-planning helper.")
+        lines.append("")
+    lines.append(f"# Task Brief: {tid}: {ttitle}" if task_id_filter else f"## {tid}: {ttitle}")
     lines.append("")
     lines.append(f"| Field | Value |")
     lines.append(f"|-------|-------|")

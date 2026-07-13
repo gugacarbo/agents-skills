@@ -4,7 +4,7 @@ Crie planos de implementação decompostos em tarefas e execute-os via subagente
 
 ## Modos de Invocação
 
-Quando invocada sem subcomando, a skill primeiro apresenta ao usuário um resumo das opções de entrada (`default`, `brainstorm`, `spec`, `plan`, `decompose`, `dispatch`, `review`, `integrate` e `stats/progress`) e depois segue automaticamente pelo fluxo `default`.
+Quando invocada sem subcomando, a skill primeiro apresenta ao usuário um resumo das opções de entrada (`default`, `brainstorm`, `spec`, `plan`, `decompose`, `dispatch`, `review`, `integrate` e `stats/progress`) e depois segue automaticamente pelo fluxo `default`. O namespace `/super-planning tool <nome>` executa uma ferramenta isolada e não inicia o fluxo por fases.
 
 | Comando                      | O que faz                                         |
 | ---------------------------- | ------------------------------------------------- |
@@ -16,23 +16,36 @@ Quando invocada sem subcomando, a skill primeiro apresenta ao usuário um resumo
 | `/super-planning dispatch`   | Inicia na Fase 5 (Dispatch) e continua.           |
 | `/super-planning review`     | Inicia na Fase 6 (Review) e continua.             |
 | `/super-planning integrate`  | Inicia na Fase 7 (Integrate).                     |
+| `/super-planning tool doctor` | Diagnostica ambiente, helpers, schema e proveniência. |
+| `/super-planning tool bootstrap` | Instala/atualiza o manifesto completo fora de um repo vendorizado. |
+| `/super-planning tool validate` | Valida registry ou payload de task sem persistir. |
+| `/super-planning tool transition` | Executa uma transição de lifecycle com guardrails. |
+| `/super-planning tool render-task` | Gera o brief Markdown de uma task. |
+| `/super-planning tool review-package` | Gera o pacote de review de uma task. |
+| `/super-planning tool stats` | Resume o progresso dos registries. |
 
 ## Fases
 
-| Fase          | O que produz                                                    | Ponto de verificação                                                                                       |
-| ------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 1. Brainstorm | Requisitos, restrições, decisões de design                      | Fluxo completo de brainstorm integrado                                                                     |
-| 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                                | Aprovação do usuário                                                                                       |
-| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                     | Verificação da documentação atual das bibliotecas/frameworks + checklist de auto-revisão                  |
+| Fase          | O que produz                                                   | Ponto de verificação                                                                                       |
+| ------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1. Brainstorm | Requisitos, restrições, decisões de design                     | Fluxo completo de brainstorm integrado                                                                     |
+| 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                               | Aprovação do usuário                                                                                       |
+| 3. Plan       | `docs/plans/NNNN-<nome>.md`                                    | Verificação da documentação atual das bibliotecas/frameworks + checklist de auto-revisão                   |
 | 4. Decompose  | `docs/jobs/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers, descoberta de perfis `general/deep/quick`, `task_profile` por task, e ledger gerado |
-| 5. Dispatch   | Trabalho dos subagentes                                         | Checks pré-voo, validação de `agent/model`, e fallback para default                                        |
-| 6. Review     | Revisão em dois estágios                                        | Issues críticos/importantes devem ser corrigidos                                                           |
-| 7. Integrate  | Revisão final, preparação para merge                            | Suite de testes completa passa                                                                             |
+| 5. Dispatch   | Trabalho dos subagentes                                        | Checks pré-voo, validação de `agent/model`, e fallback para default                                        |
+| 6. Review     | Revisão em dois estágios                                       | Issues críticos/importantes devem ser corrigidos                                                           |
+| 7. Integrate  | Revisão final, preparação para merge                           | Suite de testes completa passa                                                                             |
 
 Quando a skill não está vendorizada no repositório-alvo, a Fase 4 cria
-`.super-planning/` com os helpers, `super-planning-reference.json` e
-`super-update.sh`. A atualização usa o remote GitHub do repositório e não
-altera `.gitignore` automaticamente.
+`.super-planning/` com o manifesto completo: `super-plan.sh`,
+`super-update.sh`, `render-progress-ledger.sh`, `log-task.sh`,
+`review-package.sh`, `render-task-md.sh`, `summarize-all-tasks.sh`, `doctor.sh`,
+`bootstrap.sh` e o schema.
+`super-planning-reference.json` registra a proveniência explicitamente capturada
+da instalação de origem (repositório, ref e commit), não o remote do
+aplicativo-alvo; essa referência é o que permite ao updater buscar a skill
+correta. Se a origem não estiver em Git, não adivinhe esses valores: obtenha-os
+do instalador ou da release antes de criar a referência.
 
 ## Documentação Detalhada
 

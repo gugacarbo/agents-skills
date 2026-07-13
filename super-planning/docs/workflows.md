@@ -180,11 +180,11 @@ flowchart TD
     A["Read <repo>/docs/plans/NNNN-<feature>.md and testing handoff"] --> B["Resolve active helper: super-planning/scripts/ or <repo>/.super-planning/"]
     B --> C{"Target repo already contains super-planning?"}
     C -->|yes| D["Use in-repo scripts and schema"]
-    C -->|no| E["Bootstrap <repo>/.super-planning helpers + <repo>/.super-planning/super-planning-reference.json"]
+    C -->|no| E["Capture source skill repository/ref/commit; bootstrap complete helpers + reference"]
     D --> F["Initialize <repo>/docs/jobs/NNNN-<feature>/super-plan.json"]
     E --> F
     F --> G["Build task entries incrementally through helper"]
-    G --> H["Populate requirementsChecklist, fileStructure, dependencies, batches, phases"]
+    G --> H["Populate requirementsChecklist, fileStructure, dependencies, batches, layers, maxTries"]
     H --> I["Set every task pending; set plan metadata and source paths"]
     I --> J["Discover general/deep/quick profiles and available slots"]
     J --> K["Run pre-dispatch dependency, acceptance, and ownership conflict scan"]
@@ -326,7 +326,7 @@ flowchart TD
     G --> H{"Still blocked?"}
     H -->|yes| I["Escalate with evidence"]
     H -->|no| R
-    B -->|new task discovered| J["Add task through helper; set batch, phase, dependencies"] --> R
+    B -->|new task discovered| J["Add task through helper; set batch, layer, maxTries, dependencies"] --> R
     B -->|task no longer needed| K["Set cancelled; preserve record; update dependents and log"] --> R
     B -->|dependency changed| L["Update dependencies; move only pending tasks between batches"] --> R
     B -->|spec changed| M["Pause dispatch; assess impact; update and re-approve spec"]

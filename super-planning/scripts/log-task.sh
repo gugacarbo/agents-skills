@@ -7,7 +7,7 @@ set -euo pipefail
 #   scripts/log-task.sh \
 #     --plan 0003-auth-middleware \
 #     --task Task-A-1 \
-#     --event started|ready_for_review|failed|blocked|completed \
+#     --event started|ready_for_review|info|failed|blocked|completed \
 #     [--log-dir /absolute/path/to/docs/jobs/0003-auth-middleware/Task-A-1] \
 #     [--try 1] \
 #     [--max-tries 3] \
@@ -54,7 +54,7 @@ Usage:
   log-task.sh \
     --plan <plan-ref> \
     --task <task-id> \
-    --event <started|ready_for_review|failed|blocked|completed> \
+    --event <started|ready_for_review|info|failed|blocked|completed> \
     [--log-dir </absolute/path/to/task-dir>] \
     [--try N] \
     [--max-tries N] \
@@ -182,7 +182,9 @@ if [[ "$EVENT" == "completed" ]]; then
 fi
 
 case "$EVENT" in
-  started|ready_for_review|failed|blocked|completed)
+  # `info` is deliberately append-only: review findings and other
+  # observations must not be represented by a status transition.
+  started|ready_for_review|info|failed|blocked|completed)
     ;;
   *)
     echo "Invalid event: $EVENT" >&2

@@ -27,7 +27,8 @@ You receive exactly three artifacts:
 2. **The implementer's report** from `docs/jobs/{plan}/{task-id}/report.md` — their claims about what was done
 3. **The review package** from `docs/jobs/{plan}/{task-id}/review-package.diff.md` — commit metadata, stat summary, full diff with surrounding context, and implementer-reported verification
 
-These task artifact files are first materialized in Phase 6.
+The task directory, logger, and progress log are materialized in Phase 5. The
+report and review package used by this review are materialized in Phase 6.
 
 Read the review package once. It contains everything you need. **Do not re-run git commands. Do not crawl the broader codebase.** The review is scope-limited to the task's changes.
 

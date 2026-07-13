@@ -16,6 +16,8 @@ LOG_TASK_SCRIPT="$REPO_ROOT/super-planning/scripts/log-task.sh"
 SUMMARIZE_SCRIPT="$REPO_ROOT/super-planning/scripts/summarize-all-tasks.sh"
 RENDER_TASK_MD_SCRIPT="$REPO_ROOT/super-planning/scripts/render-task-md.sh"
 REVIEW_PACKAGE_SCRIPT="$REPO_ROOT/super-planning/scripts/review-package.sh"
+BOOTSTRAP_SCRIPT="$REPO_ROOT/super-planning/scripts/bootstrap.sh"
+DOCTOR_SCRIPT="$REPO_ROOT/super-planning/scripts/doctor.sh"
 
 fail() {
   printf 'FAIL: %s\n' "$1" >&2
@@ -98,7 +100,7 @@ def task(task_id, title, profile, batch, layer, status="completed", dependencies
         "reviewPackage": f"{payload['taskDirectory']}/{task_id}/review-package.diff.md",
         "progressLog": f"{payload['taskDirectory']}/{task_id}/progress.log",
         "logTaskScript": f"{payload['taskDirectory']}/{task_id}/log-task.sh",
-        "baseCommit": "pending",
+        "baseCommit": "test-base-commit",
         "dependencies": dependencies or [],
         "acceptanceCriteria": ["Focused tests pass"],
         "requirements": ["REQ-001"] if task_id == "Task-B-1" else [],
@@ -127,6 +129,32 @@ log_dir.mkdir(parents=True, exist_ok=True)
     '{"timestamp":"2026-07-04T14:10:00Z","task":"Task-A-1","event":"completed","try":1,"message":"Review clean; accepted by orchestrator"}\n',
     encoding="utf-8",
 )
+PY
+}
+
+set_task_state_directly() {
+  local registry="$1"
+  local task_id="$2"
+  local status="$3"
+  local base_commit="${4:-pending}"
+
+  python3 - "$registry" "$task_id" "$status" "$base_commit" <<'PY'
+import json
+import sys
+
+path, task_id, status, base_commit = sys.argv[1:]
+with open(path, encoding="utf-8") as handle:
+    payload = json.load(handle)
+for task in payload["tasks"]:
+    if task["id"] == task_id:
+        task["status"] = status
+        task["baseCommit"] = base_commit
+        break
+else:
+    raise SystemExit(f"missing task: {task_id}")
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(payload, handle, indent=2)
+    handle.write("\n")
 PY
 }
 
@@ -326,6 +354,7 @@ test_update_accepts_cancelled_task_status() {
   schema="$REPO_ROOT/super-planning/interfaces/super-plan.schema.json"
   mkdir -p "$(dirname "$registry")"
   create_test_plan_fixture "$registry"
+  set_task_state_directly "$registry" "Task-A-1" ready_for_review test-base-commit
 
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=cancelled >/dev/null
 
@@ -357,8 +386,11 @@ test_update_accepts_reviewing_task_status() {
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
   create_test_plan_fixture "$registry"
+  set_task_state_directly "$registry" "Task-A-1" pending pending
 
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set "tasks[Task-A-1].baseCommit=$(git -C "$REPO_ROOT" rev-parse HEAD)" >/dev/null
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=in_progress >/dev/null
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=ready_for_review >/dev/null
   "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=reviewing >/dev/null
 
   assert_contains_file '"status": "reviewing"' "$registry"
@@ -371,6 +403,7 @@ test_active_task_requires_base_commit() {
   registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
   mkdir -p "$(dirname "$registry")"
   create_test_plan_fixture "$registry"
+  set_task_state_directly "$registry" "Task-A-1" ready_for_review test-base-commit
   python3 - "$registry" <<'PY'
 import json
 import sys
@@ -824,16 +857,14 @@ test_render_task_md_single_task() {
 
   md_file="$tmp/task-b-brief.md"
   assert_exists "$md_file"
-  assert_contains_file "## Task-B-1:" "$md_file"
+  assert_contains_file "# Task Brief: Task-B-1:" "$md_file"
   assert_contains_file "Implementar middleware requireAuth" "$md_file"
   assert_contains_file "### Acceptance Criteria" "$md_file"
   assert_contains_file "### Steps" "$md_file"
   assert_contains_file "### Files" "$md_file"
   assert_contains_file "**Modified:**" "$md_file"
 
-  if grep -q "# Task Brief:" "$md_file"; then
-    fail "single task brief should not include plan header"
-  fi
+  assert_contains_file "Process:" "$md_file"
   if grep -q "## Goal" "$md_file"; then
     fail "single task brief should not include plan goal section"
   fi
@@ -882,6 +913,121 @@ test_append_task_validate_only() {
   local output
   output=$("$SUPER_PLAN_SCRIPT" append-task --input "$registry" --validate-only "$task_json" 2>&1) || fail "append-task --validate-only failed"
   echo "$output" | grep -q '"valid": true' || fail "expected valid:true in append-task --validate-only output"
+
+  local invalid_task_json='[{"id":"Task-Z-1"}]'
+  if "$SUPER_PLAN_SCRIPT" append-task --input "$registry" --validate-only "$invalid_task_json" >"$tmp/invalid.log" 2>&1; then
+    fail "append-task --validate-only accepted an invalid task array"
+  fi
+  assert_contains_file "missing required keys" "$tmp/invalid.log"
+  assert_contains_file '"tasks": []' "$registry"
+
+  local non_pending_task_json
+  non_pending_task_json=${task_json/\"status\":\"pending\"/\"status\":\"in_progress\"}
+  non_pending_task_json=${non_pending_task_json/\"baseCommit\":\"pending\"/\"baseCommit\":\"test-base-commit\"}
+  if "$SUPER_PLAN_SCRIPT" append-task --input "$registry" --tasks "$non_pending_task_json" >"$tmp/non-pending.log" 2>&1; then
+    fail "append-task accepted a task that skipped the pending state"
+  fi
+  assert_contains_file "New tasks must start with status pending" "$tmp/non-pending.log"
+}
+
+test_init_uses_documented_safe_defaults() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-sample/super-plan.json"
+
+  "$SUPER_PLAN_SCRIPT" init \
+    --plan-id 0001-sample \
+    --feature-name sample \
+    --spec docs/specs/0001-sample-spec.md \
+    --plan docs/plans/0001-sample.md \
+    --output "$registry" >/dev/null
+
+  assert_contains_file '"enabled": false' "$registry"
+  assert_contains_file '"executionMode": "sequential"' "$registry"
+  assert_contains_file '"reviewCadence": "per_task"' "$registry"
+}
+
+test_task_lifecycle_rejects_skipped_review_and_accepts_reviewed_completion() {
+  local tmp registry base
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+  set_task_state_directly "$registry" "Task-A-1" pending pending
+  base=$(git -C "$REPO_ROOT" rev-parse HEAD)
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set tasks[Task-A-1].status=completed >"$tmp/skipped-review.log" 2>&1; then
+    fail "task completed without passing the review lifecycle"
+  fi
+  assert_contains_file "Invalid task Task-A-1 status transition: pending -> completed" "$tmp/skipped-review.log"
+
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set "tasks[Task-A-1].baseCommit=$base" >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-task --input "$registry" --task-id Task-A-1 --status in_progress >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-task --input "$registry" --task-id Task-A-1 --status ready_for_review >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-task --input "$registry" --task-id Task-A-1 --status reviewing >/dev/null
+  "$SUPER_PLAN_SCRIPT" complete-task --input "$registry" --task-id Task-A-1 >/dev/null
+  assert_contains_file '"status": "completed"' "$registry"
+}
+
+test_plan_lifecycle_rejects_early_completion() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set status=completed >"$tmp/early-completion.log" 2>&1; then
+    fail "plan completed directly from pending"
+  fi
+  assert_contains_file "Invalid plan status transition: pending -> completed" "$tmp/early-completion.log"
+}
+
+test_plan_lifecycle_accepts_reviewed_completion_when_all_gates_pass() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+
+  "$SUPER_PLAN_SCRIPT" transition-plan --input "$registry" --status in_progress >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-plan --input "$registry" --status ready_for_review >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-plan --input "$registry" --status reviewing >/dev/null
+  "$SUPER_PLAN_SCRIPT" complete-plan --input "$registry" >/dev/null
+  assert_contains_file '"status": "completed"' "$registry"
+}
+
+test_completed_task_base_commit_rule_matches_schema() {
+  local tmp registry schema
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  schema="$REPO_ROOT/super-planning/interfaces/super-plan.schema.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+  set_task_state_directly "$registry" "Task-A-1" completed pending
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set 'goal=trigger validation' >"$tmp/validator.log" 2>&1; then
+    fail "registry validator accepted a completed task with baseCommit=pending"
+  fi
+  assert_contains_file "baseCommit" "$tmp/validator.log"
+
+  if python3 -c "import jsonschema" 2>/dev/null; then
+    if python3 - "$registry" "$schema" 2>"$tmp/schema-validation.log" <<'PY'
+import json
+import sys
+import jsonschema
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    registry = json.load(handle)
+with open(sys.argv[2], encoding="utf-8") as handle:
+    schema = json.load(handle)
+jsonschema.validate(registry, schema)
+PY
+    then
+      fail "JSON schema accepted a completed task with baseCommit=pending"
+    fi
+  else
+    echo "SKIP: jsonschema module not available, skipping completed-task schema agreement"
+  fi
 }
 
 test_update_set_requirement_status() {
@@ -931,8 +1077,50 @@ test_gitignore_template_contains_only_visual_companion_directory() {
   fi
 }
 
-# TODO: Add visual companion tests (start-server.sh, stop-server.sh) — skipped
-# because they require node and a running server.
+test_bootstrap_materializes_complete_flat_manifest_with_source_provenance() {
+  local tmp target commit doctor_output
+  tmp=$(mktemp -d)
+  target="$tmp/project/.super-planning"
+  commit=$(git -C "$REPO_ROOT" rev-parse HEAD)
+
+  sh "$BOOTSTRAP_SCRIPT" \
+    --source-dir "$REPO_ROOT/super-planning" \
+    --target-dir "$target" \
+    --repo-url https://github.com/gugacarbo/agents-skills.git \
+    --ref main \
+    --commit "$commit" >/dev/null
+
+  for file in super-plan.sh super-update.sh render-progress-ledger.sh log-task.sh review-package.sh render-task-md.sh summarize-all-tasks.sh doctor.sh bootstrap.sh super-plan.schema.json super-planning-reference.json; do
+    assert_exists "$target/$file"
+  done
+  for file in start-server.sh stop-server.sh server.cjs helper.js frame-template.html; do
+    assert_exists "$target/visual-companion/$file"
+  done
+  assert_contains_file '"repository": "https://github.com/gugacarbo/agents-skills.git"' "$target/super-planning-reference.json"
+  assert_contains_file "\"commit\": \"$commit\"" "$target/super-planning-reference.json"
+
+  doctor_output=$(cd "$REPO_ROOT" && sh "$DOCTOR_SCRIPT" --target-dir "$target" --visual)
+  printf '%s\n' "$doctor_output" | grep -Fq 'PASS super-planning-reference.json' || fail "doctor did not validate bootstrap provenance"
+}
+
+test_visual_companion_background_lifecycle() {
+  local tmp project session_dir stopped
+  if ! command -v node >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; then
+    echo "SKIP: node and curl are required for visual companion lifecycle coverage"
+    return 0
+  fi
+
+  tmp=$(mktemp -d)
+  project="$tmp/project"
+  mkdir -p "$project"
+  bash "$REPO_ROOT/super-planning/scripts/visual-companion/start-server.sh" \
+    --project-dir "$project" \
+    --idle-timeout-minutes 1 >/dev/null
+  session_dir=$(find "$project/.super-planning/brainstorm" -mindepth 1 -maxdepth 1 -type d -name '*-*' | head -n 1)
+  [ -n "$session_dir" ] || fail "visual companion did not create a session directory"
+  stopped=$(bash "$REPO_ROOT/super-planning/scripts/visual-companion/stop-server.sh" "$session_dir")
+  printf '%s\n' "$stopped" | grep -Fq '"status": "stopped"' || fail "visual companion did not stop its background server"
+}
 
 test_render_task_md_invalid_task_id_exits_with_error() {
   local tmp registry
@@ -975,9 +1163,16 @@ main() {
   test_render_task_md_empty_plan
   test_render_task_md_invalid_task_id_exits_with_error
   test_append_task_validate_only
+  test_init_uses_documented_safe_defaults
+  test_task_lifecycle_rejects_skipped_review_and_accepts_reviewed_completion
+  test_plan_lifecycle_rejects_early_completion
+  test_plan_lifecycle_accepts_reviewed_completion_when_all_gates_pass
+  test_completed_task_base_commit_rule_matches_schema
   test_update_set_requirement_status
   test_log_task_log_command
   test_gitignore_template_contains_only_visual_companion_directory
+  test_bootstrap_materializes_complete_flat_manifest_with_source_provenance
+  test_visual_companion_background_lifecycle
 
   printf 'PASS: super-planning.sh\n'
 }

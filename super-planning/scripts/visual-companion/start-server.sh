@@ -16,7 +16,7 @@
 #   --open                Auto-open the browser on the first screen (use only
 #                         after the user approves the visual companion).
 #   --foreground          Run server in the current terminal (no backgrounding).
-#   --background          Force background mode (overrides Codex auto-foreground).
+#   --background          Run detached (the default; retained as an explicit alias).
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -95,18 +95,9 @@ is_windows_like_shell() {
   return 1
 }
 
-# Some environments reap detached/background processes. Auto-foreground when detected.
-# Auto-foreground in platforms that reap background processes
-if [[ "$FOREGROUND" != "true" && "$FORCE_BACKGROUND" != "true" ]]; then
-  FOREGROUND="true"
-fi
-
-# Windows/Git Bash reaps nohup background processes. Auto-foreground when detected.
-if [[ "$FOREGROUND" != "true" && "$FORCE_BACKGROUND" != "true" ]]; then
-  if is_windows_like_shell; then
-    FOREGROUND="true"
-  fi
-fi
+# A generic runner expects this command to return its connection JSON. Keep
+# detached mode as the default; callers that need lifecycle ownership can opt
+# into --foreground explicitly. `--background` remains a compatibility alias.
 
 # Session files (server.log, server-info, .last-token) embed the session key —
 # keep everything this script and the server create owner-only.
@@ -119,7 +110,9 @@ if [[ -n "$PROJECT_DIR" ]]; then
   PROJECT_GITIGNORE="${PROJECT_DIR}/.super-planning/.gitignore"
   if [[ ! -e "$PROJECT_GITIGNORE" ]]; then
     mkdir -p "${PROJECT_DIR}/.super-planning"
-    cp "$SCRIPT_DIR/../../templates/.gitignore-template" "$PROJECT_GITIGNORE"
+    # A flat non-vendored helper install has no templates/ sibling. The
+    # companion needs only this one ignore rule, so create it directly.
+    printf 'brainstorm/\n' > "$PROJECT_GITIGNORE"
   fi
   SESSION_DIR="${PROJECT_DIR}/.super-planning/brainstorm/${SESSION_ID}"
   # Persist the bound port and key per project so a restart reuses them and an
@@ -193,20 +186,20 @@ echo "$SERVER_PID" > "$PID_FILE"
 for _ in {1..50}; do
   if grep -q "server-started" "$LOG_FILE" 2>/dev/null; then
     # Extract port from log line
-    local server_line
     server_line=$(grep "server-started" "$LOG_FILE" | head -1)
-    local server_port
     server_port=$(echo "$server_line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['port'])" 2>/dev/null || true)
     if [[ -n "$server_port" ]]; then
-      # Health check: verify server responds with a valid HTTP response
-      local health_result
-      health_result=$(curl -s -o /dev/null -w "%{http_code}" "http://$BIND_HOST:$server_port/?key=$TOKEN" 2>/dev/null || true)
-      if [[ "$health_result" != "403" && "$health_result" != "200" ]]; then
+      # The start record owns the authoritative session URL (including its
+      # key). Do not rely on an unset shell TOKEN or test an unauthenticated
+      # route, which would only prove the authorization gate returns 403.
+      server_url=$(echo "$server_line" | python3 -c 'import json, sys; from urllib.parse import urlsplit; record = json.load(sys.stdin); url = urlsplit(record["url"]); print("http://{}:{}{}?{}".format(sys.argv[1], record["port"], url.path, url.query))' "$BIND_HOST" 2>/dev/null || true)
+      health_result=$(curl -s -o /dev/null -w "%{http_code}" "$server_url" 2>/dev/null || true)
+      if [[ "$health_result" != "200" ]]; then
         # Wait a bit and retry once
         sleep 0.5
-        health_result=$(curl -s -o /dev/null -w "%{http_code}" "http://$BIND_HOST:$server_port/?key=$TOKEN" 2>/dev/null || true)
+        health_result=$(curl -s -o /dev/null -w "%{http_code}" "$server_url" 2>/dev/null || true)
       fi
-      if [[ "$health_result" != "403" && "$health_result" != "200" ]]; then
+      if [[ "$health_result" != "200" ]]; then
         echo "{\"error\": \"Server started but health check failed (HTTP $health_result). Retry with: $SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
         exit 1
       fi

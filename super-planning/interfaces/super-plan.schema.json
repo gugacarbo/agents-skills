@@ -276,6 +276,24 @@
 		"task": {
 			"type": "object",
 			"additionalProperties": false,
+			"allOf": [
+				{
+					"if": {
+						"properties": {
+							"status": {
+								"enum": ["in_progress", "ready_for_review", "reviewing", "needs_fix", "completed"]
+							}
+						}
+					},
+					"then": {
+						"properties": {
+							"baseCommit": {
+								"not": {"const": "pending"}
+							}
+						}
+					}
+				}
+			],
 		"required": [
 			"id",
 			"title",

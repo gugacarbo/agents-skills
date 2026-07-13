@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Bash required: uses [[ ]], local variables, and /proc command-line checks.
 # Stop the brainstorm server and clean up
 # Usage: stop-server.sh <session_dir>
 #

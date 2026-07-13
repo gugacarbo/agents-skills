@@ -1,7 +1,8 @@
 ---
 name: super-planning
-description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression. If the user invokes `/super-planning <phase>`, start from that phase and continue forward from there."
-user-invocable: true
+description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression. If the user invokes a named super-planning phase, start there and continue forward."
+metadata:
+  user-invocable: true
 ---
 
 # super-planning
@@ -29,6 +30,7 @@ Treat this file as an explicit, expandable router for entry phases.
 | `/super-planning review` | `review` | Start at Phase 6 and continue forward from there. Use only when implementation outputs already exist and are ready for review gates. | [`phases/06-review.md`](phases/06-review.md) |
 | `/super-planning integrate` | `integrate` | Start at Phase 7 and continue forward from there. Use only when reviewed outputs are ready to merge and finish. | [`phases/07-integrate.md`](phases/07-integrate.md) |
 | `/super-planning stats` | `stats` | Print a progress summary across all task registries. Aliases: `progress`, `task-stats`, `task-progress`. | This file, then run [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh) |
+| `/super-planning tool <name>` | `tool` | Run one toolbox helper and stop. Does not enter a workflow phase. | Toolbox routing below |
 
 **Routing rule:** If no subcommand is provided, always choose `default`.
 
@@ -45,11 +47,32 @@ Available super-planning entry points:
 - review: start at Phase 6 — run review gates
 - integrate: start at Phase 7 — run final verification and close the plan
 - stats/progress: summarize task progress
+- tool <name>: run one standalone helper without starting a phase
 ```
 
 After presenting this summary, continue with the normal routing rule: use `default`, and resolve whether to begin at Phase 1 or Phase 3 based on the presence of an approved spec. The summary is informational; do not pause for a choice unless the user explicitly asks to choose an entry phase.
 
 **Stats rule:** When the user invokes `/super-planning stats`, `/super-planning progress`, `/super-planning task-stats`, or `/super-planning task-progress`, run the active `summarize-all-tasks.sh` helper. Prefer the in-repo script at `super-planning/scripts/summarize-all-tasks.sh` when the skill is vendored; otherwise use the repo-local `.super-planning/summarize-all-tasks.sh` copied by Phase 4. Default scan directory is `docs/jobs`. Accept optional flags exactly as the script does: `--base-dir`, `--plan-id`, `--task-id` (requires `--plan-id`), `--json`. Produce only the script output plus a one-line note about the command used.
+
+## Toolbox Router
+
+`/super-planning tool <name>` runs exactly one named capability and then stops.
+It never invokes the forward-only phase workflow. Resolve helpers from the
+vendored skill first; otherwise use the complete `.super-planning/` bootstrap
+manifest created by Phase 4.
+
+| Toolbox command | Purpose | Active helper / contract |
+| --- | --- | --- |
+| `doctor` | Check Git, Python, Bash, Node (when visual companion is requested), worktree support, helper manifest, provenance, and schema availability before work begins. | `doctor.sh`; report actionable failures and do not mutate the registry. |
+| `bootstrap` | Materialize or refresh the complete non-vendored helper manifest and provenance file. | `bootstrap.sh --target-dir <repo>/.super-planning`. |
+| `validate` | Validate a registry or proposed task payload before it is persisted. | `super-plan.sh validate` / `append-task --validate-only` as available. |
+| `transition` | Make one lifecycle transition through the helper guardrail. | `super-plan.sh transition-task`, `transition-plan`, `complete-task`, or `complete-plan`; all validate the prior state and completion gates. |
+| `render-task` | Render one human-readable task brief. | `render-task-md.sh`. |
+| `review-package` | Generate one review package from a recorded base commit. | `review-package.sh`. |
+| `stats` | Summarize registries and task state. | `summarize-all-tasks.sh`. |
+
+If the requested helper is unavailable, say which manifest item is missing and
+run `tool bootstrap`; do not silently substitute a hand-written artifact.
 
 **Forward-only rule:** When a phase name is provided, start at that phase and execute the remaining phases in order unless the user explicitly asks to stop earlier.
 
@@ -78,7 +101,7 @@ After presenting this summary, continue with the normal routing rule: use `defau
 
 **Default rule:** Always run Phase 1 first when the user starts from an idea, request, or loose requirements. Skip it only when there is already an approved spec in the repo or when the user explicitly invoked a later phase.
 
-> **Note:** `user-invocable: true` in the frontmatter marks this skill as a direct entry point for the planning workflow, invocable by users via `/super-planning` and its phase subcommands.
+> **Note:** `metadata.user-invocable: true` marks this skill as a direct entry point for the planning workflow, invocable by users via `/super-planning` and its phase subcommands.
 
 ## Decision Flow
 
@@ -103,11 +126,11 @@ Want progress stats?
 
 - **Sequential mode:** one implementer + one reviewer according to `reviewCadence` (defined in [Phase 5 — DISPATCH](phases/05-dispatch.md)). Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously. Review timing is controlled by `reviewCadence`; with `per_task`, launch all finished-task reviewers immediately after the implementer wave returns. Requires file-level isolation.
-- **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it creates `.super-planning/` in the target repo and copies the registry/update helper stack there (`super-plan.sh`, `super-update.sh`, `render-progress-ledger.sh`, `super-plan.schema.json`); it also creates `super-planning-reference.json` with the current Git remote/ref/commit. Every later `super-plan.json` mutation must go through that active helper path, which regenerates the ledger immediately. Phase 5 uses the shared logging helper from the same active helper path and Phase 6 materializes each task directory plus task-local artifacts such as `report.md`, `review-package.diff.md`, wrapper `log-task.sh`, and `progress.log`.
+- **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it bootstraps the complete manifest in `.super-planning/`: `super-plan.sh`, `super-update.sh`, `render-progress-ledger.sh`, `log-task.sh`, `review-package.sh`, `render-task-md.sh`, `summarize-all-tasks.sh`, and `super-plan.schema.json`. It also writes `super-planning-reference.json` from explicitly captured source-skill provenance (repository, ref, commit), never from the target application remote. Every later registry mutation must go through the active helper path, which regenerates the ledger immediately. Phase 5 materializes task directories, logging wrappers, and `progress.log`; Phase 6 materializes reports and review packages.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 - **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → reviewing → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
-- **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. When Phase 6 materializes task artifacts, include the task directory, logging files, and `progress-ledger.md` in that summary. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/jobs/0001-auth/super-plan.json, docs/jobs/0001-auth/Task-A-1/log-task.sh, docs/jobs/0001-auth/progress-ledger.md`
+- **Output summary** — after creating artifacts for the current phase, print a one-line summary showing each file path so the user knows what was produced. Phase 5 summaries include the task directory, logging files, and `progress-ledger.md`; Phase 6 summaries include the report and review package. Example: `Created: docs/specs/0001-auth-spec.md, docs/plans/0001-auth.md, docs/jobs/0001-auth/super-plan.json, docs/jobs/0001-auth/Task-A-1/log-task.sh, docs/jobs/0001-auth/progress-ledger.md`
 - **Generated-document header** — every generated Markdown or text artifact must begin with a visible `Process: super-planning` marker and point the reader back to this skill and the active phase instructions. Preserve the marker when updating the artifact.
 - **Testing strategy** — Phase 2 asks whether TDD is required for behavior changes, records the decision in the spec, and resolves the repository's `testing-anti-patterns.md` guidance file. Later phases propagate that decision and guidance path into task rules, acceptance criteria, dispatch, review, and final verification.
 - **Pre-dispatch conflict gate** — before decomposition, scan task dependencies, global constraints, acceptance criteria, and parallel file ownership for contradictions. Resolve real conflicts in one batched user question before dispatch.
@@ -125,8 +148,8 @@ Want progress stats?
 | Task directory  | `docs/jobs/NNNN-<feature-name>/<task-id>/`         | Contains task report, review package, local logger, and task progress log        |
 | Task progress log | `docs/jobs/NNNN-<feature-name>/<task-id>/progress.log` | [`templates/progress-template.txt`](templates/progress-template.txt)             |
 | Progress ledger | `docs/jobs/NNNN-<feature-name>/progress-ledger.md` | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write |
-| Repo helpers     | `.super-planning/`                                  | Only created when the target repo does not already contain this `super-planning` skill; holds copied helper scripts and schema |
-| Skill reference  | `.super-planning/super-planning-reference.json`     | Created by `super-plan.sh reference`; records the GitHub remote and exact helper commit |
+| Repo helpers     | `.super-planning/`                                  | Only created when the target repo does not already contain this `super-planning` skill; holds the complete bootstrap helper manifest and schema |
+| Skill reference  | `.super-planning/super-planning-reference.json`     | Created from source-skill provenance; records source repository, ref, and exact helper commit |
 
 ## Prompt Library
 
@@ -146,7 +169,8 @@ Want progress stats?
 
 | Dependency | Version | Required For | Notes |
 | ---------- | ------- | ------------ | ----- |
-| `python3` | ≥ 3.8 | All scripts (super-plan.sh, render-progress-ledger.sh, summarize-all-tasks.sh, render-task-md.sh) | Required for `Optional`, `List`, `Dict` typing support |
+| `python3` | ≥ 3.9 | All scripts (super-plan.sh, render-progress-ledger.sh, summarize-all-tasks.sh, render-task-md.sh) | Required by the helper implementation and modern built-in generic typing |
+| `bash` | any modern Bash | Task lifecycle logging | `log-task.sh` uses Bash and is intentionally a Bash helper; core registry scripts remain POSIX `sh` |
 | `node` | ≥ 18 | Visual companion (start-server.sh, stop-server.sh) | Optional — only needed when using Phase 1 visual companion |
 | `flock` | util-linux | log-task.sh file locking | Part of `util-linux` on Linux. Optional on macOS (uses `mkdir` fallback) |
 | `git` | any | Review packages, spec-compliance auditor | Required for Phase 6 review gates and Phase 7 audit |
@@ -163,3 +187,5 @@ Want progress stats?
 - **Review package helper:** [`scripts/review-package.sh`](scripts/review-package.sh)
 - **Task brief renderer:** [`scripts/render-task-md.sh`](scripts/render-task-md.sh)
 - **All-tasks summarizer:** [`scripts/summarize-all-tasks.sh`](scripts/summarize-all-tasks.sh)
+- **Environment doctor:** [`scripts/doctor.sh`](scripts/doctor.sh)
+- **Non-vendored bootstrap:** [`scripts/bootstrap.sh`](scripts/bootstrap.sh)

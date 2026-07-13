@@ -39,6 +39,23 @@ Usage:
     [   --set <path>=<json-or-string>] \
     [--append <path>=<json-or-@file>] ...
 
+  super-plan.sh transition-task \
+    --input <docs/jobs/.../super-plan.json> \
+    --task-id <Task-A-1> \
+    --status <pending|in_progress|ready_for_review|reviewing|needs_fix|blocked|completed|cancelled>
+
+  super-plan.sh complete-task \
+    --input <docs/jobs/.../super-plan.json> \
+    --task-id <Task-A-1>
+
+  super-plan.sh complete-plan --input <docs/jobs/.../super-plan.json>
+
+  super-plan.sh transition-plan \
+    --input <docs/jobs/.../super-plan.json> \
+    --status <pending|in_progress|ready_for_review|reviewing|needs_fix|blocked|completed|cancelled>
+
+  super-plan.sh validate --input <docs/jobs/.../super-plan.json>
+
 Append-only update mode for tasks:
   super-plan.sh append-task \
     --input <docs/jobs/.../super-plan.json> \
@@ -110,7 +127,7 @@ def expect_string_list(value, path_label: str):
         expect_non_empty_string(item, f"{path_label}[{index}]")
 
 
-def expect_status(value, allowed: set[str], path_label: str):
+def expect_status(value, allowed, path_label: str):
     expect_non_empty_string(value, path_label)
     if value not in allowed:
         fail(f"{path_label} must be one of: {', '.join(sorted(allowed))}")
@@ -285,7 +302,7 @@ for index, task in enumerate(payload["tasks"]):
     expect_non_empty_string(task["progressLog"], f"{path_label}.progressLog")
     expect_non_empty_string(task["logTaskScript"], f"{path_label}.logTaskScript")
     expect_non_empty_string(task["baseCommit"], f"{path_label}.baseCommit")
-    if task["status"] in {"in_progress", "ready_for_review", "reviewing", "needs_fix"} and task["baseCommit"] == "pending":
+    if task["status"] in {"in_progress", "ready_for_review", "reviewing", "needs_fix", "completed"} and task["baseCommit"] == "pending":
         fail(f"{path_label}.baseCommit must be a commit SHA before the task leaves pending")
     expect_string_list(task["dependencies"], f"{path_label}.dependencies")
     expect_string_list(task["acceptanceCriteria"], f"{path_label}.acceptanceCriteria")
@@ -320,7 +337,7 @@ MODE="init"
 
 if [ "$#" -gt 0 ]; then
   case "$1" in
-    init|update|append-task|reference)
+    init|update|append-task|reference|transition-task|complete-task|complete-plan|transition-plan|validate)
       MODE="$1"
       shift
       ;;
@@ -331,6 +348,86 @@ if [ "$#" -gt 0 ]; then
       error_json 1 "Unknown subcommand: $1"
       ;;
   esac
+fi
+
+if [ "$MODE" = "validate" ]; then
+  INPUT_PATH=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --input) INPUT_PATH="$2"; shift 2 ;;
+      *) usage ;;
+    esac
+  done
+  if [ -z "$INPUT_PATH" ]; then
+    error_json 1 "validate requires --input"
+  fi
+  validate_json "$INPUT_PATH"
+  printf '%s\n' "$INPUT_PATH"
+  exit 0
+fi
+
+if [ "$MODE" = "complete-plan" ]; then
+  INPUT_PATH=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --input) INPUT_PATH="$2"; shift 2 ;;
+      *) usage ;;
+    esac
+  done
+  if [ -z "$INPUT_PATH" ]; then
+    error_json 1 "complete-plan requires --input"
+  fi
+  exec "$0" update --input "$INPUT_PATH" --set status=completed
+fi
+
+if [ "$MODE" = "transition-plan" ]; then
+  INPUT_PATH=""
+  NEXT_STATUS=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --input) INPUT_PATH="$2"; shift 2 ;;
+      --status) NEXT_STATUS="$2"; shift 2 ;;
+      *) usage ;;
+    esac
+  done
+  if [ -z "$INPUT_PATH" ] || [ -z "$NEXT_STATUS" ]; then
+    error_json 1 "transition-plan requires --input and --status"
+  fi
+  exec "$0" update --input "$INPUT_PATH" --set "status=$NEXT_STATUS"
+fi
+
+if [ "$MODE" = "transition-task" ] || [ "$MODE" = "complete-task" ]; then
+  INPUT_PATH=""
+  TASK_ID=""
+  NEXT_STATUS=""
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --input) INPUT_PATH="$2"; shift 2 ;;
+      --task-id) TASK_ID="$2"; shift 2 ;;
+      --status)
+        if [ "$MODE" = "complete-task" ]; then
+          error_json 1 "complete-task does not accept --status"
+        fi
+        NEXT_STATUS="$2"
+        shift 2
+        ;;
+      *) usage ;;
+    esac
+  done
+
+  if [ -z "$INPUT_PATH" ] || [ -z "$TASK_ID" ]; then
+    error_json 1 "$MODE requires --input and --task-id"
+  fi
+  if [ "$MODE" = "complete-task" ]; then
+    NEXT_STATUS="completed"
+  elif [ -z "$NEXT_STATUS" ]; then
+    error_json 1 "transition-task requires --status"
+  fi
+
+  # Delegate to the sole mutation path. Its transition validator is the
+  # authoritative lifecycle gate, so this command cannot bypass review.
+  exec "$0" update --input "$INPUT_PATH" --set "tasks[$TASK_ID].status=$NEXT_STATUS"
 fi
 
 if [ "$MODE" = "reference" ]; then
@@ -395,10 +492,10 @@ if [ "$MODE" = "init" ]; then
   BASE_BRANCH="${BASE_BRANCH:-main}"
   FEATURE_BRANCH=""
   TASK_DIRECTORY=""
-  WORKTREE_ENABLED=""
+  WORKTREE_ENABLED="false"
   WORKTREE_PATH=""
-  EXECUTION_MODE=""
-  REVIEW_CADENCE=""
+  EXECUTION_MODE="sequential"
+  REVIEW_CADENCE="per_task"
   SCHEMA_PATH=""
 
   while [ "$#" -gt 0 ]; do
@@ -461,8 +558,8 @@ if [ "$MODE" = "init" ]; then
     esac
   done
 
-  if [ -z "$PLAN_ID" ] || [ -z "$FEATURE_NAME" ] || [ -z "$SPEC_PATH" ] || [ -z "$PLAN_PATH" ] || [ -z "$OUTPUT_PATH" ] || [ -z "$WORKTREE_ENABLED" ] || [ -z "$EXECUTION_MODE" ] || [ -z "$REVIEW_CADENCE" ]; then
-    error_json 1 "Missing required argument for init: --plan-id, --feature-name, --spec, --plan, --output, --worktree-enabled, --execution-mode, --review-cadence"
+  if [ -z "$PLAN_ID" ] || [ -z "$FEATURE_NAME" ] || [ -z "$SPEC_PATH" ] || [ -z "$PLAN_PATH" ] || [ -z "$OUTPUT_PATH" ]; then
+    error_json 1 "Missing required argument for init: --plan-id, --feature-name, --spec, --plan, --output"
   fi
 
   case "$WORKTREE_ENABLED" in
@@ -609,6 +706,7 @@ if [ "$MODE" = "update" ]; then
   trap 'rm -f "$UPDATE_ARGS_FILE" "$TEMP_OUTPUT_PATH"' EXIT HUP INT TERM
 
   python3 - "$INPUT_PATH" "$UPDATE_ARGS_FILE" "$TEMP_OUTPUT_PATH" <<'PY'
+import copy
 import json
 import sys
 from pathlib import Path
@@ -753,6 +851,8 @@ with input_path.open("r", encoding="utf-8") as fh:
     except json.JSONDecodeError as exc:
         emit_error(f"Invalid JSON in input file {input_path}: {exc}")
 
+original_data = copy.deepcopy(data)
+
 with ops_path.open("r", encoding="utf-8") as fh:
     for raw_line in fh:
         raw_line = raw_line.rstrip("\n")
@@ -776,6 +876,66 @@ with ops_path.open("r", encoding="utf-8") as fh:
             set_value(data, path, value, append=(op == "--append"))
         except (KeyError, TypeError) as exc:
             emit_error(str(exc))
+
+
+TASK_TRANSITIONS = {
+    "pending": {"in_progress", "blocked", "cancelled"},
+    "in_progress": {"ready_for_review", "blocked", "cancelled"},
+    "ready_for_review": {"reviewing", "blocked", "cancelled"},
+    "reviewing": {"needs_fix", "completed", "blocked", "cancelled"},
+    "needs_fix": {"in_progress", "blocked", "cancelled"},
+    "blocked": {"pending", "in_progress", "cancelled"},
+    "completed": set(),
+    "cancelled": set(),
+}
+KNOWN_STATUSES = set(TASK_TRANSITIONS)
+
+
+def validate_transition(entity_label, previous, current, transitions):
+    if previous == current:
+        return
+    if current not in transitions.get(previous, set()):
+        emit_error(f"Invalid {entity_label} status transition: {previous} -> {current}")
+
+
+original_tasks = {task.get("id"): task for task in original_data.get("tasks", []) if isinstance(task, dict)}
+for task in data.get("tasks", []):
+    if not isinstance(task, dict) or task.get("id") not in original_tasks:
+        continue
+    previous_task = original_tasks[task["id"]]
+    previous_status = previous_task.get("status")
+    current_status = task.get("status")
+    # Leave malformed status values to the shared registry validator so callers
+    # receive the same enum error for update and append paths.
+    if previous_status in KNOWN_STATUSES and current_status in KNOWN_STATUSES:
+        validate_transition(f"task {task['id']}", previous_status, current_status, TASK_TRANSITIONS)
+    if current_status == "completed" and previous_status != "completed":
+        if task.get("baseCommit") in (None, "", "pending"):
+            emit_error(f"Task {task['id']} cannot complete without a recorded baseCommit")
+        if previous_status != "reviewing":
+            emit_error(f"Task {task['id']} can only complete after reviewing")
+
+PLAN_TRANSITIONS = {
+    "pending": {"in_progress", "blocked", "cancelled"},
+    "in_progress": {"ready_for_review", "blocked", "cancelled"},
+    "ready_for_review": {"reviewing", "blocked", "cancelled"},
+    "reviewing": {"needs_fix", "completed", "blocked", "cancelled"},
+    "needs_fix": {"in_progress", "blocked", "cancelled"},
+    "blocked": {"pending", "in_progress", "cancelled"},
+    "completed": set(),
+    "cancelled": set(),
+}
+previous_plan_status = original_data.get("status")
+current_plan_status = data.get("status")
+if previous_plan_status in KNOWN_STATUSES and current_plan_status in KNOWN_STATUSES:
+    validate_transition("plan", previous_plan_status, current_plan_status, PLAN_TRANSITIONS)
+if current_plan_status == "completed" and previous_plan_status != "completed":
+    unfinished_tasks = [task.get("id", "<unknown>") for task in data.get("tasks", []) if task.get("status") not in {"completed", "cancelled"}]
+    unfinished_requirements = [requirement.get("id", "<unknown>") for requirement in data.get("requirementsChecklist", []) if requirement.get("status") not in {"completed", "cancelled"}]
+    if unfinished_tasks:
+        emit_error("Plan cannot complete while tasks are unfinished: " + ", ".join(unfinished_tasks))
+    if unfinished_requirements:
+        emit_error("Plan cannot complete while requirements are unfinished: " + ", ".join(unfinished_requirements))
 
 from datetime import datetime, timezone
 data["updatedAt"] = datetime.now(timezone.utc).isoformat()
@@ -830,6 +990,10 @@ if [ "$MODE" = "append-task" ]; then
     error_json 1 "append-task requires at least one of --task, --tasks, or --validate-only"
   fi
 
+  if [ -n "$VALIDATE_ONLY" ] && { [ -n "$TASK_JSON" ] || [ -n "$TASKS_JSON" ]; }; then
+    error_json 1 "--validate-only cannot be combined with --task or --tasks"
+  fi
+
   TEMP_OUTPUT_PATH="$(mktemp)"
   trap 'rm -f "$TEMP_OUTPUT_PATH"' EXIT HUP INT TERM
 
@@ -875,20 +1039,30 @@ if validate_only:
     tasks_to_validate = parse_value(validate_only)
     if not isinstance(tasks_to_validate, list):
         emit_error("--validate-only value must be a JSON array")
-    print(json.dumps({"valid": True, "count": len(tasks_to_validate)}))
-    sys.exit(0)
+    # Validate the supplied array through the same complete registry validator
+    # used by writes. Do not merge it with existing tasks: this mode is used to
+    # check a prospective task array before it is appended or written.
+    data["tasks"] = tasks_to_validate
 
+new_tasks = []
 if task_json:
     task = parse_value(task_json)
     if not isinstance(task, dict):
         emit_error("--task value must be a JSON object")
-    data.setdefault("tasks", []).append(task)
+    new_tasks.append(task)
 
 if tasks_json:
     tasks = parse_value(tasks_json)
     if not isinstance(tasks, list):
         emit_error("--tasks value must be a JSON array")
-    data.setdefault("tasks", []).extend(tasks)
+    new_tasks.extend(tasks)
+
+for task in new_tasks:
+    if not isinstance(task, dict):
+        emit_error("--tasks entries must be JSON objects")
+    if task.get("status") != "pending":
+        emit_error("New tasks must start with status pending; use update for lifecycle transitions")
+data.setdefault("tasks", []).extend(new_tasks)
 
 with output_path.open("w", encoding="utf-8") as fh:
     json.dump(data, fh, indent=2)
@@ -896,6 +1070,19 @@ with output_path.open("w", encoding="utf-8") as fh:
 PY
 
   if [ -n "$VALIDATE_ONLY" ]; then
+    validate_json "$TEMP_OUTPUT_PATH"
+    python3 - "$VALIDATE_ONLY" <<'PY'
+import json
+import sys
+
+raw = sys.argv[1]
+if raw.startswith("@"):
+    with open(raw[1:], encoding="utf-8") as handle:
+        tasks = json.load(handle)
+else:
+    tasks = json.loads(raw)
+print(json.dumps({"valid": True, "count": len(tasks)}))
+PY
     exit 0
   fi
 
