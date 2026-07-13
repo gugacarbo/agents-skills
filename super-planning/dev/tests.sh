@@ -123,12 +123,16 @@ payload["tasks"][0]["files"]["created"] = ["src/types/auth.ts"]
 registry.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 root = registry.parent
-log_dir = root / "Task-A-1"
-log_dir.mkdir(parents=True, exist_ok=True)
-(log_dir / "progress.log").write_text(
-    '{"timestamp":"2026-07-04T14:10:00Z","task":"Task-A-1","event":"completed","try":1,"message":"Review clean; accepted by orchestrator"}\n',
-    encoding="utf-8",
-)
+for task_entry in payload["tasks"]:
+    task_dir = root / task_entry["id"]
+    task_dir.mkdir(parents=True, exist_ok=True)
+    (task_dir / "report.md").write_text("# Report\n\n# Process: super-planning\n", encoding="utf-8")
+    (task_dir / "review-package.diff.md").write_text("# Review package\n\n# Process: super-planning\n", encoding="utf-8")
+    (task_dir / "progress.log").write_text(
+        "{" + f'\"timestamp\":\"2026-07-04T14:09:00Z\",\"task\":\"{task_entry["id"]}\",\"event\":\"ready_for_review\",\"try\":1,\"message\":\"Ready for review\"' + "}\n"
+        + "{" + f'\"timestamp\":\"2026-07-04T14:10:00Z\",\"task\":\"{task_entry["id"]}\",\"event\":\"completed\",\"try\":1,\"message\":\"Review clean; accepted by orchestrator\"' + "}\n",
+        encoding="utf-8",
+    )
 PY
 }
 
@@ -529,19 +533,80 @@ except jsonschema.ValidationError as e:
     sys.exit(1)
 "
 
-  # Also validate that schema accepts all valid status values
+  # Check every authoritative enum and the critical required-field contracts.
   python3 -c "
 import json, jsonschema, sys
 with open('$schema') as f:
     s = json.load(f)
-status_enum = s['properties']['status']['enum']
-expected = {'pending', 'in_progress', 'ready_for_review', 'reviewing', 'needs_fix', 'blocked', 'completed', 'cancelled'}
-actual = set(status_enum)
-if actual != expected:
-    print(f'Schema status enum mismatch: extra={actual-expected} missing={expected-actual}', file=sys.stderr)
+expected_root = {'\$schema', 'planId', 'featureName', 'status', 'source', 'goal', 'architectureSummary', 'techStack', 'executionMode', 'reviewCadence', 'agents', 'branchStrategy', 'worktree', 'globalConstraints', 'fileStructure', 'requirementsChecklist', 'taskDirectory', 'rules', 'tasks'}
+if set(s['required']) != expected_root:
+    print('Schema root required keys drifted', file=sys.stderr)
     sys.exit(1)
-print('Status enum: PASS')
+expected = {'pending', 'in_progress', 'ready_for_review', 'reviewing', 'needs_fix', 'blocked', 'completed', 'cancelled'}
+for label, node in {
+    'plan': s['properties']['status'],
+    'task': s['\$defs']['task']['properties']['status'],
+    'requirement': s['\$defs']['requirement']['properties']['status'],
+}.items():
+    actual = set(node['enum'])
+    if actual != expected:
+        print(f'Schema {label} status enum mismatch: extra={actual-expected} missing={expected-actual}', file=sys.stderr)
+        sys.exit(1)
+task_required = set(s['\$defs']['task']['required'])
+for field in {'tryCount', 'maxTries', 'layer', 'reportFile', 'reviewPackage', 'progressLog', 'baseCommit'}:
+    if field not in task_required:
+        print(f'Schema task contract is missing {field}', file=sys.stderr)
+        sys.exit(1)
+print('Schema contract: PASS')
 " || fail "schema and validator status enums disagree"
+}
+
+test_validator_rejects_try_count_above_max_tries() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set 'tasks[Task-A-1].tryCount=4' >"$tmp/try-count.log" 2>&1; then
+    fail "validator accepted tryCount greater than maxTries"
+  fi
+  assert_contains_file 'tryCount must be <= maxTries' "$tmp/try-count.log"
+}
+
+test_validator_rejects_schema_forbidden_extra_task_property() {
+  local tmp registry
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set 'tasks[Task-A-1].undocumentedField=true' >"$tmp/extra-property.log" 2>&1; then
+    fail "validator accepted a task property forbidden by the schema"
+  fi
+  assert_contains_file 'unexpected keys: undocumentedField' "$tmp/extra-property.log"
+}
+
+test_completed_task_requires_review_artifacts_and_event() {
+  local tmp registry base task_dir
+  tmp=$(mktemp -d)
+  registry="$tmp/docs/jobs/0001-auth-middleware/super-plan.json"
+  mkdir -p "$(dirname "$registry")"
+  create_test_plan_fixture "$registry"
+  set_task_state_directly "$registry" "Task-A-1" pending pending
+  base=$(git -C "$REPO_ROOT" rev-parse HEAD)
+  task_dir="$(dirname "$registry")/Task-A-1"
+
+  "$SUPER_PLAN_SCRIPT" update --input "$registry" --set "tasks[Task-A-1].baseCommit=$base" >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-task --input "$registry" --task-id Task-A-1 --status in_progress >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-task --input "$registry" --task-id Task-A-1 --status ready_for_review >/dev/null
+  "$SUPER_PLAN_SCRIPT" transition-task --input "$registry" --task-id Task-A-1 --status reviewing >/dev/null
+
+  rm "$task_dir/review-package.diff.md"
+  if "$SUPER_PLAN_SCRIPT" complete-task --input "$registry" --task-id Task-A-1 >"$tmp/missing-artifact.log" 2>&1; then
+    fail "task completed without its review package"
+  fi
+  assert_contains_file 'cannot complete without reviewPackage' "$tmp/missing-artifact.log"
 }
 
 test_render_progress_ledger_includes_timeline_and_requirements() {
@@ -1153,6 +1218,8 @@ main() {
   test_update_rejects_invalid_task_profile_without_mutating_file
   test_render_progress_ledger_includes_timeline_and_requirements
   test_schema_validator_agreement
+  test_validator_rejects_try_count_above_max_tries
+  test_validator_rejects_schema_forbidden_extra_task_property
   test_materialized_logger_wrapper_writes_jsonl_events
   test_summarize_all_tasks_terminal_output
   test_summarize_all_tasks_json_output
@@ -1165,6 +1232,7 @@ main() {
   test_append_task_validate_only
   test_init_uses_documented_safe_defaults
   test_task_lifecycle_rejects_skipped_review_and_accepts_reviewed_completion
+  test_completed_task_requires_review_artifacts_and_event
   test_plan_lifecycle_rejects_early_completion
   test_plan_lifecycle_accepts_reviewed_completion_when_all_gates_pass
   test_completed_task_base_commit_rule_matches_schema

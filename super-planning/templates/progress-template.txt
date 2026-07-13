@@ -11,18 +11,19 @@ This file is append-only. Each line is a JSON object written through the task-lo
 The `log-task.sh` script appends one JSON object per line:
 
 ```json
-{"timestamp":"ISO8601","task":"Task-X-N","event":"started|ready_for_review|failed|blocked|completed","try":1,"maxTries":3,"message":"human-readable note"}
+{"timestamp":"ISO8601","task":"Task-X-N","event":"started|ready_for_review|info|failed|blocked|completed","try":1,"maxTries":3,"message":"human-readable note"}
 ```
 
 ## Supported Events
 
 - `started`   — subagent began working on the task
 - `ready_for_review` — implementer finished self-review and the task is ready for independent review
+- `info`       — orchestrator records a review finding or other audit note
 - `failed`     — subagent encountered an error and will retry (if retries remain)
 - `blocked`   — subagent cannot proceed without external input or decision
 - `completed` — orchestrator completed review and accepted the task
 
-Note: event values are **lowercase**. The script only accepts `started|ready_for_review|failed|blocked|completed`.
+Note: event values are **lowercase**. The script only accepts `started|ready_for_review|info|failed|blocked|completed`.
 
 ## Example Log
 

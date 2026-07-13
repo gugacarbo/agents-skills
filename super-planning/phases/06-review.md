@@ -120,6 +120,12 @@ When logging the clean completion, include `BASE..HEAD` and `review clean` in
 the event message so the generated ledger retains the commit range and review
 outcome after context compaction.
 
+The helper enforces this gate: before accepting `completed`, it requires a
+recorded `baseCommit`, the task's `report.md` and review package, and an
+orchestrator-written `completed` event in `progress.log`. Log that event first,
+then run `complete-task`; do not bypass the lifecycle with a generic status
+write.
+
 - `per_task` — the task can be completed right after its own clean review
 - `per_batch` — tasks in the batch can be completed after the batch review is clean
 - `final_only` — tasks stay at `ready_for_review` until their batch is reviewed during final integration in Phase 7; artifacts are still materialized now so Phase 7 has them

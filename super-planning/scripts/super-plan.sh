@@ -133,11 +133,15 @@ def expect_status(value, allowed, path_label: str):
         fail(f"{path_label} must be one of: {', '.join(sorted(allowed))}")
 
 
-def expect_keys(obj, required_keys, path_label: str):
+def expect_keys(obj, required_keys, path_label: str, optional_keys=()):
     expect_type(obj, dict, path_label)
     missing = [key for key in required_keys if key not in obj]
     if missing:
         fail(f"{path_label} is missing required keys: {', '.join(missing)}")
+    allowed = set(required_keys) | set(optional_keys)
+    unexpected = sorted(set(obj) - allowed)
+    if unexpected:
+        fail(f"{path_label} has unexpected keys: {', '.join(unexpected)}")
 
 
 with path.open("r", encoding="utf-8") as fh:
@@ -167,6 +171,7 @@ expect_keys(
         "tasks",
     ],
     "root",
+    ["createdAt", "updatedAt"],
 )
 
 expect_non_empty_string(payload["$schema"], "$schema")
@@ -290,6 +295,8 @@ for index, task in enumerate(payload["tasks"]):
         fail(f"{path_label}.tryCount must be an integer >= 1")
     if not isinstance(task["maxTries"], int) or task["maxTries"] < 1:
         fail(f"{path_label}.maxTries must be an integer >= 1")
+    if task["tryCount"] > task["maxTries"]:
+        fail(f"{path_label}.tryCount must be <= maxTries")
     expect_non_empty_string(task["task_profile"], f"{path_label}.task_profile")
     if task["task_profile"] not in TASK_PROFILES:
         fail(f"{path_label}.task_profile must be one of: {', '.join(sorted(TASK_PROFILES))}")
@@ -914,6 +921,34 @@ for task in data.get("tasks", []):
             emit_error(f"Task {task['id']} cannot complete without a recorded baseCommit")
         if previous_status != "reviewing":
             emit_error(f"Task {task['id']} can only complete after reviewing")
+        def resolve_existing_artifact(raw_path):
+            artifact = Path(raw_path)
+            if artifact.is_absolute():
+                return artifact
+            candidates = [Path.cwd(), *input_path.parents]
+            for candidate_root in candidates:
+                candidate = candidate_root / artifact
+                if candidate.is_file():
+                    return candidate
+            return candidates[0] / artifact
+
+        for artifact_name in ("reportFile", "reviewPackage"):
+            artifact = resolve_existing_artifact(task[artifact_name])
+            if not artifact.is_file():
+                emit_error(f"Task {task['id']} cannot complete without {artifact_name}: {task[artifact_name]}")
+        progress_log = resolve_existing_artifact(task["progressLog"])
+        if not progress_log.is_file():
+            emit_error(f"Task {task['id']} cannot complete without progressLog: {task['progressLog']}")
+        try:
+            events = [
+                json.loads(line).get("event")
+                for line in progress_log.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        except (OSError, json.JSONDecodeError) as exc:
+            emit_error(f"Task {task['id']} has an unreadable progressLog: {exc}")
+        if "completed" not in events:
+            emit_error(f"Task {task['id']} cannot complete without an orchestrator completed review event")
 
 PLAN_TRANSITIONS = {
     "pending": {"in_progress", "blocked", "cancelled"},

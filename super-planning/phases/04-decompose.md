@@ -216,6 +216,9 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
 > **Forward-references:** The paths `reportFile`, `reviewPackage`, `progressLog`, and `logTaskScript` in the task JSON are forward-references — the files will be created in later phases (5-6). Do NOT create the directories now; just record the intended paths.
 ```
 
+`tryCount` is the current attempt and must be between `1` and `maxTries`.
+The helper rejects a task when this invariant is violated.
+
 Minimum number of script invocations in this phase:
 
 - **1 call to `init`** for the plan skeleton.
