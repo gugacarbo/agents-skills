@@ -38,6 +38,44 @@ remove_test_artifacts() {
   \) -exec rm -f {} \;
 }
 
+remove_ignored_artifacts() {
+  build_dir=$1
+
+  find "$build_dir" -type d \( \
+    -name node_modules -o \
+    -name .pnpm-store -o \
+    -name build -o \
+    -name out -o \
+    -name .next -o \
+    -name .nuxt -o \
+    -name .idea -o \
+    -name logs -o \
+    -name coverage -o \
+    -name .cache -o \
+    -name __pycache__ -o \
+    -name .turbo -o \
+    -name .super-planning \
+  \) -prune -exec rm -rf {} \;
+
+  find "$build_dir" -type f \( \
+    -name package.json -o \
+    -name pnpm-lock.yaml -o \
+    -name package-lock.json -o \
+    -name yarn.lock -o \
+    -name bun.lockb -o \
+    -name bun.lock -o \
+    -name .env -o \
+    \( -name '.env.*' ! -name .env.example \) -o \
+    -name '*.swp' -o \
+    -name '*.swo' -o \
+    -name '*~' -o \
+    -name .DS_Store -o \
+    -name Thumbs.db -o \
+    -name '*.log' -o \
+    -name '*.tsbuildinfo' \
+  \) -exec rm -f {} \;
+}
+
 [ -d "$SKILLS_SOURCE_DIR" ] || die "Diretorio de skills nao encontrado: $SKILLS_SOURCE_DIR"
 [ "$BUILD_OUTPUT_DIR" != "$SKILLS_SOURCE_DIR" ] || die "A saida de build nao pode ser o diretorio de fontes"
 [ "$BUILD_TARGET_DIR" != "$SKILLS_SOURCE_DIR" ] || die "O destino de build nao pode ser o diretorio de fontes"
@@ -57,6 +95,7 @@ done
 [ "$copied_count" -gt 0 ] || die "Nenhuma skill elegivel foi encontrada para build"
 
 remove_test_artifacts "$BUILD_OUTPUT_DIR"
+remove_ignored_artifacts "$BUILD_OUTPUT_DIR"
 
 mkdir -p "$BUILD_TARGET_DIR"
 cp -R "$BUILD_OUTPUT_DIR/." "$BUILD_TARGET_DIR/"

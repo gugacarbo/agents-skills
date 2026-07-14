@@ -18,6 +18,28 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 | `dev`     | Observa as fontes e publica builds no destino escolhido |
 | `help`    | Exibe a ajuda com os comandos disponíveis             |
 
+## Desenvolvimento das skills
+
+As skills com código executável usam packages privados de desenvolvimento no
+workspace `pnpm`: `skill-master`, `super-planning` e
+`task-completion-notifier`. Os `package.json` ficam somente na árvore de
+fontes e são removidos pelo build antes da publicação.
+
+```sh
+pnpm install
+pnpm test                         # testes globais e testes das skills
+pnpm test:skills                  # somente testes das skills com package
+pnpm --filter @gugacarbo/skill-master test
+pnpm --filter @gugacarbo/skill-super-planning test
+pnpm --filter @gugacarbo/skill-task-completion-notifier test
+pnpm validate:skills              # validações opcionais declaradas por skill
+pnpm build                        # valida skills e gera dist/skills/
+```
+
+O workspace organiza o desenvolvimento, mas a distribuição continua sendo
+uma pasta de skill contendo `SKILL.md` e seus arquivos de runtime. Dependências
+e manifests de desenvolvimento não fazem parte do artefato instalado.
+
 ## Opções do `install`
 
 | Opção             | Descrição                                                               |

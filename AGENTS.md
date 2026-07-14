@@ -14,7 +14,10 @@ casa-standard-ref: 7cdb964                 # versão do casa-standard de origem 
 > Regras de um pacote específico → <subdir>/AGENTS.md (lazy nativo, nearest-wins).
 
 ## Contexto em 5 linhas
-<!-- O que este sistema é, pra quem, e qual o stack principal. Máximo 5 linhas. -->
+Repositório de skills reutilizáveis para agentes Codex e integrações relacionadas.
+As skills publicadas são pastas com `SKILL.md` e runtime; algumas têm tooling privado de desenvolvimento.
+O workspace usa pnpm para descobrir e executar os packages privados em `skills/*`.
+Scripts de build/teste usam Bash, Python e Node conforme a skill.
 
 ## Infra & ambientes
 <!-- Onde roda; o que é self-hosted. ⚠️ Liste ferramentas que NUNCA usar
@@ -23,13 +26,15 @@ casa-standard-ref: 7cdb964                 # versão do casa-standard de origem 
 
 ## Como rodar localmente
 ```bash
-# comandos exatos, copiáveis
+pnpm install
+pnpm test
+pnpm build
 ```
 
 ## Como validar (DoD global do repo)
 ```bash
-npm run typecheck        # exit 0
-npm test                 # tudo verde
+pnpm test                # exit 0
+pnpm build               # artefatos publicados válidos
 ```
 
 ## Como deployar
@@ -43,6 +48,10 @@ npm test                 # tudo verde
      descoberto pelo agente DEVE ser registrado aqui. -->
 
 -
+- `package.json` dentro de `skills/*` é tooling privado: o build remove manifests,
+  locks e diretórios de desenvolvimento antes de copiar para `dist/`.
+- O hook `scripts/pre-commit` usa `scripts/shared.sh`; não mover o arquivo sem
+  atualizar o caminho do source.
 
 ## Mapa de contexto
 <!-- Índice dos capítulos (docs/context/), cada um com QUANDO carregar.

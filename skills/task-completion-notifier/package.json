@@ -1,0 +1,10 @@
+{
+	"name": "@gugacarbo/skill-task-completion-notifier",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Development tooling for the task-completion-notifier skill.",
+	"scripts": {
+		"test": "bash -lc 'for test_script in tests/*.sh; do bash \"$test_script\"; done'",
+		"build": "bash -lc 'for file in scripts/*.sh; do bash -n \"$file\"; done' && python3 -c \"import ast, pathlib; [ast.parse(path.read_text()) for path in pathlib.Path('scripts').rglob('*.py')]\""
+	}
+}

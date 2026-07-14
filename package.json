@@ -4,15 +4,18 @@
 	"description": "Installable coding-agent skills and their shell orchestrator.",
 	"scripts": {
 		"dev": "sh src/dev.sh",
-		"build": "sh src/build.sh",
-		"test": "bash -lc 'for test_script in tests/*.sh skills/*/dev/tests.sh skills/*/tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done'",
+		"build": "pnpm run build:skills && sh src/build.sh",
+		"build:skills": "pnpm -r --if-present run build",
+		"test": "bash -lc 'for test_script in tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done' && pnpm run test:skills",
+		"test:skills": "pnpm -r --if-present run test",
+		"validate:skills": "pnpm -r --if-present run validate",
 		"lint": "biome check .",
 		"format:md": "pnpx prettier --write \"**/*.{md,mdx}\" --log-level=warn --no-error-on-unmatched-pattern  --cache",
 		"format:ts": "biome check --write .",
 		"format": "pnpm format:md && pnpm format:ts",
 		"typecheck": "tsc --noEmit",
 		"knip": "knip",
-		"prepare": "husky",
+		"prepare": "if command -v husky >/dev/null 2>&1; then husky; fi",
 		"lint-staged": "lint-staged",
 		"test-staged": "test-staged"
 	},
@@ -28,6 +31,8 @@
 	},
 	"type": "module",
 	"devDependencies": {
+		"test-staged": "^1.1.11",
+		"tsc-files": "^1.1.4",
 		"typescript": "^6.0.3"
 	}
 }
