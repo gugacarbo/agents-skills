@@ -75,8 +75,8 @@ For each checkable item extracted in Step 1, **read the relevant source files** 
 
 Assign one of these statuses:
 
-| Status                       | Meaning                                                        |
-| ---------------------------- | -------------------------------------------------------------- |
+| Status                        | Meaning                                                        |
+| ----------------------------- | -------------------------------------------------------------- |
 | ✅ **Implemented**            | The code matches the spec requirement fully                    |
 | ⚠️ **Partial**                | The requirement is partially implemented or lacks depth        |
 | ❌ **Missing**                | The requirement is absent from the implementation              |
@@ -113,11 +113,11 @@ Produce a structured **Spec Review Report** with the following sections:
 
 A concise table listing every item and its status.
 
-| ID  | Requirement                     | Status | Notes                  |
-| --- | ------------------------------- | ------ | ---------------------- |
-| 1.1 | Feature flag gating logic       | ✅      | -                      |
-| 2.5 | Cache key separation            | 🔀      | See deviation analysis |
-| ... | ...                                    | ...    | ...                    |
+| ID  | Requirement               | Status | Notes                  |
+| --- | ------------------------- | ------ | ---------------------- |
+| 1.1 | Feature flag gating logic | ✅     | -                      |
+| 2.5 | Cache key separation      | 🔀     | See deviation analysis |
+| ... | ...                       | ...    | ...                    |
 
 #### Deviation Analysis
 
@@ -165,11 +165,11 @@ Use Markdown. Use tables and headers for clarity. Aim for a report that a tech l
 
 When the audit produces more than 10 findings, provide a compressed summary table at the top:
 
-| Severity | Count |
-|:-|:-|
-| Critical | N |
-| Important | N |
-| Minor | N |
+| Severity  | Count |
+| :-------- | :---- |
+| Critical  | N     |
+| Important | N     |
+| Minor     | N     |
 
 Then only detail the High/Critical findings. Low findings can be listed by ID only.
 
@@ -178,10 +178,12 @@ Then only detail the High/Critical findings. Low findings can be listed by ID on
 ## Example Usage
 
 **User prompt:**
+
 > Here is our spec: [paste spec or attach spec file]
 > The codebase is checked out on the correct branch. Please explore it and review whether the implementation matches the spec.
 
 **Agent response:**
+
 > **File Map** — [list of files inspected]
 > [Full Spec Review Report as described above]
 

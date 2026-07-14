@@ -6,11 +6,11 @@ uses a privacy-safe desktop summary.
 
 ## Supported delivery
 
-| Platform | Manual notification | Lifecycle integration |
-| --- | --- | --- |
-| Linux | `notify-send`, graphical D-Bus session | Cursor, GitHub Copilot, OpenCode |
-| macOS | `osascript` | GitHub Copilot and hosts that can run Python hooks |
-| Windows | PowerShell toast | GitHub Copilot PowerShell hook |
+| Platform | Manual notification                    | Lifecycle integration                              |
+| -------- | -------------------------------------- | -------------------------------------------------- |
+| Linux    | `notify-send`, graphical D-Bus session | Cursor, GitHub Copilot, OpenCode                   |
+| macOS    | `osascript`                            | GitHub Copilot and hosts that can run Python hooks |
+| Windows  | PowerShell toast                       | GitHub Copilot PowerShell hook                     |
 
 The lifecycle mode is at-least-once until its state acknowledgment. A process
 crash after a desktop notification can cause a later retry and duplicate.

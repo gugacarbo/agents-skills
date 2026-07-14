@@ -25,15 +25,15 @@ Generate hierarchical AGENTS.md files. Two modes:
 
 ## Mode Comparison
 
-| Aspect                    | Default (full)                     | --light                             |
-| ------------------------- | ---------------------------------- | ----------------------------------- |
-| **Where**                 | Every directory                    | Only score > 8 (see Scoring Matrix) |
-| **Template size**         | Full (Key Files, Subdirs, AI Agents, Dependencies) | Telegraphic (OVERVIEW, WHERE TO LOOK, CONVENTIONS, ANTI-PATTERNS, COMMANDS) |
-| **Root target**           | ~100-200 lines                     | 50-150 lines                        |
-| **Subdir target**         | ~50-100 lines                      | 30-80 lines                         |
-| **Parent references**     | `<!-- Parent: ../AGENTS.md -->`       | None                                |
-| **Key content**           | Everything is documented           | Only non-obvious, project-specific info |
-| **Best for**              | New projects, team onboarding      | Mature codebases, personal projects   |
+| Aspect                | Default (full)                                     | --light                                                                     |
+| --------------------- | -------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Where**             | Every directory                                    | Only score > 8 (see Scoring Matrix)                                         |
+| **Template size**     | Full (Key Files, Subdirs, AI Agents, Dependencies) | Telegraphic (OVERVIEW, WHERE TO LOOK, CONVENTIONS, ANTI-PATTERNS, COMMANDS) |
+| **Root target**       | ~100-200 lines                                     | 50-150 lines                                                                |
+| **Subdir target**     | ~50-100 lines                                      | 30-80 lines                                                                 |
+| **Parent references** | `<!-- Parent: ../AGENTS.md -->`                    | None                                                                        |
+| **Key content**       | Everything is documented                           | Only non-obvious, project-specific info                                     |
+| **Best for**          | New projects, team onboarding                      | Mature codebases, personal projects                                         |
 
 ## Common Workflow (both modes)
 
@@ -70,14 +70,17 @@ Deduplicate, trim to limits, verify telegraphic style (light) or completeness (f
 # {Directory Name}
 
 ## Purpose
+
 {One-paragraph description}
 
 ## Key Files
+
 | File      | Description                  |
 | --------- | ---------------------------- |
 | `file.ts` | Brief description of purpose |
 
 ## Subdirectories
+
 | Directory | Purpose                                   |
 | --------- | ----------------------------------------- |
 | `subdir/` | What it contains (see `subdir/AGENTS.md`) |
@@ -85,20 +88,25 @@ Deduplicate, trim to limits, verify telegraphic style (light) or completeness (f
 ## For AI Agents
 
 ### Working In This Directory
+
 {Special instructions for AI agents modifying files here}
 
 ### Testing Requirements
+
 {How to test changes in this directory}
 
 ### Common Patterns
+
 {Code patterns or conventions used here}
 
 ## Dependencies
 
 ### Internal
+
 {References to other parts of the codebase this depends on}
 
 ### External
+
 {Key external packages/libraries used}
 
 <!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->
@@ -118,12 +126,12 @@ Every AGENTS.md (except root) includes a `<!-- Parent: -->` tag:
 
 ### Empty Directory Handling (Default Mode)
 
-| Condition                                  | Action                                                  |
-| ------------------------------------------ | ------------------------------------------------------- |
-| No files, no subdirectories                | **Skip**                                                |
-| No files, has subdirectories               | Minimal AGENTS.md with subdirectory listing only         |
-| Has only generated files (*.min.js, *.map) | Skip or minimal AGENTS.md                               |
-| Has only config files                      | Create AGENTS.md describing configuration purpose        |
+| Condition                                  | Action                                            |
+| ------------------------------------------ | ------------------------------------------------- |
+| No files, no subdirectories                | **Skip**                                          |
+| No files, has subdirectories               | Minimal AGENTS.md with subdirectory listing only  |
+| Has only generated files (*.min.js, *.map) | Skip or minimal AGENTS.md                         |
+| Has only config files                      | Create AGENTS.md describing configuration purpose |
 
 ### Parallelization Rules
 
@@ -151,7 +159,7 @@ Every AGENTS.md (except root) includes a `<!-- Parent: -->` tag:
 | Subdir count         | 2x     | >5                       | bash                        |
 | Code ratio           | 2x     | >70%                     | bash                        |
 | Unique patterns      | 1x     | Has own config           | explore                     |
-| Module boundary      | 2x     | Has index.ts/__init__.py | bash                        |
+| Module boundary      | 2x     | Has index.ts/**init**.py | bash                        |
 | Symbol density       | 2x     | >30 symbols              | lsp_workspace_symbols count |
 | Reference centrality | 3x     | >20 refs                 | lsp_find_references count   |
 

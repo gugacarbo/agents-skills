@@ -159,12 +159,15 @@
 		"agentProfile": {
 			"type": "object",
 			"additionalProperties": false,
-			"required": ["model", "agent"],
+			"required": ["model", "agent", "effort"],
 			"properties": {
 				"model": {
 					"type": "string"
 				},
 				"agent": {
+					"type": "string"
+				},
+				"effort": {
 					"type": "string"
 				}
 			}
@@ -281,27 +284,33 @@
 					"if": {
 						"properties": {
 							"status": {
-								"enum": ["in_progress", "ready_for_review", "reviewing", "needs_fix", "completed"]
+								"enum": [
+									"in_progress",
+									"ready_for_review",
+									"reviewing",
+									"needs_fix",
+									"completed"
+								]
 							}
 						}
 					},
 					"then": {
 						"properties": {
 							"baseCommit": {
-								"not": {"const": "pending"}
+								"not": { "const": "pending" }
 							}
 						}
 					}
 				}
 			],
-		"required": [
-			"id",
-			"title",
-			"description",
-			"status",
-			"tryCount",
-			"maxTries",
-			"task_profile",
+			"required": [
+				"id",
+				"title",
+				"description",
+				"status",
+				"tryCount",
+				"maxTries",
+				"task_profile",
 				"batch",
 				"layer",
 				"reportFile",
@@ -330,27 +339,27 @@
 				"description": {
 					"type": "string"
 				},
-			"status": {
-				"type": "string",
-				"enum": [
-					"pending",
-					"in_progress",
-					"ready_for_review",
-					"reviewing",
-					"needs_fix",
-					"blocked",
-					"completed",
-					"cancelled"
-				]
-			},
-			"tryCount": {
-				"type": "integer",
-				"minimum": 1
-			},
-			"maxTries": {
-				"type": "integer",
-				"minimum": 1
-			},
+				"status": {
+					"type": "string",
+					"enum": [
+						"pending",
+						"in_progress",
+						"ready_for_review",
+						"reviewing",
+						"needs_fix",
+						"blocked",
+						"completed",
+						"cancelled"
+					]
+				},
+				"tryCount": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"maxTries": {
+					"type": "integer",
+					"minimum": 1
+				},
 				"task_profile": {
 					"type": "string",
 					"enum": ["general", "deep", "quick"]

@@ -58,8 +58,8 @@ If any preferred capability is missing, adapt the execution mode instead of pret
 
 Before starting any implementation wave, especially a parallel wave, validate the configured execution slots against the current platform:
 
-1. Re-discover the currently available agents/subagents and models using the platform's available tools
-2. For each profile used by the pending tasks in the upcoming wave, verify whether the configured `agent` and `model` are still available
+1. Re-discover the currently available agents/subagents, models, and effort levels using the platform's available tools
+2. For each profile used by the pending tasks in the upcoming wave, verify whether the configured `agent`, `model`, and `effort` are still available
 3. Run a lightweight pre-flight dispatch/probe with the configured profile before launching the full batch when the platform supports such a test
 
 If a configured profile is empty:
@@ -69,11 +69,11 @@ If a configured profile is empty:
 
 If a configured profile fails validation or the pre-flight dispatch:
 
-1. Update `super-plan.json` through the active helper path and set that profile's `model` and `agent` to empty strings
+1. Update `super-plan.json` through the active helper path and set that profile's `model`, `agent`, and `effort` to empty strings
 2. Record that the orchestrator is falling back to the platform default selection
 3. Use the system default configuration for the real subagent dispatch
 
-Never keep retrying a broken explicit model/agent pairing across a batch. Clear it once, persist the fallback, and continue with the platform defaults.
+Never keep retrying a broken explicit model/agent/effort configuration across a batch. Clear it once, persist the fallback, and continue with the platform defaults.
 
 ## Resolve the Shared Logging Helper
 
@@ -200,7 +200,7 @@ For each task:
 
 1. Read the task entry from `docs/jobs/{NNNN-<feature-name>}/super-plan.json`.
 2. Resolve the task's `task_profile` and the corresponding `agents.<task_profile>` config.
-3. Validate the configured model/agent if present; otherwise use the system default.
+3. Validate the configured model/agent/effort if present; otherwise use the system default.
 4. Ensure the Phase 5 task directory, task-local logger, and empty
    `progress.log` were materialized before dispatching the implementer.
 5. Dispatch one implementer subagent with the task JSON entry + scene-setting context.
@@ -220,7 +220,7 @@ For independent tasks with no file conflicts:
 1. Extract all task entries from `super-plan.json` at once.
 2. Resolve which profiles are needed in the wave from each task's `task_profile`.
 3. Validate the configured `agents.quick|general|deep` entries needed for the wave and run a lightweight pre-flight dispatch/probe before the real batch when the platform supports it.
-4. For any failed configured profile, clear `model` and `agent` in `super-plan.json` before the batch and use the system defaults instead.
+4. For any failed configured profile, clear `model`, `agent`, and `effort` in `super-plan.json` before the batch and use the system defaults instead.
 5. Ensure every task in the wave has its directory, task-local logger, and
    empty `progress.log` before launching the wave.
 6. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.

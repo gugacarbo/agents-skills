@@ -131,20 +131,26 @@ Is the code well-built? Review the diff for the following categories.
 
 ```markdown
 ### Spec Compliance
+
 - ✅ Spec compliant | ❌ Issues found: [what's missing/extra/misunderstood, with file:line]
 - ⚠️ Cannot verify from diff: [requirements you could not verify]
 
 ### Strengths
+
 [What's well done? Be specific with file:line references.]
 
 ### Issues
+
 #### Critical (Must Fix)
+
 #### Important (Should Fix)
+
 #### Minor (Nice to Have)
 
 For each issue: file:line, what's wrong, why it matters, how to fix.
 
 ### Assessment
+
 **Task quality:** [Approved | Needs fixes]
 **Reasoning:** [1-2 sentence technical assessment]
 ```
@@ -162,11 +168,11 @@ Findings sorted file then line ascending. Emoji severity: 🔴 Critical, 🟡 Im
 
 ## Handling Review Outcomes
 
-| Finding severity | Meaning                      | Action                                      |
-| ---------------- | ---------------------------- | ------------------------------------------- |
-| **Critical**    | Must fix before proceeding   | Dispatch fix subagent, re-review            |
-| **Important**   | Should fix, blocks merge     | Dispatch fix subagent, re-review            |
-| **Minor**       | Nice to have                 | Record in the task `progress.log` with file/line, impact, and recommended follow-up |
+| Finding severity | Meaning                    | Action                                                                              |
+| ---------------- | -------------------------- | ----------------------------------------------------------------------------------- |
+| **Critical**     | Must fix before proceeding | Dispatch fix subagent, re-review                                                    |
+| **Important**    | Should fix, blocks merge   | Dispatch fix subagent, re-review                                                    |
+| **Minor**        | Nice to have               | Record in the task `progress.log` with file/line, impact, and recommended follow-up |
 
 Only mark a task `completed` once its review is clean for the configured
 `reviewCadence` and all unverifiable items have been resolved by the

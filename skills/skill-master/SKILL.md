@@ -37,12 +37,12 @@ Capture the intended capability, trigger conditions, output contract, inputs,
 dependencies, and success criteria. Classify the skill before choosing its
 tests:
 
-| Type | Main question | Useful test |
-| --- | --- | --- |
-| Discipline | Will the agent follow a rule under pressure? | Pressure scenario and rationalization capture |
-| Technique | Can the agent apply a method to a new case? | Application and edge-case scenarios |
-| Pattern | Can the agent recognize when a mental model applies? | Recognition, application, and counter-example |
-| Reference | Can the agent retrieve and apply the right fact? | Retrieval and correctness assertions |
+| Type       | Main question                                        | Useful test                                   |
+| ---------- | ---------------------------------------------------- | --------------------------------------------- |
+| Discipline | Will the agent follow a rule under pressure?         | Pressure scenario and rationalization capture |
+| Technique  | Can the agent apply a method to a new case?          | Application and edge-case scenarios           |
+| Pattern    | Can the agent recognize when a mental model applies? | Recognition, application, and counter-example |
+| Reference  | Can the agent retrieve and apply the right fact?     | Retrieval and correctness assertions          |
 
 For authoring structure, descriptions, naming, examples, and token budgets,
 read [`references/authoring.md`](references/authoring.md). For baseline design,

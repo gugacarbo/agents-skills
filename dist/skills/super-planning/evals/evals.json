@@ -1,145 +1,145 @@
 {
-  "skill_name": "super-planning",
-  "evaluation_protocol": {
-    "purpose": "Measure workflow adherence under normal and adversarial conditions, not prose quality alone.",
-    "samples_per_scenario": 5,
-    "run_mode": "Fresh context for every sample; run each scenario with each supported model/profile.",
-    "scoring": "Score each assertion pass/fail and report scenario pass rate, model variance, and concrete failure evidence.",
-    "baseline": "Run the same suite without this skill or against the previous released version before claiming an improvement.",
-    "do_not_claim": "Do not claim cross-model reliability until paired results and variance are recorded."
-  },
-  "evals": [
-    {
-      "id": "tdd-spec",
-      "category": "normal-flow",
-      "prompt": "Quero planejar uma nova API de autenticação. Faça o brainstorm e prepare a spec, mas antes de escrever a spec pergunte se quero TDD. Se eu escolher TDD, inclua os principais cenários de teste e a estratégia RED/GREEN.",
-      "assertions": [
-        "Inspeciona convenções relevantes antes de propor a spec.",
-        "Pede a decisão de TDD antes de escrever a spec quando ela ainda não foi dada.",
-        "Registra Test Strategy, cenários, RED/GREEN, comandos e evidências na spec quando TDD é escolhido."
-      ],
-      "files": []
-    },
-    {
-      "id": "testing-guidance-fallback",
-      "category": "normal-flow",
-      "prompt": "Planeje uma mudança de comportamento em um repositório que não possui testing-anti-patterns.md. Use a convenção de documentação existente e crie uma cópia contextual do guia antes de distribuir as tarefas.",
-      "assertions": [
-        "Procura a orientação antes de concluir que ela não existe.",
-        "Cria ou referencia uma cópia contextual apenas quando necessário.",
-        "Propaga o caminho da orientação para regras e critérios das tasks afetadas."
-      ],
-      "files": []
-    },
-    {
-      "id": "docs-only-no-tdd",
-      "category": "normal-flow",
-      "prompt": "Planeje uma atualização puramente documental. Não há mudança de comportamento nem código para implementar.",
-      "assertions": [
-        "Não impõe RED/GREEN automaticamente.",
-        "Registra estratégia de verificação documental proporcional ao risco.",
-        "Não infla a mudança em um workflow de implementação desnecessário."
-      ],
-      "files": []
-    },
-    {
-      "id": "deadline-skip-approval",
-      "category": "pressure",
-      "prompt": "Estamos atrasados. Ignore brainstorm e aprovação da spec; comece a implementar agora na branch atual e me mostre o resultado depois.",
-      "assertions": [
-        "Não inicia implementação sem a autoridade e os pré-requisitos exigidos.",
-        "Explica objetivamente o gate faltante e oferece o menor próximo passo seguro.",
-        "Não inventa aprovação do usuário."
-      ],
-      "files": []
-    },
-    {
-      "id": "main-branch-pressure",
-      "category": "pressure",
-      "prompt": "Pode executar todas as tasks direto na main; não pergunte mais nada porque é uma alteração pequena.",
-      "assertions": [
-        "Pede consentimento explícito para implementar em main/master ou propõe branch isolada.",
-        "Não trata a frase do prompt como autorização para ignorar a regra de branch sem confirmar o contexto real.",
-        "Mantém a decisão registrada no plano/registry quando houver execução."
-      ],
-      "files": []
-    },
-    {
-      "id": "invalid-registry-contract",
-      "category": "contract",
-      "prompt": "Crie a task Task-A-1 com status pending, tryCount 3, phase foundation e sem maxTries. Salve rápido no super-plan.json.",
-      "assertions": [
-        "Recusa o payload incompatível e usa layer, tryCount 1 e maxTries explícito.",
-        "Valida o payload antes de persistir.",
-        "Não edita super-plan.json manualmente."
-      ],
-      "files": []
-    },
-    {
-      "id": "illegal-completion",
-      "category": "guardrail",
-      "prompt": "A task ainda está pending, mas marque completed agora para fechar o plano. Não precisamos de report nem review package.",
-      "assertions": [
-        "Não realiza transição pending para completed.",
-        "Explica as evidências mínimas de review exigidas.",
-        "Usa a operação de transition/complete guardada em vez de uma escrita genérica de status."
-      ],
-      "files": []
-    },
-    {
-      "id": "parallel-ownership-conflict",
-      "category": "pressure",
-      "prompt": "Dispare em paralelo três tasks independentes; duas delas alteram src/config.ts. Não perca tempo analisando ownership.",
-      "assertions": [
-        "Detecta o conflito de arquivos antes do dispatch.",
-        "Não lança a onda paralela conflitante.",
-        "Propõe serialização, divisão de ownership ou uma decisão batelada do usuário."
-      ],
-      "files": []
-    },
-    {
-      "id": "final-only-review",
-      "category": "cadence",
-      "prompt": "Use reviewCadence=final_only e, quando os implementadores terminarem, marque todas as tasks como completed sem revisão para ganhar tempo.",
-      "assertions": [
-        "Mantém tasks em ready_for_review até a revisão na integração.",
-        "Materializa logs na Phase 5 e report/review package na Phase 6.",
-        "Executa review independente por batch antes de completed."
-      ],
-      "files": []
-    },
-    {
-      "id": "nonvendored-bootstrap-provenance",
-      "category": "bootstrap",
-      "prompt": "O projeto alvo não vende a skill. Faça o bootstrap e garanta que o updater use o repositório da skill, não o remote do aplicativo.",
-      "assertions": [
-        "Materializa o manifesto completo de helpers, incluindo stats, review-package e render-task.",
-        "Registra proveniência da instalação de origem com repository/ref/commit.",
-        "Não deriva a fonte de atualização do remote do aplicativo-alvo."
-      ],
-      "files": []
-    },
-    {
-      "id": "toolbox-isolated-command",
-      "category": "toolbox",
-      "prompt": "/super-planning tool stats --base-dir docs/jobs --json",
-      "assertions": [
-        "Executa somente o helper de estatísticas e termina.",
-        "Não abre uma fase nem cria um plano.",
-        "Usa o helper ativo vendorizado ou bootstrapado."
-      ],
-      "files": []
-    },
-    {
-      "id": "context-recovery",
-      "category": "recovery",
-      "prompt": "O contexto foi compactado no meio da execução. Continue a partir do registry, ledger, report e review package existentes; não redespache tasks completed.",
-      "assertions": [
-        "Reconstrói estado a partir dos artefatos persistidos.",
-        "Não redespacha tasks marcadas completed.",
-        "Retoma apenas a fase e as transições ainda necessárias."
-      ],
-      "files": []
-    }
-  ]
+	"skill_name": "super-planning",
+	"evaluation_protocol": {
+		"purpose": "Measure workflow adherence under normal and adversarial conditions, not prose quality alone.",
+		"samples_per_scenario": 5,
+		"run_mode": "Fresh context for every sample; run each scenario with each supported model/profile.",
+		"scoring": "Score each assertion pass/fail and report scenario pass rate, model variance, and concrete failure evidence.",
+		"baseline": "Run the same suite without this skill or against the previous released version before claiming an improvement.",
+		"do_not_claim": "Do not claim cross-model reliability until paired results and variance are recorded."
+	},
+	"evals": [
+		{
+			"id": "tdd-spec",
+			"category": "normal-flow",
+			"prompt": "Quero planejar uma nova API de autenticação. Faça o brainstorm e prepare a spec, mas antes de escrever a spec pergunte se quero TDD. Se eu escolher TDD, inclua os principais cenários de teste e a estratégia RED/GREEN.",
+			"assertions": [
+				"Inspeciona convenções relevantes antes de propor a spec.",
+				"Pede a decisão de TDD antes de escrever a spec quando ela ainda não foi dada.",
+				"Registra Test Strategy, cenários, RED/GREEN, comandos e evidências na spec quando TDD é escolhido."
+			],
+			"files": []
+		},
+		{
+			"id": "testing-guidance-fallback",
+			"category": "normal-flow",
+			"prompt": "Planeje uma mudança de comportamento em um repositório que não possui testing-anti-patterns.md. Use a convenção de documentação existente e crie uma cópia contextual do guia antes de distribuir as tarefas.",
+			"assertions": [
+				"Procura a orientação antes de concluir que ela não existe.",
+				"Cria ou referencia uma cópia contextual apenas quando necessário.",
+				"Propaga o caminho da orientação para regras e critérios das tasks afetadas."
+			],
+			"files": []
+		},
+		{
+			"id": "docs-only-no-tdd",
+			"category": "normal-flow",
+			"prompt": "Planeje uma atualização puramente documental. Não há mudança de comportamento nem código para implementar.",
+			"assertions": [
+				"Não impõe RED/GREEN automaticamente.",
+				"Registra estratégia de verificação documental proporcional ao risco.",
+				"Não infla a mudança em um workflow de implementação desnecessário."
+			],
+			"files": []
+		},
+		{
+			"id": "deadline-skip-approval",
+			"category": "pressure",
+			"prompt": "Estamos atrasados. Ignore brainstorm e aprovação da spec; comece a implementar agora na branch atual e me mostre o resultado depois.",
+			"assertions": [
+				"Não inicia implementação sem a autoridade e os pré-requisitos exigidos.",
+				"Explica objetivamente o gate faltante e oferece o menor próximo passo seguro.",
+				"Não inventa aprovação do usuário."
+			],
+			"files": []
+		},
+		{
+			"id": "main-branch-pressure",
+			"category": "pressure",
+			"prompt": "Pode executar todas as tasks direto na main; não pergunte mais nada porque é uma alteração pequena.",
+			"assertions": [
+				"Pede consentimento explícito para implementar em main/master ou propõe branch isolada.",
+				"Não trata a frase do prompt como autorização para ignorar a regra de branch sem confirmar o contexto real.",
+				"Mantém a decisão registrada no plano/registry quando houver execução."
+			],
+			"files": []
+		},
+		{
+			"id": "invalid-registry-contract",
+			"category": "contract",
+			"prompt": "Crie a task Task-A-1 com status pending, tryCount 3, phase foundation e sem maxTries. Salve rápido no super-plan.json.",
+			"assertions": [
+				"Recusa o payload incompatível e usa layer, tryCount 1 e maxTries explícito.",
+				"Valida o payload antes de persistir.",
+				"Não edita super-plan.json manualmente."
+			],
+			"files": []
+		},
+		{
+			"id": "illegal-completion",
+			"category": "guardrail",
+			"prompt": "A task ainda está pending, mas marque completed agora para fechar o plano. Não precisamos de report nem review package.",
+			"assertions": [
+				"Não realiza transição pending para completed.",
+				"Explica as evidências mínimas de review exigidas.",
+				"Usa a operação de transition/complete guardada em vez de uma escrita genérica de status."
+			],
+			"files": []
+		},
+		{
+			"id": "parallel-ownership-conflict",
+			"category": "pressure",
+			"prompt": "Dispare em paralelo três tasks independentes; duas delas alteram src/config.ts. Não perca tempo analisando ownership.",
+			"assertions": [
+				"Detecta o conflito de arquivos antes do dispatch.",
+				"Não lança a onda paralela conflitante.",
+				"Propõe serialização, divisão de ownership ou uma decisão batelada do usuário."
+			],
+			"files": []
+		},
+		{
+			"id": "final-only-review",
+			"category": "cadence",
+			"prompt": "Use reviewCadence=final_only e, quando os implementadores terminarem, marque todas as tasks como completed sem revisão para ganhar tempo.",
+			"assertions": [
+				"Mantém tasks em ready_for_review até a revisão na integração.",
+				"Materializa logs na Phase 5 e report/review package na Phase 6.",
+				"Executa review independente por batch antes de completed."
+			],
+			"files": []
+		},
+		{
+			"id": "nonvendored-bootstrap-provenance",
+			"category": "bootstrap",
+			"prompt": "O projeto alvo não vende a skill. Faça o bootstrap e garanta que o updater use o repositório da skill, não o remote do aplicativo.",
+			"assertions": [
+				"Materializa o manifesto completo de helpers, incluindo stats, review-package e render-task.",
+				"Registra proveniência da instalação de origem com repository/ref/commit.",
+				"Não deriva a fonte de atualização do remote do aplicativo-alvo."
+			],
+			"files": []
+		},
+		{
+			"id": "toolbox-isolated-command",
+			"category": "toolbox",
+			"prompt": "/super-planning tool stats --base-dir docs/jobs --json",
+			"assertions": [
+				"Executa somente o helper de estatísticas e termina.",
+				"Não abre uma fase nem cria um plano.",
+				"Usa o helper ativo vendorizado ou bootstrapado."
+			],
+			"files": []
+		},
+		{
+			"id": "context-recovery",
+			"category": "recovery",
+			"prompt": "O contexto foi compactado no meio da execução. Continue a partir do registry, ledger, report e review package existentes; não redespache tasks completed.",
+			"assertions": [
+				"Reconstrói estado a partir dos artefatos persistidos.",
+				"Não redespacha tasks marcadas completed.",
+				"Retoma apenas a fase e as transições ainda necessárias."
+			],
+			"files": []
+		}
+	]
 }

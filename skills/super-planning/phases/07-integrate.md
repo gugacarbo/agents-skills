@@ -107,11 +107,13 @@ Set the plan's `status` field to `completed` in `super-plan.json`. Run `render-p
 Open the spec document and fill in the `implemented-by` field with the real paths that deliver the spec. The `implemented-by` value comes from the `fileStructure` entries in `super-plan.json` — list the key files that were created or modified to implement the spec.
 
 Example:
+
 ```markdown
 implemented-by:
-  - src/auth/middleware.ts
-  - src/auth/token.ts
-  - tests/auth/middleware.test.ts
+
+- src/auth/middleware.ts
+- src/auth/token.ts
+- tests/auth/middleware.test.ts
 ```
 
 ## Step 9: Commit the Final Work

@@ -57,6 +57,7 @@ Make output contracts explicit when shape matters:
 ## Output contract
 
 Return these sections in this order:
+
 1. Verdict
 2. Evidence
 3. Recommended action

@@ -105,11 +105,11 @@ Read the full spec and extract its structure:
 
 For each finding, assign a severity:
 
-| Severity | Meaning | Action |
-|----------|---------|--------|
-| 🔴 **Critical** | Will cause an implementer to build the wrong thing or get blocked | Must fix before planning |
-| 🟡 **Important** | Will cause ambiguity, rework, or confusion during implementation | Should fix before planning |
-| 🔵 **Minor** | Nice to improve but won't block implementation | Record and consider |
+| Severity         | Meaning                                                           | Action                     |
+| ---------------- | ----------------------------------------------------------------- | -------------------------- |
+| 🔴 **Critical**  | Will cause an implementer to build the wrong thing or get blocked | Must fix before planning   |
+| 🟡 **Important** | Will cause ambiguity, rework, or confusion during implementation  | Should fix before planning |
+| 🔵 **Minor**     | Nice to improve but won't block implementation                    | Record and consider        |
 
 ---
 

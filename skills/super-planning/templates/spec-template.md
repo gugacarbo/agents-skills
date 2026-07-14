@@ -72,9 +72,9 @@ implemented-by: []
 - **Runner and commands:** `<commands discovered from the repository>`
 - **Main scenarios:**
 
-| ID | Behavior | Test level | Expected evidence |
-| --- | --- | --- | --- |
-| T1 | `<observable behavior>` | unit / integration / e2e | `<RED/GREEN or pass criterion>` |
+| ID  | Behavior                | Test level               | Expected evidence               |
+| --- | ----------------------- | ------------------------ | ------------------------------- |
+| T1  | `<observable behavior>` | unit / integration / e2e | `<RED/GREEN or pass criterion>` |
 
 - **Edge and error scenarios:** `<enumerate the important failure paths>`
 - **Legacy coverage:** `<integration/unit coverage and explicit exclusions>`

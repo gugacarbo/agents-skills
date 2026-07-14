@@ -5,12 +5,12 @@ pressure. It is not the default form for ordinary output-shaping problems.
 
 ## Match the instruction form to the failure
 
-| Baseline failure | Use | Avoid as the primary fix |
-| --- | --- | --- |
-| Rule violated under pressure | Prohibition, rationalization table, red flags | Soft “prefer” language |
-| Output has the wrong shape | Positive recipe or contract | A long list of “do not” rules |
-| Required element is omitted | Required field or template slot | A reminder buried in prose |
-| Behavior depends on state | Conditional tied to an observable predicate | Unconditional rule with vague exceptions |
+| Baseline failure             | Use                                           | Avoid as the primary fix                 |
+| ---------------------------- | --------------------------------------------- | ---------------------------------------- |
+| Rule violated under pressure | Prohibition, rationalization table, red flags | Soft “prefer” language                   |
+| Output has the wrong shape   | Positive recipe or contract                   | A long list of “do not” rules            |
+| Required element is omitted  | Required field or template slot               | A reminder buried in prose               |
+| Behavior depends on state    | Conditional tied to an observable predicate   | Unconditional rule with vague exceptions |
 
 Prohibitions are for a demonstrated discipline failure. They can backfire when
 the real problem is output shape, because the agent negotiates with “do not X”.
@@ -22,11 +22,11 @@ their own observable condition instead of adding a nuance clause to a rule.
 After the baseline, preserve the agent's actual rationalizations. Add explicit
 counters for the shortcuts that occurred, for example:
 
-| Rationalization | Counter |
-| --- | --- |
-| “The change is trivial.” | The baseline is required regardless of size. |
-| “I will test after.” | A test that passes immediately does not establish RED. |
-| “This follows the spirit.” | The letter of the rule is the observable contract. |
+| Rationalization            | Counter                                                |
+| -------------------------- | ------------------------------------------------------ |
+| “The change is trivial.”   | The baseline is required regardless of size.           |
+| “I will test after.”       | A test that passes immediately does not establish RED. |
+| “This follows the spirit.” | The letter of the rule is the observable contract.     |
 
 Do not invent a large prohibition list for hypothetical failures. Add the
 smallest counter that blocks a rationalization seen in a run, then retest.

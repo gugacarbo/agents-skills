@@ -103,10 +103,11 @@ def display_dependencies(dependencies):
 
 def display_profile_config(profile):
     if not isinstance(profile, dict):
-        return "—", "—"
+        return "—", "—", "—"
     model = profile.get("model", "")
     agent = profile.get("agent", "")
-    return model or "default", agent or "default"
+    effort = profile.get("effort", "")
+    return model or "default", agent or "default", effort or "default"
 
 
 def collect_timeline(tasks):
@@ -176,14 +177,14 @@ lines.extend(
         "",
         "## Agent Profiles",
         "",
-        "| Profile | Model | Agent |",
-        "|---------|-------|-------|",
+        "| Profile | Model | Agent | Effort |",
+        "|---------|-------|--------|--------|",
     ]
 )
 
 for profile_name in ("general", "deep", "quick"):
-    model, agent = display_profile_config(payload.get("agents", {}).get(profile_name, {}))
-    lines.append(f"| {profile_name} | {model} | {agent} |")
+    model, agent, effort = display_profile_config(payload.get("agents", {}).get(profile_name, {}))
+    lines.append(f"| {profile_name} | {model} | {agent} | {effort} |")
 
 lines.extend(
     [

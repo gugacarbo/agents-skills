@@ -200,11 +200,13 @@ if payload["reviewCadence"] not in REVIEW_CADENCE:
 expect_keys(payload["agents"], ["general", "deep", "quick"], "agents")
 for profile_name in ("general", "deep", "quick"):
     profile = payload["agents"][profile_name]
-    expect_keys(profile, ["model", "agent"], f"agents.{profile_name}")
+    expect_keys(profile, ["model", "agent", "effort"], f"agents.{profile_name}")
     if not isinstance(profile["model"], str):
         fail(f"agents.{profile_name}.model must be a string")
     if not isinstance(profile["agent"], str):
         fail(f"agents.{profile_name}.agent must be a string")
+    if not isinstance(profile["effort"], str):
+        fail(f"agents.{profile_name}.effort must be a string")
 
 expect_keys(payload["branchStrategy"], ["baseBranch", "featureBranch"], "branchStrategy")
 expect_non_empty_string(payload["branchStrategy"]["baseBranch"], "branchStrategy.baseBranch")
@@ -651,9 +653,9 @@ payload = {
     "executionMode": execution_mode,
     "reviewCadence": review_cadence,
     "agents": {
-        "general": {"model": "", "agent": ""},
-        "deep": {"model": "", "agent": ""},
-        "quick": {"model": "", "agent": ""},
+        "general": {"model": "", "agent": "", "effort": ""},
+        "deep": {"model": "", "agent": "", "effort": ""},
+        "quick": {"model": "", "agent": "", "effort": ""},
     },
     "branchStrategy": {
         "baseBranch": base_branch,

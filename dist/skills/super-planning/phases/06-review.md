@@ -102,10 +102,10 @@ When dispatching a reviewer, use the [`agents/code-reviewer.md`](../agents/code-
 
 ## Handling Review Findings
 
-| Severity      | Meaning                    | Action                                                    |
-| ------------- | -------------------------- | --------------------------------------------------------- |
-| **Critical**  | Must fix before proceeding | Dispatch fix subagent, re-review                          |
-| **Important** | Should fix, blocks merge   | Dispatch fix subagent, re-review                          |
+| Severity      | Meaning                    | Action                                                                                                                                                                          |
+| ------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Critical**  | Must fix before proceeding | Dispatch fix subagent, re-review                                                                                                                                                |
+| **Important** | Should fix, blocks merge   | Dispatch fix subagent, re-review                                                                                                                                                |
 | **Minor**     | Nice to have               | Record minor findings in the task's `progress.log` as an `info` event with the finding details. If the finding affects status, update the task's `status` in `super-plan.json`. |
 
 For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding. Record Minor findings in the task's `progress.log` with file/line, impact, and recommended follow-up so the final audit can triage them.

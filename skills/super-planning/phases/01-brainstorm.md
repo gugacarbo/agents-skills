@@ -52,4 +52,5 @@ Before leaving Phase 1, have enough material to write a solid spec summary and t
 - Known risks or open questions
 - Explicit assumptions to carry into the spec
 - Enough context to populate `docs/spec-decisions/<feature_name>_decisions.md`
+
 > **Visual companion flag:** Record whether the visual companion was used: set `visualCompanionUsed: true` in the output handoff document.

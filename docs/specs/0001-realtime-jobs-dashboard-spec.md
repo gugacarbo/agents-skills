@@ -209,24 +209,24 @@ Each snapshot has a stable envelope:
 
 ## Edge cases
 
-| # | WHEN trigger | the system MUST response |
-| --- | --- | --- |
-| 1 | the jobs root exists but contains no registries | serve an authenticated empty dashboard with zero totals and keep watching for the first registry |
-| 2 | the configured jobs root does not exist at startup | fail startup with a non-zero exit and identify the missing path |
-| 3 | a registry becomes malformed during an atomic or partial write | retain its last valid plan snapshot, show a warning, and retry without terminating the server |
-| 4 | a newly discovered registry is malformed before any valid snapshot exists | omit that plan, show a warning for its relative path, and continue serving other plans |
-| 5 | a progress log contains blank or malformed JSONL entries | keep all valid events, count only valid events, cap returned recent events, and show a warning |
-| 6 | a registry or task directory is removed | remove it from the next valid snapshot without retaining stale plan or task data |
-| 7 | the same job content is scanned without change | send no redundant WebSocket snapshot |
-| 8 | a browser connects after changes occurred | send the latest complete snapshot immediately after authentication |
-| 9 | a request or socket upgrade lacks valid credentials | return or close with an authorization failure and reveal no job data |
-| 10 | a socket has valid credentials but a cross-origin Origin | reject the upgrade before registering the client |
-| 11 | an explicit port is unavailable | fail startup and preserve any already-running unrelated process |
-| 12 | the recorded PID is stale or belongs to another command | refuse to signal it, clear only stale dashboard metadata, and report `stale_pid` |
-| 13 | one browser disconnects unexpectedly | remove only that client and keep the server and other clients running |
-| 14 | the active helper layout is bootstrapped rather than vendored | resolve sibling dashboard and summary helpers without assuming the source skill directory exists |
-| 15 | registry or log text contains HTML or script markup | display the literal text without executing markup |
-| 16 | the server is stopped | close listeners and sockets and remove live PID metadata without modifying jobs or persisted token data |
+| #   | WHEN trigger                                                              | the system MUST response                                                                                |
+| --- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1   | the jobs root exists but contains no registries                           | serve an authenticated empty dashboard with zero totals and keep watching for the first registry        |
+| 2   | the configured jobs root does not exist at startup                        | fail startup with a non-zero exit and identify the missing path                                         |
+| 3   | a registry becomes malformed during an atomic or partial write            | retain its last valid plan snapshot, show a warning, and retry without terminating the server           |
+| 4   | a newly discovered registry is malformed before any valid snapshot exists | omit that plan, show a warning for its relative path, and continue serving other plans                  |
+| 5   | a progress log contains blank or malformed JSONL entries                  | keep all valid events, count only valid events, cap returned recent events, and show a warning          |
+| 6   | a registry or task directory is removed                                   | remove it from the next valid snapshot without retaining stale plan or task data                        |
+| 7   | the same job content is scanned without change                            | send no redundant WebSocket snapshot                                                                    |
+| 8   | a browser connects after changes occurred                                 | send the latest complete snapshot immediately after authentication                                      |
+| 9   | a request or socket upgrade lacks valid credentials                       | return or close with an authorization failure and reveal no job data                                    |
+| 10  | a socket has valid credentials but a cross-origin Origin                  | reject the upgrade before registering the client                                                        |
+| 11  | an explicit port is unavailable                                           | fail startup and preserve any already-running unrelated process                                         |
+| 12  | the recorded PID is stale or belongs to another command                   | refuse to signal it, clear only stale dashboard metadata, and report `stale_pid`                        |
+| 13  | one browser disconnects unexpectedly                                      | remove only that client and keep the server and other clients running                                   |
+| 14  | the active helper layout is bootstrapped rather than vendored             | resolve sibling dashboard and summary helpers without assuming the source skill directory exists        |
+| 15  | registry or log text contains HTML or script markup                       | display the literal text without executing markup                                                       |
+| 16  | the server is stopped                                                     | close listeners and sockets and remove live PID metadata without modifying jobs or persisted token data |
 
 ## Open questions
 
@@ -264,17 +264,17 @@ rtk bash src/tests/gitignore.sh
   local server process and network socket rather than mocking the server under
   test.
 
-| ID | Behavior | Test level | Expected evidence |
-| --- | --- | --- | --- |
-| T1 | startup defaults, JSON stdout contract, authenticated health, idempotent restart, and safe stop | integration | focused test first fails because the helper/server is absent, then passes with verified process cleanup |
-| T2 | valid token bootstrap succeeds while missing/invalid tokens and invalid socket origins fail | integration/security | RED unauthorized/security assertions followed by GREEN HTTP and WebSocket checks |
-| T3 | multiple registries aggregate into the documented snapshot and empty roots return zero totals | integration | RED snapshot assertions followed by GREEN exact plan/task/requirement totals |
-| T4 | registry or progress-log changes produce one new socket snapshot without browser polling | integration | RED timeout before implementation followed by GREEN update within 2.5 seconds |
-| T5 | malformed registry writes preserve the last valid snapshot and recover after valid replacement | integration | RED recovery test followed by GREEN warning, retention, and recovery assertions |
-| T6 | malformed JSONL lines are skipped, warned, counted correctly, and recent events cap at 200 | unit/integration | RED boundary fixture followed by GREEN count/order/cap assertions |
-| T7 | dangerous text is escaped and no jobs-root mutation endpoint or socket command exists | integration/security | RED injection/read-only assertions followed by GREEN literal rendering and rejected commands |
-| T8 | bootstrap, updater, doctor, router, docs, and dependency declarations include the dashboard manifest | integration/static | RED manifest/reference assertions followed by GREEN complete distribution coverage |
-| T9 | vendored and flat bootstrapped layouts resolve their active helpers correctly | integration | RED layout fixtures followed by GREEN startup and snapshot checks in both layouts |
+| ID  | Behavior                                                                                             | Test level           | Expected evidence                                                                                       |
+| --- | ---------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------- |
+| T1  | startup defaults, JSON stdout contract, authenticated health, idempotent restart, and safe stop      | integration          | focused test first fails because the helper/server is absent, then passes with verified process cleanup |
+| T2  | valid token bootstrap succeeds while missing/invalid tokens and invalid socket origins fail          | integration/security | RED unauthorized/security assertions followed by GREEN HTTP and WebSocket checks                        |
+| T3  | multiple registries aggregate into the documented snapshot and empty roots return zero totals        | integration          | RED snapshot assertions followed by GREEN exact plan/task/requirement totals                            |
+| T4  | registry or progress-log changes produce one new socket snapshot without browser polling             | integration          | RED timeout before implementation followed by GREEN update within 2.5 seconds                           |
+| T5  | malformed registry writes preserve the last valid snapshot and recover after valid replacement       | integration          | RED recovery test followed by GREEN warning, retention, and recovery assertions                         |
+| T6  | malformed JSONL lines are skipped, warned, counted correctly, and recent events cap at 200           | unit/integration     | RED boundary fixture followed by GREEN count/order/cap assertions                                       |
+| T7  | dangerous text is escaped and no jobs-root mutation endpoint or socket command exists                | integration/security | RED injection/read-only assertions followed by GREEN literal rendering and rejected commands            |
+| T8  | bootstrap, updater, doctor, router, docs, and dependency declarations include the dashboard manifest | integration/static   | RED manifest/reference assertions followed by GREEN complete distribution coverage                      |
+| T9  | vendored and flat bootstrapped layouts resolve their active helpers correctly                        | integration          | RED layout fixtures followed by GREEN startup and snapshot checks in both layouts                       |
 
 - **Edge and error scenarios:** missing jobs root, explicit occupied port,
   stale/reused PID, malformed registry, malformed JSONL, removed plan, dropped

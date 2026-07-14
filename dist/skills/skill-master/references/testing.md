@@ -5,11 +5,11 @@ The document is the production code; the agent's behavior is the runtime.
 
 ## TDD mapping
 
-| TDD | Skill work |
-| --- | --- |
-| RED | Agent violates or misses the target behavior without the skill |
-| GREEN | Minimal skill makes the same scenario comply |
-| REFACTOR | New rationalizations or edge cases are closed and retested |
+| TDD      | Skill work                                                     |
+| -------- | -------------------------------------------------------------- |
+| RED      | Agent violates or misses the target behavior without the skill |
+| GREEN    | Minimal skill makes the same scenario comply                   |
+| REFACTOR | New rationalizations or edge cases are closed and retested     |
 
 ## Baseline first
 

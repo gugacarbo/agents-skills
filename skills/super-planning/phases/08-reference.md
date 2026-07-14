@@ -157,23 +157,23 @@ If the user requests a spec change during implementation:
 
 ## Integration with Other Skills
 
-| Skill                   | When to use                                                                           |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| **commit-changes**      | After this skill — commit the final changes                                           |
-| **super-planning**      | This skill itself — use for any implementation plan that delegates work to subagents  |
+| Skill              | When to use                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **commit-changes** | After this skill — commit the final changes                                          |
+| **super-planning** | This skill itself — use for any implementation plan that delegates work to subagents |
 
 ## Sources
 
 Key patterns in this skill were consolidated from:
 
-| Source                                                | Key Contribution                                                                                                               |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| obra/superpowers `writing-plans`                      | Plan structure, task sizing, no-placeholders rule, self-review checklist, file structure, global constraints, interfaces block |
-| obra/superpowers `subagent-driven-development`        | Fresh subagent per task, two-stage review, status signals, progress ledger, model selection, never start on main/master        |
-| obra/superpowers `dispatching-parallel-agents`        | When/how to dispatch parallel subagents, independence criteria, common dispatch mistakes                                       |
-| obra/superpowers `executing-plans`                    | Sequential execution with checkpoints, when to stop and ask for help                                                           |
-| juliusbrussee/caveman (cavecrew)                      | Compressed output format per subagent role, ~60% context reduction per delegation                                              |
-| obra/superpowers `implementer-prompt`                 | Template for implementer dispatch: before-you-begin, code organization, escalation, self-review                                |
+| Source                                                | Key Contribution                                                                                                                                     |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| obra/superpowers `writing-plans`                      | Plan structure, task sizing, no-placeholders rule, self-review checklist, file structure, global constraints, interfaces block                       |
+| obra/superpowers `subagent-driven-development`        | Fresh subagent per task, two-stage review, status signals, progress ledger, model selection, never start on main/master                              |
+| obra/superpowers `dispatching-parallel-agents`        | When/how to dispatch parallel subagents, independence criteria, common dispatch mistakes                                                             |
+| obra/superpowers `executing-plans`                    | Sequential execution with checkpoints, when to stop and ask for help                                                                                 |
+| juliusbrussee/caveman (cavecrew)                      | Compressed output format per subagent role, ~60% context reduction per delegation                                                                    |
+| obra/superpowers `implementer-prompt`                 | Template for implementer dispatch: before-you-begin, code organization, escalation, self-review                                                      |
 | obra/superpowers `task-reviewer-prompt`               | Consolidated into [`agents/code-reviewer.md`](../agents/code-reviewer.md): do-not-trust-report, scope limits, calibrated severity, and output format |
-| nibzard/awesome-agentic-patterns `sub-agent-spawning` | Three scales of spawning, practical 2-4 limit, trade-offs of parallelism                                                       |
-| kaicianflone/parallel-orchestrate                     | Wave-based execution, pre-flight checks, scope violation detection, checkpoint recovery                                        |
+| nibzard/awesome-agentic-patterns `sub-agent-spawning` | Three scales of spawning, practical 2-4 limit, trade-offs of parallelism                                                                             |
+| kaicianflone/parallel-orchestrate                     | Wave-based execution, pre-flight checks, scope violation detection, checkpoint recovery                                                              |

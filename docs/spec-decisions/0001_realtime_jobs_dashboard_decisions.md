@@ -91,9 +91,9 @@ state.
 
 ## Alternatives Considered
 
-| Option | Why it was not chosen |
-| ------ | --------------------- |
-| Extend the visual-companion server with a jobs mode | It couples a persistent operational dashboard to temporary Phase 1 screen/session behavior. |
+| Option                                                   | Why it was not chosen                                                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Extend the visual-companion server with a jobs mode      | It couples a persistent operational dashboard to temporary Phase 1 screen/session behavior.                   |
 | Serve a page that periodically polls generated summaries | It is simpler but provides weaker real-time behavior and repeatedly reparses state even when nothing changed. |
 
 ## Open Questions

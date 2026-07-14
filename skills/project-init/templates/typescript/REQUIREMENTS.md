@@ -40,6 +40,7 @@
 ```sh
 pnpm add -D typescript vitest biome knip husky
 pnpm exec husky init
+pnpm biome init
 ```
 
 ## Git Hooks (Husky)

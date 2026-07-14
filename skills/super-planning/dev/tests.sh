@@ -67,9 +67,9 @@ payload.update({
     "architectureSummary": "Shared middleware validates bearer tokens before protected routes.",
     "techStack": ["TypeScript", "Cloudflare Workers"],
     "agents": {
-        "general": {"model": "gpt-5", "agent": "general"},
-        "deep": {"model": "gpt-5", "agent": "deep"},
-        "quick": {"model": "gpt-5-mini", "agent": "quick"},
+        "general": {"model": "gpt-5", "agent": "general", "effort": "medium"},
+        "deep": {"model": "gpt-5", "agent": "deep", "effort": "high"},
+        "quick": {"model": "gpt-5-mini", "agent": "quick", "effort": "low"},
     },
     "globalConstraints": ["Do not expose secrets"],
     "fileStructure": [{"path": "src/middleware/auth.ts", "ownerTask": "Task-B-1", "notes": "Protected route middleware"}],
@@ -288,11 +288,12 @@ test_init_generates_valid_registry_and_rich_empty_ledger() {
   assert_contains_file '"general": {' "$registry"
   assert_contains_file '"model": ""' "$registry"
   assert_contains_file '"agent": ""' "$registry"
+  assert_contains_file '"effort": ""' "$registry"
   assert_contains_file "# Progress Ledger: sample" "$ledger"
   assert_contains_file "## Summary" "$ledger"
   assert_contains_file "| pending | 0 |" "$ledger"
   assert_contains_file "## Agent Profiles" "$ledger"
-  assert_contains_file "| quick | default | default |" "$ledger"
+  assert_contains_file "| quick | default | default | default |" "$ledger"
   assert_contains_file "## Timeline" "$ledger"
   assert_contains_file "no task events logged yet" "$ledger"
   assert_contains_file "## Requirements Coverage" "$ledger"
@@ -477,6 +478,12 @@ test_errors_are_emitted_as_json() {
   python3 -c "import json,sys; json.load(open('$tmp/output.log'))" || fail "validation error is not valid JSON"
   assert_contains_file '"error": true' "$tmp/output.log"
   assert_contains_file '"exit_code": 1' "$tmp/output.log"
+
+  # Agent profile effort must remain a string.
+  if "$SUPER_PLAN_SCRIPT" update --input "$registry" --set agents.quick.effort=true >"$tmp/output.log" 2>&1; then
+    fail "expected non-string effort update to fail"
+  fi
+  assert_contains_file '"agents.quick.effort must be a string"' "$tmp/output.log"
 }
 
 test_schema_validator_agreement() {
@@ -508,9 +515,9 @@ plan = {
     'executionMode': 'subagent-driven',
     'reviewCadence': 'per_task',
     'agents': {
-        'general': {'model': '', 'agent': ''},
-        'deep': {'model': '', 'agent': ''},
-        'quick': {'model': '', 'agent': ''},
+        'general': {'model': '', 'agent': '', 'effort': ''},
+        'deep': {'model': '', 'agent': '', 'effort': ''},
+        'quick': {'model': '', 'agent': '', 'effort': ''},
     },
     'branchStrategy': {'baseBranch': 'main', 'featureBranch': '0001-test'},
     'worktree': {'enabled': False, 'path': ''},
@@ -622,7 +629,7 @@ test_render_progress_ledger_includes_timeline_and_requirements() {
   assert_contains_file "## Summary" "$ledger"
   assert_contains_file "| completed | 5 |" "$ledger"
   assert_contains_file "## Agent Profiles" "$ledger"
-  assert_contains_file "| quick | gpt-5-mini | quick |" "$ledger"
+  assert_contains_file "| quick | gpt-5-mini | quick | low |" "$ledger"
   assert_contains_file "## Tasks" "$ledger"
   assert_contains_file "| Task-A-1 | Definir tipos e interfaces de autenticação | general | A | foundation | [DONE] completed | — |" "$ledger"
   assert_contains_file "## Timeline" "$ledger"
@@ -956,7 +963,7 @@ test_render_task_md_empty_plan() {
   assert_exists "$md_file"
   assert_contains_file "# Task Brief: sample" "$md_file"
   assert_contains_file "## Agent Profiles" "$md_file"
-  assert_contains_file "| general | default | default |" "$md_file"
+  assert_contains_file "| general | default | default | default |" "$md_file"
 }
 
 test_append_task_validate_only() {

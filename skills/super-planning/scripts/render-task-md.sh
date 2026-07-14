@@ -168,13 +168,14 @@ def render_agents():
     lines = []
     lines.append("## Agent Profiles")
     lines.append("")
-    lines.append("| Profile | Model | Agent |")
-    lines.append("|---------|-------|-------|")
+    lines.append("| Profile | Model | Agent | Effort |")
+    lines.append("|---------|-------|-------|--------|")
     for name in ("general", "deep", "quick"):
         profile = agents.get(name, {})
         model = profile.get("model", "") or "default"
         agent = profile.get("agent", "") or "default"
-        lines.append(f"| {name} | {model} | {agent} |")
+        effort = profile.get("effort", "") or "default"
+        lines.append(f"| {name} | {model} | {agent} | {effort} |")
     lines.append("")
     return lines
 

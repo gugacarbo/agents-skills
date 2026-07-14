@@ -13,12 +13,12 @@ O usuario final deve preferir `./skills.sh <comando>` ou o fluxo remoto com `cur
 
 ## Comandos
 
-| Arquivo      | Funcao                                                                            |
-| ------------ | --------------------------------------------------------------------------------- |
+| Arquivo          | Funcao                                                                            |
+| ---------------- | --------------------------------------------------------------------------------- |
 | `src/install.sh` | Instala skills em um destino local, global, explicito ou repo-local.              |
 | `src/update.sh`  | Compara a instalacao local com o snapshot remoto e sobrescreve apos confirmacao.  |
-| `src/build.sh`   | Copia `skills/` para `dist/skills/` e publica o resultado em `~/.agents/skills`.   |
-| `src/dev.sh`     | Observa `skills/`, executa o build e publica no destino selecionado.               |
+| `src/build.sh`   | Copia `skills/` para `dist/skills/` e publica o resultado em `~/.agents/skills`.  |
+| `src/dev.sh`     | Observa `skills/`, executa o build e publica no destino selecionado.              |
 | `src/tests/*.sh` | Testes Bash de instalacao, update, bootstrap, orquestrador e regras de gitignore. |
 
 ## Desenvolvimento

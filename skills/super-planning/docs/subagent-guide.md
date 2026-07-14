@@ -14,9 +14,9 @@ Each task in `super-plan.json` must have a `task_profile` and each profile must 
 - `general`: normal implementation and debugging tasks
 - `deep`: hard, ambiguous, multi-file, or high-judgment tasks
 
-When `agents.<profile>.model` and `agents.<profile>.agent` are populated, the orchestrator should try to use that configuration. When empty, it should use the platform default.
+When `agents.<profile>.model`, `agents.<profile>.agent`, and `agents.<profile>.effort` are populated, the orchestrator should try to use that configuration. When empty, it should use the platform default.
 
-Before dispatching a subagent, the orchestrator must verify that the configured `agent/model` is still available on the current platform. If not, it should clear the fields in `super-plan.json` and fall back to the system default.
+Before dispatching a subagent, the orchestrator must verify that the configured `agent/model/effort` is still available on the current platform. If not, it should clear the fields in `super-plan.json` and fall back to the system default.
 
 ## Context Compression
 

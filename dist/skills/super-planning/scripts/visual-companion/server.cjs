@@ -104,8 +104,7 @@ function preferredPort() {
 let PORT = preferredPort();
 const HOST = process.env.SESSION_HOST || "127.0.0.1";
 const URL_HOST =
-	process.env.SESSION_URL_HOST ||
-	(HOST === "127.0.0.1" ? "localhost" : HOST);
+	process.env.SESSION_URL_HOST || (HOST === "127.0.0.1" ? "localhost" : HOST);
 const SESSION_DIR = process.env.SESSION_DIR || "/tmp/brainstorm";
 const CONTENT_DIR = path.join(SESSION_DIR, "content");
 const STATE_DIR = path.join(SESSION_DIR, "state");

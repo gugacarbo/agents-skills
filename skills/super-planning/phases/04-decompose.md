@@ -157,12 +157,12 @@ Example task rules:
 - `batch_id` — the batch letter (A, B, C, …) that groups tasks meant to run in parallel.
 - `task_batch_id` — a sequential number **within that batch**, starting at 1.
 
-| Batch | Task | ID | Runs in parallel with |
-|-------|------|----|-----------------------|
-| A     | 1st  | `Task-A-1` | `Task-A-2` |
-| A     | 2nd  | `Task-A-2` | `Task-A-1` |
-| B     | 1st  | `Task-B-1` | `Task-B-2` |
-| B     | 2nd  | `Task-B-2` | `Task-B-1` |
+| Batch | Task | ID         | Runs in parallel with    |
+| ----- | ---- | ---------- | ------------------------ |
+| A     | 1st  | `Task-A-1` | `Task-A-2`               |
+| A     | 2nd  | `Task-A-2` | `Task-A-1`               |
+| B     | 1st  | `Task-B-1` | `Task-B-2`               |
+| B     | 2nd  | `Task-B-2` | `Task-B-1`               |
 | C     | 1st  | `Task-C-1` | — (sole task in batch C) |
 
 Do **not** embed the plan number in the task ID. The plan context is already carried by the directory structure (`docs/jobs/NNNN-<feature-name>/`).
@@ -240,6 +240,7 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
 ```
 
 Example — transitioning a task status:
+
 ```bash
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh transition-task \
   --input docs/jobs/0003-auth-middleware/super-plan.json \
@@ -267,7 +268,7 @@ Run profile discovery and ask the user for the cadence first (see below). Then p
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
   --input docs/jobs/0003-auth-middleware/super-plan.json \
   --set reviewCadence=per_task \
-  --set agents='{"general":{"model":"gpt-5","agent":"general"},"deep":{"model":"claude-opus-4","agent":"deep"},"quick":{"model":"gpt-5-mini","agent":"quick"}}'
+  --set agents='{"general":{"model":"gpt-5","agent":"general","effort":"medium"},"deep":{"model":"claude-opus-4","agent":"deep","effort":"high"},"quick":{"model":"gpt-5-mini","agent":"quick","effort":"low"}}'
 ```
 
 Then make every later change through that same active helper path. Do not edit `super-plan.json` by hand.
@@ -278,7 +279,7 @@ Structure and field definitions live in the schema file from the active helper p
 - `goal`, `architectureSummary`, `techStack`
 - `globalConstraints`, `fileStructure`, `requirementsChecklist`
 - `reviewCadence`
-- `agents.general|deep|quick` with `{ "model": "", "agent": "" }` defaults when discovery is unavailable
+- `agents.general|deep|quick` with `{ "model": "", "agent": "", "effort": "" }` defaults when discovery is unavailable
 - `taskDirectory`, `executionMode`, `branchStrategy`, `worktree`
 - `tasks`
 
@@ -297,7 +298,7 @@ Discover three profiles:
 Use the tools available in the current platform to discover:
 
 - subagents/agents that can be dispatched
-- models that can be paired with those subagents
+- models and effort levels that can be paired with those subagents
 
 Use platform-native list/discovery tools first. When multiple discovery tools are available, prefer the ones that return callable/current options instead of static docs.
 
@@ -318,8 +319,8 @@ After discovery:
 
 1. Recommend a configuration for `agents.general`, `agents.deep`, and `agents.quick`
 2. Ask the user to choose recommendation, manual override, or empty/default config
-3. Persist the user-approved result in `super-plan.json`
-4. If no compatible options are discoverable, leave all `model` and `agent` fields empty unless the user provides a manual override
+3. Persist the user-approved result in `super-plan.json`, including the effort level
+4. If no compatible options are discoverable, leave all `model`, `agent`, and `effort` fields empty unless the user provides a manual override
 
 Required fallback behavior when discovery fails:
 
@@ -346,9 +347,9 @@ Required shape:
 ```json
 {
   "agents": {
-    "general": { "model": "", "agent": "" },
-    "deep": { "model": "", "agent": "" },
-    "quick": { "model": "", "agent": "" }
+    "general": { "model": "", "agent": "", "effort": "" },
+    "deep": { "model": "", "agent": "", "effort": "" },
+    "quick": { "model": "", "agent": "", "effort": "" }
   }
 }
 ```

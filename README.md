@@ -10,13 +10,13 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 
 ## Comandos
 
-| Comando   | Descrição                                             |
-| --------- | ----------------------------------------------------- |
-| `install` | Instala as skills no diretório de destino             |
-| `update`  | Atualiza uma instalação existente com a versão remota |
+| Comando   | Descrição                                                     |
+| --------- | ------------------------------------------------------------- |
+| `install` | Instala as skills no diretório de destino                     |
+| `update`  | Atualiza uma instalação existente com a versão remota         |
 | `build`   | Gera `dist/skills/` e copia as skills para `~/.agents/skills` |
-| `dev`     | Observa as fontes e publica builds no destino escolhido |
-| `help`    | Exibe a ajuda com os comandos disponíveis             |
+| `dev`     | Observa as fontes e publica builds no destino escolhido       |
+| `help`    | Exibe a ajuda com os comandos disponíveis                     |
 
 ## Desenvolvimento das skills
 

@@ -31,7 +31,7 @@ skill-master/
 | Prompt approval UI    | `eval-viewer/generate_prompt_review.py`                        | Lets the user approve or edit draft eval prompts before execution.                    |
 | Report generation     | `scripts/generate_report.py`, `eval-viewer/generate_review.py` | Produces human-reviewable output.                                                     |
 | Eval schema           | `references/schemas.md`                                        | Read before changing eval JSON shape.                                                 |
-| Integration checks    | `dev/tests.sh`                                                 | Verifies routing references and extended eval metadata.                                |
+| Integration checks    | `dev/tests.sh`                                                 | Verifies routing references and extended eval metadata.                               |
 
 ## CONVENTIONS
 
