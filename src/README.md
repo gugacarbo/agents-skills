@@ -19,7 +19,7 @@ O usuario final deve preferir `./skills.sh <comando>` ou o fluxo remoto com `cur
 | `src/update.sh`  | Compara a instalacao local com o snapshot remoto e sobrescreve apos confirmacao.  |
 | `src/build.sh`   | Copia `skills/` para `dist/skills/` e publica o resultado em `~/.agents/skills`.   |
 | `src/dev.sh`     | Observa `skills/`, executa o build e publica no destino selecionado.               |
-| `tests/*.sh` | Testes Bash de instalacao, update, bootstrap, orquestrador e regras de gitignore. |
+| `src/tests/*.sh` | Testes Bash de instalacao, update, bootstrap, orquestrador e regras de gitignore. |
 
 ## Desenvolvimento
 
@@ -29,22 +29,22 @@ Scripts de runtime devem continuar POSIX `sh`:
 rtk sh -n skills.sh src/build.sh src/dev.sh src/install.sh src/update.sh
 ```
 
-Testes devem ser executados com `bash`, porque nem todos os arquivos em `tests/` precisam ser executaveis:
+Testes devem ser executados com `bash`, porque nem todos os arquivos em `src/tests/` precisam ser executaveis:
 
 ```sh
-rtk bash -lc 'for test_script in tests/*.sh; do bash "$test_script"; done'
+rtk bash -lc 'for test_script in src/tests/*.sh; do bash "$test_script"; done'
 ```
 
 Ou individualmente:
 
 ```sh
-rtk bash tests/install.sh
-rtk bash tests/update.sh
-rtk bash tests/bootstrap.sh
-rtk bash tests/build.sh
-rtk bash tests/dev.sh
-rtk bash tests/gitignore.sh
-rtk bash tests/orchestrator.sh
+rtk bash src/tests/install.sh
+rtk bash src/tests/update.sh
+rtk bash src/tests/bootstrap.sh
+rtk bash src/tests/build.sh
+rtk bash src/tests/dev.sh
+rtk bash src/tests/gitignore.sh
+rtk bash src/tests/orchestrator.sh
 ```
 
 ## Cuidados

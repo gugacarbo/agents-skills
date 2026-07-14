@@ -247,7 +247,7 @@ rtk bash -n skills/super-planning/scripts/job-dashboard/serve-jobs.sh
 rtk node --check skills/super-planning/scripts/job-dashboard/server.cjs
 # exit 0
 
-rtk bash tests/gitignore.sh
+rtk bash src/tests/gitignore.sh
 # exit 0; every new published skill file is tracked by the repository allowlist contract
 ```
 

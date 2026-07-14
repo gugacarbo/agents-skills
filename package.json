@@ -6,7 +6,7 @@
 		"dev": "sh src/dev.sh",
 		"build": "pnpm run build:skills && sh src/build.sh",
 		"build:skills": "pnpm -r --if-present run build",
-		"test": "bash -lc 'for test_script in tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done' && pnpm run test:skills",
+		"test": "bash -lc 'for test_script in src/tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done' && pnpm run test:skills",
 		"test:skills": "pnpm -r --if-present run test",
 		"validate:skills": "pnpm -r --if-present run validate",
 		"lint": "biome check .",

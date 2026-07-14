@@ -15,8 +15,8 @@
 | Clone/merge install mode  | `install.sh`                          | `--init` clones repo; non-empty destinations merge without overwriting.                  |
 | README copy option        | `install.sh`                          | `--instructions` preserves existing target README.                                       |
 | Update comparison         | `update.sh`                           | Downloads archive, compares remote files to local target, then prompts before overwrite. |
-| Curl bootstrap coverage   | `tests/bootstrap.sh`                  | Pipes root `skills.sh` into `sh -s -- install/update`.                                   |
-| Prompt edge cases         | `tests/install.sh`, `tests/update.sh` | Use `AGENTS_SKILLS_PROMPT_INPUT` with stdin redirected.                                  |
+| Curl bootstrap coverage   | `src/tests/bootstrap.sh`                  | Pipes root `skills.sh` into `sh -s -- install/update`.                                   |
+| Prompt edge cases         | `src/tests/install.sh`, `src/tests/update.sh` | Use `AGENTS_SKILLS_PROMPT_INPUT` with stdin redirected.                                  |
 
 ## CONVENTIONS
 
@@ -26,7 +26,7 @@
 - Remote behavior is tested with local `file://` git repos or tar archives.
 - Confirmation tests should cover both interactive decline/accept and `--yes`.
 - Bootstrap tests must guard against loops when a command is missing from the downloaded archive.
-- Run tests via `bash tests/<name>.sh` or the loop from root; executable bits are not consistent.
+- Run tests via `bash src/tests/<name>.sh` or the loop from root; executable bits are not consistent.
 
 ## ANTI-PATTERNS
 
@@ -39,10 +39,10 @@
 ## COMMANDS
 
 ```sh
-rtk bash tests/install.sh
-rtk bash tests/update.sh
-rtk bash tests/bootstrap.sh
-rtk bash tests/gitignore.sh
-rtk bash tests/orchestrator.sh
+rtk bash src/tests/install.sh
+rtk bash src/tests/update.sh
+rtk bash src/tests/bootstrap.sh
+rtk bash src/tests/gitignore.sh
+rtk bash src/tests/orchestrator.sh
 rtk sh -n skills.sh src/install.sh src/update.sh
 ```

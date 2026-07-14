@@ -6,7 +6,7 @@ SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
 REPO_ROOT=$(
-  CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
+  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
 )
 BOOTSTRAP="$REPO_ROOT/install.sh"
 ORCHESTRATOR="$REPO_ROOT/skills.sh"

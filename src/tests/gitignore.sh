@@ -6,7 +6,7 @@ SCRIPT_DIR=$(
   CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P
 )
 REPO_ROOT=$(
-  CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd -P
+  CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
 )
 
 fail() {
@@ -31,8 +31,8 @@ main() {
   assert_not_ignored "dist/skills/commit-changes/SKILL.md"
   assert_not_ignored "src/install.sh"
   assert_not_ignored "src/update.sh"
-  assert_not_ignored "tests/install.sh"
-  assert_not_ignored "tests/update.sh"
+  assert_not_ignored "src/tests/install.sh"
+  assert_not_ignored "src/tests/update.sh"
   assert_not_ignored "skills/skill-master/AGENTS.md"
 
   printf 'PASS: gitignore.sh\n'
