@@ -140,6 +140,27 @@ Want progress stats?
 - **Review package** — record each task's base commit before dispatch and generate its package with `scripts/review-package.sh`; use the same base for fixes and `git merge-base` for the final branch audit.
 - **Review closure** — unresolved `⚠️ Cannot verify` items and plan-mandated reviewer conflicts block completion until the orchestrator verifies them or gets a user decision.
 
+### Portable watchdogs
+
+- **Provider-neutral core:** use the optional `continuation` policy only to
+  select `provider` and `watchdogProfile`; host APIs and IDs stay inside that
+  provider's adapter folder.
+- **Phase 4 materialization:** generate provider config below
+  `.super-planning/watchdogs/`. Codex writes
+  `codex-watchdogs.json` and independent prompts below `prompts/`.
+- **Explicit opt-in:** before Phase 5 creates or updates automations, ask the
+  user whether to enable watchdogs and which valid profile to use. Default is
+  disabled; the Codex `default` profile uses continuation every 2 minutes and
+  read-only status every 15 minutes.
+- **Codex roles:** both `continuation` and `status` are heartbeats targeting
+  the current thread. Status may interrupt an active run, but must only report
+  evidenced state; it never edits files, changes lifecycle state, dispatches
+  work, or creates automations. Do not substitute a cron, which opens another
+  chat.
+- **Cleanup:** pause every role on a human block and disable every role when a
+  plan is completed or cancelled. Store automation/thread IDs only in ignored
+  `.super-planning/continuations/<plan-id>.json` metadata.
+
 ## Outputs & Conventions
 
 | Artifact             | Path                                                               | Template                                                                                                                                                                                          |
@@ -153,6 +174,7 @@ Want progress stats?
 | Progress ledger      | `docs/jobs/NNNN-<feature-name>/progress-ledger.md`                 | Regenerated from `super-plan.json` and task logs by the active helper path after every registry write                                                                                             |
 | Repo helpers         | `.super-planning/`                                                 | Only created when the target repo does not already contain this `super-planning` skill; holds the complete bootstrap helper manifest and schema                                                   |
 | Skill reference      | `.super-planning/super-planning-reference.json`                    | Created from source-skill provenance; records source repository, ref, and exact helper commit                                                                                                     |
+| Watchdog config      | `.super-planning/watchdogs/<provider>-watchdogs.json`              | Materialized provider profile and independent prompt files; never stores host IDs                                                                                                                  |
 
 ## Prompt Library
 
@@ -168,6 +190,7 @@ Want progress stats?
 | [`agents/code-reviewer.md`](agents/code-reviewer.md)                     | Dispatching a Phase 6 per-task reviewer                           |
 | [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md)   | Dispatching a Phase 2 spec document review before planning        |
 | [`agents/spec-compliance-auditor.md`](agents/spec-compliance-auditor.md) | Dispatching a final whole-branch spec compliance audit in Phase 7 |
+| [`platforms/continuation/`](platforms/continuation/)                     | Generic watchdog contract/template and provider-specific adapters |
 
 ## Dependencies
 
@@ -176,7 +199,6 @@ Want progress stats?
 | `python3`  | ≥ 3.9           | All scripts (super-plan.sh, render-progress-ledger.sh, summarize-all-tasks.sh, render-task-md.sh) | Required by the helper implementation and modern built-in generic typing                            |
 | `bash`     | any modern Bash | Task lifecycle logging                                                                            | `log-task.sh` uses Bash and is intentionally a Bash helper; core registry scripts remain POSIX `sh` |
 | `node`     | ≥ 18            | Visual companion (start-server.sh, stop-server.sh)                                                | Optional — only needed when using Phase 1 visual companion                                          |
-| `flock`    | util-linux      | log-task.sh file locking                                                                          | Part of `util-linux` on Linux. Optional on macOS (uses `mkdir` fallback)                            |
 | `git`      | any             | Review packages, spec-compliance auditor                                                          | Required for Phase 6 review gates and Phase 7 audit                                                 |
 
 ## See Also

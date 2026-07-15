@@ -7,6 +7,20 @@ adapter and disable every watchdog role. Mark local continuation metadata
 inactive; never retain an active status or continuation heartbeat after a
 terminal plan state.
 
+## Repository-local runtime cleanup
+
+After watchdog cleanup, inspect every `docs/jobs/**/super-plan.json` registry
+in the target repository. Remove `.super-planning/` only when there is no task
+with status pending or in_progress in any registry. This prevents one finished
+job from deleting helpers, watchdog configuration, or local metadata required
+by another active job.
+
+Apply this cleanup only when `.super-planning/` is generated runtime state for
+a non-vendored target repository. Never remove the vendored skill directory or
+the source `skills/super-planning/` tree. If any registry cannot be read,
+preserve `.super-planning/` and report the cleanup as skipped rather than
+guessing that the repository is idle.
+
 After implementation is done and the plan is ready for final closure.
 
 ## Pre-Flight Checks

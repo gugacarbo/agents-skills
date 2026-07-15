@@ -1729,6 +1729,14 @@ test_watchdog_templates_materialize_target_config() {
   assert_contains_file '"test"' "$target/.super-planning/watchdogs/codex-watchdogs.json"
 }
 
+test_terminal_cleanup_preserves_active_super_planning_state() {
+  local phase7
+  phase7="$REPO_ROOT/skills/super-planning/phases/07-integrate.md"
+  assert_contains_file "pending or in_progress in any registry" "$phase7"
+  assert_contains_file "generated runtime state" "$phase7"
+  assert_contains_file "Never remove the vendored skill directory" "$phase7"
+}
+
 main() {
   if [ "${SUPER_PLANNING_JOB_DASHBOARD_ONLY:-0}" = "1" ]; then
     test_job_dashboard
@@ -1767,6 +1775,7 @@ main() {
   test_render_task_md_empty_plan
   test_render_task_md_invalid_task_id_exits_with_error
   test_watchdog_templates_materialize_target_config
+  test_terminal_cleanup_preserves_active_super_planning_state
   test_append_task_validate_only
   test_init_uses_documented_safe_defaults
   test_task_lifecycle_rejects_skipped_review_and_accepts_reviewed_completion

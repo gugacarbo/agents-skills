@@ -65,4 +65,24 @@ do instalador ou da release antes de criar a referência.
 
 Na Fase 4, antes de definir a branch de implementação, a skill sempre pergunta se o usuário quer usar um worktree. Se a resposta for positiva, a subfase interna [`4.1 — Using Git Worktrees`](phases/04_1-using-git-worktrees.md) executa criação/reuso do workspace, setup e baseline antes do dispatch.
 
+## Watchdogs de execução
+
+A skill pode materializar uma configuração de watchdog no repositório-alvo em
+`.super-planning/watchdogs/`. O contrato é extensível por plataforma; nesta
+versão, apenas o adaptador [`Codex`](platforms/continuation/codex/) está
+implementado.
+
+O Codex usa dois heartbeats na mesma conversa, sempre mediante opt-in na Fase
+5: `continuation` retoma a próxima ação segura a cada 2 minutos no perfil
+`default`; `status` produz um relatório somente-leitura a cada 15 minutos. O
+perfil `test` reduz o status para 30 segundos. Os intervalos e os prompts são
+configuráveis no arquivo gerado
+`.super-planning/watchdogs/codex-watchdogs.json`.
+
+O heartbeat de status pode interromper uma execução ativa. Por isso ele não
+altera arquivos, estados do plano/tarefas, dispatches ou automações. Um cron
+não é usado para status porque criaria outra conversa. IDs de thread e de
+automação ficam somente em `.super-planning/continuations/<plan-id>.json`,
+fora do Git.
+
 > **Nota para o agente**: Comece pelo [`SKILL.md`](SKILL.md) para o ponto de entrada de roteamento. Instruções detalhadas das fases estão em [`phases/`](phases/).

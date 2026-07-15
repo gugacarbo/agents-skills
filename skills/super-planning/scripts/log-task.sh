@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Append-only task progress logger with file locking.
+# Append-only task progress logger with a portable directory mutex.
 #
 # Usage:
 #   scripts/log-task.sh \
@@ -262,37 +262,29 @@ message_json() {
   fi
 }
 
-LOCK_FILE="$LOG_FILE.lock"
+LOCK_DIR="$LOG_FILE.lock.d"
 
 acquire_lock() {
-  if command -v flock >/dev/null 2>&1; then
-    exec 200>"$LOCK_FILE"
-    flock -x -w 10 200 || { echo "Could not acquire lock for $LOG_FILE" >&2; exit 1; }
-  else
-    # macOS fallback: atomic mkdir as mutex
-    local waited=0
-    while ! mkdir "$LOCK_FILE" 2>/dev/null; do
-      sleep 0.1
-      waited=$((waited + 1))
-      if [ "$waited" -gt 100 ]; then
-        echo "Could not acquire lock for $LOG_FILE" >&2
-        exit 1
-      fi
-    done
-  fi
+  local waited=0
+  while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    sleep 0.1
+    waited=$((waited + 1))
+    if [ "$waited" -gt 100 ]; then
+      echo "Could not acquire lock for $LOG_FILE" >&2
+      exit 1
+    fi
+  done
 }
 
 release_lock() {
-  if command -v flock >/dev/null 2>&1; then
-    exec 200>&-
-  else
-    rmdir "$LOCK_FILE" 2>/dev/null || true
-  fi
+  rmdir "$LOCK_DIR" 2>/dev/null || true
 }
 
 acquire_lock
+trap release_lock EXIT INT TERM
 
 printf '{"timestamp":"%s","task":"%s","event":"%s","try":%s,"maxTries":%s,"message":%s}\n' \
   "$TIMESTAMP" "$TASK" "$EVENT" "$(try_count)" "$(max_tries)" "$(message_json)" >> "$LOG_FILE"
 
 release_lock
+trap - EXIT INT TERM
