@@ -19,18 +19,9 @@ Everything you paste into a dispatch prompt — and everything a subagent prints
 
 When the platform supports it, configure subagents to return compressed output (~60% less context than prose). Use the role-specific formats defined in the dispatch prompt templates:
 
-- **Implementer output:** see [`prompts/implementer-guidance.md`](../prompts/implementer-guidance.md) → Compressed Output Format
+- **Implementer output:** see [`agents/general-executor.md`](../agents/general-executor.md) or [`agents/deep-executor.md`](../agents/deep-executor.md)
 - **Reviewer output:** see [`agents/code-reviewer.md`](../agents/code-reviewer.md) → Compressed Output Format
-- **Investigator output:** used when dispatching an investigation subagent:
-  ```
-  ## Output Format:
-  - Problem: <description>
-  - Root Cause: <analysis>
-  - Fix: <recommendation>
-  - Impact: <high/medium/low>
-  - Evidence: <file:line references>
-  ```
-  Always file-path-first, line-number-attached, backticked symbols.
+- **Investigator output:** see [`agents/investigator.md`](../agents/investigator.md).
 
 **General principles:**
 

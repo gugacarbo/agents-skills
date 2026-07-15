@@ -1,6 +1,6 @@
 ---
 name: super-planning
-description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression. If the user invokes a named super-planning phase, start there and continue forward."
+description: "Create implementation plans decomposed into tasks and execute them via subagents — sequential or parallel — to reduce context pressure on the main agent. Use when you have a feature idea, loose requirements, or an approved spec for a multi-step task, before touching code. Covers integrated brainstorming, spec writing, plan writing, task decomposition, optional Git worktree isolation, model selection, subagent prompt construction, parallel dispatch, review gates, progress tracking, and context compression. If the user invokes a named super-planning phase, start there and continue forward."
 metadata:
   user-invocable: true
 ---
@@ -86,6 +86,7 @@ run `tool bootstrap`; do not silently substitute a hand-written artifact.
 4. **Load the matching phase file first**, then continue through the remaining phases in order.
 5. **Default entry:** if no subcommand is provided, use the normal workflow selection and start at Phase 1 unless there is already an approved spec.
 6. **If Phase 1 becomes visual:** load [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) before launching the companion.
+7. **If Phase 4 records worktree isolation:** load [`phases/04_1-using-git-worktrees.md`](phases/04_1-using-git-worktrees.md) and complete it before Phase 5.
 
 ## Phase Router
 
@@ -95,6 +96,7 @@ run `tool bootstrap`; do not silently substitute a hand-written artifact.
 | 2 — SPEC       | Write the feature spec and get user approval                     | [`phases/02-spec.md`](phases/02-spec.md)             |
 | 3 — PLAN       | Write the implementation plan                                    | [`phases/03-plan.md`](phases/03-plan.md)             |
 | 4 — DECOMPOSE  | Fill `super-plan.json` with atomic tasks and task-state metadata | [`phases/04-decompose.md`](phases/04-decompose.md)   |
+| 4.1 — WORKTREE | Create or reuse the approved isolated implementation workspace   | [`phases/04_1-using-git-worktrees.md`](phases/04_1-using-git-worktrees.md) |
 | 5 — DISPATCH   | Send subagents (sequential or parallel)                          | [`phases/05-dispatch.md`](phases/05-dispatch.md)     |
 | 6 — REVIEW     | Spec compliance + code quality gates                             | [`phases/06-review.md`](phases/06-review.md)         |
 | 7 — INTEGRATE  | Merge results, final review, finish                              | [`phases/07-integrate.md`](phases/07-integrate.md)   |
@@ -127,6 +129,7 @@ Want progress stats?
 - **Sequential mode:** one implementer + one reviewer according to `reviewCadence` (defined in [Phase 5 — DISPATCH](phases/05-dispatch.md)). Best for dependent tasks or overlapping files.
 - **Parallel mode:** dispatch 2–4 subagents simultaneously. Review timing is controlled by `reviewCadence`; with `per_task`, launch all finished-task reviewers immediately after the implementer wave returns. Requires file-level isolation.
 - **File-based handoffs:** task requirements live in `super-plan.json`; Phase 4 uses the helper stack in-place when the target repo already contains this `super-planning` skill, otherwise it bootstraps the complete manifest in `.super-planning/`: `super-plan.sh`, `super-update.sh`, `render-progress-ledger.sh`, `log-task.sh`, `review-package.sh`, `render-task-md.sh`, `summarize-all-tasks.sh`, and `super-plan.schema.json`. It also writes `super-planning-reference.json` from explicitly captured source-skill provenance (repository, ref, commit), never from the target application remote. Every later registry mutation must go through the active helper path, which regenerates the ledger immediately. Phase 5 materializes task directories, logging wrappers, and `progress.log`; Phase 6 materializes reports and review packages.
+- **Branch/worktree decision gate** — before defining or changing the implementation branch, ask the user whether implementation should use a Git worktree. Do not infer consent from parallel mode, repository support, or a default value. Persist the answer in the plan handoff and `super-plan.json`. If the answer is yes, run the built-in [Phase 4.1 worktree workflow](phases/04_1-using-git-worktrees.md); if no, persist `worktree.enabled=false` and continue in the current checkout.
 - **Never start implementation on `main`/`master`** without explicit user consent, always ask for permission.
 - **Never re-dispatch a task** the ledger or log already marks complete.
 - **Status lifecycle** — use one state machine everywhere: `pending → in_progress → ready_for_review → reviewing → needs_fix|blocked|completed|cancelled`. Only the orchestrator may mark `completed`, and only after review is clean.
@@ -159,8 +162,9 @@ Want progress stats?
 | [`prompts/post-write-approval.md`](prompts/post-write-approval.md)       | After writing the spec                                            |
 | [`prompts/find-docs.md`](prompts/find-docs.md)                           | Verifying library/framework documentation during Phase 3          |
 | [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md)   | Reviewing spec readiness                                          |
-| [`prompts/worker-prompt-template.md`](prompts/worker-prompt-template.md) | Building the implementer dispatch prompt                          |
-| [`prompts/implementer-guidance.md`](prompts/implementer-guidance.md)     | Supplementing the implementer dispatch prompt                     |
+| [`agents/general-executor.md`](agents/general-executor.md)               | Dispatching normal implementation tasks                           |
+| [`agents/deep-executor.md`](agents/deep-executor.md)                     | Dispatching difficult or cross-cutting implementation tasks       |
+| [`agents/investigator.md`](agents/investigator.md)                       | Dispatching read-only repository investigation                    |
 | [`agents/code-reviewer.md`](agents/code-reviewer.md)                     | Dispatching a Phase 6 per-task reviewer                           |
 | [`agents/spec-document-reviewer.md`](agents/spec-document-reviewer.md)   | Dispatching a Phase 2 spec document review before planning        |
 | [`agents/spec-compliance-auditor.md`](agents/spec-compliance-auditor.md) | Dispatching a final whole-branch spec compliance audit in Phase 7 |
@@ -179,6 +183,7 @@ Want progress stats?
 
 - **Full visual flows:** [`README.md`](README.md)
 - **Phase 1 visual companion:** [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md)
+- **Phase 4.1 worktree setup:** [`phases/04_1-using-git-worktrees.md`](phases/04_1-using-git-worktrees.md)
 - **Super-plan generator:** [`scripts/super-plan.sh`](scripts/super-plan.sh)
 - **Helper updater:** [`scripts/super-update.sh`](scripts/super-update.sh)
 - **Progress-ledger renderer:** [`scripts/render-progress-ledger.sh`](scripts/render-progress-ledger.sh)

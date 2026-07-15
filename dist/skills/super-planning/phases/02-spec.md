@@ -90,7 +90,7 @@ After the self-review, ask the user:
 
 > "Would you like me to dispatch a review subagent to audit this spec for inconsistencies, logical bugs, missing decisions, and planning blockers before we proceed?"
 
-If the user agrees, dispatch a general-purpose subagent using [`agents/spec-document-reviewer.md`](../agents/spec-document-reviewer.md). Provide the spec file path and let the subagent produce a thorough Spec Document Review Report.
+If the user agrees, dispatch a subagent using [`agents/spec-document-reviewer.md`](../agents/spec-document-reviewer.md). This happens before Phase 4 creates `super-plan.json`, so use the platform default rather than a persisted profile. Provide the spec file path and let the subagent produce a thorough Spec Document Review Report.
 
 If the review finds critical issues, fix them before the Post-Write Approval Gate.
 

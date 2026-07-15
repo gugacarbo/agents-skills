@@ -1,7 +1,25 @@
 # Phase 5: Dispatch Subagents
 
-Before the first implementation wave, move the registry plan from `pending` to
-`in_progress` through the active helper. Do not write its status directly:
+## Resolve the Approved Implementation Workspace
+
+## Watchdog consent and reconciliation
+
+Before the first wave, ask whether to enable watchdogs and select a valid
+provider profile from `.super-planning/watchdogs/<provider>-watchdogs.json`.
+For Codex, create/update `continuation` and read-only `status` heartbeats on
+the current thread. Status may interrupt work; never replace it with a cron or
+let it edit files, lifecycle state, dispatches, or automations. Pause every
+role on a human block and record host IDs only in ignored continuation metadata.
+
+Before defining or changing a branch, creating task branches, or dispatching an implementer, verify that the Phase 4 handoff records the user's worktree answer. `worktree.enabled` by itself is not sufficient evidence for registries created before this gate existed.
+
+- If the decision is missing, ask the user whether implementation should use an isolated Git worktree, then persist the answer before continuing.
+- If the answer is yes, load and complete the built-in [`Phase 4.1 worktree workflow`](04_1-using-git-worktrees.md), passing the approved feature branch and directory convention. Persist the actual returned path and branch values in `super-plan.json` through the active helper.
+- If the answer is no, do not load the worktree setup workflow. Keep `worktree.enabled=false`, use an empty `worktree.path`, and apply the normal `main`/`master` consent rule.
+
+Do not dispatch implementation until the selected workspace has completed its setup and baseline verification, or the user has explicitly acknowledged a reported baseline failure.
+
+After resolving the workspace and before the first implementation wave, move the registry plan from `pending` to `in_progress` through the active helper. Do not write its status directly:
 
 ```bash
 sh "$ACTIVE_SUPER_PLAN_SCRIPT" transition-plan \
@@ -25,21 +43,21 @@ Use the least powerful model that can handle each role:
 
 **Turn count beats token price.** The cheapest models take 2–3× more turns on multi-step work, costing more overall. Use standard as the floor for reviewers and for implementers working from prose descriptions. Reserve the cheapest tier for implementers whose task JSON entry contains the complete code to write.
 
-## Task Profiles and Configured Subagent Slots
+## Role Profiles and Configured Subagent Slots
 
-Read the task's `task_profile` from `super-plan.json` before dispatching. Every task must map to one of three configured execution slots under `agents`:
+Read the task's `task_profile` from `super-plan.json` before dispatching. New tasks map to one of two executor roles:
 
-- `quick`
 - `general`
 - `deep`
 
-Use the matching `agents.<task_profile>` configuration when it is populated.
+Resolve them through the fixed role catalog:
 
-Example:
+- `task_profile=general` → `agents.generalExecutor` + `agents/general-executor.md`
+- `task_profile=deep` → `agents.deepExecutor` + `agents/deep-executor.md`
 
-- `task_profile=quick` → use `agents.quick`
-- `task_profile=general` → use `agents.general`
-- `task_profile=deep` → use `agents.deep`
+Other dispatches resolve directly by role: `taskReviewer`, `investigator`, and
+`finalAuditor`. `specReviewer` is persisted for auditability but cannot affect
+the optional Phase 2 review, which runs before `super-plan.json` exists.
 
 ## Capability Adapter
 
@@ -59,7 +77,7 @@ If any preferred capability is missing, adapt the execution mode instead of pret
 Before starting any implementation wave, especially a parallel wave, validate the configured execution slots against the current platform:
 
 1. Re-discover the currently available agents/subagents, models, and effort levels using the platform's available tools
-2. For each profile used by the pending tasks in the upcoming wave, verify whether the configured `agent`, `model`, and `effort` are still available
+2. For each role profile used by the upcoming dispatches, verify whether the configured `agent`, `model`, and `effort` are still available
 3. Run a lightweight pre-flight dispatch/probe with the configured profile before launching the full batch when the platform supports such a test
 
 If a configured profile is empty:
@@ -69,7 +87,7 @@ If a configured profile is empty:
 
 If a configured profile fails validation or the pre-flight dispatch:
 
-1. Update `super-plan.json` through the active helper path and set that profile's `model`, `agent`, and `effort` to empty strings
+1. Update `super-plan.json` through the active helper path and set that role profile's `model`, `agent`, and `effort` to empty strings
 2. Record that the orchestrator is falling back to the platform default selection
 3. Use the system default configuration for the real subagent dispatch
 
@@ -105,7 +123,8 @@ A dispatch prompt contains exactly five things — nothing more:
 4. **Your resolution** of any ambiguity you noticed in the task entry
 5. **The report-file path** and report contract
 
-Use [`prompts/worker-prompt-template.md`](../prompts/worker-prompt-template.md) as the starting point for implementer dispatches.
+Use `agents/general-executor.md` or `agents/deep-executor.md`, as resolved from
+the task profile, as the starting point for implementer dispatches.
 
 If using worktree isolation, each subagent's working directory is the worktree root, not the main repo root. Adjust the `Working Directory` placeholder accordingly.
 
@@ -199,7 +218,7 @@ branch package uses `git merge-base <base-branch> HEAD` as its base.
 For each task:
 
 1. Read the task entry from `docs/jobs/{NNNN-<feature-name>}/super-plan.json`.
-2. Resolve the task's `task_profile` and the corresponding `agents.<task_profile>` config.
+2. Resolve the task's `task_profile` to `agents.generalExecutor` or `agents.deepExecutor` and load its fixed prompt.
 3. Validate the configured model/agent/effort if present; otherwise use the system default.
 4. Ensure the Phase 5 task directory, task-local logger, and empty
    `progress.log` were materialized before dispatching the implementer.
@@ -210,7 +229,7 @@ For each task:
 9. If `reviewCadence=per_task`, set the task status to `reviewing` via script, then hand off immediately to Phase 6 for artifact materialization, review package generation, and reviewer dispatch.
 10. If `reviewCadence=per_batch`, wait until the current batch is fully `ready_for_review`, then set each task to `reviewing` and hand off the batch to Phase 6.
 11. If `reviewCadence=final_only`, continue implementation without task-level review, keep the task at `ready_for_review`, and defer the independent review gate to final integration, where reviewers are still dispatched one batch at a time before any task transitions to `completed`.
-12. If the reviewer later finds issues, update `super-plan.json` to `needs_fix` via script, dispatch one fix subagent with the complete Critical/Important findings, require it to append focused test commands and output to the report, regenerate the package from the original base, and re-review according to the same cadence.
+12. If the reviewer later finds issues, update `super-plan.json` to `needs_fix` via script, dispatch one fix subagent with the complete Critical/Important findings using the task's same `generalExecutor` or `deepExecutor` profile, require it to append focused test commands and output to the report, regenerate the package from the original base, and re-review according to the same cadence.
 13. After clean review at the configured cadence, append a `completed` log entry with the task-local wrapper `log-task.sh` and update the JSON status to `completed` via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
 
 ## Parallel Dispatch
@@ -219,8 +238,8 @@ For independent tasks with no file conflicts:
 
 1. Extract all task entries from `super-plan.json` at once.
 2. Resolve which profiles are needed in the wave from each task's `task_profile`.
-3. Validate the configured `agents.quick|general|deep` entries needed for the wave and run a lightweight pre-flight dispatch/probe before the real batch when the platform supports it.
-4. For any failed configured profile, clear `model`, `agent`, and `effort` in `super-plan.json` before the batch and use the system defaults instead.
+3. Validate the configured `agents.generalExecutor|deepExecutor` entries needed for the wave and run a lightweight pre-flight dispatch/probe before the real batch when the platform supports it.
+4. For any failed configured role profile, clear `model`, `agent`, and `effort` in `super-plan.json` before the batch and use the system defaults instead.
 5. Ensure every task in the wave has its directory, task-local logger, and
    empty `progress.log` before launching the wave.
 6. Dispatch ALL subagents in ONE message (parallel tool calls), if the platform supports it.
@@ -230,7 +249,7 @@ For independent tasks with no file conflicts:
 10. If `reviewCadence=per_task`, set each finished task to `reviewing` via script, then dispatch a reviewer subagent for every finished task in the response immediately after the implementer wave returns. In a parallel wave, “immediately” means after the wave result is available, not after an individual tool call; do not wait for sibling reviews before launching the other reviewers.
 11. If `reviewCadence=per_batch`, wait for the full batch to reach `ready_for_review`, then set each task to `reviewing` and hand the batch to Phase 6 together.
 12. If `reviewCadence=final_only`, skip task-level review during the parallel wave, keep accepted tasks at `ready_for_review`, and defer independent review to final integration, where one reviewer subagent must still be dispatched per batch before any task transitions to `completed`.
-13. Dispatch fix subagents for any reviewed tasks that need fixes.
+13. Dispatch fix subagents for any reviewed tasks that need fixes using each task's resolved executor role.
 14. Integrate all changes onto the working branch.
 15. After clean review at the configured cadence, append `completed` log entries with each task-local wrapper `log-task.sh` and update the JSON status for the accepted tasks via script so the ledger regenerates. Skip this step during implementation when `reviewCadence=final_only`.
 
@@ -286,7 +305,7 @@ After each subagent returns, check that its changes stay within the declared sco
 
 ## Implementer Guidance
 
-When constructing dispatch prompts for implementers, include the expectations from [`prompts/implementer-guidance.md`](../prompts/implementer-guidance.md). Key points:
+When constructing dispatch prompts for implementers, use the resolved executor prompt from `agents/`. Key points:
 
 - Ask before starting if anything is unclear
 - Follow the plan's file structure and established codebase patterns
@@ -304,7 +323,7 @@ When you need to locate symbols, trace dependencies, verify facts, or explore th
 - You need to trace the impact of a proposed change before dispatching an implementer
 - A subagent returns BLOCKED and you need to gather context before re-dispatching
 
-An investigator is **read-only** — it must not modify any files. It returns a structured summary using the investigator compressed output format (see Phase 8 Context Compression). Use a standard model for investigators.
+An investigator is **read-only** — it must not modify any files. Use [`agents/investigator.md`](../agents/investigator.md) and the configured `agents.investigator` profile.
 
 ## Pre-Flight Checks
 
@@ -313,7 +332,7 @@ Before dispatching any subagent, verify:
 1. **Repository state:** clean working tree, correct base branch checked out
 2. **Tooling available:** test runner, linter, and build commands are accessible and work
 3. **Structured registry written:** `super-plan.json` exists with all tasks defined and set to `pending`, and the generated ledger matches it
-4. **Execution profiles validated:** any configured `agents.<profile>` used by the upcoming wave still exists on the current platform, or has already been cleared to default fallback
+4. **Execution profiles validated:** every configured role profile used by the upcoming dispatch still exists on the current platform, or has already been cleared to default fallback
 
 If any check fails, fix it before dispatching.
 
@@ -324,20 +343,20 @@ If any check fails, fix it before dispatching.
 | **DONE**               | Implemented, tests pass        | Mark `ready_for_review`, generate review package, proceed to review                   |
 | **DONE_WITH_CONCERNS** | Completed but flagged doubts   | Read concerns, decide whether to address before review                                |
 | **NEEDS_CONTEXT**      | Missing information to proceed | Provide context and re-dispatch                                                       |
-| **BLOCKED**            | Cannot complete the task       | Assess: provide context, upgrade model, break into smaller tasks, or escalate to user |
+| **BLOCKED**            | Cannot complete the task       | Assess: provide context, use `deepExecutor`, break into smaller tasks, or escalate to user |
 
 **Never** ignore an escalation or force the same model to retry without changes.
 
 ## Branch Strategy
 
-Never start implementation on `main` or `master` without explicit user consent. Create a feature branch for the plan:
+The required branch/worktree gate above must be resolved before applying this strategy. Never start implementation on `main` or `master` without explicit user consent. Create a feature branch for the plan:
 
 - **Branch name:** `NNNN-<feature-name>` (e.g., `0003-auth-middleware`)
 - **Base branch:** check out from the default branch
 - **Parallel subagents:** When using worktree isolation, each subagent works on a branch derived from the feature branch (e.g., `0003-auth-middleware/Task-A-1`)
 - **Integration:** After each task review, merge the task branch into the feature branch. After Phase 7, the feature branch is ready for a PR or merge
 
-If the user does not specify a branch strategy, propose one before Phase 5 dispatch.
+If the user does not specify a branch strategy, propose one only after they answer the worktree question and before Phase 5 dispatch.
 
 > **Note:** Record the branch scheme in the plan's metadata (e.g., `branchScheme: "one-per-feature"` or `branchScheme: "one-per-task"`). This is not validated by the schema — document for audit.
 

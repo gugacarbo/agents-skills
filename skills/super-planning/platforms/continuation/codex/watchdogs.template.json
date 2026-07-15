@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "provider": "codex",
+  "enabled": false,
+  "activeProfile": "default",
+  "profiles": {
+    "default": {
+      "continuation": {"kind": "heartbeat", "interval": {"unit": "minutes", "value": 2}, "promptFile": "./prompts/continue-interrupted-task.md"},
+      "status": {"kind": "heartbeat", "interval": {"unit": "minutes", "value": 15}, "promptFile": "./prompts/report-execution-status.md"}
+    },
+    "test": {
+      "continuation": {"kind": "heartbeat", "interval": {"unit": "minutes", "value": 2}, "promptFile": "./prompts/continue-interrupted-task.md"},
+      "status": {"kind": "heartbeat", "interval": {"unit": "seconds", "value": 30}, "promptFile": "./prompts/report-execution-status.md"}
+    }
+  }
+}

@@ -182,7 +182,11 @@ lines.extend(
     ]
 )
 
-for profile_name in ("general", "deep", "quick"):
+ROLE_AGENT_PROFILES = ("generalExecutor", "deepExecutor", "taskReviewer", "investigator", "specReviewer", "finalAuditor")
+LEGACY_AGENT_PROFILES = ("general", "deep", "quick")
+agent_profiles = ROLE_AGENT_PROFILES if set(payload.get("agents", {})) == set(ROLE_AGENT_PROFILES) else LEGACY_AGENT_PROFILES
+
+for profile_name in agent_profiles:
     model, agent, effort = display_profile_config(payload.get("agents", {}).get(profile_name, {}))
     lines.append(f"| {profile_name} | {model} | {agent} | {effort} |")
 
@@ -202,7 +206,7 @@ if tasks:
             "| {id} | {title} | {profile} | {batch} | {layer} | {status} | {deps} |".format(
                 id=task.get("id", "—"),
                 title=task.get("title", "—"),
-                profile=task.get("task_profile", "—"),
+                profile=(f"{task.get('task_profile', '—')} → {task.get('task_profile', '—')}Executor" if set(payload.get("agents", {})) == set(ROLE_AGENT_PROFILES) else task.get("task_profile", "—")),
                 batch=task.get("batch", "—"),
                 layer=task.get("layer", "—"),
                 status=status_label(task.get("status")),

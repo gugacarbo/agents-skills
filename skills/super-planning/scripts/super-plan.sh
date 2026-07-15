@@ -102,7 +102,12 @@ TASK_STATUSES = PLAN_STATUSES
 REVIEW_CADENCE = {"per_task", "per_batch", "final_only"}
 EXECUTION_MODE = {"subagent-driven", "sequential"}
 TASK_LAYERS = {"foundation", "core", "surface", "final"}
-TASK_PROFILES = {"general", "deep", "quick"}
+ROLE_AGENT_PROFILES = ("generalExecutor", "deepExecutor", "taskReviewer", "investigator", "specReviewer", "finalAuditor")
+LEGACY_AGENT_PROFILES = ("general", "deep", "quick")
+TASK_PROFILES_BY_AGENT_FORMAT = {
+    "role": {"general", "deep"},
+    "legacy": {"general", "deep", "quick"},
+}
 
 
 def fail(message: str):
@@ -171,7 +176,7 @@ expect_keys(
         "tasks",
     ],
     "root",
-    ["createdAt", "updatedAt"],
+    ["createdAt", "updatedAt", "continuation"],
 )
 
 expect_non_empty_string(payload["$schema"], "$schema")
@@ -183,6 +188,13 @@ expect_type(payload["architectureSummary"], str, "architectureSummary")
 expect_string_list(payload["techStack"], "techStack")
 expect_string_list(payload["globalConstraints"], "globalConstraints")
 expect_string_list(payload["rules"], "rules")
+if "continuation" in payload:
+    continuation = payload["continuation"]
+    expect_keys(continuation, ["enabled", "provider", "watchdogProfile", "status"], "continuation")
+    if not isinstance(continuation["enabled"], bool): fail("continuation.enabled must be boolean")
+    if continuation["provider"] != "codex": fail("continuation.provider must be codex")
+    expect_non_empty_string(continuation["watchdogProfile"], "continuation.watchdogProfile")
+    expect_status(continuation["status"], {"disabled", "active", "paused"}, "continuation.status")
 expect_non_empty_string(payload["taskDirectory"], "taskDirectory")
 
 expect_keys(payload["source"], ["spec", "plan"], "source")
@@ -197,8 +209,17 @@ expect_non_empty_string(payload["reviewCadence"], "reviewCadence")
 if payload["reviewCadence"] not in REVIEW_CADENCE:
     fail(f"reviewCadence must be one of: {', '.join(sorted(REVIEW_CADENCE))}")
 
-expect_keys(payload["agents"], ["general", "deep", "quick"], "agents")
-for profile_name in ("general", "deep", "quick"):
+agent_keys = set(payload["agents"]) if isinstance(payload["agents"], dict) else set()
+if agent_keys == set(ROLE_AGENT_PROFILES):
+    agent_format = "role"
+    agent_profile_names = ROLE_AGENT_PROFILES
+elif agent_keys == set(LEGACY_AGENT_PROFILES):
+    agent_format = "legacy"
+    agent_profile_names = LEGACY_AGENT_PROFILES
+else:
+    fail("agents must define either role profiles (generalExecutor, deepExecutor, taskReviewer, investigator, specReviewer, finalAuditor) or legacy profiles (general, deep, quick)")
+
+for profile_name in agent_profile_names:
     profile = payload["agents"][profile_name]
     expect_keys(profile, ["model", "agent", "effort"], f"agents.{profile_name}")
     if not isinstance(profile["model"], str):
@@ -300,8 +321,9 @@ for index, task in enumerate(payload["tasks"]):
     if task["tryCount"] > task["maxTries"]:
         fail(f"{path_label}.tryCount must be <= maxTries")
     expect_non_empty_string(task["task_profile"], f"{path_label}.task_profile")
-    if task["task_profile"] not in TASK_PROFILES:
-        fail(f"{path_label}.task_profile must be one of: {', '.join(sorted(TASK_PROFILES))}")
+    allowed_task_profiles = TASK_PROFILES_BY_AGENT_FORMAT[agent_format]
+    if task["task_profile"] not in allowed_task_profiles:
+        fail(f"{path_label}.task_profile must be one of: {', '.join(sorted(allowed_task_profiles))} for {agent_format} agents")
     expect_non_empty_string(task["batch"], f"{path_label}.batch")
     expect_non_empty_string(task["layer"], f"{path_label}.layer")
     if task["layer"] not in TASK_LAYERS:
@@ -608,7 +630,7 @@ if [ "$MODE" = "init" ]; then
     TASK_DIRECTORY="$(dirname "$OUTPUT_PATH")"
   fi
 
-  if [ -z "$WORKTREE_PATH" ]; then
+  if [ "$WORKTREE_ENABLED" = "true" ] && [ -z "$WORKTREE_PATH" ]; then
     WORKTREE_PATH="../$PLAN_ID-worktree"
   fi
 
@@ -653,9 +675,12 @@ payload = {
     "executionMode": execution_mode,
     "reviewCadence": review_cadence,
     "agents": {
-        "general": {"model": "", "agent": "", "effort": ""},
-        "deep": {"model": "", "agent": "", "effort": ""},
-        "quick": {"model": "", "agent": "", "effort": ""},
+        "generalExecutor": {"model": "", "agent": "", "effort": ""},
+        "deepExecutor": {"model": "", "agent": "", "effort": ""},
+        "taskReviewer": {"model": "", "agent": "", "effort": ""},
+        "investigator": {"model": "", "agent": "", "effort": ""},
+        "specReviewer": {"model": "", "agent": "", "effort": ""},
+        "finalAuditor": {"model": "", "agent": "", "effort": ""},
     },
     "branchStrategy": {
         "baseBranch": base_branch,
@@ -670,6 +695,7 @@ payload = {
     "requirementsChecklist": [],
     "taskDirectory": task_directory,
     "rules": [],
+    "continuation": {"enabled": False, "provider": "codex", "watchdogProfile": "default", "status": "disabled"},
     "tasks": [],
 }
 

@@ -59,12 +59,16 @@ fi
 mkdir -p "$TARGET_DIR" "$TARGET_DIR/visual-companion"
 for file in \
   super-plan.sh super-update.sh render-progress-ledger.sh log-task.sh \
-  review-package.sh render-task-md.sh summarize-all-tasks.sh doctor.sh bootstrap.sh
+  review-package.sh render-task-md.sh summarize-all-tasks.sh doctor.sh bootstrap.sh materialize-watchdogs.sh
 do
   cp "$SOURCE_DIR/scripts/$file" "$TARGET_DIR/$file"
 done
 cp "$SOURCE_DIR/interfaces/super-plan.schema.json" "$TARGET_DIR/super-plan.schema.json"
 cp "$SOURCE_DIR/templates/.gitignore-template" "$TARGET_DIR/.gitignore"
+mkdir -p "$TARGET_DIR/watchdog-templates/prompts"
+cp "$SOURCE_DIR/platforms/continuation/codex/watchdogs.template.json" "$TARGET_DIR/watchdog-templates/codex-watchdogs.template.json"
+cp "$SOURCE_DIR/prompts/watchdogs/continue-interrupted-task.md" "$TARGET_DIR/watchdog-templates/prompts/continue-interrupted-task.md"
+cp "$SOURCE_DIR/prompts/watchdogs/report-execution-status.md" "$TARGET_DIR/watchdog-templates/prompts/report-execution-status.md"
 for file in start-server.sh stop-server.sh server.cjs helper.js frame-template.html; do
   cp "$SOURCE_DIR/scripts/visual-companion/$file" "$TARGET_DIR/visual-companion/$file"
 done

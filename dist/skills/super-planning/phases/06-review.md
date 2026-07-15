@@ -91,7 +91,7 @@ The reviewer gets three things:
 
 ## Reviewer Guidance
 
-When dispatching a reviewer, use the [`agents/code-reviewer.md`](../agents/code-reviewer.md) agent. Key principles:
+When dispatching a reviewer, use the [`agents/code-reviewer.md`](../agents/code-reviewer.md) prompt and the configured `agents.taskReviewer` profile. Key principles:
 
 - **Do Not Trust the Report:** Treat the implementer's report as unverified claims; verify against the diff
 - **Scope-Limited:** Only review the task's changes, not the whole branch
@@ -104,8 +104,8 @@ When dispatching a reviewer, use the [`agents/code-reviewer.md`](../agents/code-
 
 | Severity      | Meaning                    | Action                                                                                                                                                                          |
 | ------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Critical**  | Must fix before proceeding | Dispatch fix subagent, re-review                                                                                                                                                |
-| **Important** | Should fix, blocks merge   | Dispatch fix subagent, re-review                                                                                                                                                |
+| **Critical**  | Must fix before proceeding | Dispatch the affected task's executor role, re-review                                                                                                                           |
+| **Important** | Should fix, blocks merge   | Dispatch the affected task's executor role, re-review                                                                                                                           |
 | **Minor**     | Nice to have               | Record minor findings in the task's `progress.log` as an `info` event with the finding details. If the finding affects status, update the task's `status` in `super-plan.json`. |
 
 For the final whole-branch review, dispatch ONE fix subagent with ALL findings — not one fixer per finding. Record Minor findings in the task's `progress.log` with file/line, impact, and recommended follow-up so the final audit can triage them.

@@ -2,7 +2,33 @@
 
 Before dispatching any subagent, generate a single machine-readable registry that is the source of truth for the plan and every task.
 
+## Required Branch and Worktree Decision Gate
+
+Before selecting, creating, or persisting the implementation branch, the orchestrator MUST ask the user:
+
+> Should implementation use an isolated Git worktree?
+
+Use the platform's structured question tool when available and allowed; otherwise ask in plain text. Do not infer the answer from parallel execution, Git worktree support, a previous default, or the size of the change. The branch is not considered defined until the user answers this gate.
+
+After the answer:
+
+1. select the base branch and proposed feature branch;
+2. record the answer in the plan's **Decomposition handoff**;
+3. persist `branchStrategy.baseBranch`, `branchStrategy.featureBranch`, and `worktree.enabled` in `super-plan.json`;
+4. when the answer is no, persist an empty `worktree.path`;
+5. when the answer is yes, reserve the intended path if known and run the built-in [`Phase 4.1 worktree workflow`](04_1-using-git-worktrees.md) before Phase 5.
+
+Phase 4.1 must not repeat the consent question: pass it the already-approved answer, selected feature branch, and any repository directory convention.
+
 ## Resolve the Active Helper Path First
+
+## Watchdog configuration materialization
+
+When the selected plan supports watchdogs, Phase 4 materializes the provider
+configuration before dispatch. For Codex, run `materialize-watchdogs.sh
+--target-dir <repo-root>` so the target gets
+`.super-planning/watchdogs/codex-watchdogs.json` and independent prompts.
+Do not materialize host IDs; Phase 5 owns those local records.
 
 Before using the registry script, decide which helper path is active for this run:
 
@@ -56,6 +82,8 @@ This incremental approach guarantees that every mutation goes through the helper
 
 ### Step 1: create the skeleton
 
+The examples below assume `BASE_BRANCH`, `FEATURE_BRANCH`, `WORKTREE_ENABLED`, and `WORKTREE_PATH` were assigned from the required user decision above. Use `WORKTREE_ENABLED=false` and an empty `WORKTREE_PATH` when the user declines isolation; never substitute an inferred default.
+
 When the skill is already inside the target repository:
 
 ```bash
@@ -64,7 +92,10 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh init \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
-  --worktree-enabled true \
+  --base-branch "$BASE_BRANCH" \
+  --feature-branch "$FEATURE_BRANCH" \
+  --worktree-enabled "$WORKTREE_ENABLED" \
+  --worktree-path "$WORKTREE_PATH" \
   --execution-mode subagent-driven \
   --review-cadence per_task \
   --output docs/jobs/0003-auth-middleware/super-plan.json
@@ -103,7 +134,10 @@ sh /absolute/path/to/workspace/.super-planning/super-plan.sh init \
   --feature-name auth-middleware \
   --spec docs/specs/0003-auth-middleware-spec.md \
   --plan docs/plans/0003-auth-middleware.md \
-  --worktree-enabled true \
+  --base-branch "$BASE_BRANCH" \
+  --feature-branch "$FEATURE_BRANCH" \
+  --worktree-enabled "$WORKTREE_ENABLED" \
+  --worktree-path "$WORKTREE_PATH" \
   --execution-mode subagent-driven \
   --review-cadence per_task \
   --output docs/jobs/0003-auth-middleware/super-plan.json
@@ -260,7 +294,7 @@ sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
   --set requirementsChecklist=@/tmp/requirements.json
 ```
 
-### Step 4: set agents and review cadence after user confirmation
+### Step 4: set role profiles and review cadence after user confirmation
 
 Run profile discovery and ask the user for the cadence first (see below). Then persist the choices:
 
@@ -268,7 +302,7 @@ Run profile discovery and ask the user for the cadence first (see below). Then p
 sh /absolute/path/to/workspace/super-planning/scripts/super-plan.sh update \
   --input docs/jobs/0003-auth-middleware/super-plan.json \
   --set reviewCadence=per_task \
-  --set agents='{"general":{"model":"gpt-5","agent":"general","effort":"medium"},"deep":{"model":"claude-opus-4","agent":"deep","effort":"high"},"quick":{"model":"gpt-5-mini","agent":"quick","effort":"low"}}'
+  --set agents='{"generalExecutor":{"model":"gpt-5","agent":"general-executor","effort":"medium"},"deepExecutor":{"model":"gpt-5","agent":"deep-executor","effort":"high"},"taskReviewer":{"model":"gpt-5","agent":"task-reviewer","effort":"medium"},"investigator":{"model":"gpt-5","agent":"investigator","effort":"medium"},"specReviewer":{"model":"gpt-5","agent":"spec-reviewer","effort":"medium"},"finalAuditor":{"model":"gpt-5","agent":"final-auditor","effort":"high"}}'
 ```
 
 Then make every later change through that same active helper path. Do not edit `super-plan.json` by hand.
@@ -279,21 +313,24 @@ Structure and field definitions live in the schema file from the active helper p
 - `goal`, `architectureSummary`, `techStack`
 - `globalConstraints`, `fileStructure`, `requirementsChecklist`
 - `reviewCadence`
-- `agents.general|deep|quick` with `{ "model": "", "agent": "", "effort": "" }` defaults when discovery is unavailable
+- `agents.generalExecutor|deepExecutor|taskReviewer|investigator|specReviewer|finalAuditor`, each with `{ "model": "", "agent": "", "effort": "" }` defaults when discovery is unavailable
 - `taskDirectory`, `executionMode`, `branchStrategy`, `worktree`
 - `tasks`
 
-> **Worktree path:** Worktree path goes outside the main repo. Before enabling worktree mode, verify the repo supports worktrees (`git worktree list` should not error). Default `worktree.enabled=true` is safe only if the repo doesn't use submodules or hooks that break with worktrees.
+> **Worktree path:** Never enable worktree mode by default. Use the user's answer from the required decision gate. Phase 4.1 owns detection, directory selection, native-tool preference, setup, and baseline verification.
 
 ## Subagent Profile Discovery
 
 Before finalizing `super-plan.json`, the orchestrator must attempt platform-native auto-discovery for subagent execution profiles.
 
-Discover three profiles:
+Discover the role profiles that the workflow actually dispatches:
 
-- `general` — default/general-purpose subagent for most implementation tasks
-- `deep` — best available profile for difficult, ambiguous, or architecture-heavy tasks
-- `quick` — fastest/lightest profile for narrow, mechanical work
+- `generalExecutor` — normal implementation and debugging tasks; fixed prompt: `agents/general-executor.md`
+- `deepExecutor` — difficult, ambiguous, architecture-heavy, or cross-file tasks; fixed prompt: `agents/deep-executor.md`
+- `taskReviewer` — Phase 6 task review; fixed prompt: `agents/code-reviewer.md`
+- `investigator` — read-only fact finding; fixed prompt: `agents/investigator.md`
+- `specReviewer` — optional Phase 2 spec review; fixed prompt: `agents/spec-document-reviewer.md`
+- `finalAuditor` — Phase 7 whole-branch audit; fixed prompt: `agents/spec-compliance-auditor.md`
 
 Use the tools available in the current platform to discover:
 
@@ -307,7 +344,7 @@ After collecting the discovery result, the orchestrator must present it to the u
 **Preferred interaction rule:** if the current platform exposes an ask/confirm/question tool for structured user input, including `question` / a request user input tool, and the current collaboration mode/session allows that tool to be called, the orchestrator must use that tool instead of a plain text question. Use the structured prompt to:
 
 1. show the discovered agents and models
-2. show the recommended `general`, `deep`, and `quick` configuration
+2. show the recommended role-profile configuration
 3. let the user choose one of these paths:
    - accept the recommendation
    - provide a manual override
@@ -317,7 +354,7 @@ After collecting the discovery result, the orchestrator must present it to the u
 
 After discovery:
 
-1. Recommend a configuration for `agents.general`, `agents.deep`, and `agents.quick`
+1. Recommend a configuration for every role profile under `agents`
 2. Ask the user to choose recommendation, manual override, or empty/default config
 3. Persist the user-approved result in `super-plan.json`, including the effort level
 4. If no compatible options are discoverable, leave all `model`, `agent`, and `effort` fields empty unless the user provides a manual override
@@ -347,12 +384,18 @@ Required shape:
 ```json
 {
   "agents": {
-    "general": { "model": "", "agent": "", "effort": "" },
-    "deep": { "model": "", "agent": "", "effort": "" },
-    "quick": { "model": "", "agent": "", "effort": "" }
+    "generalExecutor": { "model": "", "agent": "", "effort": "" },
+    "deepExecutor": { "model": "", "agent": "", "effort": "" },
+    "taskReviewer": { "model": "", "agent": "", "effort": "" },
+    "investigator": { "model": "", "agent": "", "effort": "" },
+    "specReviewer": { "model": "", "agent": "", "effort": "" },
+    "finalAuditor": { "model": "", "agent": "", "effort": "" }
   }
 }
 ```
+
+`specReviewer` is recorded for auditability, but the optional Phase 2 review
+runs before the registry exists and therefore uses the platform default.
 
 ## Review Cadence Decision
 
@@ -374,15 +417,14 @@ When presenting the options, make the dispatch behavior explicit:
 
 Each task entry must still include:
 
-- `task_profile` — one of `general`, `deep`, or `quick`
+- `task_profile` — one of `general` or `deep`
 - `batch` — execution batch label such as `A`, `B`, `C`
 - `layer` — work classification such as `foundation`, `core`, `surface`, `final`
 
 `task_profile` is mandatory and represents the intended execution complexity/profile for that task:
 
-- `quick` — narrow, mechanical, low-risk work
-- `general` — normal implementation/debugging work
-- `deep` — harder debugging, architecture, cross-file integration, or subtle reasoning
+- `general` — resolves to `agents.generalExecutor` for normal implementation/debugging work
+- `deep` — resolves to `agents.deepExecutor` for harder debugging, architecture, cross-file integration, or subtle reasoning
 
 Do not leave tasks uncategorized. Every task in `super-plan.json` must have a `task_profile`.
 

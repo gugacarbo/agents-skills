@@ -1,5 +1,12 @@
 # Phase 7: Integrate and Finish
 
+## Watchdog terminal cleanup
+
+Before marking a plan completed or cancelled, resolve its enabled provider
+adapter and disable every watchdog role. Mark local continuation metadata
+inactive; never retain an active status or continuation heartbeat after a
+terminal plan state.
+
 After implementation is done and the plan is ready for final closure.
 
 ## Pre-Flight Checks
@@ -56,7 +63,7 @@ sh "$ACTIVE_REVIEW_PACKAGE_SCRIPT" "$BASE" HEAD \
   docs/jobs/{NNNN-<feature-name>}/final-review-package.diff.md
 ```
 
-Dispatch a final whole-branch review using the most capable model. Use [`agents/spec-compliance-auditor.md`](../agents/spec-compliance-auditor.md) as the audit prompt, providing:
+Dispatch a final whole-branch review with the configured `agents.finalAuditor` profile. Use [`agents/spec-compliance-auditor.md`](../agents/spec-compliance-auditor.md) as the audit prompt, providing:
 
 1. The full spec document
 2. Access to the codebase on the feature branch
@@ -71,7 +78,7 @@ Produce a File Map listing all files created or modified during implementation. 
 
 ## Step 5: Address Remaining Findings
 
-Address any findings from the final audit. Dispatch ONE fix subagent with ALL
+Address any findings from the final audit. Dispatch ONE `deepExecutor` subagent with ALL
 findings — not one fixer per finding. Require focused test evidence in its
 report, regenerate the final package from the same merge base, and repeat the
 audit until there are no Critical/Important findings and no unresolved

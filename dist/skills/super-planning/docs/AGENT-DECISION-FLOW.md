@@ -134,70 +134,81 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Resolve active helper path"] --> B{"Target repo already contains this skill?"}
-    B -->|Yes| C["Use in-repo skill scripts directly"]
-    B -->|No| D["Create or refresh .super-planning helper stack"]
-    C --> E["Generate super-plan.json via active helper path"]
-    D --> E
-    E --> F["Populate plan metadata, requirements, file structure, execution settings, tasks"]
-    F --> G["Set every task status to pending"]
-    G --> H{"Need per-task directories or progress.log now?"}
-    H -->|Yes| I["Defer report and review package to Phase 6; Phase 5 owns logger/progress"]
-    H -->|No| J["Materialize artifacts now"]
-    I --> K["Proceed with registry as single source of truth"]
-    J --> K
-    K --> L{"Any future change to registry?"}
-    L -->|Yes| M["Update only through the same active super-plan.sh helper path"]
-    L -->|No| N["Proceed to Phase 5"]
-    M --> N
+    A["Ask whether implementation should use a worktree before defining branch"] --> A1{"User selects worktree?"}
+    A1 -->|Yes| A2["Record approval; run built-in Phase 4.1 worktree setup"]
+    A1 -->|No| A3["Record worktree.enabled=false and empty path"]
+    A2 --> B["Select and persist base and feature branches"]
+    A3 --> B
+    B --> C["Resolve active helper path"]
+    C --> D{"Target repo already contains this skill?"}
+    D -->|Yes| E["Use in-repo skill scripts directly"]
+    D -->|No| F["Create or refresh .super-planning helper stack"]
+    E --> G["Generate super-plan.json via active helper path"]
+    F --> G
+    G --> H["Populate plan metadata, requirements, file structure, execution settings, tasks"]
+    H --> I["Set every task status to pending"]
+    I --> J{"Need per-task directories or progress.log now?"}
+    J -->|Yes| K["Defer report and review package to Phase 6; Phase 5 owns logger/progress"]
+    J -->|No| L["Materialize artifacts now"]
+    K --> M["Proceed with registry as single source of truth"]
+    L --> M
+    M --> N{"Any future change to registry?"}
+    N -->|Yes| O["Update only through the same active super-plan.sh helper path"]
+    N -->|No| P["Proceed to Phase 5"]
+    O --> P
 ```
 
 ## Phase 5: Dispatch
 
 ```mermaid
 flowchart TD
-    A["Read task_profile or wave profiles from super-plan.json"] --> B["Map to agents.quick/general/deep"]
-    B --> C{"Configured agent/model present?"}
-    C -->|No| D["Use platform defaults"]
-    C -->|Yes| E["Re-discover current platform options"]
-    E --> F{"Configured agent/model still available?"}
-    F -->|No| G["Clear profile in super-plan.json and fall back to defaults"]
-    F -->|Yes| H{"Platform supports explicit model selection?"}
-    H -->|No| I["Record limitation in super-plan.json and use session model/default agent"]
-    H -->|Yes| J["Run lightweight probe with configured agent/model"]
-    J --> K{"Probe succeeded?"}
-    K -->|No| G
-    K -->|Yes| L["Use explicit agent/model for dispatch"]
-    D --> M["Check platform capabilities"]
-    G --> M
-    I --> M
-    L --> M
-    M --> N{"Parallel dispatch supported?"}
-    N -->|No| O["Fallback to sequential wave"]
-    N -->|Yes| P["Parallel remains possible"]
-    O --> Q
-    P --> Q{"Tasks are independent, file-isolated, and dependency-safe?"}
-    Q -->|No| R["Use sequential mode"]
-    Q -->|Yes| S{"Worktree isolation available if needed?"}
-    S -->|No| T["Do not run parallel tasks with overlapping files"]
-    S -->|Yes| U["Use parallel mode with isolated worktrees"]
-    T --> R
-    R --> V["Run pre-flight checks: repo state, tooling, registry, ledger, validated profiles"]
-    U --> V
-    V --> W{"Any pre-flight check failed?"}
-    W -->|Yes| X["Fix before dispatching"]
-    X --> V
-    W -->|No| Y["Build minimal dispatch prompt from the implementer prompt"]
-    Y --> Z{"Implementer returned status?"}
-    Z -->|DONE| AA["Mark ready_for_review and hand off to Phase 6"]
-    Z -->|DONE_WITH_CONCERNS| AB["Resolve correctness/scope concerns<br/>or record observation before review"]
-    Z -->|NEEDS_CONTEXT| AC["Provide context and re-dispatch"]
-    Z -->|BLOCKED| AD{"Can unblock with context, better model, or smaller scope?"}
-    AD -->|Yes| AE["Change something and re-dispatch"]
-    AD -->|No| AF["Escalate to user"]
-    AC --> Y
-    AE --> Y
-    AB --> AA
+    A["Verify recorded worktree decision before branch or dispatch"] --> A1{"Worktree approved?"}
+    A1 -->|Yes| A2["Complete built-in Phase 4.1; persist actual path and branch"]
+    A1 -->|No| A3["Use current checkout and empty worktree path"]
+    A2 --> B["Read dispatch role or task_profile from super-plan.json"]
+    A3 --> B
+    B --> C["Map task general/deep to generalExecutor/deepExecutor; use direct role otherwise"]
+    C --> D{"Configured agent/model present?"}
+    D -->|No| E["Use platform defaults"]
+    D -->|Yes| F["Re-discover current platform options"]
+    F --> G{"Configured agent/model still available?"}
+    G -->|No| H["Clear profile in super-plan.json and fall back to defaults"]
+    G -->|Yes| I{"Platform supports explicit model selection?"}
+    I -->|No| J["Record limitation in super-plan.json and use session model/default agent"]
+    I -->|Yes| K["Run lightweight probe with configured agent/model"]
+    K --> L{"Probe succeeded?"}
+    L -->|No| H
+    L -->|Yes| M["Use explicit agent/model for dispatch"]
+    E --> N["Check platform capabilities"]
+    H --> N
+    J --> N
+    M --> N
+    N --> O{"Parallel dispatch supported?"}
+    O -->|No| P["Fallback to sequential wave"]
+    O -->|Yes| Q["Parallel remains possible"]
+    P --> R
+    Q --> R{"Tasks are independent, file-isolated, and dependency-safe?"}
+    R -->|No| S["Use sequential mode"]
+    R -->|Yes| T{"Worktree isolation available if needed?"}
+    T -->|No| U["Do not run parallel tasks with overlapping files"]
+    T -->|Yes| V["Use parallel mode with isolated worktrees"]
+    U --> S
+    S --> W["Run pre-flight checks: repo state, tooling, registry, ledger, validated profiles"]
+    V --> W
+    W --> X{"Any pre-flight check failed?"}
+    X -->|Yes| Y["Fix before dispatching"]
+    Y --> W
+    X -->|No| Z["Build minimal dispatch prompt from the implementer prompt"]
+    Z --> AA{"Implementer returned status?"}
+    AA -->|DONE| AB["Mark ready_for_review and hand off to Phase 6"]
+    AA -->|DONE_WITH_CONCERNS| AC["Resolve correctness/scope concerns<br/>or record observation before review"]
+    AA -->|NEEDS_CONTEXT| AD["Provide context and re-dispatch"]
+    AA -->|BLOCKED| AE{"Can unblock with context, better model, or smaller scope?"}
+    AE -->|Yes| AF["Change something and re-dispatch"]
+    AE -->|No| AG["Escalate to user"]
+    AD --> Z
+    AF --> Z
+    AC --> AB
 ```
 
 ## Phase 6: Review

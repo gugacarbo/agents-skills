@@ -29,7 +29,9 @@ flowchart TD
     R5 --> P
 
     P --> P1["1. Brainstorm"] --> P2["2. Spec"] --> P3["3. Plan"]
-    P3 --> P4["4. Decompose"] --> P5["5. Dispatch"]
+    P3 --> P4["4. Decompose: ask worktree choice before branch"] --> W{"Worktree approved?"}
+    W -->|yes| P41["4.1 Set up isolated workspace"] --> P5["5. Dispatch"]
+    W -->|no| P5
     P5 --> C{"reviewCadence"}
     C -->|per_task / per_batch| P6["6. Review"]
     C -->|final_only| P7["7. Integrate; review batches here"]
@@ -50,7 +52,8 @@ flowchart LR
     E --> F["Regenerate <repo>/docs/jobs/<NNNN>-<feature>/progress-ledger.md"]
     F --> G["Never edit registry by hand"]
     G --> H["Never dispatch completed task"]
-    H --> I["Never start implementation on main/master without consent"]
+    H --> I["Ask worktree choice before defining implementation branch"]
+    I --> J["Never start implementation on main/master without consent"]
 ```
 
 ## Phase 1: Brainstorm — Complete Flow
@@ -177,7 +180,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Read <repo>/docs/plans/NNNN-<feature>.md and testing handoff"] --> B["Resolve active helper: super-planning/scripts/ or <repo>/.super-planning/"]
+    A["Read <repo>/docs/plans/NNNN-<feature>.md and testing handoff"] --> A1["Ask worktree choice before defining branch"]
+    A1 --> A2["Select base/feature branches and record the answer"]
+    A2 --> B["Resolve active helper: super-planning/scripts/ or <repo>/.super-planning/"]
     B --> C{"Target repo already contains super-planning?"}
     C -->|yes| D["Use in-repo scripts and schema"]
     C -->|no| E["Capture source skill repository/ref/commit; bootstrap complete helpers + reference"]
@@ -186,12 +191,12 @@ flowchart TD
     F --> G["Build task entries incrementally through helper"]
     G --> H["Populate requirementsChecklist, fileStructure, dependencies, batches, layers, maxTries"]
     H --> I["Set every task pending; set plan metadata and source paths"]
-    I --> J["Discover general/deep/quick profiles and available slots"]
+    I --> J["Discover executor, reviewer, investigator, spec-reviewer, and auditor role profiles"]
     J --> K["Run pre-dispatch dependency, acceptance, and ownership conflict scan"]
     K --> L{"Conflict found?"}
     L -->|yes| M["Resolve in one batched user question"]
     M --> K
-    L -->|no| N["Ask and persist executionMode, worktree, profile, reviewCadence decisions"]
+    L -->|no| N["Persist branchStrategy, executionMode, worktree, profiles, and reviewCadence"]
     N --> O{"reviewCadence"}
     O -->|per_task| P["Review after each ready task"]
     O -->|per_batch| Q["Review after each ready batch"]
@@ -200,7 +205,10 @@ flowchart TD
     Q --> S
     R --> S
     S["Generate <repo>/docs/jobs/NNNN-<feature>/progress-ledger.md through active helper"] --> T["Persist statuses only via super-planning/scripts/super-plan.sh update or <repo>/.super-planning/super-plan.sh update"]
-    T --> U["Handoff: <repo>/docs/jobs/NNNN-<feature>/super-plan.json, ledger, profiles, cadence, helper paths to Phase 5"]
+    T --> U{"worktree.enabled?"}
+    U -->|yes| V["Run Phase 4.1: detect/reuse/create workspace, sync planning handoff, setup, baseline"]
+    U -->|no| W["Handoff directly to Phase 5"]
+    V --> W
 ```
 
 ## Phase 5: Dispatch — Complete Flow
@@ -208,7 +216,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["Select next pending task or ready batch"] --> B["Read task entry and task_profile only"]
-    B --> C["Resolve configured agent/model slot"]
+    B --> C["Resolve general/deep task profile to its executor role"]
     C --> D{"Profile valid and capability available?"}
     D -->|no| E["Fallback to platform default; record fallback"]
     D -->|yes| F["Use configured profile"]
@@ -216,7 +224,7 @@ flowchart TD
     F --> G["Apply capability adapter: worktree, file handoff, compressed output"]
     G --> H["Resolve super-planning/scripts/log-task.sh and super-planning/scripts/review-package.sh, or their <repo>/.super-planning copies"]
     H --> I["Materialize <repo>/docs/jobs/<NNNN>-<feature>/<Task-ID>/task-brief.md, log-task.sh, progress.log"]
-    I --> J["Build prompt from super-planning/prompts/worker-prompt-template.md + super-planning/prompts/implementer-guidance.md"]
+    I --> J["Build prompt from the resolved super-planning/agents/*-executor.md contract"]
     J --> K["Prompt contains task, context, working dir, constraints, tests, report, status format"]
     K --> L["Run pre-flight: branch, ownership, scope, dependencies, guidance path"]
     L --> M{"Pre-flight clean?"}
@@ -318,7 +326,7 @@ flowchart TD
 flowchart TD
     A["Need guidance during execution"] --> B{"Situation"}
     B -->|context pressure| C["Use <repo>/docs/jobs/<NNNN>-<feature>/super-plan.json, <Task-ID>/report.md, review-package.diff.md, and progress.log"]
-    C --> C1["Use formats in super-planning/prompts/implementer-guidance.md and super-planning/agents/code-reviewer.md"] --> R
+    C --> C1["Use formats in the resolved executor prompt and super-planning/agents/code-reviewer.md"] --> R
     B -->|retryable failure| D["Classify: lint/type, test, scope, missing context, architecture"]
     D --> E{"tryCount < maxTries?"}
     E -->|yes| F["Fix in task or add context and retry"] --> R

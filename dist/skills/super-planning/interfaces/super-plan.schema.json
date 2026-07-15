@@ -118,6 +118,9 @@
 				"type": "string"
 			}
 		},
+		"continuation": {
+			"$ref": "#/$defs/continuation"
+		},
 		"tasks": {
 			"type": "array",
 			"items": {
@@ -125,7 +128,46 @@
 			}
 		}
 	},
+	"allOf": [
+		{
+			"if": {
+				"properties": {
+					"agents": {
+						"$ref": "#/$defs/roleAgentsConfig"
+					}
+				},
+				"required": ["agents"]
+			},
+			"then": {
+				"properties": {
+					"tasks": {
+						"items": {
+							"allOf": [
+								{ "$ref": "#/$defs/task" },
+								{
+									"properties": {
+										"task_profile": { "enum": ["general", "deep"] }
+									}
+								}
+							]
+						}
+					}
+				}
+			}
+		}
+	],
 	"$defs": {
+		"continuation": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["enabled", "provider", "watchdogProfile", "status"],
+			"properties": {
+				"enabled": {"type": "boolean"},
+				"provider": {"type": "string", "enum": ["codex"]},
+				"watchdogProfile": {"type": "string", "minLength": 1},
+				"status": {"type": "string", "enum": ["disabled", "active", "paused"]}
+			}
+		},
 		"source": {
 			"type": "object",
 			"additionalProperties": false,
@@ -173,19 +215,48 @@
 			}
 		},
 		"agentsConfig": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/roleAgentsConfig"
+				},
+				{
+					"$ref": "#/$defs/legacyAgentsConfig"
+				}
+			]
+		},
+		"roleAgentsConfig": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["generalExecutor", "deepExecutor", "taskReviewer", "investigator", "specReviewer", "finalAuditor"],
+			"properties": {
+				"generalExecutor": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"deepExecutor": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"taskReviewer": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"investigator": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"specReviewer": {
+					"$ref": "#/$defs/agentProfile"
+				},
+				"finalAuditor": {
+					"$ref": "#/$defs/agentProfile"
+				}
+			}
+		},
+		"legacyAgentsConfig": {
 			"type": "object",
 			"additionalProperties": false,
 			"required": ["general", "deep", "quick"],
 			"properties": {
-				"general": {
-					"$ref": "#/$defs/agentProfile"
-				},
-				"deep": {
-					"$ref": "#/$defs/agentProfile"
-				},
-				"quick": {
-					"$ref": "#/$defs/agentProfile"
-				}
+				"general": { "$ref": "#/$defs/agentProfile" },
+				"deep": { "$ref": "#/$defs/agentProfile" },
+				"quick": { "$ref": "#/$defs/agentProfile" }
 			}
 		},
 		"worktree": {

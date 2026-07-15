@@ -8,15 +8,14 @@ See the model and strategy selection table in [`phases/05-dispatch.md`](../phase
 
 ## Task Profiles
 
-Each task in `super-plan.json` must have a `task_profile` and each profile must point to a configuration in `agents`:
+Each new task in `super-plan.json` must have a `task_profile` that resolves to a fixed executor role in `agents`:
 
-- `quick`: fast, mechanical, well-scoped tasks
-- `general`: normal implementation and debugging tasks
-- `deep`: hard, ambiguous, multi-file, or high-judgment tasks
+- `general`: normal implementation and debugging tasks → `agents.generalExecutor` + `agents/general-executor.md`
+- `deep`: hard, ambiguous, multi-file, or high-judgment tasks → `agents.deepExecutor` + `agents/deep-executor.md`
 
-When `agents.<profile>.model`, `agents.<profile>.agent`, and `agents.<profile>.effort` are populated, the orchestrator should try to use that configuration. When empty, it should use the platform default.
+The registry also records `taskReviewer`, `investigator`, `specReviewer`, and `finalAuditor`. Each role maps to a fixed prompt in `agents/` and carries optional `model`, `agent`, and `effort` overrides. When empty, the orchestrator uses the platform default.
 
-Before dispatching a subagent, the orchestrator must verify that the configured `agent/model/effort` is still available on the current platform. If not, it should clear the fields in `super-plan.json` and fall back to the system default.
+Before dispatching a subagent, the orchestrator must verify that the resolved role profile's `agent/model/effort` is still available on the current platform. If not, it should clear the fields in `super-plan.json` and fall back to the system default. Legacy registries with `quick` remain readable, but new plans do not create it.
 
 ## Context Compression
 

@@ -88,6 +88,7 @@ rules = payload.get("rules", [])
 tasks = payload.get("tasks", [])
 task_directory = payload.get("taskDirectory", "")
 source = payload.get("source", {})
+ROLE_AGENT_PROFILES = {"generalExecutor", "deepExecutor", "taskReviewer", "investigator", "specReviewer", "finalAuditor"}
 
 
 def status_label(status):
@@ -170,7 +171,12 @@ def render_agents():
     lines.append("")
     lines.append("| Profile | Model | Agent | Effort |")
     lines.append("|---------|-------|-------|--------|")
-    for name in ("general", "deep", "quick"):
+    profile_names = (
+        ("generalExecutor", "deepExecutor", "taskReviewer", "investigator", "specReviewer", "finalAuditor")
+        if set(agents) == ROLE_AGENT_PROFILES
+        else ("general", "deep", "quick")
+    )
+    for name in profile_names:
         profile = agents.get(name, {})
         model = profile.get("model", "") or "default"
         agent = profile.get("agent", "") or "default"
@@ -263,6 +269,8 @@ def render_task(task):
     tdesc = task.get("description", "")
     tstatus = task.get("status", "pending")
     tprofile = task.get("task_profile", "—")
+    if set(agents) == ROLE_AGENT_PROFILES and tprofile in {"general", "deep"}:
+        tprofile = f"{tprofile} → {tprofile}Executor"
     tbatch = task.get("batch", "—")
     tlayer = task.get("layer", "—")
     ttry = task.get("tryCount", 1)

@@ -31,8 +31,9 @@ Quando invocada sem subcomando, a skill primeiro apresenta ao usuário um resumo
 | 1. Brainstorm | Requisitos, restrições, decisões de design                     | Fluxo completo de brainstorm integrado                                                                     |
 | 2. Spec       | `docs/specs/NNNN-<nome>-spec.md`                               | Aprovação do usuário                                                                                       |
 | 3. Plan       | `docs/plans/NNNN-<nome>.md`                                    | Verificação da documentação atual das bibliotecas/frameworks + checklist de auto-revisão                   |
-| 4. Decompose  | `docs/jobs/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Bootstrap dos helpers, descoberta de perfis `general/deep/quick`, `task_profile` por task, e ledger gerado |
-| 5. Dispatch   | Trabalho dos subagentes                                        | Checks pré-voo, validação de `agent/model/effort`, e fallback para default                                 |
+| 4. Decompose  | `docs/jobs/NNNN-<nome>/super-plan.json` e `progress-ledger.md` | Pergunta obrigatória sobre worktree antes da branch, bootstrap dos helpers, perfis por papel e ledger gerado |
+| 4.1 Worktree  | Workspace de implementação isolado, quando aprovado            | Fluxo interno completo em `phases/04_1-using-git-worktrees.md`                                            |
+| 5. Dispatch   | Trabalho dos subagentes                                        | Workspace resolvido; depois resolução de perfil, checks pré-voo e fallback                                |
 | 6. Review     | Revisão em dois estágios                                       | Issues críticos/importantes devem ser corrigidos                                                           |
 | 7. Integrate  | Revisão final, preparação para merge                           | Suite de testes completa passa                                                                             |
 
@@ -61,5 +62,7 @@ do instalador ou da release antes de criar a referência.
 3. **Plan + Decompose**: `/super-planning plan` — Crie o plano e decomponha em tarefas
 4. **Dispatch**: `/super-planning dispatch` — Envie tarefas para subagentes
 5. **Review + Integrate**: `/super-planning review` — Revise e integre o resultado
+
+Na Fase 4, antes de definir a branch de implementação, a skill sempre pergunta se o usuário quer usar um worktree. Se a resposta for positiva, a subfase interna [`4.1 — Using Git Worktrees`](phases/04_1-using-git-worktrees.md) executa criação/reuso do workspace, setup e baseline antes do dispatch.
 
 > **Nota para o agente**: Comece pelo [`SKILL.md`](SKILL.md) para o ponto de entrada de roteamento. Instruções detalhadas das fases estão em [`phases/`](phases/).
