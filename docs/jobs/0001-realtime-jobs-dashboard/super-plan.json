@@ -1,0 +1,573 @@
+{
+  "$schema": "https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills/super-planning/interfaces/super-plan.schema.json",
+  "createdAt": "2026-07-14T00:47:50.350812+00:00",
+  "planId": "0001-realtime-jobs-dashboard",
+  "featureName": "realtime-jobs-dashboard",
+  "status": "in_progress",
+  "source": {
+    "spec": "docs/specs/0001-realtime-jobs-dashboard-spec.md",
+    "plan": "docs/plans/0001-realtime-jobs-dashboard.md"
+  },
+  "goal": "Allow authenticated read-only real-time observation of every super-planning job under a project.",
+  "architectureSummary": "Dedicated Node 18 built-in dashboard server plus Bash lifecycle helper; snapshots derive from super-plan registries and progress logs, with secure HTTP/WebSocket delivery and no jobs-root writes.",
+  "techStack": [
+    "Bash",
+    "Node.js >=18 built-in modules",
+    "Python 3 summary semantics",
+    "Vanilla HTML/CSS/JavaScript"
+  ],
+  "executionMode": "sequential",
+  "reviewCadence": "per_batch",
+  "agents": {
+    "general": {
+      "model": "gpt-5.6-luna",
+      "agent": "",
+      "effort": "medium"
+    },
+    "deep": {
+      "model": "gpt-5.6-luna",
+      "agent": "",
+      "effort": "high"
+    },
+    "quick": {
+      "model": "gpt-5.6-luna",
+      "agent": "",
+      "effort": "medium"
+    }
+  },
+  "branchStrategy": {
+    "baseBranch": "main",
+    "featureBranch": "main"
+  },
+  "worktree": {
+    "enabled": false,
+    "path": "."
+  },
+  "globalConstraints": [
+    "Preserve canonical lifecycle strings and never mutate files below the selected jobs root.",
+    "Use Node.js 18 built-in modules only; add no package-install step or external CDN.",
+    "Emit exactly one detached-start JSON object to stdout; send diagnostics to stderr.",
+    "Require token or strict session cookie for all HTTP and WebSocket job data, and same-origin validation for upgrades.",
+    "Display only project-relative jobs-root paths and render job text as literal text.",
+    "Apply TDD to behavior changes using docs/context/testing-anti-patterns.md.",
+    "The user authorized implementation directly on main without a worktree."
+  ],
+  "fileStructure": [
+    {
+      "path": "skills/super-planning/scripts/job-dashboard/serve-jobs.sh",
+      "ownerTask": "Task-A-1",
+      "notes": "Bash start/stop lifecycle, authenticated health verification, and owner-only per-project state."
+    },
+    {
+      "path": "skills/super-planning/scripts/job-dashboard/server.cjs",
+      "ownerTask": "Task-A-1",
+      "notes": "Node 18 built-in authenticated HTTP/WebSocket snapshot server."
+    },
+    {
+      "path": "skills/super-planning/scripts/job-dashboard/app.js",
+      "ownerTask": "Task-A-1",
+      "notes": "Dependency-free dashboard rendering, local filtering, and connection state."
+    },
+    {
+      "path": "skills/super-planning/scripts/job-dashboard/styles.css",
+      "ownerTask": "Task-A-1",
+      "notes": "Responsive local dashboard styles."
+    },
+    {
+      "path": "skills/super-planning/scripts/bootstrap.sh",
+      "ownerTask": "Task-B-1",
+      "notes": "Flat manifest distribution."
+    },
+    {
+      "path": "skills/super-planning/scripts/super-update.sh",
+      "ownerTask": "Task-B-1",
+      "notes": "Nested and flat helper updates."
+    },
+    {
+      "path": "skills/super-planning/scripts/doctor.sh",
+      "ownerTask": "Task-B-1",
+      "notes": "Dashboard manifest and Node preflight."
+    },
+    {
+      "path": "skills/super-planning/SKILL.md",
+      "ownerTask": "Task-C-1",
+      "notes": "Authoritative tool dashboard route."
+    },
+    {
+      "path": "skills/super-planning/README.md",
+      "ownerTask": "Task-C-1",
+      "notes": "Published Portuguese discoverability documentation."
+    },
+    {
+      "path": "skills/super-planning/package.json",
+      "ownerTask": "Task-C-1",
+      "notes": "Published entrypoint syntax validation."
+    },
+    {
+      "path": "skills/super-planning/dev/tests.sh",
+      "ownerTask": "Task-A-1, Task-B-1, Task-C-1, Task-D-1",
+      "notes": "Sequentially owned integration, distribution, static, and regression coverage."
+    },
+    {
+      "path": "docs/specs/0001-realtime-jobs-dashboard-spec.md",
+      "ownerTask": "Task-D-1",
+      "notes": "Accepted-to-implemented closure metadata and verification results."
+    }
+  ],
+  "requirementsChecklist": [
+    {
+      "id": "REQ-001",
+      "title": "Provide the documented dashboard lifecycle helper and safe single-instance runtime state.",
+      "source": "accepted spec: Helper interface; Runtime and state",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "Detached startup prints one connection JSON object",
+        "Foreground and safe idempotent stop work without touching jobs"
+      ],
+      "coveredByTasks": [
+        "Task-A-1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "REQ-002",
+      "title": "Protect every HTTP and WebSocket surface with the token, strict session cookie, and same-origin upgrade checks.",
+      "source": "accepted spec: Authentication and network behavior",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "Unauthorized requests reveal no registry data",
+        "Key bootstrap redirects to a token-free URL",
+        "Cross-origin upgrades fail before registration"
+      ],
+      "coveredByTasks": [
+        "Task-A-1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "REQ-003",
+      "title": "Aggregate valid registries and progress logs into the versioned snapshot envelope without changing CLI summary behavior.",
+      "source": "accepted spec: Snapshot and update behavior",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "Empty roots are valid",
+        "Task events are chronological, capped at 200, and retain full eventCount",
+        "Display paths remain jobs-root relative"
+      ],
+      "coveredByTasks": [
+        "Task-A-1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "REQ-004",
+      "title": "Broadcast only changed snapshots and retain last valid data while malformed registry or JSONL input recovers.",
+      "source": "accepted spec: Flow; Edge cases 3-8",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "Authenticated sockets receive an initial snapshot and one changed update",
+        "Warnings identify malformed relative paths",
+        "Recovered input removes its warning"
+      ],
+      "coveredByTasks": [
+        "Task-A-1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "REQ-005",
+      "title": "Render a dependency-free responsive overview and detail dashboard with local filters and literal job text.",
+      "source": "accepted spec: Dashboard presentation; Edge case 15",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "Overview, status counts, warnings, connection state, task detail and filters are present",
+        "Registry and log strings are inserted as text rather than executable HTML"
+      ],
+      "coveredByTasks": [
+        "Task-A-1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "REQ-006",
+      "title": "Distribute and document the dashboard consistently in vendored and bootstrapped layouts.",
+      "source": "accepted spec: Distribution and documentation",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "Bootstrap and update copy all dashboard files without removing runtime state",
+        "Doctor validates dashboard dependencies and manifest",
+        "SKILL route, README, build and tests remain aligned"
+      ],
+      "coveredByTasks": [
+        "Task-B-1",
+        "Task-C-1"
+      ],
+      "notes": []
+    }
+  ],
+  "taskDirectory": "docs/jobs/0001-realtime-jobs-dashboard",
+  "rules": [
+    "super-plan.json is orchestrator-owned; workers do not edit it directly.",
+    "Tasks run sequentially and receive per-batch independent review.",
+    "Task reports contain command output and TDD RED/GREEN evidence when required.",
+    "Use rtk as the workspace command prefix.",
+    "The requested profile configuration is gpt-5.6-luna: deep/high, general/medium, quick/medium; platform dispatch uses its default agent when no explicit selector is available."
+  ],
+  "tasks": [
+    {
+      "id": "Task-A-1",
+      "title": "Implement authenticated real-time job dashboard runtime",
+      "description": "Create the independent Node 18 job dashboard helper, server, and dependency-free browser surface. Use real temporary jobs fixtures and sockets to prove the accepted lifecycle, authorization, snapshot, live-update, and malformed-input behavior.",
+      "status": "in_progress",
+      "tryCount": 1,
+      "maxTries": 3,
+      "task_profile": "deep",
+      "batch": "A",
+      "layer": "core",
+      "reportFile": "docs/jobs/0001-realtime-jobs-dashboard/Task-A-1/report.md",
+      "reviewPackage": "docs/jobs/0001-realtime-jobs-dashboard/Task-A-1/review-package.diff.md",
+      "progressLog": "docs/jobs/0001-realtime-jobs-dashboard/Task-A-1/progress.log",
+      "logTaskScript": "docs/jobs/0001-realtime-jobs-dashboard/Task-A-1/log-task.sh",
+      "baseCommit": "cf78a23456c10450e51dd1552aa77dbd9a2804e6",
+      "dependencies": [],
+      "acceptanceCriteria": [
+        "Focused dashboard tests are observed RED while the helper is absent, then GREEN against a real local server process.",
+        "serve-jobs.sh implements the accepted arguments, one-JSON stdout contract, authenticated health verification, owner-only runtime metadata, duplicate reuse, foreground mode, and safe idempotent stop.",
+        "server.cjs uses Node built-ins only, produces the accepted snapshot envelope, reads no paths outside the jobs root, never mutates the jobs root, retains last valid data on malformed files, and broadcasts only changed snapshots.",
+        "HTTP, cookie bootstrap, restrictive headers, WebSocket authentication/origin checks, responsive DOM UI, filters, literal text rendering, and connection state satisfy the accepted security and presentation contracts.",
+        "The focused dashboard suite verifies startup, authentication, empty and multiple registries, update delivery, malformed registry/JSONL recovery, event cap, injection safety, occupied ports, stale PID safety, and clean shutdown."
+      ],
+      "requirements": [
+        "REQ-001",
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005"
+      ],
+      "rules": [
+        "TDD required for this behavior-changing task.",
+        "Read docs/context/testing-anti-patterns.md before creating fixtures or test-only helpers.",
+        "Use real file fixtures, HTTP requests, WebSocket frames, and child processes; do not mock the dashboard server or filesystem contract.",
+        "Keep stdout parseable; diagnostics and warnings go to stderr.",
+        "Do not add packages, CDNs, mutation endpoints, or dashboard-only lifecycle states.",
+        "Write RED and GREEN commands, output, and expected failure reason to the task report."
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Add failing integration coverage",
+          "description": "Add a focused dashboard-only test section using minimal temporary project, registry, progress log, and socket fixtures. Run it before implementing the helper and record the missing-runtime failure.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "Fails because job-dashboard helper/server behavior is absent",
+          "codeExample": "if [[ \"${SUPER_PLANNING_JOB_DASHBOARD_ONLY:-}\" = 1 ]]; then test_job_dashboard; fi"
+        },
+        {
+          "order": 2,
+          "title": "Implement lifecycle helper",
+          "description": "Create serve-jobs.sh with argument validation, canonical project/jobs roots, secure per-project state, launch/reuse, authenticated health check, optional opener warning, and PID instance proof for stop.",
+          "command": "bash -n skills/super-planning/scripts/job-dashboard/serve-jobs.sh",
+          "expectedResult": "Shell syntax check exits 0",
+          "codeExample": "serve-jobs.sh --project-dir <path> --base-dir <path> --refresh-ms 1000"
+        },
+        {
+          "order": 3,
+          "title": "Implement secure snapshot server",
+          "description": "Create server.cjs with built-in HTTP and RFC 6455 support, token/cookie authorization, headers, filesystem-signature scanning, snapshot cache/retention/warnings, and authenticated broadcasts.",
+          "command": "node --check skills/super-planning/scripts/job-dashboard/server.cjs",
+          "expectedResult": "Node syntax check exits 0",
+          "codeExample": "{ type: 'job-snapshot', version: 1, plans: [], warnings: [] }"
+        },
+        {
+          "order": 4,
+          "title": "Implement browser dashboard",
+          "description": "Add local CSS and JavaScript that render metrics, plan/task details, filters, warnings, timelines, and connection state using textContent rather than HTML injection.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "All focused runtime and browser-security assertions pass",
+          "codeExample": "node.textContent = value"
+        },
+        {
+          "order": 5,
+          "title": "Report TDD evidence",
+          "description": "Run the focused suite again after self-review, preserve exact results in report.md, and do not alter distribution helpers owned by later tasks.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "GREEN evidence is complete and output is clean",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": [
+        "skills/super-planning/scripts/job-dashboard/serve-jobs.sh",
+        "skills/super-planning/scripts/job-dashboard/server.cjs",
+        "skills/super-planning/scripts/job-dashboard/app.js",
+        "skills/super-planning/scripts/job-dashboard/styles.css",
+        "skills/super-planning/dev/tests.sh"
+      ],
+      "files": {
+        "created": [
+          "skills/super-planning/scripts/job-dashboard/serve-jobs.sh",
+          "skills/super-planning/scripts/job-dashboard/server.cjs",
+          "skills/super-planning/scripts/job-dashboard/app.js",
+          "skills/super-planning/scripts/job-dashboard/styles.css"
+        ],
+        "modified": [
+          "skills/super-planning/dev/tests.sh"
+        ],
+        "deleted": []
+      },
+      "notes": []
+    },
+    {
+      "id": "Task-B-1",
+      "title": "Distribute dashboard helpers through bootstrap, update, and doctor",
+      "description": "Extend the existing complete helper manifest so a bootstrapped project receives the same dashboard runtime, updater refreshes it without deleting runtime state, and doctor validates the dashboard-specific prerequisites and files.",
+      "status": "pending",
+      "tryCount": 1,
+      "maxTries": 3,
+      "task_profile": "general",
+      "batch": "B",
+      "layer": "foundation",
+      "reportFile": "docs/jobs/0001-realtime-jobs-dashboard/Task-B-1/report.md",
+      "reviewPackage": "docs/jobs/0001-realtime-jobs-dashboard/Task-B-1/review-package.diff.md",
+      "progressLog": "docs/jobs/0001-realtime-jobs-dashboard/Task-B-1/progress.log",
+      "logTaskScript": "docs/jobs/0001-realtime-jobs-dashboard/Task-B-1/log-task.sh",
+      "baseCommit": "pending",
+      "dependencies": [
+        "Task-A-1"
+      ],
+      "acceptanceCriteria": [
+        "Bootstrap copies every job-dashboard file to the flat manifest and keeps permissions usable.",
+        "super-update refreshes each dashboard file in both nested and flat layouts without deleting unrelated job-dashboard runtime metadata.",
+        "doctor.sh --dashboard validates Node and every dashboard manifest file while preserving existing --visual behavior.",
+        "Focused tests demonstrate both vendored and bootstrapped resolution paths start the dashboard successfully."
+      ],
+      "requirements": [
+        "REQ-006"
+      ],
+      "rules": [
+        "TDD required for manifest and helper behavior.",
+        "Read docs/context/testing-anti-patterns.md before adding fixture helpers.",
+        "Extend existing manifest loops and layout conventions instead of introducing a second bootstrap format.",
+        "Do not delete files outside the explicitly managed helper manifest.",
+        "Record RED and GREEN command evidence in the task report."
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Add failing manifest assertions",
+          "description": "Extend focused integration coverage to require dashboard files from bootstrap, update, doctor, and flat-layout startup before modifying the helper scripts.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "Fails because dashboard files are absent from the distribution manifests",
+          "codeExample": "assert_exists \"$target/job-dashboard/server.cjs\""
+        },
+        {
+          "order": 2,
+          "title": "Extend bootstrap manifest",
+          "description": "Copy the complete dashboard directory into the flat install alongside the existing visual companion and ensure executable shell permissions.",
+          "command": "bash skills/super-planning/scripts/bootstrap.sh --help",
+          "expectedResult": "Existing bootstrap interface remains valid",
+          "codeExample": "mkdir -p \"$TARGET_DIR/job-dashboard\""
+        },
+        {
+          "order": 3,
+          "title": "Extend updater manifest",
+          "description": "Add each dashboard source file to the nested/flat update mapping while preserving unrelated runtime state and existing visual companion behavior.",
+          "command": "bash skills/super-planning/scripts/super-update.sh --help",
+          "expectedResult": "Existing updater interface remains valid",
+          "codeExample": "scripts/job-dashboard/*"
+        },
+        {
+          "order": 4,
+          "title": "Add dashboard doctor checks",
+          "description": "Implement the documented --dashboard option and validate Node plus all dashboard files without weakening default or --visual checks.",
+          "command": "bash skills/super-planning/scripts/doctor.sh --dashboard",
+          "expectedResult": "Vendored dashboard manifest checks pass",
+          "codeExample": "check_command node"
+        },
+        {
+          "order": 5,
+          "title": "Run focused distribution GREEN suite",
+          "description": "Run the dashboard-only tests and include bootstrapped fixture startup and non-destructive update evidence in the report.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "Distribution and layout assertions pass",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": [
+        "skills/super-planning/scripts/bootstrap.sh",
+        "skills/super-planning/scripts/super-update.sh",
+        "skills/super-planning/scripts/doctor.sh",
+        "skills/super-planning/dev/tests.sh"
+      ],
+      "files": {
+        "created": [],
+        "modified": [
+          "skills/super-planning/scripts/bootstrap.sh",
+          "skills/super-planning/scripts/super-update.sh",
+          "skills/super-planning/scripts/doctor.sh",
+          "skills/super-planning/dev/tests.sh"
+        ],
+        "deleted": []
+      },
+      "notes": []
+    },
+    {
+      "id": "Task-C-1",
+      "title": "Expose and document the dashboard toolbox route",
+      "description": "Make /super-planning tool dashboard discoverable and aligned with published build and documentation contracts, then add static assertions for the complete public surface.",
+      "status": "pending",
+      "tryCount": 1,
+      "maxTries": 3,
+      "task_profile": "quick",
+      "batch": "C",
+      "layer": "surface",
+      "reportFile": "docs/jobs/0001-realtime-jobs-dashboard/Task-C-1/report.md",
+      "reviewPackage": "docs/jobs/0001-realtime-jobs-dashboard/Task-C-1/review-package.diff.md",
+      "progressLog": "docs/jobs/0001-realtime-jobs-dashboard/Task-C-1/progress.log",
+      "logTaskScript": "docs/jobs/0001-realtime-jobs-dashboard/Task-C-1/log-task.sh",
+      "baseCommit": "pending",
+      "dependencies": [
+        "Task-B-1"
+      ],
+      "acceptanceCriteria": [
+        "SKILL.md makes tool dashboard discoverable and routes it to serve-jobs.sh in vendored and bootstrapped layouts.",
+        "README and dependency/build declarations name the dashboard and validate its shell and Node entrypoints.",
+        "Focused static tests catch missing route, documentation, dependency declaration, or published dashboard file."
+      ],
+      "requirements": [
+        "REQ-006"
+      ],
+      "rules": [
+        "This task is documentation and static contract work; it does not require separate RED/GREEN behavior evidence beyond its consistency assertions.",
+        "Keep SKILL.md authoritative and avoid duplicating incompatible helper instructions.",
+        "Do not modify runtime implementation or distribution helpers owned by earlier tasks."
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Add static contract assertions",
+          "description": "Extend focused tests to assert the dashboard toolbox route, documentation references, build syntax coverage, and published-file contract.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "Static assertions identify any missing public integration",
+          "codeExample": "assert_contains_file 'tool dashboard' \"$SKILL\""
+        },
+        {
+          "order": 2,
+          "title": "Document toolbox routing",
+          "description": "Add the dashboard route and active-helper resolution guidance to SKILL.md, keeping the standalone tool behavior explicit.",
+          "command": "rg -n 'tool dashboard' skills/super-planning/SKILL.md",
+          "expectedResult": "Authoritative route is present",
+          "codeExample": "/super-planning tool dashboard"
+        },
+        {
+          "order": 3,
+          "title": "Align README and build",
+          "description": "Update the Portuguese README and package build syntax checks to include all published dashboard shell and Node files.",
+          "command": "pnpm --filter @gugacarbo/skill-super-planning run build",
+          "expectedResult": "Published skill syntax validation passes",
+          "codeExample": "scripts/job-dashboard/*.sh"
+        },
+        {
+          "order": 4,
+          "title": "Verify documentation surface",
+          "description": "Run focused static tests and inspect the documentation links for vendored and flat helper wording.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh",
+          "expectedResult": "Route and distribution documentation assertions pass",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": [
+        "skills/super-planning/SKILL.md",
+        "skills/super-planning/README.md",
+        "skills/super-planning/package.json",
+        "skills/super-planning/dev/tests.sh"
+      ],
+      "files": {
+        "created": [],
+        "modified": [
+          "skills/super-planning/SKILL.md",
+          "skills/super-planning/README.md",
+          "skills/super-planning/package.json",
+          "skills/super-planning/dev/tests.sh"
+        ],
+        "deleted": []
+      },
+      "notes": []
+    },
+    {
+      "id": "Task-D-1",
+      "title": "Verify integration and close dashboard delivery",
+      "description": "Run the accepted focused, complete, syntax, gitignore, package test, and build checks after implementation; resolve integration defects within scope and update the spec verification metadata with the real delivery paths.",
+      "status": "pending",
+      "tryCount": 1,
+      "maxTries": 3,
+      "task_profile": "general",
+      "batch": "D",
+      "layer": "final",
+      "reportFile": "docs/jobs/0001-realtime-jobs-dashboard/Task-D-1/report.md",
+      "reviewPackage": "docs/jobs/0001-realtime-jobs-dashboard/Task-D-1/review-package.diff.md",
+      "progressLog": "docs/jobs/0001-realtime-jobs-dashboard/Task-D-1/progress.log",
+      "logTaskScript": "docs/jobs/0001-realtime-jobs-dashboard/Task-D-1/log-task.sh",
+      "baseCommit": "pending",
+      "dependencies": [
+        "Task-C-1"
+      ],
+      "acceptanceCriteria": [
+        "Every Definition of Done command is run and its output recorded.",
+        "Any in-scope integration defect found by full checks is fixed with focused regression evidence.",
+        "The accepted spec gains exact implemented paths and verification results only after all checks pass."
+      ],
+      "requirements": [
+        "REQ-001",
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006"
+      ],
+      "rules": [
+        "Do not mark the spec implemented or the task complete before independent review and all Definition of Done checks pass.",
+        "Report any unrelated pre-existing failure with its command and evidence rather than masking it.",
+        "Keep fixes narrow and preserve the accepted read-only scope."
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "Run focused dashboard verification",
+          "description": "Run the accepted dashboard-only suite, shell syntax check, Node syntax check, and gitignore contract.",
+          "command": "SUPER_PLANNING_JOB_DASHBOARD_ONLY=1 bash skills/super-planning/dev/tests.sh && bash -n skills/super-planning/scripts/job-dashboard/serve-jobs.sh && node --check skills/super-planning/scripts/job-dashboard/server.cjs && bash src/tests/gitignore.sh",
+          "expectedResult": "All focused Definition of Done checks exit 0",
+          "codeExample": null
+        },
+        {
+          "order": 2,
+          "title": "Run complete regression suite",
+          "description": "Run the full super-planning test suite and workspace tests/build, fixing only dashboard-caused failures.",
+          "command": "bash skills/super-planning/dev/tests.sh && pnpm test && pnpm build",
+          "expectedResult": "Complete suite and build exit 0",
+          "codeExample": null
+        },
+        {
+          "order": 3,
+          "title": "Record closure metadata",
+          "description": "Update the accepted spec with real implementation paths and command results once verification is clean, then report any human-only checks remaining.",
+          "command": "git diff --check",
+          "expectedResult": "No whitespace errors or unrecorded scope drift",
+          "codeExample": null
+        }
+      ],
+      "filesTouched": [
+        "docs/specs/0001-realtime-jobs-dashboard-spec.md",
+        "skills/super-planning/dev/tests.sh"
+      ],
+      "files": {
+        "created": [],
+        "modified": [
+          "docs/specs/0001-realtime-jobs-dashboard-spec.md",
+          "skills/super-planning/dev/tests.sh"
+        ],
+        "deleted": []
+      },
+      "notes": []
+    }
+  ],
+  "updatedAt": "2026-07-14T02:03:26.611756+00:00"
+}
