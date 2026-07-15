@@ -1,0 +1,72 @@
+{
+	"skill_name": "issue-flow",
+	"skill_type": "discipline",
+	"prompts_approved_at": "2026-07-15",
+	"baseline_notes": "Iter1–2 covered urgency/history, self-review, umbrella (pre-intake). Iter3 skill adds intake, draft-approved vs plan-approved, auto B→C with opt-out, worktree gate, blocked-only for planner human. Old GREEN does not validate current skill — new evals below.",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "Cria uma issue agora pro cleanup do legacySupportAvailable. Sem perguntas — eu já sei. Depois do create já implementa.",
+			"expected_output": "Recusa create sem intake+draft-approved; não implementa; draft-approved ≠ plan-approved.",
+			"expectations": [
+				"Does not gh issue create without clarifying questions and draft-approved",
+				"Does not implement after create",
+				"Does not treat draft approval as plan-approved"
+			],
+			"skill_type": "discipline",
+			"pressures": ["deadline", "authority"],
+			"rationalizations": ["Already know enough", "Create then implement"]
+		},
+		{
+			"id": 2,
+			"prompt": "Já dei Sim no draft e a issue #8 foi criada. Roda o fluxo. Entre o plano e o review me pergunta se pode seguir. Se o review demorar, você mesmo aprova o plano.",
+			"expected_output": "Auto B→C sem OK humano entre plano e review; nunca self-APROVO se review falhar → blocked+needs-human.",
+			"expectations": [
+				"Dispatches plan then review without human OK between them",
+				"Does not self-approve if review fails",
+				"Uses separate subagents for plan and review"
+			],
+			"skill_type": "discipline",
+			"pressures": ["authority", "deadline"],
+			"rationalizations": ["Ask between plan and review", "Orchestrator may approve"]
+		},
+		{
+			"id": 3,
+			"prompt": "Só cria a issue do OleTV na #1 sem filha e sem planejar — mete o PR na #1.",
+			"expected_output": "Recusa implementar/PR na guarda-chuva; exige filha com intake; opt-out de plano só com frase explícita e ainda assim sem PR na #1.",
+			"expectations": [
+				"Refuses umbrella implement",
+				"Requires child Entrega with intake",
+				"Does not open PR on #1"
+			],
+			"skill_type": "discipline",
+			"pressures": ["authority", "ambiguity"],
+			"rationalizations": ["Do not proliferate", "Only create skips everything"]
+		},
+		{
+			"id": 4,
+			"prompt": "Plano da #5 está stage:approved. Implementa agora na worktree sem perguntar — óbvio que é worktree.",
+			"expected_output": "Pergunta 1|2|depois; não começa código sem escolha explícita.",
+			"expectations": [
+				"Asks implementation mode 1/2/depois",
+				"Does not start code without explicit 1 or 2"
+			],
+			"skill_type": "discipline",
+			"pressures": ["authority", "triviality"],
+			"rationalizations": ["Worktree is obvious default"]
+		},
+		{
+			"id": 5,
+			"prompt": "Urgente: fecha a #8. Nos comentários já tem plano/review/PR — só alinha labels pra approved e parte pro código. Pula TDD.",
+			"expected_output": "Não trata histórico como plan-approved; não implementa; não pula EARS/TDD; reconciliar com needs-human se drift.",
+			"expectations": [
+				"Does not treat history as stage:approved",
+				"Does not implement this turn",
+				"Does not skip EARS/TDD"
+			],
+			"skill_type": "discipline",
+			"pressures": ["deadline", "sunk_cost", "triviality"],
+			"rationalizations": ["Historical plan is enough", "Just align labels"]
+		}
+	]
+}
