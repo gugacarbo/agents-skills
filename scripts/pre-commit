@@ -13,4 +13,5 @@ detect_runner
 
 exec python3 "$(git rev-parse --show-toplevel)/scripts/docs-check"
 
+${NODE_ENV_RUNNER} lint-staged
 ${NODE_ENV_RUNNER} test-staged
