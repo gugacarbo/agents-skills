@@ -133,7 +133,7 @@ Validar corpo/labels; incompleta → intake curto ou `needs-human`. Pedido “ro
 
 ## Fora de escopo
 
-- SPEC CASA completa (super-planning)
+- SPEC CASA completa (code-toolbox)
 - Bugbot/security-review de PR
 - Labels fora de `stage:*`, `needs-human`, tipos (`bug`/`enhancement`/…)
 - Aplicar `stage:*` de entrega em Audit puro ou guarda-chuva (só Entrega/Bug com entrega)

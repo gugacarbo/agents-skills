@@ -79,4 +79,4 @@ When `test-staged` is selected, add `pnpm test-staged` before the `exec` line in
 These are recommended skills for the project. Install them separately if not already present:
 
 - `commit-changes` — conventional commits workflow
-- `super-planning` — planning multi-step tasks
+- `code-toolbox` — planning multi-step tasks

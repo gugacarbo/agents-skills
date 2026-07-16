@@ -7,17 +7,17 @@ projeto e não indicam uma instalação ainda existente.
 
 ## Decisões preservadas
 
-- `super-planning` é uma skill autocontida: o fluxo de brainstorming está
+- `code-toolbox` é uma skill autocontida: o fluxo de brainstorming está
   integrado nela, incluindo seus prompts, scripts e documentação auxiliar.
 - A documentação do companion visual fica em
-  `skills/super-planning/phases/01_1-visual-companion.md`.
-- `/super-planning` sem argumento executa o fluxo completo. Com uma fase
+  `skills/code-toolbox/phases/01_1-visual-companion.md`.
+- `/code-toolbox` sem argumento executa o fluxo completo. Com uma fase
   (`brainstorm`, `spec`, `plan`, `decompose`, `dispatch`, `review` ou
   `integrate`), começa naquela fase e continua pelas fases seguintes.
-- `skills/super-planning/SKILL.md` é a fonte autoritativa do roteamento; o
+- `skills/code-toolbox/SKILL.md` é a fonte autoritativa do roteamento; o
   `README.md` deve permanecer alinhado a ele.
 - O fluxo de dispatch usa o prompt mantido em
-  `skills/super-planning/prompts/worker-prompt-template.md`.
+  `skills/code-toolbox/prompts/worker-prompt-template.md`.
 - O notifier deve sinalizar conclusão verificada, não apenas eventos de parada;
   o runtime instalado deve ser executável mesmo quando os arquivos copiados
   não preservam o bit de execução.
@@ -37,7 +37,7 @@ O histórico detalhado continua no armazenamento de memória do Codex. Os
 rollouts principais para este repositório foram:
 
 - integração de brainstorming e organização do companion visual;
-- roteamento por fase do `super-planning`;
+- roteamento por fase do `code-toolbox`;
 - refinamentos de documentação, diagramas, bootstrap e `.gitignore` do
   companion visual;
 - atualização por referência remota e sincronização dos helpers;

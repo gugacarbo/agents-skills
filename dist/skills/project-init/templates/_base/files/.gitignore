@@ -35,4 +35,4 @@ coverage/
 .cache/
 *.tsbuildinfo
 
-.super-planning
+.code-toolbox

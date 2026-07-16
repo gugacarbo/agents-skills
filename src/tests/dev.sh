@@ -53,7 +53,7 @@ test_dev_uses_the_prompted_output_path() {
     AGENTS_SKILLS_WATCH_ONCE=1 \
     sh "$DEV_SCRIPT" >"$tmp/output.log" 2>&1
 
-  assert_exists "$target/super-planning/SKILL.md"
+  assert_exists "$target/code-toolbox/SKILL.md"
 }
 
 wait_for_content() {

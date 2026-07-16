@@ -52,7 +52,7 @@ pnpm biome init
 
 - `project-init` — this skill
 - `commit-changes` — conventional commits workflow
-- `super-planning` — planning multi-step tasks
+- `code-toolbox` — planning multi-step tasks
 
 ## Project Structure Convention
 

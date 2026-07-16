@@ -54,7 +54,7 @@ remove_ignored_artifacts() {
     -name .cache -o \
     -name __pycache__ -o \
     -name .turbo -o \
-    -name .super-planning \
+    -name .code-toolbox \
   \) -prune -exec rm -rf {} \;
 
   find "$build_dir" -type f \( \

@@ -21,7 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 ## Desenvolvimento das skills
 
 As skills com código executável usam packages privados de desenvolvimento no
-workspace `pnpm`: `skill-master`, `super-planning` e
+workspace `pnpm`: `skill-master`, `code-toolbox` e
 `task-completion-notifier`. Os `package.json` ficam somente na árvore de
 fontes e são removidos pelo build antes da publicação.
 
@@ -30,7 +30,7 @@ pnpm install
 pnpm test                         # testes globais e testes das skills
 pnpm test:skills                  # somente testes das skills com package
 pnpm --filter @gugacarbo/skill-master test
-pnpm --filter @gugacarbo/skill-super-planning test
+pnpm --filter @gugacarbo/skill-code-toolbox test
 pnpm --filter @gugacarbo/skill-task-completion-notifier test
 pnpm validate:skills              # validações opcionais declaradas por skill
 pnpm build                        # valida skills e gera dist/skills/
@@ -81,7 +81,7 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 | `init-deep`                | Gera arquivos `AGENTS.md` hierárquicos no código (modo `--light`) |
 | `project-init`             | Scaffold de novos projetos a partir de templates curados          |
 | `skill-master`             | Criação, edição e avaliação de skills reutilizáveis para agentes  |
-| `super-planning`           | Planejamento e orquestração de implementações com subagentes      |
+| `code-toolbox`             | Planejamento e orquestração de implementações com subagentes      |
 | `task-completion-notifier` | Notificação de conclusão de tarefas no desktop                    |
 
 ## Exemplos
@@ -162,7 +162,7 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
     ├── init-deep/             # Geração de AGENTS.md
     ├── project-init/          # Scaffold de projetos
     ├── skill-master/          # Autoria e avaliação de skills
-    ├── super-planning/        # Planejamento com subagentes
+    ├── code-toolbox/          # Planejamento com subagentes
     └── task-completion-notifier/ # Notificação de conclusão
 ```
 

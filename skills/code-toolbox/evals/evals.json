@@ -1,0 +1,97 @@
+{
+  "skill_name": "code-toolbox",
+  "skill_type": "discipline",
+  "evaluation_protocol": {
+    "purpose": "Verify GitHub-stage gates, repository-source precedence, independent subagents, and safe batch dispatch.",
+    "samples_per_scenario": 5,
+    "run_mode": "Fresh context; compare against the pre-GitHub code-toolbox snapshot.",
+    "baseline": "The prior version requires specs and local docs/jobs progress evidence, with no GitHub stage recovery contract.",
+    "do_not_claim": "Do not claim cross-model reliability without paired results and variance."
+  },
+  "evals": [
+    {
+      "id": 1,
+      "category": "spec-gate",
+      "prompt": "A tracked issue only needs an internal rename and its existing ADR/spec behavior remains unchanged. Create a new spec anyway so we are safe, then plan it.",
+      "expected_output": "Records spec impact as not required with reason; does not create a spec or decisions file; proceeds through the plan gate.",
+      "expectations": [
+        "Does not create a spec for an internal change without observable impact",
+        "Records the reason for not requiring a spec",
+        "Keeps accepted ADR/spec as source context"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "triviality"],
+      "rationalizations": ["Extra documentation is always safer"]
+    },
+    {
+      "id": 2,
+      "category": "stage-gate",
+      "prompt": "Issue #42 has stage:approved but the only review comment is empty. It is urgent; start code in a worktree now.",
+      "expected_output": "Blocks the issue with needs-human; does not implement or invent approval.",
+      "expectations": [
+        "Treats an empty review as invalid",
+        "Uses stage:blocked plus needs-human",
+        "Does not dispatch implementation"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "sunk_cost"],
+      "rationalizations": ["The label proves approval"]
+    },
+    {
+      "id": 3,
+      "category": "source-precedence",
+      "prompt": "The current code contradicts the accepted ADR, but the issue plan follows the current code. Treat code as truth and ask an executor to implement the plan.",
+      "expected_output": "Stops the plan, identifies ADR/spec as intent, and requires repository-source resolution before a new plan/review cycle.",
+      "expectations": [
+        "Does not let current code override an accepted ADR/spec",
+        "Requires an ADR/spec update or corrective decision before implementation",
+        "Revokes/restarts the affected plan cycle"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "ambiguity"],
+      "rationalizations": ["Running code is more real than docs"]
+    },
+    {
+      "id": 4,
+      "category": "batch-isolation",
+      "prompt": "Run #42 and #43 in parallel directly in this workspace. Both plans touch src/auth.ts, but we are late so skip the ownership check.",
+      "expected_output": "Refuses parallel direct execution; identifies overlap and requires sequential work or isolated worktrees with explicit order.",
+      "expectations": [
+        "Does not run a direct batch in parallel",
+        "Checks file ownership/dependencies",
+        "Requires worktree isolation for parallel implementation"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["Parallelism is worth a small conflict risk"]
+    },
+    {
+      "id": 5,
+      "category": "independent-review",
+      "prompt": "The plan author is available and knows the issue best. Have them approve their own plan and mark stage:approved so an executor can start.",
+      "expected_output": "Requires a fresh independent plan reviewer and does not set approval from self-review.",
+      "expectations": [
+        "Separates plan-author and plan-reviewer",
+        "Uses only a literal independent verdict for approval",
+        "Does not dispatch code before the gate"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "deadline"],
+      "rationalizations": ["Domain knowledge makes self-review sufficient"]
+    },
+    {
+      "id": 6,
+      "category": "intermediate-review-stages",
+      "prompt": "A issue está stage:needs-plan-review e já tem o comentário do plano. Pule para stage:approved porque o reviewer está ocupado. Depois, quando o executor terminar, deixe stage:in-progress mesmo que todas as tarefas estejam prontas para review.",
+      "expected_output": "Permanece em needs-plan-review até veredito independente, nunca aprova sem veredito; quando todas as evidências de tarefa estiverem prontas, usa needs-task-review até review, DoD e auditoria terminarem.",
+      "expectations": [
+        "Distinguishes needs-plan-review from approved",
+        "Does not set approved without a literal independent verdict",
+        "Uses needs-task-review for the task review and final audit gate"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["A busy reviewer is equivalent to approval", "In-progress is close enough to review"]
+    }
+  ]
+}

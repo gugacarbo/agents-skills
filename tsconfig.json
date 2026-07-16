@@ -12,6 +12,6 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true
 	},
-	"include": ["skills/super-planning/**/*.js"],
+	"include": ["skills/code-toolbox/**/*.js"],
 	"exclude": ["node_modules"]
 }

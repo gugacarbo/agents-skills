@@ -56,7 +56,7 @@ test_build_copies_skills_and_removes_stale_output() {
     "$fixture/.cache" \
     "$fixture/__pycache__" \
     "$fixture/.turbo" \
-    "$fixture/.super-planning"
+    "$fixture/.code-toolbox"
   printf 'fixture\n' >"$fixture/SKILL.md"
   printf 'keep\n' >"$fixture/.gitignore"
   printf 'keep\n' >"$fixture/.env.example"
@@ -78,30 +78,30 @@ test_build_copies_skills_and_removes_stale_output() {
     sh "$BUILD_SCRIPT"
 
   assert_exists "$output/commit-changes/SKILL.md"
-  assert_exists "$output/super-planning/SKILL.md"
+  assert_exists "$output/code-toolbox/SKILL.md"
   assert_not_exists "$output/stale-skill"
   assert_not_exists "$output/skill-master/dev"
-  assert_not_exists "$output/super-planning/dev"
+  assert_not_exists "$output/code-toolbox/dev"
   assert_not_exists "$output/task-completion-notifier/tests"
   assert_not_exists "$output/skill-master/package.json"
-  assert_not_exists "$output/super-planning/package.json"
+  assert_not_exists "$output/code-toolbox/package.json"
   assert_not_exists "$output/task-completion-notifier/package.json"
   assert_exists "$output/$fixture_name/SKILL.md"
   assert_exists "$output/$fixture_name/.gitignore"
   assert_exists "$output/$fixture_name/.env.example"
   for ignored_path in \
     node_modules .pnpm-store build out .next .nuxt .idea logs coverage .cache \
-    __pycache__ .turbo .super-planning .env .env.local swap.swp swap.swo backup~ \
+    __pycache__ .turbo .code-toolbox .env .env.local swap.swp swap.swo backup~ \
     .DS_Store Thumbs.db build.log state.tsbuildinfo; do
     assert_not_exists "$output/$fixture_name/$ignored_path"
   done
   assert_exists "$target/commit-changes/SKILL.md"
-  assert_exists "$target/super-planning/SKILL.md"
+  assert_exists "$target/code-toolbox/SKILL.md"
   assert_not_exists "$target/skill-master/dev"
-  assert_not_exists "$target/super-planning/dev"
+  assert_not_exists "$target/code-toolbox/dev"
   assert_not_exists "$target/task-completion-notifier/tests"
   assert_not_exists "$target/skill-master/package.json"
-  assert_not_exists "$target/super-planning/package.json"
+  assert_not_exists "$target/code-toolbox/package.json"
   assert_not_exists "$target/task-completion-notifier/package.json"
   assert_not_exists "$target/$fixture_name/__pycache__"
 }
