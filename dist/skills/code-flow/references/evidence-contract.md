@@ -1,17 +1,13 @@
 # Evidence Contract
 
-Evidence is append-only and does not replace accepted repository ADRs/specs.
-In issue mode, comments retain exact agent and task status while the stage label
-names the next coordination gate. In direct mode, append the same evidence to
-the versioned delivery record; never create an issue or use GitHub comments,
-labels, or stages.
+Evidence is append-only and does not replace accepted ADRs/specs. In issue
+mode, post it before a state change; in direct mode, append it to the versioned
+delivery record without GitHub state.
 
-## Universal agent envelope
+## Envelope
 
-Every execution and outcome from `issue-writer`, `issue-reviewer`,
-`plan-writer`, `plan-reviewer`, `executor`, and `delivery-reviewer` records
-these eight fields in this order, including no-change, `BLOCKED`, error,
-missing-evidence, and rejection outcomes:
+Every outcome from every role uses these fields in this order, including no
+change, `BLOCKED`, errors, missing evidence, and rejections:
 
 ```text
 Agent: <agent>
@@ -24,47 +20,25 @@ Blockers: <blocker or none>
 Next action: <action and owner>
 ```
 
-In issue mode, publish one new comment before the orchestrator changes state.
-In direct mode, append an equivalent section to the delivery record before
-stopping or proceeding.
+## Task and review evidence
 
-## Task evidence
+One executor comment covers one stable task ID and includes plan cycle, base
+SHA, commits/PR when available, changed files, verification, and `DONE`,
+`DONE_WITH_CONCERNS`, or `BLOCKED`. Only the first two are review-ready.
+`BLOCKED` stops the flow until resolved or explicitly cancelled by the user.
 
-An executor posts one eight-field comment per task attempt with the plan-cycle
-URL and stable task ID; branch, base SHA, commits, and PR URL when available;
-changed files and allowed-scope deviations; verification commands/results; TDD
-RED/GREEN evidence where required; and `DONE`, `DONE_WITH_CONCERNS`, or
-`BLOCKED` with the exact blocker.
-
-Only `DONE` and `DONE_WITH_CONCERNS` evidence is review-ready. In issue mode,
-`BLOCKED` requires a recorded resolution or documented user cancellation before
-the issue can reach task review. In direct mode, append the blocker and
-`Resume: <phase/task>` to the delivery record, then stop without GitHub state.
-
-## Review evidence
-
-In issue mode, an independent `delivery-reviewer` posts one eight-field
-comment per task/range. In direct mode, append the equivalent review to the
-delivery record and never post a GitHub comment or alter GitHub state. Each
-review references the task ID, evidence, review-package range, and a literal
-verdict. The `delivery-reviewer` is distinct from the plan-writer and every
-executor in the reviewed range. Each Critical/Important finding includes
-`file:line`, impact, required action, and `Resume: <phase/task>` when it
-rejects work. A clean review links the reviewed commit/PR. Parallel task
-branches additionally require an independent review of the assembled range
-before its PR opens.
+An independent `delivery-reviewer` covers one task/range, cites its evidence
+and review range, and gives a literal verdict. Critical/Important findings use
+`file:line`, impact, required action, and `Resume: <phase/task>`. Parallel
+branches also require a fresh assembled-range review before their PR.
 
 ## Closure matrix
 
-Phase 6 posts one final table before closure:
+Phase 6 posts:
 
 | Task | Commit / PR | Executor evidence | Independent review | DoD evidence | Status |
 | --- | --- | --- | --- | --- | --- |
 
-Every planned task must have a row and executor evidence. A cancelled task
-retains its row with an immutable user-cancellation decision as its evidence
-and `review: not applicable`; no row may be silently omitted. A blocked task
-requires its exact recorded decision before it can advance. In direct mode,
-append this matrix to the versioned delivery record with immutable commit
-URLs/SHAs. The final `delivery-reviewer` outcome also uses the eight-field
-envelope.
+Every planned task has a row. Cancelled work retains immutable user-cancellation
+evidence; blocked work retains its resolution. In direct mode append the matrix
+to the delivery record. The final audit also uses the envelope.

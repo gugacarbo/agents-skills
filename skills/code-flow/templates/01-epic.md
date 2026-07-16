@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | #<n> | <one independently closable user-story outcome> | <team/person> | <#n or none> | <link/status> |
 
-Each child must be a delivery/bug issue, using `templates/user-story.md`.
+Each child must be a delivery/bug issue, using `templates/02-user-story.md`.
 GitHub may link it as a subissue of this Epic. Apply `stage:*` labels and the
 code-flow source, plan, execution, and review flow only to its children;
 keep implementation-only steps as task IDs in the child's plan.

@@ -7,87 +7,68 @@ metadata:
 
 # code-flow
 
-Coordinate dispatch, labels, gates, and final status only. Never self-author a plan, self-review it, or implement a dispatched task.
+Coordinate the flow; dispatch the named roles instead of writing plans, reviews, or implementation yourself.
 
-## Router
+## Commands
 
 | Invocation | Behavior |
 | --- | --- |
 | `/code-flow` | Repository mode: resume the earliest unmet phase. |
-| `/code-flow issue create` | Run issue-writer preparation, then create one delivery issue at `stage:spec-approval` + `needs-human`. |
+| `/code-flow issue create` | Run Phases 0–2, then create one delivery issue whose ADR/spec proposal awaits human approval at `stage:spec-approval` + `needs-human`. |
 | `/code-flow issue <#N\|URL> [phase]` | Validate an existing eligible issue, then resume its stage or named phase. |
 | `/code-flow batch <#N\|URL>... --from <phase>` | Run isolated trails for existing eligible delivery/bug issues. |
-| `/code-flow <brainstorm\|spec\|plan\|dispatch\|review\|integrate>` | Start that repository phase and continue. |
+| `/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>` | Start that repository phase and continue. |
 | `/code-flow tool <doctor\|bootstrap\|review-package>` | Run one helper and stop. |
 
-A named phase never bypasses an unmet gate. `issue create` is the sole creation route and cannot create code. `batch` never creates issues. `direct` is repository-only: it creates no issue, label, stage, or GitHub comment.
+`issue create` is the only issue-creation route. Named phases never bypass gates; `batch` never creates issues; `direct` is repository-only and never changes GitHub state.
 
-## Execution preflight: scope and Epic suggestion
+## Rules before writing
 
-At the start of repository mode or `/code-flow issue create`, decide whether the requested work is one delivery issue or an initiative. A delivery issue has one cohesive outcome that can be planned, approved, implemented, reviewed, and closed together. An initiative has two or more independently deliverable outcomes, owners, dependencies, or release decisions.
+1. Classify the work. A delivery issue has one closable outcome. An initiative has multiple independently deliverable outcomes, owners, dependencies, or release decisions.
+2. Before any `code-flow` template, find the repository's current pattern: guidance, forms, schemas, canonical documents, and recent accepted artifacts. Use a compatible local pattern as the base; add only fields the current gate needs. Record its source, absence, or adaptation in evidence.
+3. Accepted ADRs/specs define intent. Code and tests reveal current behavior and drift; they do not silently replace accepted intent.
 
-For an initiative, pause before source-set preparation and suggest an Epic. State the concrete signals that make the work broader than one delivery issue and offer [`templates/epic.md`](templates/epic.md). Do not create the Epic, infer its child issues, or start a child delivery flow until the user explicitly chooses how to proceed. If the user defers the Epic, require one narrowed delivery issue before continuing.
+For an initiative, explain the signals and offer [`templates/01-epic.md`](templates/01-epic.md). Create an Epic only after the user explicitly selects it. It is tracking-only: no delivery stages, plans, or execution. Each child is one delivery/bug issue, written with [`templates/02-user-story.md`](templates/02-user-story.md), and follows this flow independently. GitHub subissues link Epic to delivery issues; implementation work remains stable plan task IDs.
 
-An Epic is a tracking issue only: never add `stage:*` or `needs-human`, never plan or implement against it, and never pass it to `issue`, `batch`, or an executor. Each linked child is one eligible delivery/bug issue, written as a user story with [`templates/user-story.md`](templates/user-story.md), and follows the normal flow independently. The GitHub parent-child relation may represent those children as subissues of the Epic; it does not create a third workflow layer.
+## Delivery flow
 
-Keep implementation steps as stable plan task IDs, not GitHub subissues. Create a child delivery issue only when it has its own observable outcome, owner, dependencies, acceptance/verification, and independent approval/review cycle. Do not split technical chores, files, or executor tasks into subissues just for visibility. In `direct` mode, do not create or suggest creating GitHub state; ask the user to switch to issue mode if they want an Epic. Existing `issue` and `batch` targets still use Phase 0 eligibility: an Epic/umbrella target is ineligible and stops without label changes.
+1. **Phases 0–1:** establish repository context, scope, local patterns, risks, and unresolved user decisions.
+2. **Phase 2:** prepare the source set, decide `create`, `update`, or `not required` for ADR/spec, and create the delivery issue containing the proposal or no-spec rationale at `stage:spec-approval` + `needs-human`; do not materialize the formal document yet.
+3. **Human source approval:** materialize the approved ADR/spec when required, record its immutable link, and move to `stage:needs-plan`.
+4. **Phase 3:** `plan-writer` posts the plan; `plan-reviewer` posts an independent verdict. An approving verdict still waits for human approval of that exact snapshot at `stage:needs-plan-review` + `needs-human`.
+5. **Human plan approval:** move to `stage:approved`. Execution still needs an explicit request and `worktree` or `later` choice.
+6. **Phases 4–6:** execute stable task IDs, review each range independently, verify the closure matrix and DoD, obtain PR approval, then offer integration only when requested.
 
-Load the named phase and its referenced sources:
+In `direct` mode, use [`templates/10-delivery-report-template.md`](templates/10-delivery-report-template.md) for the same approvals and evidence, with no issue, label, stage, or GitHub comment. An existing Epic/umbrella issue is ineligible for delivery flow.
+
+## Load for the active phase
 
 | Phase | Load |
 | --- | --- |
 | 0 — ISSUE CONTEXT | [`phases/00-issue-context.md`](phases/00-issue-context.md) |
-| 1 — SOURCE SET | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
+| 1 — BRAINSTORM | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
 | 1.1 — VISUAL COMPANION | [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) |
-| 2 — SPEC GATE | [`phases/02-spec.md`](phases/02-spec.md) |
+| 2 — CREATE ISSUE | [`phases/02-create-issue.md`](phases/02-create-issue.md) |
 | 3 — PLAN AND REVIEW | [`phases/03-plan.md`](phases/03-plan.md) |
 | 4 — DISPATCH | [`phases/04-dispatch.md`](phases/04-dispatch.md) |
 | 5 — DELIVERY REVIEW | [`phases/05-review.md`](phases/05-review.md) |
 | 6 — VERIFY AND INTEGRATE | [`phases/06-integrate.md`](phases/06-integrate.md) |
 
-## Sources, stages, and gates
+Read [`references/github-flow.md`](references/github-flow.md) before changing issue stages or resuming an issue. Read [`references/evidence-contract.md`](references/evidence-contract.md) before publishing evidence, reviewing task work, or closing delivery.
 
-1. Accepted ADRs/specs define intent.
-2. Code/tests show current behavior and drift, never silently override accepted sources.
-3. Issue comments hold delivery evidence; repository direct mode uses one versioned Markdown delivery record.
-4. Exactly one `stage:*` label is the issue's operational state. See [`references/github-flow.md`](references/github-flow.md).
-
-Spec is required only for a changed contract, observable behavior, or durable decision. `issue-writer` records a concrete no-spec rationale otherwise. An issue stays at `stage:spec-approval` + `needs-human` until a human approves its source set, even after `issue-reviewer` reviews it. Plan publication moves an issue to `stage:needs-plan-review`; a valid independent approval moves it to `stage:approved`; worktree execution moves it to `stage:in-progress`; complete non-blocked task evidence moves it to `stage:needs-task-review`. Invalid evidence, product/access decisions, blockers, and the third requested-change cycle use `stage:blocked` + `needs-human`.
-
-Issue execution requires `stage:approved`, an explicit user request, and a worktree choice. Tasks are sequential by default. Parallel work needs disjoint ownership, a worktree/branch per task, an assembly branch/order, integration verification, and a fresh assembled-range review before PR.
-
-## Exactly six agents
+## Roles
 
 Dispatch only these roles:
 
 | Agent | Responsibility |
 | --- | --- |
-| `issue-writer` | Investigation, conditional ADR/spec, user decisions, issue creation, initial evidence. |
-| `issue-reviewer` | Independent issue/source-set review; never replaces human approval. |
-| `plan-writer` | Append-only implementation plan. |
-| `plan-reviewer` | Fresh literal plan verdict. |
-| `executor` | One approved task, at the depth the task requires. |
-| `delivery-reviewer` | Task/range review and, in a fresh instance, final DoD/contract audit. |
+| `issue-writer` | Context, proposal, issue creation, and formal ADR/spec materialization after approval. |
+| `issue-reviewer` | Optional independent source-set audit. |
+| `plan-writer` | One append-only implementation plan. |
+| `plan-reviewer` | Independent literal verdict on one plan snapshot. |
+| `executor` | One approved stable task ID. |
+| `delivery-reviewer` | Independent task/range review and fresh final audit. |
 
-`plan-writer` and `plan-reviewer` are distinct. A range `delivery-reviewer` is distinct from its executor and plan-writer. The final-audit `delivery-reviewer` is a fresh instance distinct from all range reviewers, executors, and plan-writer.
+Keep plan writer/reviewer separate. A delivery reviewer is distinct from the executor and plan writer; the final auditor is also fresh.
 
-## Universal evidence contract
-
-Every outcome from every agent records an append-only envelope before the orchestrator transitions, blocks, or stops—even no-change, `BLOCKED`, errors, missing verdicts, and rejected reviews. Issue mode posts a new comment; direct mode appends a section to the delivery record. The fields and order are mandatory:
-
-```text
-Agent: <agent>
-Phase/scope: <phase, cycle, task, or range>
-Summary: <result>
-Sources/evidence: <immutable links, commands, output>
-Decisions: <applied, pending, or none>
-Changes/validation: <changes and validation, or none>
-Blockers: <blocker or none>
-Next action: <action and owner>
-```
-
-Plans, reviews, and task evidence remain append-only. Every plan task has a stable ID. Phase 6 publishes the closure matrix. Do not create a local registry, `docs/jobs`, task brief, report, dashboard, or progress log.
-
-## Non-goals
-
-Do not redesign `bootstrap` or the visual companion. Watchdogs are not part of this skill. Integration/merge is optional only after PR approval and an explicit user request.
+Evidence is append-only. Record every outcome—including no change, `BLOCKED`, errors, and rejected reviews—before changing state. Do not create separate task trackers, progress logs, or workflow registries.

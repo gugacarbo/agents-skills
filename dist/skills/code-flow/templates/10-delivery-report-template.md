@@ -30,10 +30,12 @@ Changes/validation: `<files/effect and validation, or none>`
 Blockers: `<blocker and required human decision, or none>`
 Next action: `<action and owner>`
 
-## Source-set approval
+## ADR/spec proposal approval
 
 - **Accepted ADR/spec or approved no-spec rationale:** …
+- **Proposal / no-spec rationale:** …
 - **Human approval evidence:** …
+- **Materialized ADR/spec immutable link:** …
 - **Source revision:** `<full SHA / immutable URL>`
 
 ## Plan snapshot — cycle `<k>/3`

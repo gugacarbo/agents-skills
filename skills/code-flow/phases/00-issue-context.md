@@ -1,8 +1,12 @@
 # Phase 0: Issue Context
 
-Use this phase only for `/code-flow issue` and `/code-flow batch`.
+Use this phase for `/code-flow issue`, `/code-flow batch`, and `/code-flow issue create`.
+
+For `issue create`, establish the request context before Phase 1: resolve the repository/default branch, load applicable guidance and accepted ADRs/specs, inspect the narrow code/test area, and record the baseline evidence. There is no GitHub delivery target yet, so do not validate labels or create GitHub state in this phase. Phase 2 creates the approved delivery issue or, when the user explicitly selected one during initiative triage, its tracking Epic.
 
 ## Validate before dispatch
+
+For existing issue/batch targets:
 
 1. Confirm that each target is an existing delivery/bug issue, not an umbrella, audit, or tracking issue. This eligibility check comes before any label repair.
 2. If it is ineligible, explain that it is outside this delivery flow and stop without adding, removing, or replacing labels.
@@ -17,7 +21,7 @@ For an eligible issue only, apply `stage:blocked` plus `needs-human` and stop th
 
 - zero or multiple `stage:*` labels;
 - a plan/review comment or required evidence envelope conflicts with the stage or has no identifiable cycle/scope;
-- `stage:approved` lacks a literal approving review for the current plan snapshot;
+- `stage:approved` lacks both a literal approving review and human approval evidence for the current plan snapshot;
 - `stage:in-progress` has `BLOCKED` evidence or evidence for a task outside the current plan;
 - `stage:needs-task-review` lacks non-blocked evidence for any planned task.
 

@@ -1,32 +1,31 @@
 # code-flow
 
-`code-flow` coordinates non-trivial work through independent subagents. It uses accepted ADRs/specs as the technical source of truth, GitHub issues for delivery planning and review when an issue is supplied, and PRs for implementation evidence.
+`code-flow` coordinates non-trivial delivery through independent roles, GitHub
+issues, approval gates, and PR evidence.
 
 ## Invocation
 
 | Command | Meaning |
 | --- | --- |
-| `/code-flow` | Resume the earliest unmet phase in repository mode. |
-| `/code-flow issue create` | After investigation/spec gate, create one delivery issue at `stage:spec-approval` + `needs-human`. |
-| `/code-flow issue #42 [phase]` | Resume or start an existing delivery/bug issue. |
-| `/code-flow batch #42 #43 --from plan` | Run issue trails in parallel from one phase. |
-| `/code-flow plan` | Start the repository-only plan phase and continue. |
-| `/code-flow tool doctor --github --issue 42` | Validate GitHub readiness for an issue flow. |
+| `/code-flow` | Resume the earliest unmet repository phase. |
+| `/code-flow issue create` | Run Phases 0–2, then create a delivery issue with an ADR/spec proposal awaiting approval. |
+| `/code-flow issue #42 [phase]` | Resume an eligible delivery or bug issue. |
+| `/code-flow batch #42 #43 --from plan` | Run existing eligible issues from one phase. |
+| `/code-flow plan` | Start repository-only planning. |
 
-The canonical flow is:
+The flow is: context → brainstorm and human design approval → proposal in issue
+→ human ADR/spec approval → plan → independent review → human plan approval →
+execution → independent delivery review → PR approval → optional integration.
 
-`Pre-issue investigation/spec gate → Spec approval → Needs plan → Needs plan review → Approved → In progress → Needs task review → PR approval → optional integration → Closed`
+Use the repository's current template or canonical example before any bundled
+template. For initiatives, create a tracking-only [Epic](templates/01-epic.md)
+only after the user selects it; each [user-story](templates/02-user-story.md)
+child has its own delivery flow.
 
-A named phase continues forward but cannot bypass its prerequisites. A batch never creates issues; it operates only on existing delivery/bug issues.
+Phase 2 puts the proposed ADR/spec—or a no-spec rationale—inside the GitHub
+issue for approval. It materializes the formal ADR/spec only after that
+approval. A plan-reviewer verdict is also insufficient by itself: the user
+approves the exact plan snapshot before execution.
 
-Before a new repository-mode delivery or `/code-flow issue create`, the skill distinguishes one closable delivery issue from a multi-delivery initiative. For an initiative it suggests, but never creates automatically, a tracking-only [Epic template](templates/epic.md). Epics carry no `stage:*` or `needs-human` labels and never enter the execution flow; their child delivery issues do. A child is written with the [user-story template](templates/user-story.md) and may use GitHub's subissue relation to the Epic; implementation-only work stays as plan task IDs instead of becoming more issues.
-
-## Sources and evidence
-
-Accepted ADRs/specs define intended behavior. Code/tests show current behavior. In issue mode, every agent execution or outcome publishes one append-only eight-field evidence comment; exactly one detailed stage label identifies the next gate. Every plan task has an ID and closure maps it to commit/PR, review, and DoD evidence.
-
-Specs are conditional: create or update one only for a contract, observable behavior, or durable architectural decision. Otherwise record the concrete no-spec rationale and obtain human source-set approval before planning.
-
-Issue execution is worktree-only. `/code-flow issue create` is the sole issue-creation route and is available only after the spec gate prepares an ADR/spec or explicit no-spec rationale; it is incompatible with repository `direct` mode. `direct` creates no issue and uses no labels or GitHub comments. Repository mode keeps one versioned Markdown delivery record with the same append-only eight-field evidence, plan, reviews, task evidence, and DoD closure—not a local progress registry. Rejected reviews, `BLOCKED`, and audit failures are recorded there with a stop/resume instruction, never as GitHub state. For parallel issue tasks, task branches are assembled and independently re-reviewed before the issue PR. After that PR is approved, merge/integration is suggested as an explicit optional final action; it is never automatic.
-
-See [SKILL.md](SKILL.md) for gates, agent roles, and the full workflow.
+`direct` stores equivalent evidence in a versioned delivery record and never
+creates GitHub state. See [SKILL.md](SKILL.md) for the complete rules.

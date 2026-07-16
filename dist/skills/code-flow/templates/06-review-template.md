@@ -7,7 +7,7 @@ Sources/evidence: `<plan comment URL, immutable source links, and base SHA>`
 Decisions: `<literal verdict and required decisions>`
 Changes/validation: `<review checks and validation, or none>`
 Blockers: `<blocker or none>`
-Next action: `<approve plan | revise plan | human decision, owner>`
+Next action: `<human approves this exact plan snapshot | revise plan | human decision, owner>`
 
 **Plan cycle:** `<plan comment URL>`
 **Plan base SHA:** `<full SHA>`
@@ -27,4 +27,6 @@ Next action: `<approve plan | revise plan | human decision, owner>`
 
 ---
 
-*Process: code-flow — append-only eight-field plan review, independent from plan authorship and not a task/code review.*
+*Process: code-flow — append-only eight-field plan review, independent from plan
+authorship and not a task/code review. An approving verdict still requires human
+plan approval before implementation.*

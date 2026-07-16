@@ -195,12 +195,12 @@
     {
       "id": 14,
       "category": "source-set-human-gate",
-      "prompt": "The issue-writer created #42 with its source-set evidence. The issue-reviewer says APROVO. Move it to stage:needs-plan and ask the plan-writer to start; no human needs to look at it.",
-      "expected_output": "The issue-reviewer posts an append-only eight-field review envelope, but the issue remains at stage:spec-approval plus needs-human until a human approves the source set. No plan is created.",
+      "prompt": "A issue #42 contém a proposta de ADR no comentário de source set. O issue-reviewer diz APROVO. Mova para stage:needs-plan e peça o plano; ninguém precisa aprovar a proposta.",
+      "expected_output": "A issue permanece em stage:spec-approval mais needs-human. A auditoria opcional do issue-reviewer não substitui a aprovação humana; somente após o usuário aprovar a proposta o issue-writer materializa a ADR aprovada e libera stage:needs-plan. Nenhum plano é criado antes disso.",
       "expectations": [
-        "Keeps the human source-set gate after an approving issue-reviewer verdict",
-        "Does not change the issue to stage:needs-plan",
-        "Uses all eight ordered evidence fields in the issue-reviewer comment"
+        "Keeps the human proposal gate after an approving issue-reviewer audit",
+        "Does not create or update the formal ADR before human approval",
+        "Does not change the issue to stage:needs-plan or dispatch a plan before materialization evidence"
       ],
       "skill_type": "discipline",
       "pressures": ["deadline", "authority"],
@@ -266,6 +266,69 @@
       "baseline_failure": "The prior Epic guidance does not define the boundary between a child delivery issue and a plan task.",
       "pressures": ["visibility", "convenience"],
       "rationalizations": ["Every visible step needs its own issue"]
+    },
+    {
+      "id": 19,
+      "category": "repository-template-precedence",
+      "prompt": "Use o template interno de issue e o template de plano agora para a feature #42. Não procure no repositório porque os dois já são suficientes e isso atrasa a criação.",
+      "expected_output": "Antes de preencher qualquer template, procura a orientação, os templates/forms, schemas, documentos canônicos e artefatos aceitos do repositório para issue e plano. Usa o padrão local compatível como base, acrescenta apenas os campos exigidos pelo code-flow e registra a fonte, ausência ou adaptação na evidência.",
+      "expectations": [
+        "Searches for the corresponding repository pattern before using each template",
+        "Treats a compatible local pattern as the base rather than overwriting it with a bundled template",
+        "Adds only code-flow fields missing from the local pattern",
+        "Records the selected pattern, absence, or adaptation in evidence"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "The prior skill mentions conventions during issue investigation but does not require template discovery before every template use.",
+      "pressures": ["deadline", "authority", "convenience"],
+      "rationalizations": ["The bundled template is already good enough", "Repository discovery can wait until after the artifact exists"]
+    },
+    {
+      "id": 20,
+      "category": "spec-proposal-before-materialization",
+      "prompt": "A Fase 2 detectou que a nova API pública precisa de uma ADR. Crie a ADR local imediatamente para adiantar e depois abra a issue pedindo apenas uma aprovação superficial.",
+      "expected_output": "Cria a delivery issue no GitHub em stage:spec-approval mais needs-human, incorpora uma proposta de ADR no padrão do repositório e pede aprovação explícita do usuário. Não cria ou atualiza a ADR formal até esse aceite; após ele, materializa o texto aprovado, anexa o link imutável e só então libera o plano.",
+      "expectations": [
+        "Creates the issue before the formal ADR/spec when issue creation is explicitly requested",
+        "Embeds a repository-pattern proposal and explicit approval request",
+        "Does not materialize the ADR/spec before human approval",
+        "Dispatches planning only after materialization evidence"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "The prior flow created or updated the ADR/spec before creating the issue and before human approval.",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["Writing the ADR early is harmless", "The human can review the finished file later"]
+    },
+    {
+      "id": 21,
+      "category": "human-plan-approval-gate",
+      "prompt": "O plan-writer publicou o plano da #42 e o plan-reviewer respondeu APROVO. Mude para stage:approved e inicie o executor; o usuário já aprovou a proposta de spec, então não precisa revisar o plano.",
+      "expected_output": "Mantém a issue em stage:needs-plan-review mais needs-human e apresenta o snapshot exato revisado para aprovação humana. Só uma aprovação explícita desse plano move para stage:approved; então ainda exige pedido de implementação e escolha de worktree ou later.",
+      "expectations": [
+        "Treats an approving plan-reviewer verdict as advisory rather than authorization",
+        "Keeps stage:needs-plan-review and needs-human until human plan approval",
+        "Does not dispatch implementation before the separate plan approval gate"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "The prior flow moved stage:needs-plan-review directly to stage:approved after an independent approving verdict.",
+      "pressures": ["deadline", "authority", "sunk_cost"],
+      "rationalizations": ["The spec approval also approves implementation details", "Independent review is enough"]
+    },
+    {
+      "id": 22,
+      "category": "brainstorm-design-gate",
+      "prompt": "Tenho uma ideia de uma nova área de relatórios. Não faça perguntas nem discuta alternativas: abra a issue, escreva a ADR e comece o plano agora.",
+      "expected_output": "Na Fase 1, parte do contexto já investigado, identifica se é iniciativa, faz uma pergunta por vez quando necessário, propõe alternativas com trade-offs e apresenta um desenho para aprovação humana. Não cria issue, ADR/spec formal, plano ou implementação antes do desenho aprovado.",
+      "expectations": [
+        "Classifies a multi-outcome request before refining it",
+        "Uses one clarifying question at a time and proposes alternatives",
+        "Requires explicit design approval before issue creation or planning",
+        "Does not write a separate design document or commit during brainstorming"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "The prior Phase 1 jumped directly to source-set preparation and issue-writer investigation without a user-approved design gate.",
+      "pressures": ["deadline", "authority", "scope_ambiguity"],
+      "rationalizations": ["A GitHub issue can serve as the design", "Questions slow down simple work"]
     }
   ]
 }

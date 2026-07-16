@@ -12,7 +12,8 @@ Next action: `plan-reviewer reviews this snapshot`
 **Plan cycle:** `1/3`
 **Base SHA:** `<full-sha>`
 **Spec impact:** `create | update | not required` — `<concrete reason>`
-**Source-set approval:** `<human approval URL/comment or immutable repository revision>`
+**Proposal approval:** `<human approval URL/comment or immutable repository revision>`
+**Materialized ADR/spec:** `<immutable blob URL or not required>`
 
 ## Repository sources
 
@@ -49,4 +50,5 @@ Next action: `plan-reviewer reviews this snapshot`
 
 ---
 
-*Process: code-flow — append-only eight-field plan snapshot. Independent review required.*
+*Process: code-flow — append-only eight-field plan snapshot. Independent review
+and human approval of this exact snapshot are required.*
