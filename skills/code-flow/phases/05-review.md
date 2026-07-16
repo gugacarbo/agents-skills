@@ -1,11 +1,26 @@
-# Phase 5: Delivery review
+# Fase 5: Review da entrega
 
-For each `DONE` or `DONE_WITH_CONCERNS` task, dispatch a fresh `agents/06-delivery-reviewer.md` distinct from the executor and plan-writer. Give it the task/range, source set, plan, executor envelope, and review package. `BLOCKED` is never review-ready.
+A partir de `stage:needs-task-review`, para cada evidência `DONE` ou
+`DONE_WITH_CONCERNS` do plano aprovado, despache um
+`agents/06-delivery-reviewer.md` fresco, distinto do executor e do plan-writer.
+Dê a ele o range, source-set, plano, envelope do executor e o pacote de review
+de `scripts/review-package.sh` (`/code-flow tool review-package` quando útil).
+`BLOCKED` nunca está pronto para review.
 
-The reviewer posts `templates/08-task-review-template.md` in issue mode or appends the same ordered eight-field envelope to the direct-mode delivery record. It uses `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES`, or `NÃO APROVO` and checks scope, contract, validation, error paths, and ownership.
+O reviewer publica `templates/08-task-review-template.md` no modo issue ou
+anexa o envelope ordenado de oito campos ao registro do modo `direct`. Usa
+`APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO` e checa escopo,
+contrato, validação, caminhos de erro e ownership.
 
-- Critical/Important finding or `NÃO APROVO`: return only the affected task to Phase 4. Issue mode returns to `stage:in-progress`; direct mode records `Resume: Phase 4 / <Task-ID>` and stops.
-- Minor finding: retain it in the review and closure matrix.
-- A clean review maps task ID to commit/PR and evidence. Parallel work also needs a fresh assembled-range review after assembly.
+O orquestrador muta labels após o comentário de review:
 
-When all task/range reviews are clean, proceed to Phase 6 while retaining `stage:needs-task-review` for issue mode. Direct mode remains GitHub-free.
+| Resultado | Ação (modo issue) |
+| --- | --- |
+| `APROVO` / `APROVO COM RESSALVAS` | Mutar para `stage:ready-to-merge` e seguir para a Fase 6. |
+| `PEÇO AJUSTES` ou achado Critical/Important | Mutar para `stage:needs-changes` e devolver a implementação à Fase 4. |
+| `NÃO APROVO` com decisão de produto/acesso | Mutar para `stage:blocked` + `needs-human`. |
+| Achado Minor | Reter na review e na evidência de fechamento; não muda o stage por si só se o veredito for aprovador. |
+
+No modo `direct`, registre o veredito e `Resume: Phase 6` ou `Resume: Phase 4`
+conforme a tabela; sem estado GitHub. Review limpa mapeia o plano aprovado a
+commit/PR e evidência.

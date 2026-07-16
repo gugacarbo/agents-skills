@@ -1,33 +1,33 @@
-## Integration and closure
+## Integração e fechamento
 
 Agent: `delivery-reviewer`
-Phase/scope: `final audit and closure`
-Summary: `<final audit result>`
-Sources/evidence: `<task envelopes, review URLs, PR, final range, and DoD output>`
-Decisions: `<literal audit verdict and optional integration decision>`
-Changes/validation: `<audit checks and validation, or none>`
-Blockers: `<blocker or none>`
-Next action: `<offer explicit integration | resolve finding | close, owner>`
+Phase/scope: `auditoria final e fechamento`
+Summary: `<resultado da auditoria final>`
+Sources/evidence: `<envelope do executor, URLs de review, PR, range final e saída do DoD>`
+Decisions: `<veredito literal da auditoria e decisão opcional de integração>`
+Changes/validation: `<checagens da auditoria e validação, ou nenhuma>`
+Blockers: `<blocker ou none>`
+Next action: `<oferecer integração explícita | resolver achado | fechar, owner>`
 
 **PR:** `<URL>`
-**PR approval:** `approved | pending | not applicable`
-**Final audit:** `APROVO | APROVO COM RESSALVAS | NÃO APROVO`
-**Assembly review:** `<URL or not applicable>`
+**Aprovação do PR:** `approved | pending | not applicable`
+**Auditoria final:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
 
-| Task | Commit / PR | Executor evidence | Independent review | DoD evidence | Status |
+| Entrega | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
 | --- | --- | --- | --- | --- | --- |
-| Task-A-1 | | | | | |
+| Plano aprovado | | | | | |
 
-## Definition of Done
+## Definição de pronto
 
 ```text
-<command> — <result>
+<comando> — <resultado>
 ```
 
-## Optional integration decision
+## Decisão opcional de integração
 
-`Await explicit user request to merge | merged at <commit> | not applicable`
+`Aguardar pedido explícito do usuário para merge | merged em <commit> | not applicable`
 
 ---
 
-*Process: code-flow — append-only eight-field PR-ready evidence. Never merge automatically after approval.*
+*Processo: code-flow — evidência append-only pronta para PR (envelope de oito
+campos). Nunca fazer merge automático após aprovação.*

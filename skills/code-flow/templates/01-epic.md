@@ -1,41 +1,42 @@
-<!-- Tracking artifact only. Do not add stage:* or needs-human labels to this Epic. -->
+<!-- Artefato só de tracking. Não adicionar labels stage:* ou needs-human a este Epic. -->
 
-# Epic: <initiative title>
+# Epic: <título da iniciativa>
 
-## Why now
+## Por que agora
 
-<Problem, opportunity, and the user or business impact.>
+<Problema, oportunidade e impacto para o usuário ou negócio.>
 
-## Outcome and success measures
+## Resultado e medidas de sucesso
 
-- **Outcome:** <observable result when the initiative is complete>
-- **Success measures:** <metric, target, and measurement method>
+- **Resultado:** <resultado observável quando a iniciativa terminar>
+- **Medidas de sucesso:** <métrica, alvo e método de medição>
 
-## Scope
+## Escopo
 
-- **In:** <capabilities or delivery outcomes included>
-- **Out:** <explicit exclusions>
-- **Constraints:** <time, compatibility, access, security, or product constraints>
+- **Dentro:** <capacidades ou resultados de entrega incluídos>
+- **Fora:** <exclusões explícitas>
+- **Restrições:** <tempo, compatibilidade, acesso, segurança ou produto>
 
-## Child delivery issues
+## Issues de entrega filhas
 
-| Child | Delivery outcome | Owner | Depends on | Status |
+| Filha | Resultado da entrega | Owner | Depende de | Status |
 | --- | --- | --- | --- | --- |
-| #<n> | <one independently closable user-story outcome> | <team/person> | <#n or none> | <link/status> |
+| #<n> | <um resultado de user-story independentemente fechável> | <time/pessoa> | <#n ou none> | <link/status> |
 
-Each child must be a delivery/bug issue, using `templates/02-user-story.md`.
-GitHub may link it as a subissue of this Epic. Apply `stage:*` labels and the
-code-flow source, plan, execution, and review flow only to its children;
-keep implementation-only steps as task IDs in the child's plan.
+Cada filha deve ser uma issue de entrega/bug, usando `templates/02-user-story.md`.
+O GitHub pode ligá-la como subissue deste Epic. Aplicar labels `stage:*` e o
+fluxo code-flow de fonte, plano, execução e review apenas nas filhas; manter a
+implementação dentro do plano aprovado de cada filha — sem decompor em task IDs
+nem criar subissues de chore.
 
-## Cross-cutting decisions and risks
+## Decisões e riscos transversais
 
-| Item | Decision or risk | Owner | Resolution / review point |
+| Item | Decisão ou risco | Owner | Resolução / ponto de review |
 | --- | --- | --- | --- |
-| <id> | <decision, dependency, or risk> | <team/person> | <link, date, or condition> |
+| <id> | <decisão, dependência ou risco> | <time/pessoa> | <link, data ou condição> |
 
-## Completion
+## Conclusão
 
-The Epic is complete when every in-scope child is closed or explicitly removed
-by a recorded product decision, its success measures are evaluated, and any
-cross-cutting decisions have a durable record.
+O Epic está completo quando toda filha in-scope estiver fechada ou removida por
+decisão de produto registrada, as medidas de sucesso forem avaliadas e qualquer
+decisão transversal tiver registro durável.

@@ -1,28 +1,38 @@
-# Phase 0: Issue Context
+# Fase 0: Contexto da issue
 
-Use this phase for `/code-flow issue`, `/code-flow batch`, and `/code-flow issue create`.
+Use esta fase para `/code-flow issue`, `/code-flow batch` e `/code-flow issue create`.
 
-For `issue create`, establish the request context before Phase 1: resolve the repository/default branch, load applicable guidance and accepted ADRs/specs, inspect the narrow code/test area, and record the baseline evidence. There is no GitHub delivery target yet, so do not validate labels or create GitHub state in this phase. Phase 2 creates the approved delivery issue or, when the user explicitly selected one during initiative triage, its tracking Epic.
+Para `issue create`, estabeleça o contexto do pedido antes da Fase 1: resolva o
+repositório/branch default, carregue guidance aplicável e ADRs/specs aceitos,
+inspecione a área estreita de código/teste e registre a evidência de baseline.
+Ainda não há alvo de entrega no GitHub, então não valide labels nem crie estado
+GitHub nesta fase. A Fase 2 cria a issue de entrega aprovada ou, quando o
+usuário selecionou explicitamente durante o triage de iniciativa, seu Epic de
+tracking.
 
-## Validate before dispatch
+## Validar antes do dispatch
 
-For existing issue/batch targets:
+Para alvos issue/batch existentes:
 
-1. Confirm that each target is an existing delivery/bug issue, not an umbrella, audit, or tracking issue. This eligibility check comes before any label repair.
-2. If it is ineligible, explain that it is outside this delivery flow and stop without adding, removing, or replacing labels.
-3. Read an eligible issue's body, labels, linked PRs, and prior eight-field evidence, plan, and review comments.
-4. List every `stage:*` label. Exactly one stage from `references/github-flow.md` is required for a resumable eligible issue; `needs-human` is orthogonal.
-5. Resolve the repository default branch and inspect linked ADR/spec paths at their recorded commits.
-6. For batch, retain an ephemeral per-issue dispatch view: issue URL, current stage, active plan cycle, source links, blockers, and next phase. Do not write a state file or registry.
+1. Confirme que cada alvo é uma issue de entrega/bug existente, não umbrella, auditoria ou tracking. Esta checagem de elegibilidade vem antes de qualquer reparo de label.
+2. Se for inelegível, explique que está fora deste fluxo de entrega e pare sem adicionar, remover ou substituir labels.
+3. Leia body, labels, PRs ligados e comentários anteriores de evidência (oito campos), plano e review de uma issue elegível.
+4. Liste toda label `stage:*`. Exatamente um stage de `references/github-flow.md` é necessário para uma issue elegível retomável; `needs-human` é ortogonal.
+5. Resolva o branch default do repositório e inspecione paths de ADR/spec ligados nos commits registrados.
+6. Para batch, retenha uma visão efêmera de dispatch por issue: URL, stage atual, ciclo de plano ativo, links de fontes, blockers e próxima fase. Não escrever arquivo de estado ou registry.
 
-## Drift handling
+## Tratamento de drift
 
-For an eligible issue only, apply `stage:blocked` plus `needs-human` and stop the affected issue when any of these is true:
+Só para issue elegível, aplique `stage:blocked` + `needs-human` e pare a issue
+afetada quando qualquer um destes for verdadeiro:
 
-- zero or multiple `stage:*` labels;
-- a plan/review comment or required evidence envelope conflicts with the stage or has no identifiable cycle/scope;
-- `stage:approved` lacks both a literal approving review and human approval evidence for the current plan snapshot;
-- `stage:in-progress` has `BLOCKED` evidence or evidence for a task outside the current plan;
-- `stage:needs-task-review` lacks non-blocked evidence for any planned task.
+- zero ou múltiplas labels `stage:*`;
+- um comentário de plano/review ou envelope de evidência obrigatório conflita com o stage ou não tem ciclo/escopo identificável;
+- `stage:approved` carece de review aprovadora literal e evidência de aprovação humana do snapshot atual do plano;
+- `stage:in-progress` ou `stage:needs-changes` tem evidência `BLOCKED` ou evidência de implementação que não corresponde ao plano atual;
+- `stage:needs-task-review` carece de evidência não bloqueada do executor para o plano aprovado;
+- `stage:ready-to-merge` carece de review aprovadora da implementação para o range atual.
 
-Never repair drift by inferring approval from history, a PR, or an implementer claim. Do not apply a delivery stage as a shortcut for an ineligible issue. A blocked issue does not stop unrelated batch issues.
+Nunca reparar drift inferindo aprovação de histórico, PR ou claim do implementador.
+Não aplicar stage de entrega como atalho para issue inelegível. Uma issue
+bloqueada não para issues de batch não relacionadas.

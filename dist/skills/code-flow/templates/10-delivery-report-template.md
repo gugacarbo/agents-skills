@@ -4,66 +4,70 @@ base-sha: <full-sha>
 sources: []
 ---
 
-# <Delivery title>
+# <Título da entrega>
 
-This is one versioned delivery record, not a generated registry. Keep every
-snapshot below append-only and commit each material update. Link every source,
-review, evidence, and DoD result to a full SHA or immutable repository URL.
-Every agent execution/outcome uses the ordered eight-field envelope: `Agent`,
-`Phase/scope`, `Summary`, `Sources/evidence`, `Decisions`,
-`Changes/validation`, `Blockers`, and `Next action`. This record is the only
-coordination surface in direct mode: never create an issue or use GitHub
-comments, labels, or stages.
+Este é um registro de entrega versionado, não um registry gerado. Mantenha cada
+snapshot abaixo append-only e faça commit de cada atualização material. Vincule
+toda fonte, review, evidência e DoD a um SHA completo ou URL imutável do
+repositório. Toda execução/resultado de agente usa o envelope ordenado de oito
+campos: `Agent`, `Phase/scope`, `Summary`, `Sources/evidence`, `Decisions`,
+`Changes/validation`, `Blockers` e `Next action`.
 
-## Agent execution envelope
+**Caminho padrão:** `docs/delivery/<slug>.md`. Antes de criar o arquivo,
+pergunte ao usuário se deve usar outro caminho.
 
-Append this section once for every agent outcome, including no-change,
-`BLOCKED`, rejected review, error, or missing verdict. Do not replace a prior
-section.
+Este registro é a única superfície de coordenação no modo `direct`: nunca criar
+issue nem usar comentários, labels ou stages do GitHub.
+
+## Envelope de execução do agente
+
+Anexe esta seção uma vez para cada resultado de agente, incluindo sem mudança,
+`BLOCKED`, review rejeitada, erro ou veredito ausente. Não substitua uma seção
+anterior.
 
 Agent: `<role>`
-Phase/scope: `<phase, cycle, task, range, or audit>`
-Summary: `<concise result>`
-Sources/evidence: `<immutable source, commit, command, output, or none>`
-Decisions: `<applied, pending, or none>`
-Changes/validation: `<files/effect and validation, or none>`
-Blockers: `<blocker and required human decision, or none>`
-Next action: `<action and owner>`
+Phase/scope: `<fase, ciclo, range ou auditoria>`
+Summary: `<resultado conciso>`
+Sources/evidence: `<fonte imutável, commit, comando, saída ou none>`
+Decisions: `<aplicadas, pendentes ou nenhuma>`
+Changes/validation: `<arquivos/efeito e validação, ou nenhuma>`
+Blockers: `<blocker e decisão humana necessária, ou none>`
+Next action: `<ação e owner>`
 
-## ADR/spec proposal approval
+## Aprovação da proposta de ADR/spec
 
-- **Accepted ADR/spec or approved no-spec rationale:** …
-- **Proposal / no-spec rationale:** …
-- **Human approval evidence:** …
-- **Materialized ADR/spec immutable link:** …
-- **Source revision:** `<full SHA / immutable URL>`
+- **ADR/spec aceito ou racional no-spec aprovado:** …
+- **Proposta / racional no-spec:** …
+- **Evidência de aprovação humana:** …
+- **Link imutável do ADR/spec materializado:** …
+- **Revisão da fonte:** `<SHA completo / URL imutável>`
 
-## Plan snapshot — cycle `<k>/3`
+## Snapshot do plano — ciclo `<k>/3`
 
-- **Plan revision:** `<full SHA / immutable URL>`
-- **Task IDs, ownership, dependencies, acceptance, verification, parallel safety, and DoD:** …
+- **Revisão do plano:** `<SHA completo / URL imutável>`
+- **Objetivo, limites, aceite, verificação, EARS e DoD:** …
 
-## Independent plan review
+## Review independente do plano
 
-- **Review revision:** `<full SHA / immutable URL>`
-- **Reviewer independence:** …
-- **Verdict:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
-- **Resume:** `<Phase 3 | stop pending human decision>`
+- **Revisão da review:** `<SHA completo / URL imutável>`
+- **Independência do reviewer:** …
+- **Veredito:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
+- **Resume:** `<Fase 3 | parar aguardando decisão humana>`
 
-## Task evidence and code reviews
+## Evidência de implementação e reviews de código
 
-| Task | Status | Commit/range | Evidence revision | Independent review revision |
+| Entrega | Status | Commit/range | Revisão da evidência | Revisão da review independente |
 | --- | --- | --- | --- | --- |
-| Task-A-1 | `DONE | DONE_WITH_CONCERNS | BLOCKED | CANCELLED` | | | |
+| Plano aprovado | `DONE | DONE_WITH_CONCERNS | BLOCKED | CANCELLED` | | | |
 
-`CANCELLED` requires the immutable user-cancellation decision in the evidence
-column and `review: not applicable`; never remove its task row.
+`CANCELLED` exige a decisão imutável de cancelamento do usuário na coluna de
+evidência e `review: not applicable`.
 
-For every `BLOCKED`, rejected review, audit failure, or unresolved DoD item,
-append the exact blocker and `Resume: <phase/task>` here.
+Para cada `BLOCKED`, review rejeitada, falha de auditoria ou item de DoD
+pendente, anexe o blocker exato e `Resume: Phase 4` aqui.
 
-## DoD and final audit
+## DoD e auditoria final
 
-- **Audit revision and independence:** …
-- **DoD command/result:** …
-- **Optional PR merge decision:** `not applicable | awaiting explicit request | merged at <SHA>`
+- **Revisão e independência da auditoria:** …
+- **Comando/resultado do DoD:** …
+- **Decisão opcional de merge do PR:** `not applicable | awaiting explicit request | merged at <SHA>`

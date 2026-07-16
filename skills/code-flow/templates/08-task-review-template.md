@@ -1,30 +1,31 @@
-## Revisão independente
+## Revisão independente da implementação
 
 Agent: `delivery-reviewer`
-Phase/scope: `<task, range, or assembled range>`
-Summary: `<review result>`
-Sources/evidence: `<task evidence URL, reviewed range/PR, and source links>`
-Decisions: `<literal verdict and required decisions>`
-Changes/validation: `<review checks and validation, or none>`
-Blockers: `<blocker or none>`
-Next action: `<accept | executor correction | human decision, owner>`
+Phase/scope: `<plano aprovado / range implementado>`
+Summary: `<resultado da review>`
+Sources/evidence: `<URL da evidência do executor, range/PR e links das fontes>`
+Decisions: `<veredito literal e decisões necessárias>`
+Changes/validation: `<checagens e validação, ou nenhuma>`
+Blockers: `<blocker ou none>`
+Next action: `<aceitar | correção do executor | decisão humana, owner>`
 
-**Plan cycle / task:** `<plan URL and Task-ID>`
-**Evidence reviewed:** `<comment URL>`
-**Range / PR:** `<base..head or URL>`
-**Reviewer independence:** `I did not author the plan or implement work in this reviewed range.`
+**Ciclo de plano:** `<URL do plano>`
+**Evidência revisada:** `<URL do comentário>`
+**Range / PR:** `<base..head ou URL>`
+**Independência do reviewer:** `Não autorizei o plano nem implementei o trabalho neste range.`
 **Veredito:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
 
-## Findings
+## Achados
 
-- `Critical | Important | Minor | Cannot verify` — `<file:line>` — `<impact and action>`
+- `Critical | Important | Minor | Cannot verify` — `<file:line>` — `<impacto e ação>`
 
-## Evidence checked
+## Evidência checada
 
-- Contract/source compliance: …
-- Tests and DoD: …
-- Scope and ownership: …
+- Conformidade com contrato/fontes: …
+- Testes e DoD: …
+- Escopo e ownership: …
 
 ---
 
-*Process: code-flow — append-only eight-field task/range review. Use `issue-plan-review-comment.md` for plan review.*
+*Processo: code-flow — review append-only da implementação (envelope de oito
+campos). Para review de plano use `templates/06-review-template.md`.*

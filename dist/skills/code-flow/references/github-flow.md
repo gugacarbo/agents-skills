@@ -1,65 +1,129 @@
-# GitHub Flow Contract
+# Contrato do fluxo GitHub
 
-Use this reference after a delivery issue exists. Phases 0–2 investigate and decide spec impact before creation; the resulting issue carries the ADR/spec proposal or no-spec rationale for human approval. Do not write or update the formal ADR/spec first.
+Use esta referência depois que a issue de entrega existir. As Fases 0–2 investigam
+e decidem o impacto de spec antes da criação; a issue resultante carrega a
+proposta de ADR/spec ou o racional no-spec para aprovação humana. Não escrever
+nem atualizar o ADR/spec formal primeiro.
 
-## Issue eligibility and creation
+## Elegibilidade e criação da issue
 
-Only an existing delivery issue or a bug issue with an implementation delivery may use this flow. An umbrella, audit, or generic tracking issue is ineligible: explain why and stop without adding, removing, or replacing any `stage:*` label. `batch` receives existing issue numbers/URLs only.
+Só uma issue de entrega existente ou uma bug issue com entrega de implementação
+pode usar este fluxo. Uma issue umbrella, auditoria ou tracking genérico é
+inelegível: explique por quê e pare sem adicionar, remover ou substituir qualquer
+label `stage:*`. `batch` recebe apenas números/URLs de issues existentes.
 
-When this workflow creates a delivery issue, prepare repository context and a repository-pattern proposal first. Create the issue at `stage:spec-approval` plus `needs-human`; its body and source-set comment must include the proposed ADR/spec content or state `Spec impact: not required` with the reason, then explicitly request human approval. After that approval, materialize the ADR/spec (when required) and append its immutable link before planning.
+Quando este fluxo cria uma issue de entrega, prepare o contexto do repositório e
+uma proposta no padrão do repositório primeiro. Crie a issue em
+`stage:spec-approval` mais `needs-human`; o body e o comentário do source-set
+devem incluir o conteúdo proposto de ADR/spec ou declarar
+`Spec impact: not required` com o motivo, e pedir aprovação humana explicitamente.
+Após essa aprovação, materialize o ADR/spec (quando necessário) e anexe seu link
+imutável antes de planejar.
 
-## Precise stages
+## Stages precisos
 
-Exactly one `stage:*` label applies to a delivery issue. It identifies the issue's next gate; append-only comments retain the exact status of parallel task agents.
+Exatamente uma label `stage:*` aplica-se a uma issue de entrega. Ela identifica
+o próximo gate; comentários append-only retêm o status exato do trabalho.
 
-| Label | Precise meaning | Next action |
+| Label | Significado preciso | Próxima ação |
 | --- | --- | --- |
-| `stage:spec-approval` | Delivery issue contains a proposed ADR/spec or explicit no-spec rationale, awaiting human approval | Human approves the proposal; `issue-writer` materializes the approved ADR/spec when required, then moves to `stage:needs-plan`. |
-| `stage:needs-plan` | Approved source set has no current plan snapshot | Dispatch/await plan-writer. |
-| `stage:needs-plan-review` | Current plan snapshot awaits an independent verdict or human approval after an approving verdict | Dispatch/await plan-reviewer, then await human plan approval. |
-| `stage:approved` | Current plan has a literal approving verdict and explicit human approval | Human selects `worktree` or `later`; issue execution never uses `direct`. |
-| `stage:in-progress` | Approved tasks are implementing or being fixed | Await task evidence or blockers. |
-| `stage:needs-task-review` | Every planned task has non-blocked evidence; independent task review, assembled-diff review when applicable, DoD, final `delivery-reviewer` audit, PR approval, and merge decision remain before closure | Dispatch/await `delivery-reviewer` instances, then present optional integration. |
-| `stage:blocked` | A human decision or external correction is required | Present the recorded blocker; do not guess. |
+| `stage:spec-approval` | A issue contém ADR/spec proposto ou racional no-spec explícito, aguardando aprovação humana | Humano aprova a proposta; `issue-writer` materializa o ADR/spec aprovado quando necessário e move para `stage:needs-plan`. |
+| `stage:needs-plan` | Source-set aprovado sem snapshot atual de plano | Despachar/aguardar plan-writer. |
+| `stage:needs-plan-review` | Snapshot atual do plano aguarda veredito independente ou aprovação humana após veredito aprovador | Despachar/aguardar plan-reviewer, depois aguardar aprovação humana do plano. |
+| `stage:approved` | Plano atual tem veredito aprovador literal e aprovação humana explícita | Humano escolhe `worktree` ou `later`; execução de issue nunca usa `direct`. |
+| `stage:in-progress` | O plano aprovado está sendo implementado pela primeira vez como uma unidade | Aguardar evidência do executor ou blockers. |
+| `stage:needs-task-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5). |
+| `stage:needs-changes` | A review da implementação (ou auditoria final) pediu ajustes corrigíveis | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-task-review`. |
+| `stage:ready-to-merge` | Review da implementação aprovou; restam auditoria final, DoD, aprovação do PR e decisão de merge | Despachar auditoria final (Fase 6), depois oferecer integração opcional. |
+| `stage:blocked` | Decisão humana ou correção externa é necessária | Apresentar o blocker registrado; não adivinhar. |
 
-`needs-human` is orthogonal. Add it for `spec-approval`, `needs-plan-review` after an approving verdict, `approved` + `later`, blocked decisions, review failure, the third requested-change cycle, and the optional post-PR integration decision. Before adding a stage, remove every existing `stage:*` label. After a merged/closed delivery, remove both the stage and `needs-human` labels.
+`needs-human` é ortogonal. Adicione-a em `spec-approval`, `needs-plan-review`
+após veredito aprovador, `approved` + `later`, decisões bloqueadas, falha de
+review que exige produto/acesso, o terceiro ciclo de pedido de ajuste do plano e
+a decisão opcional de integração pós-PR. Antes de adicionar um stage, remova
+toda label `stage:*` existente. Após entrega merged/fechada, remova o stage e
+`needs-human`.
 
-## Transition table
+## Mutação de labels (obrigatória)
+
+O status da issue é o conjunto de labels do GitHub, não o texto do comentário.
+Escrever `stage:*`, `needs-human` ou uma frase de transição dentro de um
+comentário append-only não muda a issue. Após o comentário de evidência
+autorizador existir, mutue as labels imediatamente:
+
+1. Remova toda label `stage:*` existente.
+2. Adicione exatamente uma próxima label `stage:*` da tabela acima.
+3. Adicione ou remova `needs-human` conforme a transição exigir.
+4. Confirme com `gh issue view <n> --json labels` antes de continuar.
+
+O orquestrador aplica essas mutações depois dos posts dos papéis (e o
+`issue-writer` as aplica na criação e na materialização pós-aprovação). Papéis
+que dizem que não devem mudar labels continuam sem mudar; o orquestrador
+atualiza por eles. Nunca pare após apenas registrar o novo stage no body do
+comentário.
+
+| Racionalização | Contraponto |
+| --- | --- |
+| “O comentário já diz o novo stage.” | Texto de comentário é narrativa; só labels são status durável. |
+| “Next action nomeia o stage, então a issue está atualizada.” | `Next action` não é mutação de label. |
+| “Vou atualizar as labels depois / após o próximo passo.” | Mutue labels no mesmo turno do comentário autorizador. |
+
+## Tabela de transição
 
 ```text
-phase 0 → phase 1 → phase 2: investigate → decide spec impact → prepare issue proposal
-create delivery issue: proposal/no-spec rationale + spec-approval + needs-human
-human proposal approval → materialize ADR/spec when required → needs-plan → needs-plan-review
-  ├─ independent reviewer approves → await human plan approval → approved → worktree in-progress
-  ├─ asks changes (cycle < 3) → needs-plan
-  └─ rejects/errors/third change → blocked + needs-human
-in-progress → needs-task-review → task + assembled-diff review → final audit/DoD → PR approval
-  └─ optional, user-confirmed integration/merge → close
-  └─ task review requests changes → in-progress
+fase 0 → fase 1 → fase 2: investigar → decidir impacto de spec → preparar proposta
+criar issue de entrega: proposta/racional no-spec + spec-approval + needs-human
+aprovação humana da proposta → materializar ADR/spec quando necessário → needs-plan → needs-plan-review
+  ├─ reviewer independente aprova → aguardar aprovação humana do plano → approved → worktree in-progress
+  ├─ pede ajustes (ciclo < 3) → needs-plan
+  └─ rejeita/erros/terceiro ajuste → blocked + needs-human
+in-progress → needs-task-review → review da implementação
+  ├─ APROVO / APROVO COM RESSALVAS → ready-to-merge → auditoria final/DoD → aprovação do PR
+  │    └─ integração/merge opcional confirmada pelo usuário → fechar
+  ├─ PEÇO AJUSTES / achados Critical|Important → needs-changes → executor → needs-task-review
+  └─ NÃO APROVO com decisão de produto/acesso → blocked + needs-human
+auditoria final pede ajustes → needs-changes → executor → needs-task-review
 ```
 
-## Resume rules
+## Regras de resume
 
-| Observed state | Resume action |
+| Estado observado | Ação de resume |
 | --- | --- |
-| `stage:spec-approval` | Present the issue's proposed ADR/spec or no-spec rationale for human approval; do not write the formal ADR/spec or plan. |
-| `stage:needs-plan` | Start or await Phase 3 plan-writer work. |
-| `stage:needs-plan-review` | Dispatch/await the current independent plan review, then present an approving snapshot for human plan approval. |
-| `stage:approved` | Ask `worktree` or `later`; do not edit code yet. `direct` is repository-only. |
-| `stage:in-progress` | Dispatch/resume the earliest planned task without `DONE`/`DONE_WITH_CONCERNS` evidence or resolve its blocker. |
-| `stage:needs-task-review` | Dispatch/await independent `delivery-reviewer` task/range reviews, assembled-diff review when applicable, DoD, final audit, and PR approval. After approval, offer—not automatically perform—merge/integration. |
-| `stage:blocked` | Present the recorded human decision; do not guess. |
-| Eligible issue with zero/multiple stages or comment drift | Set `stage:blocked` + `needs-human` and explain the mismatch. |
-| Ineligible issue | Explain that it is outside the delivery flow and stop without touching labels. |
+| `stage:spec-approval` | Apresentar a proposta de ADR/spec ou racional no-spec para aprovação humana; não escrever ADR/spec formal nem plano. |
+| `stage:needs-plan` | Iniciar ou aguardar o plan-writer da Fase 3. |
+| `stage:needs-plan-review` | Despachar/aguardar a review independente do plano atual, depois apresentar um snapshot aprovador para aprovação humana. |
+| `stage:approved` | Perguntar `worktree` ou `later`; ainda não editar código. `direct` é só repositório. |
+| `stage:in-progress` | Despachar/retomar o executor único do plano aprovado, ou resolver seu blocker. |
+| `stage:needs-task-review` | Despachar/aguardar a review independente da implementação (Fase 5). |
+| `stage:needs-changes` | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-task-review`. |
+| `stage:ready-to-merge` | Despachar auditoria final, DoD e aprovação do PR (Fase 6). Após isso, oferecer — não executar automaticamente — merge/integração. |
+| `stage:blocked` | Apresentar a decisão humana registrada; não adivinhar. |
+| Issue elegível com zero/múltiplos stages ou drift de comentário | Definir `stage:blocked` + `needs-human` e explicar o mismatch. |
+| Issue inelegível | Explicar que está fora do fluxo de entrega e parar sem tocar labels. |
 
-## Plan cycles
+## Ciclos de plano
 
-One cycle is one append-only plan comment plus one append-only review comment. The plan must identify `Plan cycle: k/3`, its repository base SHA, source links, and task IDs. The review must cite that plan comment URL and use a literal verdict:
+Um ciclo é um comentário append-only de plano mais um comentário append-only de
+review. O plano deve identificar `Plan cycle: k/3`, o base SHA do repositório e
+os links das fontes. Não decompor em task IDs. A review deve citar a URL desse
+comentário de plano e usar um veredito literal:
 
 `APROVO` | `APROVO COM RESSALVAS` | `PEÇO AJUSTES` | `NÃO APROVO`
 
-Do not edit a submitted plan or review comment. A material plan change, human rejection, or human request for changes starts a new cycle, replaces `stage:approved` or `stage:needs-plan-review` with `stage:needs-plan`, and requires a new reviewer. If a reviewer requires a product/access choice, use `NÃO APROVO` and block rather than consuming an adjustment cycle. The plan-reviewer must be distinct from the plan-writer. Every `delivery-reviewer` instance must also be distinct from the plan-writer and executors whose work is in its reviewed range.
+Não editar um comentário de plano ou review já submetido. Uma mudança material
+de plano, rejeição humana ou pedido humano de ajustes inicia um novo ciclo,
+substitui `stage:approved` ou `stage:needs-plan-review` por `stage:needs-plan`
+e exige um novo reviewer. Se o reviewer exigir escolha de produto/acesso, use
+`NÃO APROVO` e bloqueie em vez de consumir um ciclo de ajuste. O plan-reviewer
+deve ser distinto do plan-writer. Toda instância de `delivery-reviewer` também
+deve ser distinta do plan-writer e do executor cujo trabalho está no range
+revisado.
 
-## Batch rules
+## Regras de batch
 
-Maintain an ephemeral orchestration view for every issue: URL, observed stage, plan cycle, base SHA, assigned agents, blockers, branch/worktree, PR, and next action. Do not persist it as a registry or progress file; issue labels/comments and the PR are the durable evidence. A blocked issue does not halt unrelated issues. Plan/review agents may run in parallel. Parallel implementation needs an isolated worktree, branch, and PR per issue; batch has no direct mode.
+Mantenha uma visão efêmera de orquestração por issue: URL, stage observado,
+ciclo de plano, base SHA, agentes atribuídos, blockers, branch/worktree, PR e
+próxima ação. Não persistir como registry ou arquivo de progresso; labels/comentários
+da issue e o PR são a evidência durável. Uma issue bloqueada não para issues
+não relacionadas. Agentes de plano/review podem rodar em paralelo. Cada issue
+usa uma worktree, branch e PR isolados; batch não tem modo `direct`.

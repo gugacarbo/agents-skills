@@ -1,29 +1,29 @@
-# <Delivery title>
+# <Título da entrega>
 
 ## User story
 
-As a `<user or role>`, I want `<capability>` so that `<observable value>`.
+Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
 
-## Outcome and acceptance criteria
+## Resultado e critérios de aceite
 
-- **Outcome:** <one independently closable result>
-- **Acceptance criteria:**
-  - <observable behavior or EARS-style condition>
-  - <observable behavior or EARS-style condition>
-- **Verification:** <test, command, walkthrough, or metric>
+- **Resultado:** <um resultado independentemente fechável>
+- **Critérios de aceite:**
+  - <comportamento observável ou condição no estilo EARS>
+  - <comportamento observável ou condição no estilo EARS>
+- **Verificação:** <teste, comando, walkthrough ou métrica>
 
-## Scope
+## Escopo
 
-- **In:** <included behavior>
-- **Out:** <explicit exclusions>
-- **Dependencies / decisions:** <issue, ADR/spec, access, or none>
+- **Dentro:** <comportamento incluído>
+- **Fora:** <exclusões explícitas>
+- **Dependências / decisões:** <issue, ADR/spec, acesso ou none>
 
-## Delivery relation
+## Relação de entrega
 
-- **Epic:** #<n> or `none`
-- **GitHub relation:** `subissue of #<n>` or `standalone delivery issue`
+- **Epic:** #<n> ou `none`
+- **Relação no GitHub:** `subissue of #<n>` ou `standalone delivery issue`
 
-This is one eligible delivery/bug issue. Apply `stage:*`, source-set approval,
-plan, execution, review, and closure only here. Keep implementation-only work
-as stable task IDs in its plan; create another child issue only for an
-independently closable delivery outcome.
+Esta é uma issue elegível de entrega/bug. Aplicar `stage:*`, aprovação do
+source-set, plano, execução, review e fechamento apenas aqui. Manter a
+implementação dentro do plano aprovado desta issue como uma unidade do executor;
+criar outra issue filha só para um resultado de entrega independentemente fechável.

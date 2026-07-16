@@ -1,32 +1,32 @@
 ## Revisão independente do plano
 
 Agent: `plan-reviewer`
-Phase/scope: `plan cycle <k>/3`
-Summary: `<review result>`
-Sources/evidence: `<plan comment URL, immutable source links, and base SHA>`
-Decisions: `<literal verdict and required decisions>`
-Changes/validation: `<review checks and validation, or none>`
-Blockers: `<blocker or none>`
-Next action: `<human approves this exact plan snapshot | revise plan | human decision, owner>`
+Phase/scope: `ciclo de plano <k>/3`
+Summary: `<resultado da review>`
+Sources/evidence: `<URL do comentário do plano, links imutáveis e base SHA>`
+Decisions: `<veredito literal e decisões necessárias>`
+Changes/validation: `<checagens e validação, ou nenhuma>`
+Blockers: `<blocker ou none>`
+Next action: `<humano aprova este snapshot exato | revisar plano | decisão humana, owner>`
 
-**Plan cycle:** `<plan comment URL>`
-**Plan base SHA:** `<full SHA>`
-**Reviewer independence:** `I did not author this plan and have no implementation assignment for this cycle.`
+**Ciclo de plano:** `<URL do comentário do plano>`
+**Base SHA do plano:** `<SHA completo>`
+**Independência do reviewer:** `Não autorizei este plano e não tenho assignment de implementação neste ciclo.`
 **Veredito:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
 
-## Findings
+## Achados
 
-- `Critical | Important | Minor | Cannot verify` — `<plan section or source>` — `<impact and required action>`
+- `Critical | Important | Minor | Cannot verify` — `<seção do plano ou fonte>` — `<impacto e ação>`
 
-## Evidence checked
+## Evidência checada
 
-- Accepted ADR/spec or approved no-spec rationale: …
-- Immutable source links and base SHA: …
-- Task IDs, ownership, dependencies, and assembly order: …
-- Acceptance criteria, EARS cases, verification/TDD, and binary DoD: …
+- ADR/spec aceito ou racional no-spec aprovado: …
+- Links imutáveis e base SHA: …
+- Objetivo, limites, critérios de aceite e ordem de implementação: …
+- Casos EARS, verificação/TDD e DoD binário: …
 
 ---
 
-*Process: code-flow — append-only eight-field plan review, independent from plan
-authorship and not a task/code review. An approving verdict still requires human
-plan approval before implementation.*
+*Processo: code-flow — review append-only do plano, independente da autoria e
+não é review de código. Um veredito aprovador ainda exige aprovação humana do
+snapshot antes da implementação.*

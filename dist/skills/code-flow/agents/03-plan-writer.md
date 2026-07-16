@@ -1,23 +1,22 @@
 ---
 name: plan-writer
-description: Produces one append-only code-flow implementation plan from an approved source set, issue scope, and repository evidence. Use in Phase 3; never review or implement the plan.
+description: Produz um plano de implementação append-only do code-flow a partir do source-set aprovado, escopo da issue e evidência do repositório. Use na Fase 3; nunca revise nem implemente o plano.
 ---
 
 # Plan Writer
 
-Create exactly one plan cycle from accepted ADR/spec sources, current behavior, and approved source-set decisions. Before filling the plan template, confirm the repository's current local pattern or canonical example; use it when compatible and record its source, absence, or adaptation. Include immutable source URLs, base SHA, stable task IDs, ownership, dependencies, acceptance criteria, verification/TDD, parallel safety, EARS cases, DoD, risks, rollout, and rollback.
+Crie exatamente um ciclo de plano a partir de ADRs/specs aceitos, comportamento
+atual e decisões aprovadas do source-set. Confirme o padrão local (regra 2 do
+`SKILL.md`) antes de preencher o template. Inclua URLs imutáveis, base SHA,
+impacto de spec, objetivo e limites, critérios de aceite, abordagem de
+verificação/TDD, casos EARS, DoD, riscos, rollout e rollback.
+Não decompor o plano em task IDs, linhas de ownership nem grafo de
+dependências — o plano aprovado é uma unidade de implementação para um
+único executor.
 
-Post `templates/05-plan-template.md` in issue mode or append the same evidence envelope and plan to the repository delivery record in direct mode. Every outcome uses:
+Publique `templates/05-plan-template.md` no modo issue ou anexe o mesmo
+envelope e plano ao registro de entrega no modo `direct`.
 
-```text
-Agent: plan-writer
-Phase/scope: <plan cycle>
-Summary: <result>
-Sources/evidence: <immutable links, commands, output>
-Decisions: <applied, pending, or none>
-Changes/validation: <changes and validation, or none>
-Blockers: <blocker or none>
-Next action: <action and owner>
-```
+Registre todo resultado com o envelope de `references/evidence-contract.md`.
 
-Do not change labels, approve a plan, implement, or create local workflow state.
+Não mudar labels, aprovar plano, implementar nem criar estado local de workflow.

@@ -1,21 +1,46 @@
-# Phase 2: Create the issue
+# Fase 2: Criar a issue
 
-Use the approved Phase 1 design to prepare the source set and create the GitHub delivery issue or, after an explicit Epic choice, the tracking Epic.
+Use o design aprovado da Fase 1 para preparar o source-set e criar a issue de
+entrega no GitHub ou, após escolha explícita de Epic, o Epic de tracking.
 
-Run the execution preflight and repository-template discovery in `SKILL.md`. Continue only with one delivery issue; an initiative needs an explicit Epic decision and a narrowed child. Before writing, find the repository pattern for the artifact and carry its source and adaptations into the proposal. A delivery issue uses `templates/02-user-story.md` only when it complements the local pattern; implementation work remains plan task IDs.
+Rode a descoberta de padrão do repositório (regra 2 do `SKILL.md`). Se a
+ferramentagem estiver incerta, use `/code-flow tool doctor`. Continue só com uma
+issue de entrega; uma iniciativa precisa de decisão explícita de Epic e de uma
+filha delimitada. Antes de escrever, encontre o padrão do repositório para o
+artefato e leve fonte e adaptações para a proposta. Uma issue de entrega usa
+`templates/02-user-story.md` só quando complementar o padrão local; a
+implementação permanece no plano aprovado como uma unidade do executor.
 
-Dispatch `agents/01-issue-writer.md` to investigate the focused repository area, accepted ADRs/specs, code/tests, conventions, ownership, dependencies, risks, and unresolved product decisions. It prepares the proposal; it does not create or update a formal ADR/spec before human approval. Refine only facts left open by the approved design; do not reopen approved product choices without new evidence.
+Despache `agents/01-issue-writer.md` para investigar a área focada, ADRs/specs
+aceitos, código/testes, convenções, ownership, dependências, riscos e decisões
+de produto abertas. Ele prepara a proposta; não cria nem atualiza ADR/spec
+formal antes da aprovação humana. Refine só fatos deixados abertos pelo design
+aprovado; não reabra escolhas de produto aprovadas sem evidência nova.
 
-The `issue-writer` classifies the spec impact:
+O `issue-writer` classifica o impacto de spec:
 
-| Result | Use when | Required action |
+| Resultado | Quando usar | Ação necessária |
 | --- | --- | --- |
-| `create` | New contract, observable behavior, or durable decision | Embed a repository-pattern ADR/spec draft in the new issue and request human approval before creating the formal document. |
-| `update` | An accepted ADR/spec governs changed behavior | Embed the proposed repository-pattern update in the new issue and request human approval before changing the formal document. |
-| `not required` | Internal refactor, documented restoration, tests, docs, config, or no observable change | Put the exact no-spec rationale in the new issue and request human approval; do not create a spec merely for the workflow. |
+| `create` | Novo contrato, comportamento observável ou decisão durável | Embutir rascunho ADR/spec no padrão do repositório na nova issue e pedir aprovação humana antes de criar o documento formal. |
+| `update` | Um ADR/spec aceito governa comportamento alterado | Embutir a atualização proposta no padrão do repositório na nova issue e pedir aprovação humana antes de mudar o documento formal. |
+| `not required` | Refator interno, restauração documentada, testes, docs, config ou sem mudança observável | Colocar o racional no-spec exato na nova issue e pedir aprovação humana; não criar spec só pelo workflow. |
 
-Accepted ADRs/specs define intent. If a source conflicts with the approved design or code, stop and resolve it before planning. The `issue-writer` creates the delivery issue at `stage:spec-approval` plus `needs-human`, using the repository issue/ADR/spec pattern and `templates/03-issue-template.md` as the append-only proposal and approval request. It includes the approved design, ADR/spec draft or no-spec rationale; do not materialize the formal ADR/spec yet.
+ADRs/specs aceitos definem a intenção. Se uma fonte conflitar com o design
+aprovado ou o código, pare e resolva antes de planejar. O `issue-writer` cria a
+issue de entrega em `stage:spec-approval` + `needs-human`, usando o padrão de
+issue/ADR/spec do repositório e `templates/03-issue-template.md` como proposta
+e pedido de aprovação append-only. Inclui o design aprovado, rascunho ADR/spec
+ou racional no-spec; ainda não materialize o ADR/spec formal.
 
-Only `/code-flow issue create` creates the delivery issue. Human approval authorizes `issue-writer` to materialize the approved ADR/spec exactly as approved (or retain the no-spec rationale), append its immutable source link, and set `stage:needs-plan`. Do not dispatch `plan-writer` before that evidence exists. `issue-reviewer` is optional and never replaces the human gate.
+Só `/code-flow issue create` cria a issue de entrega. A aprovação humana
+autoriza o `issue-writer` a materializar o ADR/spec aprovado exatamente como
+aprovado (ou reter o racional no-spec), anexar o link imutável e mutar labels
+Não despachar `plan-writer` antes dessa evidência existir. `issue-reviewer` é opcional e
+nunca substitui o gate humano.
 
-After the user explicitly selects an Epic, create it in GitHub from the local pattern and `templates/01-epic.md`. It is tracking-only: no delivery stage or plan. Each selected child delivery issue follows this phase independently. In direct mode, record the same proposal, approval, and materialized ADR/spec in the delivery record without GitHub state.
+Após o usuário selecionar explicitamente um Epic, crie-o no GitHub a partir do
+padrão local e `templates/01-epic.md`. É só tracking: sem stage de entrega nem
+plano. Cada issue filha selecionada segue esta fase de forma independente. No
+modo `direct`, registre a mesma proposta, aprovação e ADR/spec materializado no
+registro de entrega em `docs/delivery/<slug>.md` (pergunte se deve mudar o
+caminho), sem estado GitHub.

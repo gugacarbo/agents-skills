@@ -7,68 +7,94 @@ metadata:
 
 # code-flow
 
-Coordinate the flow; dispatch the named roles instead of writing plans, reviews, or implementation yourself.
+Coordene o fluxo; despache os papéis nomeados em vez de escrever planos,
+reviews ou implementação você mesmo.
 
-## Commands
+## Comandos
 
-| Invocation | Behavior |
+| Invocação | Comportamento |
 | --- | --- |
-| `/code-flow` | Repository mode: resume the earliest unmet phase. |
-| `/code-flow issue create` | Run Phases 0–2, then create one delivery issue whose ADR/spec proposal awaits human approval at `stage:spec-approval` + `needs-human`. |
-| `/code-flow issue <#N\|URL> [phase]` | Validate an existing eligible issue, then resume its stage or named phase. |
-| `/code-flow batch <#N\|URL>... --from <phase>` | Run isolated trails for existing eligible delivery/bug issues. |
-| `/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>` | Start that repository phase and continue. |
-| `/code-flow tool <doctor\|bootstrap\|review-package>` | Run one helper and stop. |
+| `/code-flow` | Modo repositório: retoma a fase mais antiga não cumprida. |
+| `/code-flow issue create` | Roda Fases 0–2 e cria uma issue de entrega cuja proposta ADR/spec aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
+| `/code-flow issue <#N\|URL> [phase]` | Valida uma issue elegível existente e retoma seu stage ou fase nomeada. |
+| `/code-flow batch <#N\|URL>... --from <phase>` | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes. |
+| `/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>` | Inicia essa fase de repositório e continua. |
+| `/code-flow tool <doctor\|bootstrap\|review-package>` | Roda um helper e para. |
 
-`issue create` is the only issue-creation route. Named phases never bypass gates; `batch` never creates issues; `direct` is repository-only and never changes GitHub state.
+`issue create` é a única rota de criação de issue. Fases nomeadas nunca
+bypassam gates; `batch` nunca cria issues; `direct` é só repositório e nunca
+muda estado GitHub.
 
-## Rules before writing
+## Regras antes de escrever
 
-1. Classify the work. A delivery issue has one closable outcome. An initiative has multiple independently deliverable outcomes, owners, dependencies, or release decisions.
-2. Before any `code-flow` template, find the repository's current pattern: guidance, forms, schemas, canonical documents, and recent accepted artifacts. Use a compatible local pattern as the base; add only fields the current gate needs. Record its source, absence, or adaptation in evidence.
-3. Accepted ADRs/specs define intent. Code and tests reveal current behavior and drift; they do not silently replace accepted intent.
+1. Classifique o trabalho. Uma issue de entrega tem um resultado fechável. Uma iniciativa tem múltiplos resultados independentemente entregáveis, owners, dependências ou decisões de release.
+2. Antes de qualquer template `code-flow`, encontre o padrão atual do repositório: guidance, forms, schemas, documentos canônicos e artefatos aceitos recentes. Use um padrão local compatível como base; adicione só os campos que o gate atual precisa. Registre fonte, ausência ou adaptação na evidência.
+3. ADRs/specs aceitos definem a intenção. Código e testes revelam comportamento atual e drift; não substituem a intenção aceita em silêncio.
 
-For an initiative, explain the signals and offer [`templates/01-epic.md`](templates/01-epic.md). Create an Epic only after the user explicitly selects it. It is tracking-only: no delivery stages, plans, or execution. Each child is one delivery/bug issue, written with [`templates/02-user-story.md`](templates/02-user-story.md), and follows this flow independently. GitHub subissues link Epic to delivery issues; implementation work remains stable plan task IDs.
+Para uma iniciativa, explique os sinais e ofereça [`templates/01-epic.md`](templates/01-epic.md).
+Crie um Epic só depois que o usuário o selecionar explicitamente. É só tracking:
+sem stages de entrega, planos ou execução. Cada filha é uma issue de entrega/bug,
+escrita com [`templates/02-user-story.md`](templates/02-user-story.md), e segue
+este fluxo de forma independente. Subissues do GitHub ligam Epic às issues de
+entrega; a implementação fica no plano aprovado de cada filha e numa passagem
+única do executor — sem decomposição em task IDs.
 
-## Delivery flow
+## Fluxo de entrega
 
-1. **Phases 0–1:** establish repository context, scope, local patterns, risks, and unresolved user decisions.
-2. **Phase 2:** prepare the source set, decide `create`, `update`, or `not required` for ADR/spec, and create the delivery issue containing the proposal or no-spec rationale at `stage:spec-approval` + `needs-human`; do not materialize the formal document yet.
-3. **Human source approval:** materialize the approved ADR/spec when required, record its immutable link, and move to `stage:needs-plan`.
-4. **Phase 3:** `plan-writer` posts the plan; `plan-reviewer` posts an independent verdict. An approving verdict still waits for human approval of that exact snapshot at `stage:needs-plan-review` + `needs-human`.
-5. **Human plan approval:** move to `stage:approved`. Execution still needs an explicit request and `worktree` or `later` choice.
-6. **Phases 4–6:** execute stable task IDs, review each range independently, verify the closure matrix and DoD, obtain PR approval, then offer integration only when requested.
+1. **Fases 0–1:** estabelecer contexto do repositório, escopo, padrões locais, riscos e decisões abertas do usuário.
+2. **Fase 2:** preparar o source-set, decidir `create`, `update` ou `not required` para ADR/spec, e criar a issue de entrega com a proposta ou racional no-spec em `stage:spec-approval` + `needs-human`; ainda não materializar o documento formal.
+3. **Aprovação humana da fonte:** materializar o ADR/spec aprovado quando necessário, registrar o link imutável e ir para `stage:needs-plan`.
+4. **Fase 3:** `plan-writer` publica o plano; `plan-reviewer` publica um veredito independente. Um veredito aprovador ainda aguarda aprovação humana daquele snapshot exato em `stage:needs-plan-review` + `needs-human`.
+5. **Aprovação humana do plano:** ir para `stage:approved`. A execução ainda precisa de pedido explícito e escolha `worktree` ou `later`.
+6. **Fases 4–6:** executar o plano aprovado como uma unidade (`in-progress` →
+   `needs-task-review`); a review da implementação vai para
+   `ready-to-merge` ou `needs-changes`; verificar DoD e evidência de
+   fechamento, obter aprovação do PR e oferecer integração só quando pedida.
 
-In `direct` mode, use [`templates/10-delivery-report-template.md`](templates/10-delivery-report-template.md) for the same approvals and evidence, with no issue, label, stage, or GitHub comment. An existing Epic/umbrella issue is ineligible for delivery flow.
+No modo `direct`, use [`templates/10-delivery-report-template.md`](templates/10-delivery-report-template.md)
+no caminho padrão `docs/delivery/<slug>.md` (pergunte ao usuário se deve mudar)
+para as mesmas aprovações e evidências, sem issue, label, stage ou comentário
+GitHub. Um Epic/umbrella existente é inelegível para o fluxo de entrega.
 
-## Load for the active phase
+## Carregar a fase ativa
 
-| Phase | Load |
+| Fase | Carregar |
 | --- | --- |
-| 0 — ISSUE CONTEXT | [`phases/00-issue-context.md`](phases/00-issue-context.md) |
+| 0 — CONTEXTO DA ISSUE | [`phases/00-issue-context.md`](phases/00-issue-context.md) |
 | 1 — BRAINSTORM | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
-| 1.1 — VISUAL COMPANION | [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) |
-| 2 — CREATE ISSUE | [`phases/02-create-issue.md`](phases/02-create-issue.md) |
-| 3 — PLAN AND REVIEW | [`phases/03-plan.md`](phases/03-plan.md) |
+| 1.1 — COMPANHEIRO VISUAL | [`phases/01_1-visual-companion.md`](phases/01_1-visual-companion.md) |
+| 2 — CRIAR ISSUE | [`phases/02-create-issue.md`](phases/02-create-issue.md) |
+| 3 — PLANO E REVIEW | [`phases/03-plan.md`](phases/03-plan.md) |
 | 4 — DISPATCH | [`phases/04-dispatch.md`](phases/04-dispatch.md) |
-| 5 — DELIVERY REVIEW | [`phases/05-review.md`](phases/05-review.md) |
-| 6 — VERIFY AND INTEGRATE | [`phases/06-integrate.md`](phases/06-integrate.md) |
+| 5 — REVIEW DA ENTREGA | [`phases/05-review.md`](phases/05-review.md) |
+| 6 — VERIFICAR E INTEGRAR | [`phases/06-integrate.md`](phases/06-integrate.md) |
 
-Read [`references/github-flow.md`](references/github-flow.md) before changing issue stages or resuming an issue. Read [`references/evidence-contract.md`](references/evidence-contract.md) before publishing evidence, reviewing task work, or closing delivery.
+Leia [`references/github-flow.md`](references/github-flow.md) antes de mudar
+stages de issue ou retomar uma issue. Leia
+[`references/evidence-contract.md`](references/evidence-contract.md) antes de
+publicar evidência, revisar implementação ou fechar a entrega.
 
-## Roles
+## Papéis
 
-Dispatch only these roles:
+Despache apenas estes papéis:
 
-| Agent | Responsibility |
+| Agente | Responsabilidade |
 | --- | --- |
-| `issue-writer` | Context, proposal, issue creation, and formal ADR/spec materialization after approval. |
-| `issue-reviewer` | Optional independent source-set audit. |
-| `plan-writer` | One append-only implementation plan. |
-| `plan-reviewer` | Independent literal verdict on one plan snapshot. |
-| `executor` | One approved stable task ID. |
-| `delivery-reviewer` | Independent task/range review and fresh final audit. |
+| `issue-writer` | Contexto, proposta, criação da issue e materialização formal do ADR/spec após aprovação. |
+| `issue-reviewer` | Auditoria opcional independente do source-set. |
+| `plan-writer` | Um plano de implementação append-only. |
+| `plan-reviewer` | Veredito literal independente de um snapshot de plano. |
+| `executor` | Um plano aprovado, implementado como uma unidade (pode organizar o trabalho internamente). |
+| `delivery-reviewer` | Review independente da implementação e auditoria final fresca. |
 
-Keep plan writer/reviewer separate. A delivery reviewer is distinct from the executor and plan writer; the final auditor is also fresh.
+Mantenha plan-writer e plan-reviewer separados. O delivery-reviewer é distinto
+do executor e do plan-writer; o auditor final também é fresco.
 
-Evidence is append-only. Record every outcome—including no change, `BLOCKED`, errors, and rejected reviews—before changing state. Do not create separate task trackers, progress logs, or workflow registries.
+A evidência é append-only. Registre todo resultado — incluindo sem mudança,
+`BLOCKED`, erros e reviews rejeitadas — antes de mudar estado. No modo issue,
+mudar estado significa mutar labels GitHub `stage:*` / `needs-human` após o
+comentário autorizador; texto de comentário sozinho não é atualização de status.
+O orquestrador muta labels após os posts dos papéis; subagentes não mutam
+labels, exceto `issue-writer` na criação e na materialização pós-aprovação
+(ver `references/github-flow.md`). Não criar trackers de task, logs de progresso
+ou registries de workflow separados.

@@ -1,121 +1,65 @@
-# Phase 1.1: Visual Companion
+# Fase 1.1: Companheiro visual
 
-Browser-based visual brainstorming companion for showing mockups, diagrams, and options during Phase 1.
+Companheiro de brainstorm visual no browser para mockups, diagramas e opções
+durante a Fase 1.
 
-## When to Use
+## Quando usar
 
-Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
+Decida por pergunta, não por sessão. O teste: **o usuário entenderia melhor
+vendo do que lendo?**
 
-**Use the browser** when the content itself is visual:
+**Use o browser** quando o conteúdo for visual: mockups de UI, diagramas de
+arquitetura, comparações lado a lado, polish de design, relações espaciais
+renderizadas como diagrama.
 
-- **UI mockups** — wireframes, layouts, navigation structures, component designs
-- **Architecture diagrams** — system components, data flow, relationship maps
-- **Side-by-side visual comparisons** — comparing two layouts, design directions, or visual systems
-- **Design polish** — spacing, hierarchy, look and feel
-- **Spatial relationships** — state machines, flowcharts, relationship maps rendered as diagrams
+**Use o terminal** quando for texto/tabela: requisitos e escopo, escolhas
+conceituais A/B/C, listas de trade-off, decisões técnicas, perguntas cuja
+resposta é palavras.
 
-**Use the terminal** when the content is text or tabular:
+Uma pergunta sobre UI não é automaticamente visual. "Que tipo de wizard você
+quer?" é conceitual — terminal. "Qual destes layouts de wizard parece certo?"
+é visual — browser.
 
-- **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
-- **Conceptual A/B/C choices** — picking between approaches described in words
-- **Tradeoff lists** — pros/cons, comparison tables
-- **Technical decisions** — API design, data modeling, architectural approach selection
-- **Clarifying questions** — anything where the answer is words, not a visual preference
+## Oferecer o companheiro
 
-A question about a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
+Não ofereça de antemão. Ofereça só quando a próxima pergunta for genuinamente
+mais fácil de entender visualmente, em mensagem própria:
 
-## Offering the Companion
+> "Esta próxima parte pode ficar mais fácil se eu mostrar — posso montar
+> mockups, diagramas e comparações numa aba do browser. Sobe um servidor local
+> temporário e pode ser intensivo em tokens. Quer que eu abra?"
 
-Do NOT offer the companion upfront. Offer it only when the next question would genuinely be easier to understand visually. The offer must be its own message:
+Aguarde a resposta. Se recusar, continue só em texto e não ofereça de novo a
+menos que o usuário peça. Antes de iniciar, avise que a sessão é temporária
+fora do repositório e será removida no cleanup.
 
-> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. It starts a temporary local server and can be token-intensive. Want me to open it for you?"
+## Iniciar uma sessão
 
-Wait for the user's response. If they decline, continue text-only and do not offer it again unless they raise it.
-
-Before starting the companion, explicitly warn that it creates a temporary local session outside the repository and that it will be removed during cleanup.
-
-## Starting a Session
-
-Start the companion only after the user approves it:
+Só após aprovação:
 
 ```bash
 scripts/visual-companion/start-server.sh --open
 ```
 
-> **Requirement:** Requires Node.js to run. If `node` is not available, skip the visual companion and proceed with text-only brainstorming.
+Requer Node.js. Se `node` não estiver disponível, siga só em texto.
 
-This returns JSON like:
+O comando retorna JSON com `url` (incluindo `?key=...`), `session_dir`,
+`screen_dir` e `state_dir`. Salve esses paths e compartilhe a URL completa.
+Se o JSON não for capturado, leia `$STATE_DIR/server-info`.
 
-```json
-{
-  "type": "server-started",
-  "port": 52341,
-  "url": "http://localhost:52341/?key=ab12...",
-  "session_dir": "/tmp/code-flow-brainstorm-12345-1706000000",
-  "screen_dir": "/tmp/code-flow-brainstorm-12345-1706000000/content",
-  "state_dir": "/tmp/code-flow-brainstorm-12345-1706000000/state"
-}
-```
+## Loop
 
-Save `session_dir`, `screen_dir`, and `state_dir`. Always share the complete URL, including `?key=...`.
+1. Confirme que o servidor está vivo antes de citar a URL ou empurrar uma tela.
+2. Escreva um novo arquivo HTML em `screen_dir` (fragmentos por padrão; o frame template envolve automaticamente).
+3. Diga o que está na tela e peça resposta no terminal.
+4. No turno seguinte, leia `state_dir/events` se existir (JSONL) e una com o feedback do terminal.
+5. Itere com arquivo novo a cada vez; nunca reutilize nomes.
+6. Ao voltar a texto, empurre uma tela de espera para limpar visuais obsoletos.
 
-If the startup JSON is not captured, read `$STATE_DIR/server-info`.
+Blocos disponíveis no frame: `.options` / `.option`, `.cards` / `.card`,
+`.mockup`, `.split`, `.pros-cons`.
 
-## The Loop
+## Cleanup
 
-1. Confirm the server is alive before referring to the URL or pushing a screen.
-2. Write a new HTML file into `screen_dir`.
-3. Tell the user what is on screen and ask them to respond in the terminal.
-4. On the next turn, read `state_dir/events` if present and merge that with the user's terminal feedback. If `state_dir/events` exists, read it as JSONL (one JSON object per line). Each event has at least a `type` and `payload` field.
-5. Iterate by writing a fresh file each time; never reuse filenames.
-6. When returning to a text-only step, push a waiting screen so stale visuals are cleared.
-
-## Writing Content
-
-Write content fragments by default. The server wraps them in a shared frame template automatically. Only write a full HTML document when you need total control.
-
-Minimal example:
-
-```html
-<h2>Which layout works better?</h2>
-<p class="subtitle">Consider readability and visual hierarchy</p>
-
-<div class="options">
-  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-    <div class="letter">A</div>
-    <div class="content">
-      <h3>Single Column</h3>
-      <p>Clean, focused reading experience</p>
-    </div>
-  </div>
-  <div class="option" data-choice="b" onclick="toggleSelect(this)">
-    <div class="letter">B</div>
-    <div class="content">
-      <h3>Two Column</h3>
-      <p>Sidebar navigation with main content</p>
-    </div>
-  </div>
-</div>
-```
-
-Available building blocks come from the shared frame template:
-
-- `.options` and `.option` for A/B/C choices
-- `.cards` and `.card` for visual alternatives
-- `.mockup` for previews
-- `.split` for side-by-side comparisons
-- `.pros-cons` for quick tradeoff framing
-
-## Companion Files
-
-The companion assets live here:
-
-- `scripts/visual-companion/start-server.sh`
-- `scripts/visual-companion/stop-server.sh`
-- `scripts/visual-companion/server.cjs`
-- `scripts/visual-companion/helper.js`
-- `scripts/visual-companion/frame-template.html`
-
-Use these files as-is unless you need to change companion behavior.
-
-> **Cleanup:** After completing the brainstorm session, run `stop-server.sh <session_dir>` to stop the background server and remove the temporary session.
+Ao terminar o brainstorm, rode `stop-server.sh <session_dir>` para parar o
+servidor e remover a sessão temporária.

@@ -1,54 +1,54 @@
 ## Plano de implementação
 
 Agent: `plan-writer`
-Phase/scope: `plan cycle <k>/3`
-Summary: `<plan result>`
-Sources/evidence: `<immutable source links and base SHA>`
-Decisions: `<applied, pending, or none>`
-Changes/validation: `<plan changes and validation, or none>`
-Blockers: `<blocker or none>`
-Next action: `plan-reviewer reviews this snapshot`
+Phase/scope: `ciclo de plano <k>/3`
+Summary: `<resultado do plano>`
+Sources/evidence: `<links imutáveis das fontes e base SHA>`
+Decisions: `<aplicadas, pendentes ou nenhuma>`
+Changes/validation: `<mudanças do plano e validação, ou nenhuma>`
+Blockers: `<blocker ou none>`
+Next action: `plan-reviewer revisa este snapshot`
 
-**Plan cycle:** `1/3`
+**Ciclo de plano:** `1/3`
 **Base SHA:** `<full-sha>`
-**Spec impact:** `create | update | not required` — `<concrete reason>`
-**Proposal approval:** `<human approval URL/comment or immutable repository revision>`
-**Materialized ADR/spec:** `<immutable blob URL or not required>`
+**Impacto de spec:** `create | update | not required` — `<motivo concreto>`
+**Aprovação da proposta:** `<URL/comentário humano ou revisão imutável do repositório>`
+**ADR/spec materializado:** `<blob URL imutável ou not required>`
 
-## Repository sources
+## Fontes do repositório
 
-- ADR/spec: `<immutable blob URL at full SHA or not applicable>`
-- Current-behavior evidence: `<path:line at commit or immutable URL>`
+- ADR/spec: `<blob URL imutável no SHA completo ou não aplicável>`
+- Evidência do comportamento atual: `<path:line no commit ou URL imutável>`
 
-## Goal and boundaries
+## Objetivo e limites
 
 …
 
-## Tasks
+## Critérios de aceite
 
-### Task-A-1: <title>
+- …
 
-- **Ownership/files:** …
-- **Dependencies:** …
-- **Acceptance criteria:** …
-- **Verification / TDD:** …
-- **Parallel safety:** `sequential | isolated`, with reason
+## Verificação / TDD
 
-## EARS edge cases
+…
+
+## Casos de borda (EARS)
 
 | # | WHEN | the system MUST |
 | --- | --- | --- |
 | 1 | | |
 
-## Definition of Done
+## Definição de pronto
 
 - [ ] …
 
-## Risks, rollout, and rollback
+## Riscos, rollout e rollback
 
 …
 
 ---
 
-*Process: code-flow — append-only eight-field plan snapshot. Independent review
-and human approval of this exact snapshot are required.*
+*Processo: code-flow — snapshot append-only do plano (envelope de oito campos).
+Não decompor este plano em task IDs. O executor pode organizar o trabalho
+internamente; a evidência e a review cobrem o plano aprovado como uma unidade.
+Review independente e aprovação humana deste snapshot exato são obrigatórias.*

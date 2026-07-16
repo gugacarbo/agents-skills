@@ -1,15 +1,30 @@
-# Phase 3: Plan and independent review
+# Fase 3: Plano e review independente
 
-From `stage:needs-plan`, dispatch `agents/03-plan-writer.md`. It creates one append-only plan cycle with immutable source links, base SHA, spec impact, stable task IDs, ownership, dependencies, acceptance criteria, verification/TDD, parallel safety, EARS cases, risks, rollback, and binary DoD. Its complete eight-field envelope accompanies the plan comment or direct-mode delivery-record section.
+A partir de `stage:needs-plan`, despache `agents/03-plan-writer.md`. Ele cria
+um ciclo de plano append-only com links imutáveis das fontes, base SHA, impacto
+de spec, objetivo e limites, critérios de aceite, abordagem de verificação/TDD,
+casos EARS, riscos, rollback e DoD binário. Não peça decomposição em task IDs —
+o plano é uma unidade de implementação. O envelope completo de oito campos
+acompanha o comentário do plano ou a seção do registro no modo `direct`.
 
-In issue mode, publish `templates/05-plan-template.md` and set `stage:needs-plan-review`. In direct mode, append to the versioned delivery record at the approved documentation path; do not create GitHub state or a local registry.
+No modo issue, publique `templates/05-plan-template.md` e então mutue labels
+para `stage:needs-plan-review` (remova `stage:*` anterior primeiro). Não trate
+o comentário do plano como mudança de stage. No modo `direct`, anexe ao
+registro versionado em `docs/delivery/<slug>.md` (pergunte se deve mudar o
+caminho); não criar estado GitHub nem registry local.
 
-Immediately dispatch a fresh `agents/04-plan-reviewer.md` with the literal snapshot. It publishes `templates/06-review-template.md` or the equivalent delivery-record section with all eight fields and one literal verdict:
+Despache imediatamente um `agents/04-plan-reviewer.md` fresco com o snapshot
+literal. Ele publica `templates/06-review-template.md` ou a seção equivalente
+do registro com todos os oito campos e um veredito literal:
 
-| Result | Action |
+| Resultado | Ação |
 | --- | --- |
-| `APROVO` / `APROVO COM RESSALVAS` | Issue: retain `stage:needs-plan-review` + `needs-human` and present the reviewed snapshot for human approval; direct: append the verdict and await human approval. |
-| `PEÇO AJUSTES` | Issue: return to `stage:needs-plan`; at cycle 3 block + `needs-human`. Direct: append stop/resume and start a new cycle. |
-| `NÃO APROVO`, error, absent verdict, or product/access decision | Issue: `stage:blocked` + `needs-human`; direct: append blocker and stop. |
+| `APROVO` / `APROVO COM RESSALVAS` | Issue: manter labels em `stage:needs-plan-review` + `needs-human` e apresentar o snapshot revisado para aprovação humana; direct: anexar o veredito e aguardar aprovação humana. |
+| `PEÇO AJUSTES` | Issue: mutar labels de volta para `stage:needs-plan`; no ciclo 3 bloquear + `needs-human`. Direct: anexar stop/resume e iniciar novo ciclo. |
+| `NÃO APROVO`, erro, veredito ausente ou decisão de produto/acesso | Issue: mutar labels para `stage:blocked` + `needs-human`; direct: anexar blocker e parar. |
 
-After an approving independent verdict, the human approves or rejects the exact plan-comment snapshot. Only human approval moves the issue to `stage:approved`; a rejection or requested change returns it to `stage:needs-plan` (or blocks it at cycle 3). The source-set approval and the plan approval are separate mandatory gates.
+Após um veredito independente aprovador, o humano aprova ou rejeita o snapshot
+exato do comentário do plano. Só a aprovação humana muta a issue para
+`stage:approved`; rejeição ou pedido de mudança a devolve a `stage:needs-plan`
+(ou bloqueia no ciclo 3). A aprovação do source-set e a aprovação do plano são
+gates obrigatórios separados.

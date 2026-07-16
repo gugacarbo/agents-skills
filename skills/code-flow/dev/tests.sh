@@ -49,7 +49,7 @@ assert_template_references() {
     04-issue-review-template.md \
     05-plan-template.md \
     06-review-template.md \
-    07-task-evidaence-template.md \
+    07-task-evidence-template.md \
     08-task-review-template.md \
     09-integration-report-template.md \
     10-delivery-report-template.md; do
@@ -64,10 +64,19 @@ test_router_and_subagents() {
   assert_contains '/code-flow issue <#N\|URL> [phase]' "$SKILL/SKILL.md"
   assert_contains '/code-flow batch <#N\|URL>... --from <phase>' "$SKILL/SKILL.md"
   assert_contains '/code-flow tool <doctor\|bootstrap\|review-package>' "$SKILL/SKILL.md"
-  for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-task-review blocked; do
+  for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-task-review needs-changes ready-to-merge blocked; do
     assert_contains "stage:$stage" "$SKILL/references/github-flow.md"
   done
-  assert_contains "issue's next gate" "$SKILL/references/github-flow.md"
+  assert_contains 'stage:needs-changes' "$SKILL/phases/05-review.md"
+  assert_contains 'stage:ready-to-merge' "$SKILL/phases/05-review.md"
+  assert_contains 'stage:ready-to-merge' "$SKILL/phases/06-integrate.md"
+  assert_contains 'stage:needs-changes' "$SKILL/phases/04-dispatch.md"
+  assert_contains 'próximo gate' "$SKILL/references/github-flow.md"
+  assert_contains 'Mutação de labels (obrigatória)' "$SKILL/references/github-flow.md"
+  assert_contains 'só labels são status durável' "$SKILL/references/github-flow.md"
+  assert_contains 'gh issue view <n> --json labels' "$SKILL/references/github-flow.md"
+  assert_contains 'texto de comentário sozinho não é atualização de status' "$SKILL/SKILL.md"
+  assert_contains 'Mencionar um stage no comentário não é mudança de estado' "$SKILL/references/evidence-contract.md"
   for file in 00-issue-context.md 01-brainstorm.md 02-create-issue.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
     [ -f "$SKILL/phases/$file" ] || fail "missing phase: $file"
   done
@@ -75,31 +84,34 @@ test_router_and_subagents() {
   assert_contains '/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>' "$SKILL/SKILL.md"
   assert_exact_agents
   assert_template_references
-  assert_contains 'Dispatch only these roles' "$SKILL/SKILL.md"
-  assert_contains 'multiple independently deliverable outcomes' "$SKILL/SKILL.md"
-  assert_contains 'Create an Epic only after the user explicitly selects it' "$SKILL/SKILL.md"
-  assert_contains 'tracking-only: no delivery stages, plans, or execution' "$SKILL/SKILL.md"
-  assert_contains 'Ask as many clarifying questions as needed to avoid inventing decisions' "$SKILL/phases/01-brainstorm.md"
-  assert_contains 'Propose 2–3 approaches' "$SKILL/phases/01-brainstorm.md"
-  assert_contains 'obtain explicit user approval' "$SKILL/phases/01-brainstorm.md"
-  assert_contains 'Offer the visual companion only when' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'Despache apenas estes papéis' "$SKILL/SKILL.md"
+  assert_contains 'múltiplos resultados independentemente entregáveis' "$SKILL/SKILL.md"
+  assert_contains 'Crie um Epic só depois que o usuário o selecionar explicitamente' "$SKILL/SKILL.md"
+  assert_contains 'sem stages de entrega, planos ou execução' "$SKILL/SKILL.md"
+  assert_contains 'Faça tantas perguntas de esclarecimento quanto necessário' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'Proponha 2–3 abordagens' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'obtenha aprovação explícita do usuário' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'Ofereça o companheiro visual só quando' "$SKILL/phases/01-brainstorm.md"
   [ -f "$SKILL/templates/01-epic.md" ] || fail 'missing Epic template'
-  assert_contains '## Child delivery issues' "$SKILL/templates/01-epic.md"
-  assert_contains 'Do not add stage:* or needs-human labels' "$SKILL/templates/01-epic.md"
-  assert_contains 'Each child must be a delivery/bug issue' "$SKILL/templates/01-epic.md"
-  assert_contains 'written with [`templates/02-user-story.md`]' "$SKILL/SKILL.md"
-  assert_contains 'GitHub subissues link Epic to delivery issues' "$SKILL/SKILL.md"
+  assert_contains '## Issues de entrega filhas' "$SKILL/templates/01-epic.md"
+  assert_contains 'Não adicionar labels stage:* ou needs-human' "$SKILL/templates/01-epic.md"
+  assert_contains 'Cada filha deve ser uma issue de entrega/bug' "$SKILL/templates/01-epic.md"
+  assert_contains 'escrita com [`templates/02-user-story.md`]' "$SKILL/SKILL.md"
+  assert_contains 'Subissues do GitHub ligam Epic às issues de' "$SKILL/SKILL.md"
   [ -f "$SKILL/templates/02-user-story.md" ] || fail 'missing user-story template'
   assert_contains '## User story' "$SKILL/templates/02-user-story.md"
-  assert_contains 'GitHub relation:' "$SKILL/templates/02-user-story.md"
-  assert_contains 'implementation-only work' "$SKILL/templates/02-user-story.md"
+  assert_contains 'Relação no GitHub:' "$SKILL/templates/02-user-story.md"
+  assert_contains 'como uma unidade do executor' "$SKILL/templates/02-user-story.md"
   assert_contains 'templates/02-user-story.md' "$SKILL/templates/01-epic.md"
-  assert_contains 'Before any `code-flow` template' "$SKILL/SKILL.md"
-  assert_contains 'Use a compatible local pattern as the base' "$SKILL/SKILL.md"
-  assert_contains 'repository-template discovery' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'Antes de qualquer template `code-flow`' "$SKILL/SKILL.md"
+  assert_contains 'Use um padrão local compatível como base' "$SKILL/SKILL.md"
+  assert_contains 'descoberta de padrão do repositório' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'docs/delivery/<slug>.md' "$SKILL/SKILL.md"
+  assert_contains 'pergunte ao usuário se deve mudar' "$SKILL/SKILL.md"
   for agent in "$SKILL"/agents/*.md; do
-    assert_contains 'local pattern' "$agent"
+    assert_contains 'padrão local' "$agent"
   done
+  [ ! -e "$SKILL/templates/07-task-evidaence-template.md" ] || fail 'legacy evidaence typo template still exists'
 }
 
 test_issue_evidence_contract() {
@@ -109,7 +121,7 @@ test_issue_evidence_contract() {
     04-issue-review-template.md \
     05-plan-template.md \
     06-review-template.md \
-    07-task-evidaence-template.md \
+    07-task-evidence-template.md \
     08-task-review-template.md \
     09-integration-report-template.md; do
     [ -f "$SKILL/templates/$template" ] || fail "missing issue evidence template: $template"
@@ -120,39 +132,47 @@ test_issue_evidence_contract() {
   assert_contains 'templates/03-issue-template.md' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'templates/04-issue-review-template.md' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'stage:spec-approval' "$SKILL/agents/02-issue-reviewer.md"
-  assert_contains 'human approves the source set' "$SKILL/agents/02-issue-reviewer.md"
-  assert_contains 'Do not change labels, create a plan, implement code, or self-approve' "$SKILL/agents/02-issue-reviewer.md"
+  assert_contains 'aprovar o source-set' "$SKILL/agents/02-issue-reviewer.md"
+  assert_contains 'Não mudar labels, criar plano, implementar código nem' "$SKILL/agents/02-issue-reviewer.md"
 
-  assert_contains 'Implement exactly one stable task ID' "$SKILL/agents/05-executor.md"
-  assert_contains 'fresh instance' "$SKILL/agents/06-delivery-reviewer.md"
-  assert_contains 'final auditor' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'Implemente o plano aprovado como uma unidade' "$SKILL/agents/05-executor.md"
+  assert_contains 'Pode organizar o trabalho internamente' "$SKILL/agents/05-executor.md"
+  assert_contains 'Não decompor o plano em task IDs,' "$SKILL/agents/03-plan-writer.md"
+  assert_contains 'Não decompor este plano em task IDs.' "$SKILL/templates/05-plan-template.md"
+  assert_contains 'Não exija decomposição em task IDs' "$SKILL/agents/04-plan-reviewer.md"
+  assert_contains 'instância fresca' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'auditor final' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'APROVO COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"
+  assert_contains 'PEÇO AJUSTES' "$SKILL/templates/09-integration-report-template.md"
+  assert_contains 'templates/06-review-template.md' "$SKILL/templates/08-task-review-template.md"
+  assert_contains 'scripts/review-package.sh' "$SKILL/phases/05-review.md"
 }
 
 test_issue_creation_and_mode_boundaries() {
-  assert_contains 'When this workflow creates a delivery issue' "$SKILL/references/github-flow.md"
-  assert_contains 'proposed ADR/spec content' "$SKILL/references/github-flow.md"
-  assert_contains 'Do not write or update the formal ADR/spec first' "$SKILL/references/github-flow.md"
-  assert_contains 'Only `/code-flow issue create` creates the delivery issue' "$SKILL/phases/02-create-issue.md"
-  assert_contains 'Do not dispatch `plan-writer` before that evidence exists' "$SKILL/phases/02-create-issue.md"
-  assert_contains 'After the user explicitly selects an Epic, create it in GitHub' "$SKILL/phases/02-create-issue.md"
-  assert_contains 'Do not create or update a formal ADR/spec before approval' "$SKILL/agents/01-issue-writer.md"
-  assert_contains '### Draft or no-spec rationale' "$SKILL/templates/03-issue-template.md"
-  assert_contains 'authorizes formal ADR/spec materialization' "$SKILL/templates/03-issue-template.md"
-  assert_contains 'plan approval are separate mandatory gates' "$SKILL/phases/03-plan.md"
-  assert_contains 'human approves this exact plan snapshot' "$SKILL/templates/06-review-template.md"
-  assert_contains 'explicit human approval' "$SKILL/references/github-flow.md"
+  assert_contains 'Quando este fluxo cria uma issue de entrega' "$SKILL/references/github-flow.md"
+  assert_contains 'conteúdo proposto de ADR/spec' "$SKILL/references/github-flow.md"
+  assert_contains 'Não escrever' "$SKILL/references/github-flow.md"
+  assert_contains 'ADR/spec formal primeiro' "$SKILL/references/github-flow.md"
+  assert_contains 'Só `/code-flow issue create` cria a issue de entrega' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'Não despachar `plan-writer` antes dessa evidência existir' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'Após o usuário selecionar explicitamente um Epic, crie-o no GitHub' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'Não criar nem atualizar' "$SKILL/agents/01-issue-writer.md"
+  assert_contains '### Rascunho ou racional no-spec' "$SKILL/templates/03-issue-template.md"
+  assert_contains 'autoriza a materialização formal do ADR/spec' "$SKILL/templates/03-issue-template.md"
+  assert_contains 'gates obrigatórios separados' "$SKILL/phases/03-plan.md"
+  assert_contains 'humano aprova este snapshot exato' "$SKILL/templates/06-review-template.md"
+  assert_contains 'aprovação humana explícita' "$SKILL/references/github-flow.md"
 
-  assert_contains 'direct` uses the current checkout and writes every envelope' "$SKILL/phases/04-dispatch.md"
-  assert_contains 'direct` is repository-only' "$SKILL/SKILL.md"
-  assert_contains 'no issue, label, stage, or GitHub comment' "$SKILL/SKILL.md"
+  assert_contains 'direct` usa o checkout' "$SKILL/phases/04-dispatch.md"
+  assert_contains 'direct` é só repositório' "$SKILL/SKILL.md"
+  assert_contains 'sem issue, label, stage ou comentário' "$SKILL/SKILL.md"
 
-  # Repository-mode evidence is versioned and never mutates GitHub.
-  assert_contains 'direct-mode delivery record' "$SKILL/agents/04-plan-reviewer.md"
-  assert_contains 'Direct: append stop/resume and start a new cycle' "$SKILL/phases/03-plan.md"
-  assert_contains '`BLOCKED` is never review-ready' "$SKILL/phases/05-review.md"
-  assert_contains 'Direct mode never creates an issue, label, or GitHub comment' "$SKILL/agents/01-issue-writer.md"
-  assert_contains 'Direct mode never writes GitHub state' "$SKILL/agents/05-executor.md"
-  assert_contains 'Direct mode creates no issue, labels, stages, or GitHub comments' "$SKILL/phases/06-integrate.md"
+  assert_contains 'registro do modo `direct`' "$SKILL/agents/04-plan-reviewer.md"
+  assert_contains 'Direct: anexar stop/resume e iniciar novo ciclo' "$SKILL/phases/03-plan.md"
+  assert_contains '`BLOCKED` nunca está pronto para review' "$SKILL/phases/05-review.md"
+  assert_contains 'Modo `direct` nunca cria issue, label ou comentário GitHub' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'Modo `direct` nunca escreve estado GitHub' "$SKILL/agents/05-executor.md"
+  assert_contains 'Modo `direct` não cria issue, labels, stages ou comentários GitHub' "$SKILL/phases/06-integrate.md"
 }
 
 test_no_local_workflow_state() {
@@ -162,9 +182,9 @@ test_no_local_workflow_state() {
   [ ! -e "$SKILL/scripts/materialize-watchdogs.sh" ] || fail 'legacy watchdog materializer exists'
   [ ! -e "$SKILL/scripts/log-task.sh" ] || fail 'legacy task logger exists'
   [ ! -e "$SKILL/phases/08-reference.md" ] || fail 'obsolete phase-08 reference exists'
-  assert_contains 'Do not create separate task trackers' "$SKILL/SKILL.md"
+  assert_contains 'Não criar trackers de task' "$SKILL/SKILL.md"
   assert_contains 'append-only' "$SKILL/references/github-flow.md"
-  assert_contains 'Closure matrix' "$SKILL/references/evidence-contract.md"
+  assert_contains 'Evidência de fechamento' "$SKILL/references/evidence-contract.md"
 }
 
 test_helpers() {

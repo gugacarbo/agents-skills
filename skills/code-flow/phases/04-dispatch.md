@@ -1,9 +1,27 @@
-# Phase 4: Dispatch
+# Fase 4: Dispatch
 
-Dispatch only after plan approval. In issue mode require `stage:approved`, an explicit implementation request, and `worktree` or `later`. `later` adds `needs-human` and changes no code; `worktree` removes it and sets `stage:in-progress`. Never offer `direct` for an issue or batch.
+Despache só após aprovação do plano, ou para corrigir achados quando a issue
+estiver em `stage:needs-changes`. No modo issue, a primeira execução exige
+`stage:approved`, pedido explícito de implementação e `worktree` ou `later`.
+`later` adiciona `needs-human` e não muda código; `worktree` remove essa label
+e muta para `stage:in-progress`. Em `needs-changes`, despache o executor sobre
+os achados da review sem novo pedido de `worktree` se a worktree já existir.
+Nunca oferecer `direct` para issue ou batch.
 
-In repository mode, ask for a worktree or `direct`. `direct` uses the current checkout and writes every envelope, review, and DoD result only to the versioned delivery record. It creates no issue, label, stage, or GitHub comment and cannot later convert to issue creation.
+No modo repositório, pergunte worktree ou `direct`. `direct` usa o checkout
+atual e escreve todo envelope, review e DoD só no registro versionado em
+`docs/delivery/<slug>.md` (pergunte se deve mudar o caminho). Não cria issue,
+label, stage ou comentário GitHub e não pode converter depois para criação de
+issue.
 
-Dispatch only `agents/05-executor.md`. It receives issue URL when present, plan revision, task ID, base SHA, allowed files, acceptance criteria, verification, and evidence destination. It posts `templates/07-task-evidaence-template.md` in issue mode or the same eight-field envelope in direct mode. A `BLOCKED` outcome stops: issue mode uses `stage:blocked` + `needs-human`; direct mode appends `Resume: <phase/task>` with no GitHub state.
+Despache apenas `agents/05-executor.md`. Ele recebe URL da issue quando houver,
+revisão do plano, base SHA, escopo/limites, critérios de aceite, verificação e
+destino da evidência. Implementa o plano aprovado como uma unidade — sem lista
+decomposable de tasks — e pode organizar o trabalho internamente. Publica
+`templates/07-task-evidence-template.md` no modo issue ou o mesmo envelope de
+oito campos no modo `direct`. Um resultado `BLOCKED` para: modo issue muta
+labels para `stage:blocked` + `needs-human` após o comentário de evidência;
+modo `direct` anexa `Resume: Phase 4` sem estado GitHub.
 
-Tasks are sequential by default. Parallel work needs plan-confirmed disjoint files, separate worktrees/branches, assembly branch/order, integration verification, and a fresh assembled-range delivery review. Only when every planned task has non-blocked evidence may an issue move to `stage:needs-task-review`.
+Use uma worktree/branch/PR por issue. Quando existir evidência não bloqueada do
+executor para o plano aprovado, mutue labels para `stage:needs-task-review`.

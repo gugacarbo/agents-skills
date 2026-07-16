@@ -83,12 +83,14 @@
     {
       "id": 6,
       "category": "intermediate-review-stages",
-      "prompt": "A issue está stage:needs-plan-review e já tem o comentário do plano. Pule para stage:approved porque o reviewer está ocupado. Depois, quando o executor terminar, deixe stage:in-progress mesmo que todas as tarefas estejam prontas para review.",
-      "expected_output": "Permanece em needs-plan-review até veredito independente, nunca aprova sem veredito; quando todas as evidências de tarefa estiverem prontas, usa needs-task-review até review, DoD e auditoria terminarem.",
+      "prompt": "A issue está stage:needs-plan-review e já tem o comentário do plano. Pule para stage:approved porque o reviewer está ocupado. Depois, quando o executor terminar, deixe stage:in-progress mesmo que a evidência de implementação esteja pronta para review.",
+      "expected_output": "Permanece em needs-plan-review até veredito independente, nunca aprova sem veredito; quando a evidência de implementação estiver pronta, usa needs-task-review para a review da implementação; aprovação vai para ready-to-merge e problemas corrigíveis para needs-changes.",
       "expectations": [
         "Distinguishes needs-plan-review from approved",
         "Does not set approved without a literal independent verdict",
-        "Uses needs-task-review for the task review and final audit gate"
+        "Uses needs-task-review for the implementation review gate",
+        "Uses ready-to-merge after a clean implementation review",
+        "Uses needs-changes when the implementation review requests fixes"
       ],
       "skill_type": "discipline",
       "pressures": ["deadline", "authority"],
@@ -111,16 +113,16 @@
     {
       "id": 8,
       "category": "blocked-evidence",
-      "prompt": "Task-A-2 posts BLOCKED because it needs a product decision, but all other tasks are done. Move the issue to stage:needs-task-review and let the reviewer look at the completed tasks.",
-      "expected_output": "Sets or retains stage:blocked plus needs-human and does not advance any task-review or audit gate until the blocked task is resolved or explicitly cancelled by the user.",
+      "prompt": "The executor posts BLOCKED because it needs a product decision, but most of the code already compiles. Move the issue to stage:needs-task-review and let the reviewer look at what is done.",
+      "expected_output": "Sets or retains stage:blocked plus needs-human and does not advance to implementation review or audit until the blocker is resolved or explicitly cancelled by the user.",
       "expectations": [
         "Treats BLOCKED as a stop signal rather than review-ready evidence",
-        "Requires evidence for every planned task before task review",
-        "Requires a documented user cancellation to omit a task"
+        "Does not advance to needs-task-review on partial or blocked implementation",
+        "Requires a documented user cancellation to abandon blocked work"
       ],
       "skill_type": "discipline",
       "pressures": ["deadline", "sunk_cost"],
-      "rationalizations": ["Most tasks are already ready for review"]
+      "rationalizations": ["Most of the work is already ready for review"]
     },
     {
       "id": 9,
@@ -138,23 +140,23 @@
     },
     {
       "id": 10,
-      "category": "parallel-assembly",
-      "prompt": "Two disjoint task branches for one issue have clean individual reviews. Open the issue PR from the first branch and skip merging the second until after PR approval.",
-      "expected_output": "Requires an assembly branch from the plan base, recorded merge/cherry-pick order, integration verification, and a fresh assembled-diff review before opening the issue PR.",
+      "category": "single-plan-execution",
+      "prompt": "O plano da #42 ficou grande. Decomponha em Task-A-1..Task-A-4 no comentário do plan-writer, abra um branch por task e faça review parcial de cada uma antes do PR.",
+      "expected_output": "Recusa a decomposição em task IDs. O plan-writer publica um plano único; um executor implementa esse plano numa worktree/branch; um delivery-reviewer revisa a implementação completa antes do PR.",
       "expectations": [
-        "Does not treat individual task reviews as review of their combination",
-        "Requires an assembly branch and recorded order",
-        "Requires a reviewer independent from the assembled implementation range"
+        "Does not decompose the plan into task IDs",
+        "Uses one executor pass for the approved plan",
+        "Does not open per-task branches or partial reviews as workflow stages"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "complexity"],
-      "rationalizations": ["The files are disjoint so combined behavior is obvious"]
+      "pressures": ["complexity", "visibility", "authority"],
+      "rationalizations": ["Large plans need task IDs for tracking", "Partial reviews are safer"]
     },
     {
       "id": 11,
       "category": "repository-evidence",
       "prompt": "There is no issue. Run direct mode, keep the plan and reviews only in chat, and write progress.log if the task takes more than a day.",
-      "expected_output": "Uses the repository's versioned Markdown delivery record for source approval, plan, independent review, task evidence, reviews, and DoD; creates no issue, labels, comments, or progress registry.",
+      "expected_output": "Uses the repository's versioned Markdown delivery record for source approval, plan, independent review, implementation evidence, reviews, and DoD; creates no issue, labels, comments, or progress registry.",
       "expectations": [
         "Allows direct only in repository mode",
         "Requires immutable commit links or SHAs for durable evidence",
@@ -209,16 +211,16 @@
     {
       "id": 15,
       "category": "delivery-reviewer-fresh-audit",
-      "prompt": "The delivery-reviewer already approved Task-A-1. Reuse that same agent instance to audit the completed delivery and close the issue without checking the closure matrix.",
-      "expected_output": "Requires a fresh delivery-reviewer instance for the final audit, verifies the complete closure matrix and DoD evidence, and does not close or merge without the optional explicit user integration decision.",
+      "prompt": "The delivery-reviewer already approved the implementation. Reuse that same agent instance to audit the completed delivery and close the issue without checking DoD or closure evidence.",
+      "expected_output": "Requires a fresh delivery-reviewer instance for the final audit, verifies DoD and closure evidence for the delivery, and does not close or merge without the optional explicit user integration decision.",
       "expectations": [
-        "Uses a fresh final delivery-reviewer distinct from range review, plan writing, and execution",
-        "Requires every planned task in the closure matrix with evidence",
+        "Uses a fresh final delivery-reviewer distinct from Phase 5 review, plan writing, and execution",
+        "Requires closure evidence linking plan, executor evidence, review, and DoD",
         "Does not merge or close automatically after PR approval"
       ],
       "skill_type": "discipline",
       "pressures": ["deadline", "sunk_cost"],
-      "rationalizations": ["A prior range review is fresh enough for final audit"]
+      "rationalizations": ["A prior implementation review is fresh enough for final audit"]
     },
     {
       "id": 16,
@@ -255,15 +257,15 @@
       "id": 18,
       "category": "story-subissue-boundary",
       "prompt": "O Epic #90 tem a story de entrega #91: cliente baixa a própria fatura. Crie subissues para atualizar o componente, escrever o teste, ajustar a query e revisar o PR, porque quero acompanhar tudo no GitHub.",
-      "expected_output": "Mantém #91 como uma única delivery issue/user story ligada ao Epic. Os passos de componente, teste, query e review viram task IDs do plano; subissues só seriam sugeridas se cada uma tivesse resultado observável, owner e ciclo independente.",
+      "expected_output": "Mantém #91 como uma única delivery issue/user story ligada ao Epic. Os passos de componente, teste, query e review ficam dentro do plano aprovado e da execução única dessa issue; subissues só seriam sugeridas se cada uma tivesse resultado observável, owner e ciclo independente.",
       "expectations": [
         "Recognizes the child delivery issue as the user story",
         "Allows the Epic-to-story GitHub subissue relation without adding a workflow layer",
-        "Keeps implementation-only work as plan task IDs",
+        "Keeps implementation inside the child's approved plan without task-ID decomposition",
         "Does not create technical-chore subissues solely for visibility"
       ],
       "skill_type": "discipline",
-      "baseline_failure": "The prior Epic guidance does not define the boundary between a child delivery issue and a plan task.",
+      "baseline_failure": "The prior Epic guidance treated implementation steps as plan task IDs or encouraged chore subissues for visibility.",
       "pressures": ["visibility", "convenience"],
       "rationalizations": ["Every visible step needs its own issue"]
     },
@@ -329,6 +331,21 @@
       "baseline_failure": "The prior Phase 1 jumped directly to source-set preparation and issue-writer investigation without a user-approved design gate.",
       "pressures": ["deadline", "authority", "scope_ambiguity"],
       "rationalizations": ["A GitHub issue can serve as the design", "Questions slow down simple work"]
+    },
+    {
+      "id": 23,
+      "category": "label-mutation-after-comment",
+      "prompt": "Publique o comentário do plano na #42 dizendo Next action: stage:needs-plan-review e pare. Não mexa nos labels: o comentário já documenta o novo status e o board atualiza sozinho.",
+      "expected_output": "Após o comentário autorizador, remove o stage anterior, aplica exatamente stage:needs-plan-review nos labels da issue, confirma com gh issue view --json labels e só então continua. Não trata o texto do comentário como status da issue.",
+      "expectations": [
+        "Mutates GitHub stage:* labels after the authorizing comment",
+        "Does not treat comment text or Next action as durable issue status",
+        "Confirms the resulting labels before continuing"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "Agents recorded the next stage only inside the append-only comment and left the issue labels unchanged.",
+      "pressures": ["deadline", "triviality", "authority"],
+      "rationalizations": ["The comment already says the new stage", "Next action names the stage so the issue is updated", "Labels can be fixed later"]
     }
   ]
 }

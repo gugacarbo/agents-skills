@@ -1,25 +1,35 @@
 ---
 name: issue-writer
-description: Investigates delivery context, prepares the conditional ADR/spec source set, consolidates user decisions, creates a code-flow delivery issue, and records initial evidence. Use before planning or when an issue source set needs correction.
+description: Investiga o contexto da entrega, prepara o source-set condicional de ADR/spec, consolida decisões do usuário, cria a issue code-flow e registra evidência inicial. Use antes do planejamento ou quando o source-set precisar de correção.
 ---
 
 # Issue Writer
 
-Investigate the focused repository area, accepted ADRs/specs, code/tests, conventions, dependencies, unresolved product decisions, and the repository's current templates/forms or canonical examples for every artifact you must write. Before filling a template, use that local pattern as the base when compatible; record its source, absence, or adaptation in the evidence envelope. Do not create an issue while a required user decision is open.
+Investigue a área focada do repositório, ADRs/specs aceitos, código/testes,
+convenções, dependências, decisões de produto abertas e o padrão local atual
+(regra 2 do `SKILL.md`). Não crie issue enquanto uma decisão obrigatória do
+usuário estiver aberta.
 
-Decide spec impact: create/update for a changed contract, observable behavior, or durable decision; otherwise record `Spec impact: not required` and a concrete reason. Do not create or update a formal ADR/spec before approval. Instead, create the delivery issue with the repository-pattern ADR/spec proposal (or no-spec rationale) and an explicit human approval request. After human approval, materialize exactly that approved ADR/spec using repository convention, append the immutable link, and then release the issue to planning. Never approve it yourself.
+Decida o impacto de spec: create/update para contrato alterado, comportamento
+observável ou decisão durável; caso contrário registre
+`Spec impact: not required` com motivo concreto. Não criar nem atualizar
+ADR/spec formal antes da aprovação. Em vez disso, crie a issue de entrega com a
+proposta no padrão do repositório (ou racional no-spec) e pedido explícito de
+aprovação humana. Após aprovação humana, materialize exatamente aquele ADR/spec
+aprovado, anexe o link imutável e libere a issue para planejamento. Nunca
+aprove você mesmo.
 
-After the user decisions and proposal are ready, create one eligible delivery/bug issue at `stage:spec-approval` plus `needs-human`. Publish a new append-only comment using `templates/03-issue-template.md`; it includes the complete draft or no-spec rationale and asks the user to approve it. In direct repository mode, append the same ordered envelope to the versioned delivery record. Every outcome—including no change, waiting for a decision, or blocker—records this envelope before stopping:
+Com as decisões e a proposta prontas, crie uma issue elegível de entrega/bug e
+aplique `stage:spec-approval` + `needs-human` na issue (não só no texto do
+comentário). Publique um comentário append-only com
+`templates/03-issue-template.md`. Após aprovação humana, materialize o ADR/spec
+quando necessário, anexe o link imutável, mutue labels para `stage:needs-plan`
+e remova `needs-human` quando não for mais necessário. No modo `direct`, anexe
+o mesmo envelope ordenado ao registro em `docs/delivery/<slug>.md` (pergunte se
+deve mudar o caminho).
 
-```text
-Agent: issue-writer
-Phase/scope: <phase or source set>
-Summary: <result>
-Sources/evidence: <immutable links, commands, output>
-Decisions: <applied, pending, or none>
-Changes/validation: <changes and validation, or none>
-Blockers: <blocker or none>
-Next action: <action and owner>
-```
+Registre todo resultado com o envelope de `references/evidence-contract.md`.
 
-Direct mode never creates an issue, label, or GitHub comment. Do not plan, implement, set later stages, or approve the source set.
+Modo `direct` nunca cria issue, label ou comentário GitHub. Não planejar,
+implementar, pular gates (ex.: não definir `stage:approved` ou além sem
+autorização) nem aprovar o source-set.

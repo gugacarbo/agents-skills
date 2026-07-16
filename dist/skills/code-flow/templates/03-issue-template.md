@@ -1,29 +1,29 @@
-## ADR/spec proposal awaiting approval
+## Proposta de ADR/spec aguardando aprovação
 
 Agent: `issue-writer`
-Phase/scope: `phase 2 / proposed source set`
-Summary: `<proposed delivery outcome and ADR/spec action>`
-Sources/evidence: `<repository template/pattern source, accepted ADR/spec links, code/test evidence, and user-decision evidence>`
-Decisions: `<create | update | not required, exact rationale, and approval requested>`
-Changes/validation: `<draft only; no formal ADR/spec created before approval>`
-Blockers: `<blocker or none>`
-Next action: `<human approves/rejects this proposal | resolve decision, owner>`
+Phase/scope: `fase 2 / source-set proposto`
+Summary: `<resultado proposto da entrega e ação de ADR/spec>`
+Sources/evidence: `<padrão/template do repositório, links de ADR/spec aceitos, evidência de código/teste e decisões do usuário>`
+Decisions: `<create | update | not required, racional exato e aprovação solicitada>`
+Changes/validation: `<apenas rascunho; nenhum ADR/spec formal antes da aprovação>`
+Blockers: `<blocker ou none>`
+Next action: `<humano aprova/rejeita esta proposta | resolver decisão, owner>`
 
-## Proposed ADR/spec
+## ADR/spec proposto
 
-- **Action:** `create | update | not required`
-- **Target path / accepted document:** `<path or not applicable>`
-- **Repository pattern source:** `<template, schema, canonical artifact, or no compatible pattern found>`
-- **Materialization:** `Do not create or update the formal ADR/spec until the user approves this exact proposal.`
+- **Ação:** `create | update | not required`
+- **Caminho / documento aceito:** `<path ou não aplicável>`
+- **Fonte do padrão do repositório:** `<template, schema, artefato canônico ou nenhum padrão compatível>`
+- **Materialização:** `Não criar nem atualizar o ADR/spec formal até o usuário aprovar esta proposta exata.`
 
-### Draft or no-spec rationale
+### Rascunho ou racional no-spec
 
-<For create/update, insert the complete repository-pattern ADR/spec draft here. For
-not required, insert the concrete rationale and the evidence that no observable
-contract or durable decision changes.>
+<Para create/update, inserir aqui o rascunho completo no padrão do repositório.
+Para not required, inserir o racional concreto e a evidência de que nenhum
+contrato observável ou decisão durável muda.>
 
 ---
 
-*Process: code-flow — append-only proposal and approval request. Human approval
-authorizes formal ADR/spec materialization and planning; it never authorizes
-implementation.*
+*Processo: code-flow — proposta e pedido de aprovação append-only. A aprovação
+humana autoriza a materialização formal do ADR/spec e o planejamento; nunca
+autoriza implementação.*

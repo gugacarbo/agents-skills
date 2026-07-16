@@ -1,9 +1,30 @@
-# Phase 6: Verify, approve PR, and offer integration
+# Fase 6: Verificar, aprovar PR e oferecer integração
 
-After clean task/range reviews, dispatch a fresh `agents/06-delivery-reviewer.md` for final audit. This instance must not have reviewed any task/range and is distinct from plan-writer and every executor. It audits accepted ADR/spec (or approved plan), every task envelope/review, final range, DoD, and closure matrix.
+A partir de `stage:ready-to-merge`, despache um
+`agents/06-delivery-reviewer.md` fresco para a auditoria final. Esta instância
+não deve ter feito a review da Fase 5 e é distinta do plan-writer e do executor.
+Ela audita ADR/spec aceito (ou plano aprovado), envelope/review do executor,
+range final, DoD e evidência de fechamento.
 
-Run required suites, verify every DoD item, resolve Critical/Important or cannot-verify findings, and publish `templates/09-integration-report-template.md` in issue mode or the equivalent eight-field delivery-record section in direct mode. The closure matrix maps every task to commit/PR, executor evidence, delivery review, and DoD status.
+Rode as suites necessárias, verifique cada item do DoD, resolva achados
+Critical/Important ou cannot-verify, e publique
+`templates/09-integration-report-template.md` no modo issue ou a seção
+equivalente de oito campos no registro do modo `direct`. A evidência de
+fechamento mapeia o plano aprovado a commit/PR, evidência do executor, review
+da entrega e status do DoD.
 
-In issue mode, obtain required PR approval but never merge automatically. After approval, keep `stage:needs-task-review`, add `needs-human`, and offer integration/merge as an explicit optional user decision. Only after the user requests integration may the approved PR be merged, the target verified, and the issue closed with stages removed.
+Se a auditoria final pedir ajustes corrigíveis (`PEÇO AJUSTES` ou
+Critical/Important), o orquestrador muta para `stage:needs-changes` e devolve
+à Fase 4. Se exigir decisão de produto/acesso, muta para `stage:blocked` +
+`needs-human`.
 
-Direct mode creates no issue, labels, stages, or GitHub comments. It may complete after the recorded final audit and DoD; if it has a PR, offer merge only after PR approval and explicit user confirmation.
+No modo issue, obtenha a aprovação necessária do PR mas nunca faça merge
+automaticamente. Após aprovação do PR, mantenha
+`stage:ready-to-merge`, adicione `needs-human` e ofereça
+integração/merge como decisão opcional explícita do usuário. Só depois que o
+usuário pedir integração o PR aprovado pode ser merged, o alvo verificado e a
+issue fechada com labels de stage e `needs-human` removidas.
+
+Modo `direct` não cria issue, labels, stages ou comentários GitHub. Pode
+concluir após a auditoria final e o DoD registrados; se tiver PR, ofereça merge
+só após aprovação do PR e confirmação explícita do usuário.

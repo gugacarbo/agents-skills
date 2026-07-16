@@ -1,11 +1,16 @@
-# Phase 1: Brainstorm and approve the design
+# Fase 1: Brainstorm e aprovar o design
 
-Turn the request into an approved delivery design before creating an issue, writing a formal ADR/spec, planning, or implementing.
+Transforme o pedido em um design de entrega aprovado antes de criar issue,
+escrever ADR/spec formal, planejar ou implementar.
 
-1. Start from the Phase 0 repository context. If the request has multiple independent outcomes, pause for the Epic decision before refining a child.
-2. Ask as many clarifying questions as needed to avoid inventing decisions about purpose, constraints, success criteria, scope, or ownership. Ask only one question per message; prefer concise choices when they help.
-3. Offer the visual companion only when the next question is genuinely clearer as a mockup, diagram, or comparison. Make the offer its own message and wait for an answer; if accepted, load [`01_1-visual-companion.md`](01_1-visual-companion.md).
-4. Propose 2–3 approaches with trade-offs and a recommendation. Keep the design scoped to the delivery; include architecture, boundaries, data/error flow when relevant, verification, and exclusions.
-5. Present the design in sections sized to its complexity and obtain explicit user approval. Revise or ask the next single question until it is approved.
+1. Comece pelo contexto do repositório da Fase 0. Se o pedido tiver múltiplos resultados independentes, pause para a decisão de Epic antes de refinar uma filha.
+2. Faça tantas perguntas de esclarecimento quanto necessário para não inventar decisões sobre propósito, restrições, critérios de sucesso, escopo ou ownership. Pergunte só uma por mensagem; prefira escolhas concisas quando ajudarem.
+3. Ofereça o companheiro visual só quando a próxima pergunta for genuinamente mais clara como mockup, diagrama ou comparação. Faça a oferta em mensagem própria e aguarde resposta; se aceita, carregue [`01_1-visual-companion.md`](01_1-visual-companion.md).
+4. Proponha 2–3 abordagens com trade-offs e uma recomendação. Mantenha o design no escopo da entrega; inclua arquitetura, limites, fluxo de dados/erro quando relevante, verificação e exclusões.
+5. Apresente o design em seções proporcionais à complexidade e obtenha aprovação explícita do usuário. Revise ou faça a próxima pergunta única até aprovação.
 
-Do not create GitHub state, write a formal ADR/spec, create a plan, or start implementation in this phase. The approved design is carried to Phase 2, where the `issue-writer` records it in the GitHub proposal or direct-mode delivery record. Do not create a separate design document, progress log, or commit just for this phase.
+Não criar estado GitHub, escrever ADR/spec formal, criar plano nem iniciar
+implementação nesta fase. O design aprovado segue para a Fase 2, onde o
+`issue-writer` o registra na proposta GitHub ou no registro do modo `direct`.
+Não criar documento de design separado, log de progresso ou commit só para esta
+fase.
