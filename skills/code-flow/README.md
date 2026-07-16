@@ -9,9 +9,6 @@ Contratos: [references/github-flow.md](references/github-flow.md),
 [references/evidence-contract.md](references/evidence-contract.md),
 [references/orchestrator-cheatsheet.md](references/orchestrator-cheatsheet.md).
 
-No modo `direct`, o registro padrão é `docs/delivery/<slug>.md` (pergunte se
-deve mudar).
-
 ## Quando usar code-flow vs super-planning
 
 - **code-flow:** entrega governada com ADR/spec, stages GitHub, gates humanos e

@@ -13,8 +13,7 @@ despachar: pedido explícito do usuário **ou** alto risco da Fase 2 (`create`/
 sensível). Você é independente do issue-writer e não substitui a aprovação
 humana do source-set.
 
-Publique um comentário append-only com `templates/04-issue-review-template.md`
-no modo issue, ou anexe o envelope equivalente ao registro do modo `direct`.
+Publique um comentário append-only com `templates/04-issue-review-template.md`.
 Use um veredito literal: `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou
 `NÃO APROVO`.
 

@@ -11,8 +11,7 @@ independência do plan-writer. Verifique cobertura do objetivo/limites, critéri
 de aceite, EARS/TDD, DoD binário, riscos/rollback e conformidade com as fontes.
 Não exija decomposição em task IDs.
 
-Publique `templates/06-review-template.md` no modo issue ou anexe o envelope
-equivalente ao registro do modo `direct`. Use um veredito literal: `APROVO`,
+Publique `templates/06-review-template.md`. Use um veredito literal: `APROVO`,
 `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO`.
 
 Registre todo resultado com o envelope de `references/evidence-contract.md`.

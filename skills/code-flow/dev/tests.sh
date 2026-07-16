@@ -52,7 +52,6 @@ assert_template_references() {
     07-implementation-evidence-template.md \
     08-implementation-review-template.md \
     09-integration-report-template.md \
-    10-delivery-report-template.md \
     11-human-gate-design.md \
     12-human-gate-spec.md \
     13-human-gate-plan.md \
@@ -62,6 +61,7 @@ assert_template_references() {
       "$SKILL/SKILL.md" "$SKILL/README.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/references" \
       || fail "template is not referenced by the active flow: $template"
   done
+  [ ! -e "$SKILL/templates/10-delivery-report-template.md" ] || fail 'legacy direct delivery-report template still exists'
   [ ! -e "$SKILL/templates/07-task-evidence-template.md" ] || fail 'legacy 07-task-evidence template still exists'
   [ ! -e "$SKILL/templates/08-task-review-template.md" ] || fail 'legacy 08-task-review template still exists'
 }
@@ -97,9 +97,12 @@ test_router_and_subagents() {
   assert_contains 'gh issue view <n> --json labels' "$SKILL/references/github-flow.md"
   assert_contains 'texto de comentário sozinho não é atualização de status' "$SKILL/SKILL.md"
   assert_contains 'Mencionar um stage no comentário não é mudança de estado' "$SKILL/references/evidence-contract.md"
-  for file in 00-issue-context.md 01-brainstorm.md 01_1-visual-companion.md 02-create-issue.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
+  for file in 00-issue-context.md 01-brainstorm.md 02-create-issue.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
     [ -f "$SKILL/phases/$file" ] || fail "missing phase: $file"
   done
+  [ -f "$SKILL/prompts/visual-companion.md" ] || fail 'missing prompts/visual-companion.md'
+  assert_contains 'prompts/visual-companion.md' "$SKILL/SKILL.md"
+  assert_contains 'prompts/visual-companion.md' "$SKILL/phases/01-brainstorm.md"
   assert_contains 'prompts/interview-me.md' "$SKILL/phases/01-brainstorm.md"
   assert_contains 'decisões importantes ainda não verificadas' "$SKILL/phases/01-brainstorm.md"
   assert_contains 'templates/11-human-gate-design.md' "$SKILL/phases/01-brainstorm.md"
@@ -114,7 +117,10 @@ test_router_and_subagents() {
   assert_contains 'code-flow vs super-planning' "$SKILL/README.md"
   assert_contains 'code-toolbox' "$SKILL/README.md"
   [ ! -e "$SKILL/phases/02-spec.md" ] || fail 'legacy phase-02 spec file exists'
-  assert_contains '/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>' "$SKILL/SKILL.md"
+  assert_contains '/code-flow brainstorm' "$SKILL/SKILL.md"
+  assert_contains '/code-flow <plan\|dispatch\|review\|integrate>' "$SKILL/SKILL.md"
+  assert_contains 'Não há modo sem issue' "$SKILL/SKILL.md"
+  assert_contains 'entrega exige issue GitHub' "$SKILL/SKILL.md"
   assert_exact_agents
   assert_template_references
   assert_contains 'Despache apenas estes papéis' "$SKILL/SKILL.md"
@@ -139,13 +145,13 @@ test_router_and_subagents() {
   assert_contains 'Antes de qualquer template `code-flow`' "$SKILL/SKILL.md"
   assert_contains 'Use um padrão local compatível como base' "$SKILL/SKILL.md"
   assert_contains 'descoberta de padrão do repositório' "$SKILL/phases/02-create-issue.md"
-  assert_contains 'docs/delivery/<slug>.md' "$SKILL/SKILL.md"
-  assert_contains 'pergunte ao usuário se deve mudar' "$SKILL/SKILL.md"
+  assert_contains 'Não há modo sem issue' "$SKILL/SKILL.md"
   for agent in "$SKILL"/agents/*.md; do
     assert_contains 'padrão local' "$agent"
   done
   [ ! -e "$SKILL/templates/07-task-evidaence-template.md" ] || fail 'legacy evidaence typo template still exists'
   [ ! -e "$SKILL/templates/07-task-evidence-template.md" ] || fail 'legacy 07-task-evidence template still exists'
+  [ ! -e "$SKILL/templates/10-delivery-report-template.md" ] || fail 'legacy direct delivery-report template still exists'
 }
 
 test_issue_evidence_contract() {
@@ -162,7 +168,6 @@ test_issue_evidence_contract() {
     assert_envelope "$SKILL/templates/$template"
   done
 
-  assert_envelope "$SKILL/templates/10-delivery-report-template.md"
   assert_contains 'templates/03-issue-template.md' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'templates/04-issue-review-template.md' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'stage:spec-approval' "$SKILL/agents/02-issue-reviewer.md"
@@ -205,16 +210,15 @@ test_issue_creation_and_mode_boundaries() {
   assert_contains 'humano aprova este snapshot exato' "$SKILL/templates/06-review-template.md"
   assert_contains 'aprovação humana explícita' "$SKILL/references/github-flow.md"
 
-  assert_contains 'direct` usa o checkout' "$SKILL/phases/04-dispatch.md"
-  assert_contains 'direct` é só repositório' "$SKILL/SKILL.md"
-  assert_contains 'sem issue, label, stage ou comentário' "$SKILL/SKILL.md"
+  assert_contains 'Nunca executar no checkout compartilhado sem worktree isolada' "$SKILL/phases/04-dispatch.md"
+  assert_contains 'Não há modo sem issue' "$SKILL/SKILL.md"
+  assert_contains 'Exige issue' "$SKILL/SKILL.md"
 
-  assert_contains 'registro do modo `direct`' "$SKILL/agents/04-plan-reviewer.md"
-  assert_contains 'Direct: anexar stop/resume e iniciar novo ciclo' "$SKILL/phases/03-plan.md"
+  assert_contains 'Publique `templates/06-review-template.md`' "$SKILL/agents/04-plan-reviewer.md"
   assert_contains '`BLOCKED` nunca está pronto para review' "$SKILL/phases/05-review.md"
-  assert_contains 'Modo `direct` nunca cria issue, label ou comentário GitHub' "$SKILL/agents/01-issue-writer.md"
-  assert_contains 'Modo `direct` nunca escreve estado GitHub' "$SKILL/agents/05-executor.md"
-  assert_contains 'Modo `direct` não cria issue, labels, stages ou comentários GitHub' "$SKILL/phases/06-integrate.md"
+  assert_contains 'nunca faça merge automaticamente' "$SKILL/phases/06-integrate.md"
+  ! rg -Fq -- 'modo `direct`' "$SKILL/SKILL.md" "$SKILL/phases" "$SKILL/agents" "$SKILL/references" \
+    || fail 'modo direct still present in active flow docs'
 }
 
 test_no_local_workflow_state() {
@@ -253,7 +257,7 @@ test_helpers() {
   assert_contains 'mktemp' "$SKILL/scripts/review-package.sh"
   assert_contains 'session_dir: SESSION_DIR' "$SKILL/scripts/visual-companion/server.cjs"
   assert_contains 'payload' "$SKILL/scripts/visual-companion/helper.js"
-  assert_contains 'stop-server.sh <session_dir>' "$SKILL/phases/01_1-visual-companion.md"
+  assert_contains 'stop-server.sh <session_dir>' "$SKILL/prompts/visual-companion.md"
   ! rg -Fq -- '--project-dir' "$SKILL/scripts/visual-companion/start-server.sh" || fail 'companion persists project sessions'
 }
 

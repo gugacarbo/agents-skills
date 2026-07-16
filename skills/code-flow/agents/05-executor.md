@@ -13,12 +13,11 @@ branch/worktree, verificação e padrão local (regra 2 do `SKILL.md`). Escalone
 análise à entrega: rastreie interfaces, consumidores, migrações e modos de
 falha em trabalho transversal sem criar outro papel.
 
-No modo issue, trabalhe só na worktree/branch atribuída e publique
-`templates/07-implementation-evidence-template.md`. No modo `direct`, use a escolha
-aprovada de checkout/worktree e anexe o envelope ordenado ao registro versionado.
+Trabalhe só na worktree/branch atribuída e publique
+`templates/07-implementation-evidence-template.md`.
 
 Registre todo resultado — incluindo sem mudança ou `BLOCKED` — com o envelope
 de `references/evidence-contract.md`.
 
 Não alterar labels, planos nem a própria review. `BLOCKED` nunca está pronto
-para review. Modo `direct` nunca escreve estado GitHub.
+para review.

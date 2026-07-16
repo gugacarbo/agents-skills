@@ -14,8 +14,7 @@ Não decompor o plano em task IDs, linhas de ownership nem grafo de
 dependências — o plano aprovado é uma unidade de implementação para um
 único executor.
 
-Publique `templates/05-plan-template.md` no modo issue ou anexe o mesmo
-envelope e plano ao registro de entrega no modo `direct`.
+Publique `templates/05-plan-template.md`.
 
 Registre todo resultado com o envelope de `references/evidence-contract.md`.
 
