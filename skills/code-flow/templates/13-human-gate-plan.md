@@ -1,9 +1,9 @@
 # Gate humano · plano
 
-| | |
-|---|---|
-| **Fase** | 3 — plano |
-| **Stage** | `stage:needs-plan-review` + `needs-human` |
+|             |                                                 |
+| ----------- | ----------------------------------------------- |
+| **Fase**    | 3 — plano                                       |
+| **Stage**   | `stage:needs-plan-review` + `needs-human`       |
 | **Próximo** | `stage:approved` → execução (worktree ou later) |
 
 ---
@@ -22,11 +22,11 @@ sem executar código.
 
 Responda com **uma** opção literal:
 
-| Opção | Significado |
-|:------|:------------|
-| **Yes** | Mutar para `stage:approved`; depois ainda pedir execução e `worktree` ou `later`. |
-| **No** | Rejeitar; devolver a `stage:needs-plan` (ou bloquear no ciclo 3). |
-| **Refine** | Pedir ajustes; novo ciclo de plano + reviewer fresco. |
+| Opção      | Significado                                                                       |
+| :--------- | :-------------------------------------------------------------------------------- |
+| **Yes**    | Mutar para `stage:approved`; depois ainda pedir execução e `worktree` ou `later`. |
+| **No**     | Rejeitar; devolver a `stage:needs-plan` (ou bloquear no ciclo 3).                 |
+| **Refine** | Pedir ajustes; novo ciclo de plano + reviewer fresco.                             |
 
 ---
 

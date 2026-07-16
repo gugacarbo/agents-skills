@@ -11,17 +11,17 @@ Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 
 ### Resumo rápido
 
-| Campo | Valor |
-| --- | --- |
-| Ciclo de plano | `<URL>` |
-| Status | `DONE \| DONE_WITH_CONCERNS \| BLOCKED` |
-| Base SHA / branch | `<SHA> / <branch>` |
-| Commits / PR | `<links>` |
+| Campo             | Valor                                   |
+| ----------------- | --------------------------------------- |
+| Ciclo de plano    | `<URL>`                                 |
+| Status            | `DONE \| DONE_WITH_CONCERNS \| BLOCKED` |
+| Base SHA / branch | `<SHA> / <branch>`                      |
+| Commits / PR      | `<links>`                               |
 
 ### Arquivos alterados
 
-| Arquivo | Mudança |
-| --- | --- |
+| Arquivo        | Mudança             |
+| -------------- | ------------------- |
 | `path/to/file` | `<descrição breve>` |
 
 ### Verificação
@@ -32,9 +32,9 @@ Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 
 ### Evidência TDD
 
-| Fase | Evidência |
-| --- | --- |
-| TDD | `not applicable \| RED: … \| GREEN: …` |
+| Fase | Evidência                              |
+| ---- | -------------------------------------- |
+| TDD  | `not applicable \| RED: … \| GREEN: …` |
 
 ### Ressalvas ou blocker
 
@@ -42,8 +42,8 @@ Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 
 ---
 
-*Processo: code-flow — evidência append-only do executor (envelope de oito
-campos) para review independente do plano aprovado como uma unidade.*
+_Processo: code-flow — evidência append-only do executor (envelope de oito
+campos) para review independente do plano aprovado como uma unidade._
 
 `BLOCKED` não está pronto para review. Deve identificar a decisão ou correção
 exata e mantém o fluxo bloqueado até resolução.

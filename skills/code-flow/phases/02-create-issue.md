@@ -19,11 +19,11 @@ aprovado; não reabra escolhas de produto aprovadas sem evidência nova.
 
 O `issue-writer` classifica o impacto de spec:
 
-| Resultado | Quando usar | Ação necessária |
-| --- | --- | --- |
-| `create` | Novo contrato, comportamento observável ou decisão durável | Embutir rascunho ADR/spec no padrão do repositório no **body** da issue e pedir aprovação humana antes de criar o documento formal. |
-| `update` | Um ADR/spec aceito governa comportamento alterado | Embutir a atualização proposta no padrão do repositório no **body** da issue e pedir aprovação humana antes de mudar o documento formal. |
-| `not required` | Refator interno, restauração documentada, testes, docs, config ou sem mudança observável | Colocar o racional no-spec exato no **body** da issue e pedir aprovação humana; não criar spec só pelo workflow. |
+| Resultado      | Quando usar                                                                              | Ação necessária                                                                                                                          |
+| -------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `create`       | Novo contrato, comportamento observável ou decisão durável                               | Embutir rascunho ADR/spec no padrão do repositório no **body** da issue e pedir aprovação humana antes de criar o documento formal.      |
+| `update`       | Um ADR/spec aceito governa comportamento alterado                                        | Embutir a atualização proposta no padrão do repositório no **body** da issue e pedir aprovação humana antes de mudar o documento formal. |
+| `not required` | Refator interno, restauração documentada, testes, docs, config ou sem mudança observável | Colocar o racional no-spec exato no **body** da issue e pedir aprovação humana; não criar spec só pelo workflow.                         |
 
 ADRs/specs aceitos definem a intenção. Se uma fonte conflitar com o design
 aprovado ou o código, pare e resolva antes de planejar. O `issue-writer` cria ou

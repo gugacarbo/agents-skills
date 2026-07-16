@@ -1,9 +1,9 @@
 # <Título da entrega>
 
-| Campo | Valor |
-| --- | --- |
-| **Tipo** | Issue de entrega / bug |
-| **Owner** | <time ou pessoa> |
+| Campo      | Valor                                   |
+| ---------- | --------------------------------------- |
+| **Tipo**   | Issue de entrega / bug                  |
+| **Owner**  | <time ou pessoa>                        |
 | **Status** | <rascunho \| em andamento \| concluída> |
 
 ---
@@ -14,10 +14,10 @@ Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
 
 ## Resultado e critérios de aceite
 
-| Campo | Conteúdo |
-| --- | --- |
-| **Resultado** | <um resultado independentemente fechável> |
-| **Verificação** | <teste, comando, walkthrough ou métrica> |
+| Campo           | Conteúdo                                  |
+| --------------- | ----------------------------------------- |
+| **Resultado**   | <um resultado independentemente fechável> |
+| **Verificação** | <teste, comando, walkthrough ou métrica>  |
 
 **Critérios de aceite**
 
@@ -26,17 +26,17 @@ Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
 
 ## Escopo
 
-| Limite | Conteúdo |
-| --- | --- |
-| **Dentro** | <comportamento incluído> |
-| **Fora** | <exclusões explícitas> |
+| Limite                      | Conteúdo                          |
+| --------------------------- | --------------------------------- |
+| **Dentro**                  | <comportamento incluído>          |
+| **Fora**                    | <exclusões explícitas>            |
 | **Dependências / decisões** | <issue, ADR/spec, acesso ou none> |
 
 ## Relação de entrega
 
-| Campo | Valor |
-| --- | --- |
-| **Epic** | #<n> ou `none` |
+| Campo                  | Valor                                             |
+| ---------------------- | ------------------------------------------------- |
+| **Epic**               | #<n> ou `none`                                    |
 | **Relação no GitHub:** | `subissue of #<n>` ou `standalone delivery issue` |
 
 **Regras desta issue**

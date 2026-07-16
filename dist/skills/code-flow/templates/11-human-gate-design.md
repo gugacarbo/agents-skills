@@ -1,10 +1,10 @@
 # Gate humano · design
 
-| | |
-|---|---|
-| **Fase** | 1 — brainstorm |
-| **Stage** | _(sem issue; labels não mudam)_ |
-| **Próximo** | Fase 2 — source-set / issue |
+|             |                                 |
+| ----------- | ------------------------------- |
+| **Fase**    | 1 — brainstorm                  |
+| **Stage**   | _(sem issue; labels não mudam)_ |
+| **Próximo** | Fase 2 — source-set / issue     |
 
 ---
 
@@ -21,10 +21,10 @@ Este design como base da Fase 2 (source-set / issue).
 
 Responda com **uma** opção literal:
 
-| Opção | Significado |
-|:------|:------------|
-| **Yes** | Design aprovado; seguir para a Fase 2. |
-| **No** | Rejeitar; explicar o que está errado. |
+| Opção      | Significado                                                 |
+| :--------- | :---------------------------------------------------------- |
+| **Yes**    | Design aprovado; seguir para a Fase 2.                      |
+| **No**     | Rejeitar; explicar o que está errado.                       |
 | **Refine** | Pedir mudança concreta; o orquestrador revisa e repregunta. |
 
 ---

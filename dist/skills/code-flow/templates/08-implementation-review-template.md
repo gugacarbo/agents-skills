@@ -11,18 +11,18 @@ Next action: `<aceitar | correção do executor | decisão humana, owner>`
 
 ### Resumo rápido
 
-| Campo | Valor |
-| --- | --- |
-| Ciclo de plano | `<URL do plano>` |
-| Evidência revisada | `<URL do comentário>` |
-| Range / PR | `<base..head ou URL>` |
-| Independência | `Não autorizei o plano nem implementei o trabalho neste range.` |
-| Veredito | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
+| Campo              | Valor                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Ciclo de plano     | `<URL do plano>`                                                |
+| Evidência revisada | `<URL do comentário>`                                           |
+| Range / PR         | `<base..head ou URL>`                                           |
+| Independência      | `Não autorizei o plano nem implementei o trabalho neste range.` |
+| Veredito           | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO`  |
 
 ### Achados
 
-| Severidade | Local | Impacto e ação |
-| --- | --- | --- |
+| Severidade                                        | Local         | Impacto e ação     |
+| ------------------------------------------------- | ------------- | ------------------ |
 | `Critical \| Important \| Minor \| Cannot verify` | `<file:line>` | `<impacto e ação>` |
 
 ### Evidência checada
@@ -33,5 +33,5 @@ Next action: `<aceitar | correção do executor | decisão humana, owner>`
 
 ---
 
-*Processo: code-flow — review append-only da implementação (envelope de oito
-campos). Para review de plano use `templates/06-review-template.md`.*
+_Processo: code-flow — review append-only da implementação (envelope de oito
+campos). Para review de plano use `templates/06-review-template.md`._

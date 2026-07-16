@@ -82,11 +82,11 @@ Next action: dispatch a fresh `plan-reviewer` to review this cycle against the a
 
 ## Task evidence and code reviews
 
-| Task | Status | Commit/range | Evidence revision | Independent review revision |
-| --- | --- | --- | --- | --- |
-| CT-6A-001 | `PENDING` | — | — | — |
-| CT-6A-002 | `PENDING` | — | — | — |
-| CT-6A-003 | `PENDING` | — | — | — |
+| Task      | Status    | Commit/range | Evidence revision | Independent review revision |
+| --------- | --------- | ------------ | ----------------- | --------------------------- |
+| CT-6A-001 | `PENDING` | —            | —                 | —                           |
+| CT-6A-002 | `PENDING` | —            | —                 | —                           |
+| CT-6A-003 | `PENDING` | —            | —                 | —                           |
 
 For every `BLOCKED`, rejected review, audit failure, or unresolved DoD item,
 append the exact blocker and `Resume: <phase/task>` here. This record is the
@@ -263,8 +263,8 @@ emite veredito literal.
   o envelope do `delivery-reviewer`, imutáveis antes da próxima tarefa. Isso
   falha a DoD de checkpoint de executor e review por tarefa. Para cada tarefa,
   o plano deve exigir: `commit de código → anexar envelope do executor → commit
-  da evidência → revisão independente sobre essas revisões imutáveis → anexar
-  envelope do reviewer → commit da revisão → próxima tarefa`. Aplicar a mesma
+da evidência → revisão independente sobre essas revisões imutáveis → anexar
+envelope do reviewer → commit da revisão → próxima tarefa`. Aplicar a mesma
   regra ao checkpoint pré-execução e à auditoria final.
 - **P1-2 — allowlist de papéis removidos conflita com a spec aceita.**
   CT-6A-003 e sua DoD permitem nomes removidos em asserções negativas, mas a

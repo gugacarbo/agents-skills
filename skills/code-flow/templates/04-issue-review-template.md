@@ -16,8 +16,8 @@ Next action: `<aprovação humana da proposta | ajuste do issue-writer | decisã
 
 ## Achados
 
-| Severidade | Seção / fonte | Impacto e ação |
-| --- | --- | --- |
+| Severidade                                        | Seção / fonte                | Impacto e ação               |
+| ------------------------------------------------- | ---------------------------- | ---------------------------- |
 | `Critical \| Important \| Minor \| Cannot verify` | <seção da proposta ou fonte> | <impacto e ação recomendada> |
 
 ## Evidência checada
@@ -29,5 +29,5 @@ Next action: `<aprovação humana da proposta | ajuste do issue-writer | decisã
 
 ---
 
-*Processo: code-flow — auditoria append-only opcional; nunca substitui a
-aprovação humana e não cria, atualiza nem atrasa um ADR/spec formal.*
+_Processo: code-flow — auditoria append-only opcional; nunca substitui a
+aprovação humana e não cria, atualiza nem atrasa um ADR/spec formal._

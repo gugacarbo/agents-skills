@@ -12,16 +12,16 @@ reviews ou implementação você mesmo.
 
 ## Comandos
 
-| Invocação | Comportamento |
-| --- | --- |
-| `/code-flow` | Sem issue: explique que a entrega exige issue GitHub e ofereça `issue create` ou `issue <#N>` / `batch`. |
-| `/code-flow issue create` | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
-| `/code-flow create-issue` | Alias de `/code-flow issue create` (canônico: `issue create`). |
-| `/code-flow issue <#N\|URL> [phase]` | Valida uma issue elegível existente e retoma seu stage ou fase nomeada. |
-| `/code-flow batch <#N\|URL>... --from <phase>` | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes. |
-| `/code-flow brainstorm` | Fase 1 sem issue ainda; segue para `issue create` após o design aprovado. |
-| `/code-flow <plan\|dispatch\|review\|integrate>` | Exige issue (`issue <#N> [phase]`); recuse e peça `issue create` se não houver. |
-| `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para. |
+| Invocação                                                               | Comportamento                                                                                                                                                                        |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/code-flow`                                                            | Sem issue: explique que a entrega exige issue GitHub e ofereça `issue create` ou `issue <#N>` / `batch`.                                                                             |
+| `/code-flow issue create`                                               | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
+| `/code-flow create-issue`                                               | Alias de `/code-flow issue create` (canônico: `issue create`).                                                                                                                       |
+| `/code-flow issue <#N\|URL> [phase]`                                    | Valida uma issue elegível existente e retoma seu stage ou fase nomeada.                                                                                                              |
+| `/code-flow batch <#N\|URL>... --from <phase>`                          | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes.                                                                                                               |
+| `/code-flow brainstorm`                                                 | Fase 1 sem issue ainda; segue para `issue create` após o design aprovado.                                                                                                            |
+| `/code-flow <plan\|dispatch\|review\|integrate>`                        | Exige issue (`issue <#N> [phase]`); recuse e peça `issue create` se não houver.                                                                                                      |
+| `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para.                                                                                                                                                               |
 
 `issue create` é a única rota canônica de criação de issue (`create-issue` é
 alias). Fases nomeadas nunca bypassam gates; `batch` nunca cria issues.
@@ -58,16 +58,16 @@ Um Epic/umbrella existente é inelegível para o fluxo de entrega.
 
 ## Carregar a fase ativa
 
-| Fase | Carregar |
-| --- | --- |
-| 0 — CONTEXTO DA ISSUE | [`phases/00-issue-context.md`](phases/00-issue-context.md) |
-| 1 — BRAINSTORM | [`phases/01-brainstorm.md`](phases/01-brainstorm.md) |
+| Fase                     | Carregar                                                     |
+| ------------------------ | ------------------------------------------------------------ |
+| 0 — CONTEXTO DA ISSUE    | [`phases/00-issue-context.md`](phases/00-issue-context.md)   |
+| 1 — BRAINSTORM           | [`phases/01-brainstorm.md`](phases/01-brainstorm.md)         |
 | 1.1 — COMPANHEIRO VISUAL | [`prompts/visual-companion.md`](prompts/visual-companion.md) |
-| 2 — CRIAR ISSUE | [`phases/02-create-issue.md`](phases/02-create-issue.md) |
-| 3 — PLANO E REVIEW | [`phases/03-plan.md`](phases/03-plan.md) |
-| 4 — DISPATCH | [`phases/04-dispatch.md`](phases/04-dispatch.md) |
-| 5 — REVIEW DA ENTREGA | [`phases/05-review.md`](phases/05-review.md) |
-| 6 — VERIFICAR E INTEGRAR | [`phases/06-integrate.md`](phases/06-integrate.md) |
+| 2 — CRIAR ISSUE          | [`phases/02-create-issue.md`](phases/02-create-issue.md)     |
+| 3 — PLANO E REVIEW       | [`phases/03-plan.md`](phases/03-plan.md)                     |
+| 4 — DISPATCH             | [`phases/04-dispatch.md`](phases/04-dispatch.md)             |
+| 5 — REVIEW DA ENTREGA    | [`phases/05-review.md`](phases/05-review.md)                 |
+| 6 — VERIFICAR E INTEGRAR | [`phases/06-integrate.md`](phases/06-integrate.md)           |
 
 Leia [`references/github-flow.md`](references/github-flow.md) antes de mudar
 stages de issue ou retomar uma issue. Leia
@@ -81,14 +81,14 @@ e `scripts/transition-issue.sh`.
 
 Despache apenas estes papéis:
 
-| Agente | Responsabilidade |
-| --- | --- |
-| `issue-writer` | Contexto, proposta no body da issue, criação/atualização da issue e materialização formal do ADR/spec após aprovação. |
-| `issue-reviewer` | Auditoria independente do source-set quando pedida ou em alto risco (Fase 2); nunca substitui o gate humano. |
-| `plan-writer` | Um plano de implementação append-only. |
-| `plan-reviewer` | Veredito literal independente de um snapshot de plano. |
-| `executor` | Um plano aprovado, implementado como uma unidade (pode organizar o trabalho internamente). |
-| `delivery-reviewer` | Review independente da implementação e auditoria final fresca. |
+| Agente              | Responsabilidade                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `issue-writer`      | Contexto, proposta no body da issue, criação/atualização da issue e materialização formal do ADR/spec após aprovação. |
+| `issue-reviewer`    | Auditoria independente do source-set quando pedida ou em alto risco (Fase 2); nunca substitui o gate humano.          |
+| `plan-writer`       | Um plano de implementação append-only.                                                                                |
+| `plan-reviewer`     | Veredito literal independente de um snapshot de plano.                                                                |
+| `executor`          | Um plano aprovado, implementado como uma unidade (pode organizar o trabalho internamente).                            |
+| `delivery-reviewer` | Review independente da implementação e auditoria final fresca.                                                        |
 
 Mantenha plan-writer e plan-reviewer separados. O delivery-reviewer é distinto
 do executor e do plan-writer; o auditor final também é fresco.

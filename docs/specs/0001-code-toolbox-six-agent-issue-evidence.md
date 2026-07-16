@@ -45,14 +45,14 @@ direto.
 
 O pacote expõe exatamente estes agentes, com estes nomes ASCII:
 
-| Agente | Responsabilidade |
-| --- | --- |
-| `issue-writer` | Investigação, gate de ADR/spec condicional, consolidação das decisões do usuário, criação da issue e evidência inicial. |
-| `issue-reviewer` | Revisão independente da issue e do source set; não aprova em nome do humano. |
-| `plan-writer` | Plano de implementação append-only (uma unidade), com evidência de origem. |
-| `plan-reviewer` | Veredito independente e literal sobre o plano. |
-| `executor` | Implementação do plano aprovado como uma unidade, com evidência, em worktree no modo issue. |
-| `delivery-reviewer` | Revisão da implementação e auditoria final de contrato, DoD e evidência de fechamento. |
+| Agente              | Responsabilidade                                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `issue-writer`      | Investigação, gate de ADR/spec condicional, consolidação das decisões do usuário, criação da issue e evidência inicial. |
+| `issue-reviewer`    | Revisão independente da issue e do source set; não aprova em nome do humano.                                            |
+| `plan-writer`       | Plano de implementação append-only (uma unidade), com evidência de origem.                                              |
+| `plan-reviewer`     | Veredito independente e literal sobre o plano.                                                                          |
+| `executor`          | Implementação do plano aprovado como uma unidade, com evidência, em worktree no modo issue.                             |
+| `delivery-reviewer` | Revisão da implementação e auditoria final de contrato, DoD e evidência de fechamento.                                  |
 
 Nenhum dos seguintes agentes ou papéis permanece exposto: `investigator`,
 `spec-author`, `general-executor`, `deep-executor`, `code-reviewer`,
@@ -116,16 +116,16 @@ cria uma issue ou estado GitHub.
 
 ## Casos de borda
 
-| # | QUANDO ⟨gatilho⟩ | o sistema DEVE ⟨resposta⟩ |
-| --- | --- | --- |
-| 1 | uma decisão de produto ainda não foi dada | o `issue-writer` pede a decisão e não cria a issue nem improvisa o source set. |
-| 2 | a mudança altera contrato, comportamento observável ou decisão durável | o `issue-writer` cria/atualiza ADR/spec e a issue inicia em `stage:spec-approval` + `needs-human`. |
-| 3 | a mudança é interna | o `issue-writer` registra a justificativa de spec não necessária, e o gate humano continua em `stage:spec-approval`. |
-| 4 | o `issue-reviewer` aprova o source set | a issue continua em `stage:spec-approval`; só a aprovação humana a move para `stage:needs-plan`. |
-| 5 | um agente conclui sem mudanças de código | ele ainda publica o comentário/seção com todos os campos de evidência. |
-| 6 | há modo repositório `direct` | cada agente escreve no delivery record, sem criar issue, label ou comentário GitHub. |
-| 7 | há review da implementação e auditoria final | duas instâncias fresh de `delivery-reviewer` são usadas, respeitando as restrições de independência. |
-| 8 | a implementação está bloqueada ou uma revisão é inválida | o agente registra o bloqueio e próximo passo; o orquestrador aplica o gate existente e não avança. |
+| #   | QUANDO ⟨gatilho⟩                                                       | o sistema DEVE ⟨resposta⟩                                                                                            |
+| --- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1   | uma decisão de produto ainda não foi dada                              | o `issue-writer` pede a decisão e não cria a issue nem improvisa o source set.                                       |
+| 2   | a mudança altera contrato, comportamento observável ou decisão durável | o `issue-writer` cria/atualiza ADR/spec e a issue inicia em `stage:spec-approval` + `needs-human`.                   |
+| 3   | a mudança é interna                                                    | o `issue-writer` registra a justificativa de spec não necessária, e o gate humano continua em `stage:spec-approval`. |
+| 4   | o `issue-reviewer` aprova o source set                                 | a issue continua em `stage:spec-approval`; só a aprovação humana a move para `stage:needs-plan`.                     |
+| 5   | um agente conclui sem mudanças de código                               | ele ainda publica o comentário/seção com todos os campos de evidência.                                               |
+| 6   | há modo repositório `direct`                                           | cada agente escreve no delivery record, sem criar issue, label ou comentário GitHub.                                 |
+| 7   | há review da implementação e auditoria final                           | duas instâncias fresh de `delivery-reviewer` são usadas, respeitando as restrições de independência.                 |
+| 8   | a implementação está bloqueada ou uma revisão é inválida               | o agente registra o bloqueio e próximo passo; o orquestrador aplica o gate existente e não avança.                   |
 
 ## Questões em aberto
 
@@ -146,6 +146,7 @@ aprovados para implementação.
 - [ ] Os testes estruturais cobrem os casos 1 a 8, inclusive: nenhuma label
       nova, issue-reviewer sem autoaprovação humana, um único executor,
       delivery-reviewer fresh na auditoria final e direct sem GitHub.
+
 ```bash
 pnpm test
 pnpm build

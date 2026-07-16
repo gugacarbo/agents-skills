@@ -11,17 +11,17 @@ Next action: `<oferecer integração explícita | resolver achado | fechar, owne
 
 ### Resumo rápido
 
-| Campo | Valor |
-| --- | --- |
-| PR | `<URL>` |
-| Aprovação do PR | `approved \| pending \| not applicable` |
+| Campo           | Valor                                                          |
+| --------------- | -------------------------------------------------------------- |
+| PR              | `<URL>`                                                        |
+| Aprovação do PR | `approved \| pending \| not applicable`                        |
 | Auditoria final | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
 
 ### Mapa de entrega
 
-| Entrega | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
-| --- | --- | --- | --- | --- | --- |
-| Plano aprovado | | | | | |
+| Entrega        | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
+| -------------- | ----------- | --------------------- | ------------------- | ------------- | ------ |
+| Plano aprovado |             |                       |                     |               |        |
 
 ### Definição de pronto
 
@@ -31,11 +31,11 @@ Next action: `<oferecer integração explícita | resolver achado | fechar, owne
 
 ### Decisão opcional de integração
 
-| Decisão | Valor |
-| --- | --- |
+| Decisão    | Valor                                                                                     |
+| ---------- | ----------------------------------------------------------------------------------------- |
 | Integração | `Aguardar pedido explícito do usuário para merge \| merged em <commit> \| not applicable` |
 
 ---
 
-*Processo: code-flow — evidência append-only pronta para PR (envelope de oito
-campos). Nunca fazer merge automático após aprovação.*
+_Processo: code-flow — evidência append-only pronta para PR (envelope de oito
+campos). Nunca fazer merge automático após aprovação._

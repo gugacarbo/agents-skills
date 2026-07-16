@@ -26,17 +26,17 @@ imutável antes de planejar.
 Exatamente uma label `stage:*` aplica-se a uma issue de entrega. Ela identifica
 o próximo gate; comentários append-only retêm o status exato do trabalho.
 
-| Label | Significado preciso | Próxima ação |
-| --- | --- | --- |
-| `stage:spec-approval` | A issue contém ADR/spec proposto ou racional no-spec explícito, aguardando aprovação humana | Humano aprova a proposta; `issue-writer` materializa o ADR/spec aprovado quando necessário e move para `stage:needs-plan`. |
-| `stage:needs-plan` | Source-set aprovado sem snapshot atual de plano | Despachar/aguardar plan-writer. |
-| `stage:needs-plan-review` | Snapshot atual do plano aguarda veredito independente ou aprovação humana após veredito aprovador | Despachar/aguardar plan-reviewer, depois aguardar aprovação humana do plano. |
-| `stage:approved` | Plano atual tem veredito aprovador literal e aprovação humana explícita | Humano escolhe `worktree` ou `later`; execução nunca usa o checkout compartilhado sem worktree. |
-| `stage:in-progress` | O plano aprovado está sendo implementado pela primeira vez como uma unidade | Aguardar evidência do executor ou blockers. |
-| `stage:needs-delivery-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5). |
-| `stage:needs-changes` | A review da implementação (ou auditoria final) pediu ajustes corrigíveis | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-delivery-review`. |
-| `stage:ready-to-merge` | Review da implementação aprovou; restam auditoria final, DoD, aprovação do PR e decisão de merge | Despachar auditoria final (Fase 6), depois oferecer integração opcional. |
-| `stage:blocked` | Decisão humana ou correção externa é necessária | Apresentar o blocker registrado; não adivinhar. |
+| Label                         | Significado preciso                                                                                 | Próxima ação                                                                                                               |
+| ----------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `stage:spec-approval`         | A issue contém ADR/spec proposto ou racional no-spec explícito, aguardando aprovação humana         | Humano aprova a proposta; `issue-writer` materializa o ADR/spec aprovado quando necessário e move para `stage:needs-plan`. |
+| `stage:needs-plan`            | Source-set aprovado sem snapshot atual de plano                                                     | Despachar/aguardar plan-writer.                                                                                            |
+| `stage:needs-plan-review`     | Snapshot atual do plano aguarda veredito independente ou aprovação humana após veredito aprovador   | Despachar/aguardar plan-reviewer, depois aguardar aprovação humana do plano.                                               |
+| `stage:approved`              | Plano atual tem veredito aprovador literal e aprovação humana explícita                             | Humano escolhe `worktree` ou `later`; execução nunca usa o checkout compartilhado sem worktree.                            |
+| `stage:in-progress`           | O plano aprovado está sendo implementado pela primeira vez como uma unidade                         | Aguardar evidência do executor ou blockers.                                                                                |
+| `stage:needs-delivery-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5).                                                                           |
+| `stage:needs-changes`         | A review da implementação (ou auditoria final) pediu ajustes corrigíveis                            | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-delivery-review`.                             |
+| `stage:ready-to-merge`        | Review da implementação aprovou; restam auditoria final, DoD, aprovação do PR e decisão de merge    | Despachar auditoria final (Fase 6), depois oferecer integração opcional.                                                   |
+| `stage:blocked`               | Decisão humana ou correção externa é necessária                                                     | Apresentar o blocker registrado; não adivinhar.                                                                            |
 
 `needs-human` é ortogonal. Adicione-a em `spec-approval`, `needs-plan-review`
 após veredito aprovador, `approved` + `later`, decisões bloqueadas, falha de
@@ -107,11 +107,11 @@ que dizem que não devem mudar labels continuam sem mudar; o orquestrador
 atualiza por eles. Nunca pare após apenas registrar o novo stage no body do
 comentário.
 
-| Racionalização | Contraponto |
-| --- | --- |
-| “O comentário já diz o novo stage.” | Texto de comentário é narrativa; só labels são status durável. |
-| “Next action nomeia o stage, então a issue está atualizada.” | `Next action` não é mutação de label. |
-| “Vou atualizar as labels depois / após o próximo passo.” | Mutue labels no mesmo turno do comentário autorizador. |
+| Racionalização                                               | Contraponto                                                    |
+| ------------------------------------------------------------ | -------------------------------------------------------------- |
+| “O comentário já diz o novo stage.”                          | Texto de comentário é narrativa; só labels são status durável. |
+| “Next action nomeia o stage, então a issue está atualizada.” | `Next action` não é mutação de label.                          |
+| “Vou atualizar as labels depois / após o próximo passo.”     | Mutue labels no mesmo turno do comentário autorizador.         |
 
 ## Tabela de transição
 
@@ -132,19 +132,19 @@ auditoria final pede ajustes → needs-changes → executor → needs-delivery-r
 
 ## Regras de resume
 
-| Estado observado | Ação de resume |
-| --- | --- |
-| `stage:spec-approval` | Apresentar a proposta de ADR/spec ou racional no-spec para aprovação humana; não escrever ADR/spec formal nem plano. |
-| `stage:needs-plan` | Iniciar ou aguardar o plan-writer da Fase 3. |
-| `stage:needs-plan-review` | Despachar/aguardar a review independente do plano atual, depois apresentar um snapshot aprovador para aprovação humana. |
-| `stage:approved` | Perguntar `worktree` ou `later`; ainda não editar código. |
-| `stage:in-progress` | Despachar/retomar o executor único do plano aprovado, ou resolver seu blocker. |
-| `stage:needs-delivery-review` | Despachar/aguardar a review independente da implementação (Fase 5). |
-| `stage:needs-changes` | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-delivery-review`. |
-| `stage:ready-to-merge` | Despachar auditoria final, DoD e aprovação do PR (Fase 6). Após isso, oferecer — não executar automaticamente — merge/integração. |
-| `stage:blocked` | Apresentar a decisão humana registrada; não adivinhar. |
-| Issue elegível com zero/múltiplos stages ou drift de comentário | Definir `stage:blocked` + `needs-human` e explicar o mismatch. |
-| Issue inelegível | Explicar que está fora do fluxo de entrega e parar sem tocar labels. |
+| Estado observado                                                | Ação de resume                                                                                                                     |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `stage:spec-approval`                                           | Apresentar a proposta de ADR/spec ou racional no-spec para aprovação humana; não escrever ADR/spec formal nem plano.               |
+| `stage:needs-plan`                                              | Iniciar ou aguardar o plan-writer da Fase 3.                                                                                       |
+| `stage:needs-plan-review`                                       | Despachar/aguardar a review independente do plano atual, depois apresentar um snapshot aprovador para aprovação humana.            |
+| `stage:approved`                                                | Perguntar `worktree` ou `later`; ainda não editar código.                                                                          |
+| `stage:in-progress`                                             | Despachar/retomar o executor único do plano aprovado, ou resolver seu blocker.                                                     |
+| `stage:needs-delivery-review`                                   | Despachar/aguardar a review independente da implementação (Fase 5).                                                                |
+| `stage:needs-changes`                                           | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-delivery-review`. |
+| `stage:ready-to-merge`                                          | Despachar auditoria final, DoD e aprovação do PR (Fase 6). Após isso, oferecer — não executar automaticamente — merge/integração.  |
+| `stage:blocked`                                                 | Apresentar a decisão humana registrada; não adivinhar.                                                                             |
+| Issue elegível com zero/múltiplos stages ou drift de comentário | Definir `stage:blocked` + `needs-human` e explicar o mismatch.                                                                     |
+| Issue inelegível                                                | Explicar que está fora do fluxo de entrega e parar sem tocar labels.                                                               |
 
 ## Ciclos de plano
 

@@ -11,19 +11,19 @@ Next action: `<humano aprova este snapshot exato | revisar plano | decisão huma
 
 ### Metadados da review
 
-| Campo | Valor |
-| --- | --- |
-| **Ciclo de plano** | `<URL do comentário do plano>` |
-| **Base SHA do plano** | `<SHA completo>` |
+| Campo                         | Valor                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| **Ciclo de plano**            | `<URL do comentário do plano>`                                                  |
+| **Base SHA do plano**         | `<SHA completo>`                                                                |
 | **Independência do reviewer** | `Não autorizei este plano e não tenho assignment de implementação neste ciclo.` |
-| **Veredito** | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
+| **Veredito**                  | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO`                  |
 
 ---
 
 ## Achados
 
-| Severidade | Seção / fonte | Impacto e ação |
-| --- | --- | --- |
+| Severidade                                        | Seção / fonte               | Impacto e ação     |
+| ------------------------------------------------- | --------------------------- | ------------------ |
 | `Critical \| Important \| Minor \| Cannot verify` | `<seção do plano ou fonte>` | `<impacto e ação>` |
 
 ---
@@ -42,15 +42,15 @@ Next action: `<humano aprova este snapshot exato | revisar plano | decisão huma
 > Um veredito aprovador (`APROVO` ou `APROVO COM RESSALVAS`) ainda exige que o
 > **humano aprova este snapshot exato** antes da implementação.
 
-| Veredito | Ação esperada |
-| --- | --- |
-| `APROVO` | Humano aprova snapshot → `stage:approved` |
+| Veredito               | Ação esperada                                     |
+| ---------------------- | ------------------------------------------------- |
+| `APROVO`               | Humano aprova snapshot → `stage:approved`         |
 | `APROVO COM RESSALVAS` | Humano aprova snapshot com ressalvas documentadas |
-| `PEÇO AJUSTES` | Plan-writer revisa e publica novo snapshot |
-| `NÃO APROVO` | Bloquear até novo plano ou decisão humana |
+| `PEÇO AJUSTES`         | Plan-writer revisa e publica novo snapshot        |
+| `NÃO APROVO`           | Bloquear até novo plano ou decisão humana         |
 
 ---
 
-*Processo: code-flow — review append-only do plano, independente da autoria e
+_Processo: code-flow — review append-only do plano, independente da autoria e
 não é review de código. Um veredito aprovador ainda exige aprovação humana do
-snapshot antes da implementação.*
+snapshot antes da implementação._

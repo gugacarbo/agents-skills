@@ -81,7 +81,7 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 | `init-deep`                | Gera arquivos `AGENTS.md` hierárquicos no código (modo `--light`) |
 | `project-init`             | Scaffold de novos projetos a partir de templates curados          |
 | `skill-master`             | Criação, edição e avaliação de skills reutilizáveis para agentes  |
-| `code-flow`             | Planejamento e orquestração de implementações com subagentes      |
+| `code-flow`                | Planejamento e orquestração de implementações com subagentes      |
 | `task-completion-notifier` | Notificação de conclusão de tarefas no desktop                    |
 
 ## Exemplos

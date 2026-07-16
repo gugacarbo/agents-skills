@@ -13,11 +13,11 @@ contrato, validação, caminhos de erro e ownership.
 
 O orquestrador muta labels após o comentário de review:
 
-| Resultado | Ação |
-| --- | --- |
-| `APROVO` / `APROVO COM RESSALVAS` | Mutar para `stage:ready-to-merge` e seguir para a Fase 6. |
-| `PEÇO AJUSTES` ou achado Critical/Important | Mutar para `stage:needs-changes` e devolver a implementação à Fase 4. |
-| `NÃO APROVO` com decisão de produto/acesso | Mutar para `stage:blocked` + `needs-human`. |
-| Achado Minor | Reter na review e na evidência de fechamento; não muda o stage por si só se o veredito for aprovador. |
+| Resultado                                   | Ação                                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `APROVO` / `APROVO COM RESSALVAS`           | Mutar para `stage:ready-to-merge` e seguir para a Fase 6.                                             |
+| `PEÇO AJUSTES` ou achado Critical/Important | Mutar para `stage:needs-changes` e devolver a implementação à Fase 4.                                 |
+| `NÃO APROVO` com decisão de produto/acesso  | Mutar para `stage:blocked` + `needs-human`.                                                           |
+| Achado Minor                                | Reter na review e na evidência de fechamento; não muda o stage por si só se o veredito for aprovador. |
 
 Review limpa mapeia o plano aprovado a commit/PR e evidência.

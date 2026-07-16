@@ -1,9 +1,9 @@
 # Gate humano · source-set / spec
 
-| | |
-|---|---|
-| **Fase** | 2 — criar issue |
-| **Stage** | `stage:spec-approval` + `needs-human` |
+|             |                                                            |
+| ----------- | ---------------------------------------------------------- |
+| **Fase**    | 2 — criar issue                                            |
+| **Stage**   | `stage:spec-approval` + `needs-human`                      |
 | **Próximo** | Materializar ADR/spec (se necessário) → `stage:needs-plan` |
 
 ---
@@ -22,11 +22,11 @@ Materializar o ADR/spec exatamente como proposto (quando necessário) e liberar
 
 Responda com **uma** opção literal:
 
-| Opção | Significado |
-|:------|:------------|
-| **Yes** | Aprovar a proposta/racional; `issue-writer` materializa e avança. |
-| **No** | Rejeitar; manter `spec-approval` + `needs-human` até nova proposta. |
-| **Refine** | Pedir edição concreta da proposta antes de materializar. |
+| Opção      | Significado                                                         |
+| :--------- | :------------------------------------------------------------------ |
+| **Yes**    | Aprovar a proposta/racional; `issue-writer` materializa e avança.   |
+| **No**     | Rejeitar; manter `spec-approval` + `needs-human` até nova proposta. |
+| **Refine** | Pedir edição concreta da proposta antes de materializar.            |
 
 ---
 

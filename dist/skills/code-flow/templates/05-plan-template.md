@@ -11,22 +11,22 @@ Next action: `plan-reviewer revisa este snapshot`
 
 ### Metadados do ciclo
 
-| Campo | Valor |
-| --- | --- |
-| **Ciclo de plano** | `<k>/3` |
-| **Base SHA** | `<full-sha>` |
-| **Impacto de spec** | `create \| update \| not required` — `<motivo concreto>` |
-| **Aprovação da proposta** | `<URL/comentário humano ou revisão imutável do repositório>` |
-| **ADR/spec materializado** | `<blob URL imutável ou not required>` |
+| Campo                      | Valor                                                        |
+| -------------------------- | ------------------------------------------------------------ |
+| **Ciclo de plano**         | `<k>/3`                                                      |
+| **Base SHA**               | `<full-sha>`                                                 |
+| **Impacto de spec**        | `create \| update \| not required` — `<motivo concreto>`     |
+| **Aprovação da proposta**  | `<URL/comentário humano ou revisão imutável do repositório>` |
+| **ADR/spec materializado** | `<blob URL imutável ou not required>`                        |
 
 ---
 
 ## Fontes do repositório
 
-| Tipo | Referência |
-| --- | --- |
-| ADR/spec | `<blob URL imutável no SHA completo ou não aplicável>` |
-| Comportamento atual | `<path:line no commit ou URL imutável>` |
+| Tipo                | Referência                                             |
+| ------------------- | ------------------------------------------------------ |
+| ADR/spec            | `<blob URL imutável no SHA completo ou não aplicável>` |
+| Comportamento atual | `<path:line no commit ou URL imutável>`                |
 
 ---
 
@@ -47,20 +47,20 @@ Next action: `plan-reviewer revisa este snapshot`
 
 ## Verificação / TDD
 
-| Etapa | Comando / evidência | Resultado esperado |
-| --- | --- | --- |
-| RED | `<teste ou comando>` | `<falha esperada>` |
-| GREEN | `<teste ou comando>` | `<passa>` |
-| Regressão | `<comando>` | `<exit 0 ou critério>` |
+| Etapa     | Comando / evidência  | Resultado esperado     |
+| --------- | -------------------- | ---------------------- |
+| RED       | `<teste ou comando>` | `<falha esperada>`     |
+| GREEN     | `<teste ou comando>` | `<passa>`              |
+| Regressão | `<comando>`          | `<exit 0 ou critério>` |
 
 ---
 
 ## Casos de borda (EARS)
 
-| # | WHEN | the system MUST |
-| --- | --- | --- |
-| 1 | | |
-| 2 | | |
+| #   | WHEN | the system MUST |
+| --- | ---- | --------------- |
+| 1   |      |                 |
+| 2   |      |                 |
 
 ---
 
@@ -76,12 +76,12 @@ Next action: `plan-reviewer revisa este snapshot`
 ## Riscos, rollout e rollback
 
 | Risco | Mitigação | Rollback |
-| --- | --- | --- |
-| … | … | … |
+| ----- | --------- | -------- |
+| …     | …         | …        |
 
 ---
 
-*Processo: code-flow — snapshot append-only do plano (envelope de oito campos).
+_Processo: code-flow — snapshot append-only do plano (envelope de oito campos).
 Não decompor este plano em task IDs. O executor pode organizar o trabalho
 internamente; a evidência e a review cobrem o plano aprovado como uma unidade.
-Review independente e aprovação humana deste snapshot exato são obrigatórias.*
+Review independente e aprovação humana deste snapshot exato são obrigatórias._
