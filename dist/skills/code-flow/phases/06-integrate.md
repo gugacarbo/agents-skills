@@ -21,9 +21,10 @@ Critical/Important), o orquestrador muta para `stage:needs-changes` e devolve
 No modo issue, obtenha a aprovação necessária do PR mas nunca faça merge
 automaticamente. Após aprovação do PR, mantenha
 `stage:ready-to-merge`, adicione `needs-human` e ofereça
-integração/merge como decisão opcional explícita do usuário. Só depois que o
-usuário pedir integração o PR aprovado pode ser merged, o alvo verificado e a
-issue fechada com labels de stage e `needs-human` removidas.
+integração/merge com `templates/14-human-gate-merge.md` como decisão opcional
+explícita do usuário. Só depois que o usuário pedir integração o PR aprovado
+pode ser merged, o alvo verificado e a issue fechada com labels de stage e
+`needs-human` removidas (`scripts/transition-issue.sh --clear-stage --clear-needs-human`).
 
 Modo `direct` não cria issue, labels, stages ou comentários GitHub. Pode
 concluir após a auditoria final e o DoD registrados; se tiver PR, ofereça merge

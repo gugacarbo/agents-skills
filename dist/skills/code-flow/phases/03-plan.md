@@ -24,7 +24,8 @@ do registro com todos os oito campos e um veredito literal:
 | `NÃO APROVO`, erro, veredito ausente ou decisão de produto/acesso | Issue: mutar labels para `stage:blocked` + `needs-human`; direct: anexar blocker e parar. |
 
 Após um veredito independente aprovador, o humano aprova ou rejeita o snapshot
-exato do comentário do plano. Só a aprovação humana muta a issue para
-`stage:approved`; rejeição ou pedido de mudança a devolve a `stage:needs-plan`
-(ou bloqueia no ciclo 3). A aprovação do source-set e a aprovação do plano são
-gates obrigatórios separados.
+exato do comentário do plano com `templates/13-human-gate-plan.md`. Só a
+aprovação humana muta a issue para `stage:approved`; rejeição ou pedido de
+mudança a devolve a `stage:needs-plan` (ou bloqueia no ciclo 3). A aprovação do
+source-set e a aprovação do plano são gates obrigatórios separados. Preferir
+`scripts/transition-issue.sh` para mutar labels.

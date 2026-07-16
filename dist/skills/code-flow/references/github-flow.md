@@ -49,7 +49,51 @@ toda label `stage:*` existente. Após entrega merged/fechada, remova o stage e
 O status da issue é o conjunto de labels do GitHub, não o texto do comentário.
 Escrever `stage:*`, `needs-human` ou uma frase de transição dentro de um
 comentário append-only não muda a issue. Após o comentário de evidência
-autorizador existir, mutue as labels imediatamente:
+autorizador existir, mutue as labels imediatamente.
+
+**Preferido:** `scripts/transition-issue.sh` (também via
+`/code-flow tool transition-issue`):
+
+```bash
+# Após comentário autorizador: remove stage:* antigo, aplica o próximo, confirma
+./scripts/transition-issue.sh 42 --require-from stage:needs-plan --to stage:needs-plan-review
+
+./scripts/transition-issue.sh 42 --to stage:blocked --needs-human
+./scripts/transition-issue.sh 42 --to stage:needs-plan --clear-needs-human
+./scripts/transition-issue.sh 42 --clear-stage --clear-needs-human   # pós-merge
+./scripts/transition-issue.sh 42 --to stage:approved --dry-run
+```
+
+O helper lê labels, remove todo `stage:*`, aplica exatamente um `--to` (whitelist
+da tabela), ajusta `needs-human`, confirma com `gh issue view --json labels` e
+imprime JSON (`issue`, `from`, `to`, `needs_human`, `labels`). Não posta
+comentários e não escolhe o próximo stage.
+
+A mutação é **best-effort**, não uma chamada atômica da API: cada
+`gh issue edit` é separado. Se o add falhar após o remove, a issue pode ficar
+com zero `stage:*` (drift → `blocked` + `needs-human` na Fase 0). O helper
+confirma após o remove e após o fim; se a confirmação falhar, repare com
+`--allow-repair --to <stage>` (ou o fallback manual abaixo) no mesmo turno.
+
+**Fallback manual** (se o script estiver indisponível):
+
+```bash
+# 1) Remova toda label stage:* existente (liste antes)
+gh issue view 42 --json labels -q '.labels[].name'
+gh issue edit 42 --remove-label "stage:needs-plan"
+
+# 2) Adicione exatamente um próximo stage
+gh issue edit 42 --add-label "stage:needs-plan-review"
+
+# 3) Adicione ou remova needs-human conforme a transição
+gh issue edit 42 --add-label "needs-human"
+# ou: gh issue edit 42 --remove-label "needs-human"
+
+# 4) Confirme antes de continuar
+gh issue view 42 --json labels
+```
+
+Sequência obrigatória (com ou sem helper):
 
 1. Remova toda label `stage:*` existente.
 2. Adicione exatamente uma próxima label `stage:*` da tabela acima.
