@@ -10,7 +10,7 @@ executor, validação e padrão local (regra 2 do `SKILL.md`). Use `file:line` n
 achados e um veredito literal: `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES`
 ou `NÃO APROVO`.
 
-Publique `templates/08-task-review-template.md` para a review da implementação
+Publique `templates/08-implementation-review-template.md` para a review da implementação
 ou `templates/09-integration-report-template.md` para a auditoria final no modo
 issue. No modo `direct`, anexe o envelope equivalente ao registro de entrega.
 

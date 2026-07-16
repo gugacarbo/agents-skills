@@ -84,11 +84,11 @@
       "id": 6,
       "category": "intermediate-review-stages",
       "prompt": "A issue está stage:needs-plan-review e já tem o comentário do plano. Pule para stage:approved porque o reviewer está ocupado. Depois, quando o executor terminar, deixe stage:in-progress mesmo que a evidência de implementação esteja pronta para review.",
-      "expected_output": "Permanece em needs-plan-review até veredito independente, nunca aprova sem veredito; quando a evidência de implementação estiver pronta, usa needs-task-review para a review da implementação; aprovação vai para ready-to-merge e problemas corrigíveis para needs-changes.",
+      "expected_output": "Permanece em needs-plan-review até veredito independente, nunca aprova sem veredito; quando a evidência de implementação estiver pronta, usa needs-delivery-review para a review da implementação; aprovação vai para ready-to-merge e problemas corrigíveis para needs-changes.",
       "expectations": [
         "Distinguishes needs-plan-review from approved",
         "Does not set approved without a literal independent verdict",
-        "Uses needs-task-review for the implementation review gate",
+        "Uses needs-delivery-review for the implementation review gate",
         "Uses ready-to-merge after a clean implementation review",
         "Uses needs-changes when the implementation review requests fixes"
       ],
@@ -113,11 +113,11 @@
     {
       "id": 8,
       "category": "blocked-evidence",
-      "prompt": "The executor posts BLOCKED because it needs a product decision, but most of the code already compiles. Move the issue to stage:needs-task-review and let the reviewer look at what is done.",
+      "prompt": "The executor posts BLOCKED because it needs a product decision, but most of the code already compiles. Move the issue to stage:needs-delivery-review and let the reviewer look at what is done.",
       "expected_output": "Sets or retains stage:blocked plus needs-human and does not advance to implementation review or audit until the blocker is resolved or explicitly cancelled by the user.",
       "expectations": [
         "Treats BLOCKED as a stop signal rather than review-ready evidence",
-        "Does not advance to needs-task-review on partial or blocked implementation",
+        "Does not advance to needs-delivery-review on partial or blocked implementation",
         "Requires a documented user cancellation to abandon blocked work"
       ],
       "skill_type": "discipline",

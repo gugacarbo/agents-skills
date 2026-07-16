@@ -26,14 +26,16 @@ direto.
 3. O `issue-reviewer`, um agente independente, revisa a issue e o source set
    e publica seu parecer. Ambos permanecem em `stage:spec-approval`; somente
    a aprovação humana do source set permite a transição para `stage:needs-plan`.
-4. O `plan-writer` publica o plano; um `plan-reviewer` independente publica o
-   veredito do ciclo. As transições atuais de plano continuam aplicáveis.
-5. O `executor` implementa cada tarefa aprovada. Ele substitui os perfis
-   `general-executor` e `deep-executor`; o contexto da tarefa determina a
-   profundidade, sem criar outro papel.
-6. Um `delivery-reviewer` fresco revisa cada tarefa/range e também executa a
+4. O `plan-writer` publica um plano único (sem decomposição em task IDs); um
+   `plan-reviewer` independente publica o veredito do ciclo. As transições
+   atuais de plano continuam aplicáveis; aprovação humana do snapshot é
+   gate separado.
+5. O `executor` implementa o plano aprovado como uma unidade. Ele substitui
+   os perfis `general-executor` e `deep-executor`; a profundidade acompanha
+   o escopo do plano, sem criar outro papel nem lista de task IDs.
+6. Um `delivery-reviewer` fresco revisa a implementação e também executa a
    auditoria final de contrato, DoD e evidências. A instância da auditoria
-   final deve ser distinta das instâncias que revisaram os ranges de código.
+   final deve ser distinta da que revisou a implementação.
 7. Após aprovação da PR, integração/merge continua uma ação opcional e
    explicitamente confirmada pelo usuário.
 
@@ -47,10 +49,10 @@ O pacote expõe exatamente estes agentes, com estes nomes ASCII:
 | --- | --- |
 | `issue-writer` | Investigação, gate de ADR/spec condicional, consolidação das decisões do usuário, criação da issue e evidência inicial. |
 | `issue-reviewer` | Revisão independente da issue e do source set; não aprova em nome do humano. |
-| `plan-writer` | Plano de implementação append-only, com tarefas estáveis e evidência de origem. |
+| `plan-writer` | Plano de implementação append-only (uma unidade), com evidência de origem. |
 | `plan-reviewer` | Veredito independente e literal sobre o plano. |
-| `executor` | Implementação e evidência por tarefa, em worktree no modo issue. |
-| `delivery-reviewer` | Revisão de tarefa/range e auditoria final de contrato, DoD e matriz de fechamento. |
+| `executor` | Implementação do plano aprovado como uma unidade, com evidência, em worktree no modo issue. |
+| `delivery-reviewer` | Revisão da implementação e auditoria final de contrato, DoD e evidência de fechamento. |
 
 Nenhum dos seguintes agentes ou papéis permanece exposto: `investigator`,
 `spec-author`, `general-executor`, `deep-executor`, `code-reviewer`,
@@ -72,7 +74,7 @@ issue antes de a issue existir. Cada comentário contém, nesta ordem:
 
 ```text
 Agent: <nome do agente>
-Phase/scope: <fase, ciclo, tarefa ou range>
+Phase/scope: <fase, ciclo, range ou auditoria>
 Summary: <resultado conciso>
 Sources/evidence: <links imutáveis, issue/PR, commits, comandos ou saída>
 Decisions: <decisões aplicadas, pendentes ou "none">
@@ -90,11 +92,11 @@ bloqueio também são resultados que precisam de evidência.
 ### Independência e estado
 
 `plan-writer` e `plan-reviewer` são sempre agentes distintos. O
-`delivery-reviewer` de um range é distinto do `plan-writer` e de todos os
-executores daquele range. A instância usada para a auditoria final deve ser
-fresh e não pode ter revisado os ranges auditados; ela também é distinta do
-`plan-writer` e dos executores. O orquestrador preserva as demais regras de
-isolamento de worktree, paralelismo e assembly.
+`delivery-reviewer` da implementação é distinto do `plan-writer` e do
+`executor`. A instância usada para a auditoria final deve ser fresh e não
+pode ter feito a review da implementação; ela também é distinta do
+`plan-writer` e do `executor`. O orquestrador preserva as demais regras de
+isolamento de worktree e paralelismo entre issues.
 
 Não são criadas labels novas. `issue-writer` e `issue-reviewer` trabalham sob
 `stage:spec-approval` com `needs-human` até a aprovação humana do source set.
@@ -102,14 +104,15 @@ Depois disso, a sequência continua:
 
 ```text
 stage:spec-approval → stage:needs-plan → stage:needs-plan-review
-→ stage:approved → stage:in-progress → stage:needs-task-review
-→ revisão/auditoria/PR aprovada → integração opcional confirmada → fechamento
+→ stage:approved → stage:in-progress → stage:needs-delivery-review
+→ stage:ready-to-merge (ou stage:needs-changes → executor → needs-delivery-review)
+→ aprovação de PR → integração opcional confirmada → fechamento
 ```
 
 Rejeições, saída sem veredito, decisão humana pendente, falha de evidência ou
-tarefa bloqueada usam as regras existentes de `stage:blocked` e `needs-human`.
-O modo `direct` permanece exclusivo do modo repositório e nunca cria uma issue
-ou estado GitHub.
+implementação bloqueada usam as regras existentes de `stage:blocked` e
+`needs-human`. O modo `direct` permanece exclusivo do modo repositório e nunca
+cria uma issue ou estado GitHub.
 
 ## Casos de borda
 
@@ -121,8 +124,8 @@ ou estado GitHub.
 | 4 | o `issue-reviewer` aprova o source set | a issue continua em `stage:spec-approval`; só a aprovação humana a move para `stage:needs-plan`. |
 | 5 | um agente conclui sem mudanças de código | ele ainda publica o comentário/seção com todos os campos de evidência. |
 | 6 | há modo repositório `direct` | cada agente escreve no delivery record, sem criar issue, label ou comentário GitHub. |
-| 7 | há revisão de range e auditoria final | duas instâncias fresh de `delivery-reviewer` são usadas, respeitando as restrições de independência. |
-| 8 | uma tarefa está bloqueada ou uma revisão é inválida | o agente registra o bloqueio e próximo passo; o orquestrador aplica o gate existente e não avança. |
+| 7 | há review da implementação e auditoria final | duas instâncias fresh de `delivery-reviewer` são usadas, respeitando as restrições de independência. |
+| 8 | a implementação está bloqueada ou uma revisão é inválida | o agente registra o bloqueio e próximo passo; o orquestrador aplica o gate existente e não avança. |
 
 ## Questões em aberto
 

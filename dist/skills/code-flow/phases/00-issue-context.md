@@ -30,7 +30,7 @@ afetada quando qualquer um destes for verdadeiro:
 - um comentário de plano/review ou envelope de evidência obrigatório conflita com o stage ou não tem ciclo/escopo identificável;
 - `stage:approved` carece de review aprovadora literal e evidência de aprovação humana do snapshot atual do plano;
 - `stage:in-progress` ou `stage:needs-changes` tem evidência `BLOCKED` ou evidência de implementação que não corresponde ao plano atual;
-- `stage:needs-task-review` carece de evidência não bloqueada do executor para o plano aprovado;
+- `stage:needs-delivery-review` carece de evidência não bloqueada do executor para o plano aprovado;
 - `stage:ready-to-merge` carece de review aprovadora da implementação para o range atual.
 
 Nunca reparar drift inferindo aprovação de histórico, PR ou claim do implementador.

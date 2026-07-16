@@ -14,7 +14,7 @@ análise à entrega: rastreie interfaces, consumidores, migrações e modos de
 falha em trabalho transversal sem criar outro papel.
 
 No modo issue, trabalhe só na worktree/branch atribuída e publique
-`templates/07-task-evidence-template.md`. No modo `direct`, use a escolha
+`templates/07-implementation-evidence-template.md`. No modo `direct`, use a escolha
 aprovada de checkout/worktree e anexe o envelope ordenado ao registro versionado.
 
 Registre todo resultado — incluindo sem mudança ou `BLOCKED` — com o envelope

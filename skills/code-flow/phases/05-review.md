@@ -1,13 +1,13 @@
 # Fase 5: Review da entrega
 
-A partir de `stage:needs-task-review`, para cada evidência `DONE` ou
+A partir de `stage:needs-delivery-review`, para cada evidência `DONE` ou
 `DONE_WITH_CONCERNS` do plano aprovado, despache um
 `agents/06-delivery-reviewer.md` fresco, distinto do executor e do plan-writer.
 Dê a ele o range, source-set, plano, envelope do executor e o pacote de review
 de `scripts/review-package.sh` (`/code-flow tool review-package` quando útil).
 `BLOCKED` nunca está pronto para review.
 
-O reviewer publica `templates/08-task-review-template.md` no modo issue ou
+O reviewer publica `templates/08-implementation-review-template.md` no modo issue ou
 anexa o envelope ordenado de oito campos ao registro do modo `direct`. Usa
 `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO` e checa escopo,
 contrato, validação, caminhos de erro e ownership.

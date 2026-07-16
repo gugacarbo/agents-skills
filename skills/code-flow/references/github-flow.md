@@ -32,8 +32,8 @@ o próximo gate; comentários append-only retêm o status exato do trabalho.
 | `stage:needs-plan-review` | Snapshot atual do plano aguarda veredito independente ou aprovação humana após veredito aprovador | Despachar/aguardar plan-reviewer, depois aguardar aprovação humana do plano. |
 | `stage:approved` | Plano atual tem veredito aprovador literal e aprovação humana explícita | Humano escolhe `worktree` ou `later`; execução de issue nunca usa `direct`. |
 | `stage:in-progress` | O plano aprovado está sendo implementado pela primeira vez como uma unidade | Aguardar evidência do executor ou blockers. |
-| `stage:needs-task-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5). |
-| `stage:needs-changes` | A review da implementação (ou auditoria final) pediu ajustes corrigíveis | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-task-review`. |
+| `stage:needs-delivery-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5). |
+| `stage:needs-changes` | A review da implementação (ou auditoria final) pediu ajustes corrigíveis | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-delivery-review`. |
 | `stage:ready-to-merge` | Review da implementação aprovou; restam auditoria final, DoD, aprovação do PR e decisão de merge | Despachar auditoria final (Fase 6), depois oferecer integração opcional. |
 | `stage:blocked` | Decisão humana ou correção externa é necessária | Apresentar o blocker registrado; não adivinhar. |
 
@@ -77,12 +77,12 @@ aprovação humana da proposta → materializar ADR/spec quando necessário → 
   ├─ reviewer independente aprova → aguardar aprovação humana do plano → approved → worktree in-progress
   ├─ pede ajustes (ciclo < 3) → needs-plan
   └─ rejeita/erros/terceiro ajuste → blocked + needs-human
-in-progress → needs-task-review → review da implementação
+in-progress → needs-delivery-review → review da implementação
   ├─ APROVO / APROVO COM RESSALVAS → ready-to-merge → auditoria final/DoD → aprovação do PR
   │    └─ integração/merge opcional confirmada pelo usuário → fechar
-  ├─ PEÇO AJUSTES / achados Critical|Important → needs-changes → executor → needs-task-review
+  ├─ PEÇO AJUSTES / achados Critical|Important → needs-changes → executor → needs-delivery-review
   └─ NÃO APROVO com decisão de produto/acesso → blocked + needs-human
-auditoria final pede ajustes → needs-changes → executor → needs-task-review
+auditoria final pede ajustes → needs-changes → executor → needs-delivery-review
 ```
 
 ## Regras de resume
@@ -94,8 +94,8 @@ auditoria final pede ajustes → needs-changes → executor → needs-task-revie
 | `stage:needs-plan-review` | Despachar/aguardar a review independente do plano atual, depois apresentar um snapshot aprovador para aprovação humana. |
 | `stage:approved` | Perguntar `worktree` ou `later`; ainda não editar código. `direct` é só repositório. |
 | `stage:in-progress` | Despachar/retomar o executor único do plano aprovado, ou resolver seu blocker. |
-| `stage:needs-task-review` | Despachar/aguardar a review independente da implementação (Fase 5). |
-| `stage:needs-changes` | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-task-review`. |
+| `stage:needs-delivery-review` | Despachar/aguardar a review independente da implementação (Fase 5). |
+| `stage:needs-changes` | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-delivery-review`. |
 | `stage:ready-to-merge` | Despachar auditoria final, DoD e aprovação do PR (Fase 6). Após isso, oferecer — não executar automaticamente — merge/integração. |
 | `stage:blocked` | Apresentar a decisão humana registrada; não adivinhar. |
 | Issue elegível com zero/múltiplos stages ou drift de comentário | Definir `stage:blocked` + `needs-human` e explicar o mismatch. |

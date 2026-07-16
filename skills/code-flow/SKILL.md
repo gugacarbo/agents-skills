@@ -47,7 +47,7 @@ entrega; a implementação fica no plano aprovado de cada filha e numa passagem
 4. **Fase 3:** `plan-writer` publica o plano; `plan-reviewer` publica um veredito independente. Um veredito aprovador ainda aguarda aprovação humana daquele snapshot exato em `stage:needs-plan-review` + `needs-human`.
 5. **Aprovação humana do plano:** ir para `stage:approved`. A execução ainda precisa de pedido explícito e escolha `worktree` ou `later`.
 6. **Fases 4–6:** executar o plano aprovado como uma unidade (`in-progress` →
-   `needs-task-review`); a review da implementação vai para
+   `needs-delivery-review`); a review da implementação vai para
    `ready-to-merge` ou `needs-changes`; verificar DoD e evidência de
    fechamento, obter aprovação do PR e oferecer integração só quando pedida.
 

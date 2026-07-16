@@ -1,4 +1,4 @@
-## Proposta de ADR/spec aguardando aprovação
+## Proposta de issue aguardando aprovação
 
 Agent: `issue-writer`
 Phase/scope: `fase 2 / source-set proposto`

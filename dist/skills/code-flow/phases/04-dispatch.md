@@ -18,10 +18,10 @@ Despache apenas `agents/05-executor.md`. Ele recebe URL da issue quando houver,
 revisão do plano, base SHA, escopo/limites, critérios de aceite, verificação e
 destino da evidência. Implementa o plano aprovado como uma unidade — sem lista
 decomposable de tasks — e pode organizar o trabalho internamente. Publica
-`templates/07-task-evidence-template.md` no modo issue ou o mesmo envelope de
+`templates/07-implementation-evidence-template.md` no modo issue ou o mesmo envelope de
 oito campos no modo `direct`. Um resultado `BLOCKED` para: modo issue muta
 labels para `stage:blocked` + `needs-human` após o comentário de evidência;
 modo `direct` anexa `Resume: Phase 4` sem estado GitHub.
 
 Use uma worktree/branch/PR por issue. Quando existir evidência não bloqueada do
-executor para o plano aprovado, mutue labels para `stage:needs-task-review`.
+executor para o plano aprovado, mutue labels para `stage:needs-delivery-review`.

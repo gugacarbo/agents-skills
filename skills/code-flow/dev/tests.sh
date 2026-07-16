@@ -49,8 +49,8 @@ assert_template_references() {
     04-issue-review-template.md \
     05-plan-template.md \
     06-review-template.md \
-    07-task-evidence-template.md \
-    08-task-review-template.md \
+    07-implementation-evidence-template.md \
+    08-implementation-review-template.md \
     09-integration-report-template.md \
     10-delivery-report-template.md; do
     [ -f "$SKILL/templates/$template" ] || fail "missing template: $template"
@@ -58,15 +58,25 @@ assert_template_references() {
       "$SKILL/SKILL.md" "$SKILL/README.md" "$SKILL/agents" "$SKILL/phases" \
       || fail "template is not referenced by the active flow: $template"
   done
+  [ ! -e "$SKILL/templates/07-task-evidence-template.md" ] || fail 'legacy 07-task-evidence template still exists'
+  [ ! -e "$SKILL/templates/08-task-review-template.md" ] || fail 'legacy 08-task-review template still exists'
 }
 
 test_router_and_subagents() {
   assert_contains '/code-flow issue <#N\|URL> [phase]' "$SKILL/SKILL.md"
   assert_contains '/code-flow batch <#N\|URL>... --from <phase>' "$SKILL/SKILL.md"
   assert_contains '/code-flow tool <doctor\|bootstrap\|review-package>' "$SKILL/SKILL.md"
-  for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-task-review needs-changes ready-to-merge blocked; do
+  for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-delivery-review needs-changes ready-to-merge blocked; do
     assert_contains "stage:$stage" "$SKILL/references/github-flow.md"
   done
+  if rg -Fq -- 'needs-task-review' \
+    "$SKILL/references/github-flow.md" \
+    "$SKILL/SKILL.md" \
+    "$SKILL/phases" \
+    "$SKILL/evals/evals.json" \
+    "$SKILL/agents"; then
+    fail 'legacy stage needs-task-review still present'
+  fi
   assert_contains 'stage:needs-changes' "$SKILL/phases/05-review.md"
   assert_contains 'stage:ready-to-merge' "$SKILL/phases/05-review.md"
   assert_contains 'stage:ready-to-merge' "$SKILL/phases/06-integrate.md"
@@ -112,6 +122,7 @@ test_router_and_subagents() {
     assert_contains 'padrão local' "$agent"
   done
   [ ! -e "$SKILL/templates/07-task-evidaence-template.md" ] || fail 'legacy evidaence typo template still exists'
+  [ ! -e "$SKILL/templates/07-task-evidence-template.md" ] || fail 'legacy 07-task-evidence template still exists'
 }
 
 test_issue_evidence_contract() {
@@ -121,8 +132,8 @@ test_issue_evidence_contract() {
     04-issue-review-template.md \
     05-plan-template.md \
     06-review-template.md \
-    07-task-evidence-template.md \
-    08-task-review-template.md \
+    07-implementation-evidence-template.md \
+    08-implementation-review-template.md \
     09-integration-report-template.md; do
     [ -f "$SKILL/templates/$template" ] || fail "missing issue evidence template: $template"
     assert_envelope "$SKILL/templates/$template"
@@ -144,8 +155,12 @@ test_issue_evidence_contract() {
   assert_contains 'auditor final' "$SKILL/agents/06-delivery-reviewer.md"
   assert_contains 'APROVO COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"
   assert_contains 'PEÇO AJUSTES' "$SKILL/templates/09-integration-report-template.md"
-  assert_contains 'templates/06-review-template.md' "$SKILL/templates/08-task-review-template.md"
+  assert_contains 'templates/06-review-template.md' "$SKILL/templates/08-implementation-review-template.md"
   assert_contains 'scripts/review-package.sh' "$SKILL/phases/05-review.md"
+  assert_contains 'templates/07-implementation-evidence-template.md' "$SKILL/agents/05-executor.md"
+  assert_contains 'templates/08-implementation-review-template.md' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'stage:needs-delivery-review' "$SKILL/phases/04-dispatch.md"
+  assert_contains 'stage:needs-delivery-review' "$SKILL/phases/05-review.md"
 }
 
 test_issue_creation_and_mode_boundaries() {
