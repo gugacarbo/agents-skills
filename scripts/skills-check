@@ -1,0 +1,433 @@
+#!/usr/bin/env python3
+"""
+skills-check — validador de grafo de arquivos para skills/.
+
+Uso:
+  scripts/skills-check [--root .] [--warn-only] [--json] [--max-depth N]
+
+O que faz:
+  1. Coleta todos os arquivos publicados sob skills/ (ignorando dirs de
+     build/vendoring/dev).
+  2. Define entry points: SKILL.md, AGENTS.md, README.md em qualquer nível.
+  3. Faz BFS transitiva a partir dos entry points, seguindo referências
+     extraídas por parsers por tipo de arquivo (.md, .sh, .py, .html, .js/.cjs).
+  4. Reporta 5 categorias de falha com exit codes bitmask:
+       1  órfão       — arquivo não alcançável a partir de entry points
+       2  quebrada    — referência para path inexistente dentro de skills/
+       4  circular    — ciclo no grafo de referências (exclui entry points)
+       8  cross-skill — referência para arquivo interno de outra skill
+       16 profundidade — cadeia mais longa que --max-depth
+  5. Whitelist isenta arquivos da exigência de serem alcançados.
+  6. --warn-only imprime tudo e sai 0; --json emite JSON com as 5 chaves.
+
+Parsers (por tipo): .md (links markdown + paths em inline code, ignora blocos
+fenced), .sh (source/cp/cat + strings com $VAR/path + tokens path-like),
+.py (import/from + strings com path relativo; ignora imports relativos),
+.html (src/href; ignora URLs externas), .js/.cjs/.mjs (require/import + strings
+com path relativo). Referências a diretórios são válidas (EARS §11) mas não
+alcançam seu conteúdo. Cross-skill para entry points é descoberta legítima.
+
+Sem dependências externas. Python 3 puro.
+"""
+import argparse, json, os, re, sys
+from pathlib import Path, PurePosixPath
+from collections import deque
+
+ENTRY_NAMES = {"SKILL.md", "AGENTS.md", "README.md"}
+WHITELIST = {"package.json", "LICENSE.txt", "VERSION", ".gitignore",
+             "evals.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"}
+IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "build",
+                "vendor", "__pycache__", ".next", "target", ".tox",
+                ".mypy_cache", ".pytest_cache", ".ruff_cache", "dev"}
+PARSE_EXTS = {".md", ".sh", ".py", ".html", ".js", ".cjs", ".mjs"}
+
+EXIT_ORPHAN, EXIT_BROKEN, EXIT_CIRCULAR, EXIT_CROSS_SKILL, EXIT_DEPTH = 1, 2, 4, 8, 16
+
+CODE_BLOCK_RE = re.compile(r"```[A-Za-z0-9_-]*\s*\n(.*?)\n```", re.S)
+MD_LINK_RE = re.compile(r"\[(?P<text>[^\]]*)\]\((?P<url>[^)]+)\)")
+INLINE_CODE_RE = re.compile(r"`([^`]+)`")
+HTML_ATTR_RE = re.compile(r"""(?:src|href)\s*=\s*["'](?P<url>[^"']+)["']""")
+PY_FROM_RE = re.compile(r"^\s*from\s+(?P<mod>[A-Za-z_][\w.]*)\s+import\s+", re.M)
+PY_IMPORT_RE = re.compile(r"^\s*import\s+(?P<mod>[A-Za-z_][\w.]*)", re.M)
+JS_REQUIRE_RE = re.compile(r"""require\(\s*["']([^"']+)["']\s*\)""")
+JS_IMPORT_RE = re.compile(r"""import\s[^;]*?from\s*["']([^"']+)["']""")
+STRING_PATH_RE = re.compile(r"""["']([A-Za-z_./][\w./-]*\.[A-Za-z0-9]+)["']""")
+SH_QUOTED_RE = re.compile(r"""["']([^"']+)["']""")
+SH_CMD_RE = re.compile(r"(?:^|\n)\s*(?:source|\.)\s+([^\s;&|]+)")
+SH_CP_RE = re.compile(r"\b(?:cp|cat)\s+([^\s;&|]+)")
+SH_BARE_RE = re.compile(r"\b([A-Za-z_][\w-]*(?:/[\w.-]+)+|[A-Za-z_][\w-]*\.[A-Za-z0-9]+)\b")
+SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+PATHISH_RE = re.compile(r"^[A-Za-z_./][\w./-]*$")
+TOKEN_PATH_RE = re.compile(r"^[A-Za-z_.][\w./-]*$")
+MD_BARE_RE = re.compile(r"\b([A-Za-z_][\w-]*(?:/[\w.-]+)+|[A-Za-z_][\w-]*\.[A-Za-z0-9]+)\b")
+
+
+def skill_of(relpath):
+    parts = PurePosixPath(relpath).parts
+    if len(parts) >= 2 and parts[0] == "skills":
+        return parts[1]
+    return None
+
+
+def is_entry(relpath):
+    return PurePosixPath(relpath).name in ENTRY_NAMES
+
+
+def is_whitelisted(relpath):
+    return PurePosixPath(relpath).name in WHITELIST
+
+
+def join_rel(base_rel, ref):
+    parts = []
+    for part in PurePosixPath(base_rel).parts:
+        if part in (".", ""):
+            continue
+        parts.append(part)
+    for part in ref.split("/"):
+        if part in (".", ""):
+            continue
+        if part == "..":
+            if parts:
+                parts.pop()
+            continue
+        parts.append(part)
+    return "/".join(parts)
+
+
+def collect_tree(root):
+    """Retorna (files, paths) onde paths = files ∪ dirs sob skills/."""
+    skills_dir = root / "skills"
+    files, paths = [], set()
+    if not skills_dir.is_dir():
+        return files, paths
+    for dirpath, dirnames, filenames in os.walk(skills_dir):
+        dirnames[:] = sorted(d for d in dirnames if d not in IGNORED_DIRS)
+        rel_dir = Path(dirpath).relative_to(root).as_posix()
+        paths.add(rel_dir)
+        for fn in sorted(filenames):
+            relpath = (Path(dirpath) / fn).relative_to(root).as_posix()
+            files.append(relpath)
+            paths.add(relpath)
+    return files, paths
+
+
+def strip_code_blocks(text):
+    return CODE_BLOCK_RE.sub("", text)
+
+
+def _pathish_tokens(content):
+    """De um conteúdo de inline code, extrai tokens que parecem paths."""
+    out = []
+    for tok in content.split():
+        if tok.startswith("-") or tok.startswith("<") or tok.startswith("$"):
+            continue
+        if ":" in tok:
+            continue
+        if not TOKEN_PATH_RE.match(tok):
+            continue
+        if "/" in tok or re.search(r"\.[A-Za-z0-9]+$", tok):
+            out.append(tok)
+    return out
+
+
+def parse_md(text):
+    visible = strip_code_blocks(text)
+    refs = []
+    for m in MD_LINK_RE.finditer(visible):
+        refs.append((m.group("url"), True))
+    for m in INLINE_CODE_RE.finditer(visible):
+        for tok in _pathish_tokens(m.group(1)):
+            refs.append((tok, False))
+    for m in MD_BARE_RE.finditer(text):
+        refs.append((m.group(1), False))
+    return refs
+
+
+def parse_sh(text):
+    refs = []
+    for m in SH_QUOTED_RE.finditer(text):
+        refs.append((m.group(1), False))
+    for m in SH_CMD_RE.finditer(text):
+        refs.append((m.group(1), False))
+    for m in SH_CP_RE.finditer(text):
+        tok = m.group(1)
+        if tok.startswith("<") or tok.startswith(">"):
+            continue
+        refs.append((tok, False))
+    for m in SH_BARE_RE.finditer(text):
+        refs.append((m.group(1), False))
+    return refs
+
+
+def module_to_paths(mod):
+    base = mod.replace(".", "/")
+    cands = [base + ".py", base + "/__init__.py"]
+    parts = mod.split(".")
+    for i in range(1, len(parts)):
+        pkg = "/".join(parts[:i])
+        cands.append(pkg + "/__init__.py")
+    return cands
+
+
+def parse_py(text):
+    refs = []
+    for m in PY_FROM_RE.finditer(text):
+        mod = m.group("mod")
+        if mod.startswith("."):
+            continue
+        for cand in module_to_paths(mod):
+            refs.append((cand, False))
+    for m in PY_IMPORT_RE.finditer(text):
+        mod = m.group("mod")
+        if mod.startswith("."):
+            continue
+        for cand in module_to_paths(mod):
+            refs.append((cand, False))
+    for m in STRING_PATH_RE.finditer(text):
+        refs.append((m.group(1), False))
+    return refs
+
+
+def parse_html(text):
+    return [(m.group("url"), True) for m in HTML_ATTR_RE.finditer(text)]
+
+
+def parse_js(text):
+    refs = []
+    for m in JS_REQUIRE_RE.finditer(text):
+        refs.append((m.group(1), False))
+    for m in JS_IMPORT_RE.finditer(text):
+        refs.append((m.group(1), False))
+    for m in STRING_PATH_RE.finditer(text):
+        refs.append((m.group(1), False))
+    return refs
+
+
+def normalize_ref(ref):
+    ref = ref.split("#", 1)[0]
+    ref = ref.split("?", 1)[0]
+    return ref.strip()
+
+
+def strip_var_prefix(token):
+    m = re.match(r"^\$\{?([A-Za-z_][\w]*)\}?/(.+)$", token)
+    if m:
+        return m.group(2)
+    if token.startswith("$"):
+        return None
+    return token
+
+
+def resolve_ref(ref, source_relpath, clean, paths, by_basename):
+    """Retorna (target_relpath_or_None, status) com status in {edge,broken,skip}."""
+    ref = normalize_ref(ref)
+    if not ref or SCHEME_RE.match(ref) or ref.startswith("mailto:"):
+        return None, "skip"
+    src_dir = PurePosixPath(source_relpath).parent.as_posix()
+    skill = skill_of(source_relpath)
+    if clean:
+        bases = [src_dir]
+    else:
+        skill_root = "skills/" + skill if skill else "skills"
+        bases = [src_dir, join_rel(src_dir, "files"), skill_root]
+    for base in bases:
+        target = join_rel(base, ref)
+        if target.startswith("skills/") and target in paths:
+            return target, "edge"
+    if not clean and "/" not in ref:
+        cands = by_basename.get(skill, {}).get(ref, [])
+        if len(cands) == 1:
+            return cands[0], "edge"
+    if clean:
+        primary = join_rel(src_dir, ref)
+        if primary.startswith("skills/"):
+            return primary, "broken"
+    return None, "skip"
+
+
+def _record_edge(edges, cross_skill_refs, src, target):
+    if src == target:
+        return
+    src_skill = skill_of(src)
+    tgt_skill = skill_of(target)
+    if src_skill and tgt_skill and src_skill != tgt_skill and not is_entry(target):
+        cross_skill_refs.append((src, target))
+        return
+    if target not in edges[src]:
+        edges[src].append(target)
+
+
+def extract_edges(files, paths, by_basename, root):
+    files_set = set(files)
+    edges = {f: [] for f in files}
+    broken_refs, cross_skill_refs = [], []
+    for f in files:
+        ext = PurePosixPath(f).suffix.lower()
+        if ext not in PARSE_EXTS:
+            continue
+        try:
+            text = (root / f).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if ext == ".md":
+            raw_refs = parse_md(text)
+        elif ext == ".sh":
+            raw_refs = parse_sh(text)
+        elif ext == ".py":
+            raw_refs = parse_py(text)
+        elif ext == ".html":
+            raw_refs = parse_html(text)
+        else:
+            raw_refs = parse_js(text)
+        for ref, clean in raw_refs:
+            if ext in (".sh", ".js", ".cjs", ".mjs"):
+                if ext == ".sh":
+                    ref = ref.strip("\"'")
+                path_part = strip_var_prefix(ref)
+                if path_part is None or not PATHISH_RE.match(path_part):
+                    continue
+                ref = path_part
+                clean = False
+            target, status = resolve_ref(ref, f, clean, paths, by_basename)
+            if status == "edge":
+                if target in files_set:
+                    _record_edge(edges, cross_skill_refs, f, target)
+            elif status == "broken":
+                broken_refs.append((f, target))
+    return edges, broken_refs, cross_skill_refs
+
+
+def bfs_reach_and_depth(entry_points, edges, max_depth):
+    reached, depth, parent = set(), {}, {}
+    q = deque()
+    for ep in entry_points:
+        if ep not in reached:
+            reached.add(ep)
+            depth[ep] = 0
+            q.append(ep)
+    while q:
+        node = q.popleft()
+        for nxt in edges.get(node, []):
+            if nxt not in reached:
+                reached.add(nxt)
+                depth[nxt] = depth[node] + 1
+                parent[nxt] = node
+                q.append(nxt)
+    unlimited = (max_depth == 0)
+    violations = [(n, d) for n, d in depth.items()
+                  if not unlimited and d > max_depth and not is_whitelisted(n)]
+    return reached, depth, parent, violations
+
+
+def reconstruct_path(node, parent):
+    chain = [node]
+    cur = node
+    while cur in parent:
+        cur = parent[cur]
+        chain.append(cur)
+    chain.reverse()
+    return chain
+
+
+def detect_cycles(entry_points, edges):
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color, stack, cycles, seen = {}, [], [], set()
+
+    def dfs(node):
+        color[node] = GRAY
+        stack.append(node)
+        for nxt in edges.get(node, []):
+            c = color.get(nxt, WHITE)
+            if c == GRAY:
+                cyc_nodes = stack[stack.index(nxt):]
+                if not any(is_entry(n) for n in cyc_nodes):
+                    key = tuple(sorted(set(cyc_nodes)))
+                    if key not in seen:
+                        seen.add(key)
+                        cycles.append(cyc_nodes + [nxt])
+            elif c == WHITE:
+                dfs(nxt)
+        stack.pop()
+        color[node] = BLACK
+
+    for ep in entry_points:
+        if color.get(ep, WHITE) == WHITE:
+            dfs(ep)
+    return cycles
+
+
+def main():
+    for s in (sys.stdout, sys.stderr):
+        if hasattr(s, "reconfigure"):
+            s.reconfigure(encoding="utf-8", errors="replace")
+    ap = argparse.ArgumentParser(description="Validador de grafo de arquivos para skills/")
+    ap.add_argument("--root", default=".")
+    ap.add_argument("--warn-only", action="store_true", help="imprime tudo e sai 0")
+    ap.add_argument("--json", action="store_true", help="saída JSON com as 5 chaves")
+    ap.add_argument("--max-depth", type=int, default=10, help="profundidade máxima (0 = ilimitada)")
+    args = ap.parse_args()
+    root = Path(args.root)
+
+    files, paths = collect_tree(root)
+    by_basename = {}
+    for f in files:
+        skill = skill_of(f)
+        by_basename.setdefault(skill, {}).setdefault(PurePosixPath(f).name, []).append(f)
+
+    entry_points = [f for f in files if is_entry(f)]
+    edges, broken_refs, cross_skill_refs = extract_edges(files, paths, by_basename, root)
+    reached, depth, parent, depth_violations = bfs_reach_and_depth(
+        entry_points, edges, args.max_depth)
+    cycles = detect_cycles(entry_points, edges)
+    orphans = sorted(f for f in files if f not in reached and not is_whitelisted(f))
+
+    broken_refs = sorted(set(broken_refs))
+    cross_skill_refs = sorted(set(cross_skill_refs))
+    depth_map = dict(depth_violations)
+    depth_chains = sorted((reconstruct_path(n, parent), n) for n, _ in depth_violations)
+
+    exit_code = 0
+    if orphans:
+        exit_code |= EXIT_ORPHAN
+    if broken_refs:
+        exit_code |= EXIT_BROKEN
+    if cycles:
+        exit_code |= EXIT_CIRCULAR
+    if cross_skill_refs:
+        exit_code |= EXIT_CROSS_SKILL
+    if depth_violations:
+        exit_code |= EXIT_DEPTH
+
+    if args.json:
+        payload = {
+            "orphans": orphans,
+            "broken": [{"from": s, "target": t} for s, t in broken_refs],
+            "circular": [{"path": c} for c in cycles],
+            "cross_skill": [{"from": s, "target": t} for s, t in cross_skill_refs],
+            "depth": [{"path": c, "node": n, "depth": depth_map[n]}
+                      for c, n in depth_chains],
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        for f in orphans:
+            print(f"ORPHAN: {f}")
+        for s, t in broken_refs:
+            print(f"BROKEN: {s} -> {t}")
+        for c in cycles:
+            print("CIRCULAR: " + " -> ".join(c))
+        for s, t in cross_skill_refs:
+            print(f"CROSS-SKILL: {s} -> {t}")
+        for c, n in depth_chains:
+            print("DEPTH: " + " -> ".join(c) + f" (>{args.max_depth})")
+        print(f"\n{len(files)} arquivos · {len(entry_points)} entry points · "
+              f"{len(reached)} alcançados · {len(orphans)} órfão(s) · "
+              f"{len(broken_refs)} quebrada(s) · {len(cycles)} ciclo(s) · "
+              f"{len(cross_skill_refs)} cross-skill · {len(depth_violations)} profundidade")
+
+    if args.warn_only:
+        sys.exit(0)
+    sys.exit(exit_code)
+
+
+if __name__ == "__main__":
+    main()
