@@ -16,14 +16,15 @@ reviews ou implementação você mesmo.
 | --- | --- |
 | `/code-flow` | Modo repositório: retoma a fase mais antiga não cumprida. |
 | `/code-flow issue create` | Roda Fases 0–2 e cria uma issue de entrega cuja proposta ADR/spec aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
+| `/code-flow create-issue` | Alias de `/code-flow issue create` (canônico: `issue create`). |
 | `/code-flow issue <#N\|URL> [phase]` | Valida uma issue elegível existente e retoma seu stage ou fase nomeada. |
 | `/code-flow batch <#N\|URL>... --from <phase>` | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes. |
-| `/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>` | Inicia essa fase de repositório e continua. |
-| `/code-flow tool <doctor\|bootstrap\|review-package>` | Roda um helper e para. |
+| `/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>` | Inicia essa fase de repositório e continua (`create-issue` = alias de `issue create`). |
+| `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para. |
 
-`issue create` é a única rota de criação de issue. Fases nomeadas nunca
-bypassam gates; `batch` nunca cria issues; `direct` é só repositório e nunca
-muda estado GitHub.
+`issue create` é a única rota canônica de criação de issue (`create-issue` é
+alias). Fases nomeadas nunca bypassam gates; `batch` nunca cria issues;
+`direct` é só repositório e nunca muda estado GitHub.
 
 ## Regras antes de escrever
 
@@ -72,7 +73,10 @@ GitHub. Um Epic/umbrella existente é inelegível para o fluxo de entrega.
 Leia [`references/github-flow.md`](references/github-flow.md) antes de mudar
 stages de issue ou retomar uma issue. Leia
 [`references/evidence-contract.md`](references/evidence-contract.md) antes de
-publicar evidência, revisar implementação ou fechar a entrega.
+publicar evidência, revisar implementação ou fechar a entrega. Para resume e
+mutação de labels, use
+[`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md)
+e `scripts/transition-issue.sh`.
 
 ## Papéis
 
@@ -81,7 +85,7 @@ Despache apenas estes papéis:
 | Agente | Responsabilidade |
 | --- | --- |
 | `issue-writer` | Contexto, proposta, criação da issue e materialização formal do ADR/spec após aprovação. |
-| `issue-reviewer` | Auditoria opcional independente do source-set. |
+| `issue-reviewer` | Auditoria independente do source-set quando pedida ou em alto risco (Fase 2); nunca substitui o gate humano. |
 | `plan-writer` | Um plano de implementação append-only. |
 | `plan-reviewer` | Veredito literal independente de um snapshot de plano. |
 | `executor` | Um plano aprovado, implementado como uma unidade (pode organizar o trabalho internamente). |

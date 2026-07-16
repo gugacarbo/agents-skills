@@ -34,7 +34,7 @@
 
 	function sessionKey() {
 		try {
-			return window.sessionStorage?.getItem("brainstorm-session-key");
+			return window.sessionStorage?.getItem("code-flow-visual-session-key");
 		} catch (_e) {}
 		return null;
 	}
@@ -89,7 +89,7 @@
 		el.innerHTML =
 			'<div style="max-width:480px">' +
 			'<h2 style="margin:0 0 .5rem;font-weight:600">Companion paused</h2>' +
-			'<p style="margin:0;opacity:.85">This brainstorm companion has stopped. ' +
+			'<p style="margin:0;opacity:.85">This code-flow visual companion has stopped. ' +
 			"Ask your coding agent to bring it back — this page reconnects automatically.</p></div>";
 		if (document.body) document.body.appendChild(el);
 	}

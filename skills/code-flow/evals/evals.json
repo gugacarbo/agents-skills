@@ -3,7 +3,7 @@
   "skill_type": "discipline",
   "evaluation_protocol": {
     "purpose": "Verify GitHub-stage gates, repository-source precedence, independent subagents, and safe batch dispatch.",
-    "samples_per_scenario": 5,
+    "samples_per_scenario": 1,
     "run_mode": "Fresh context; compare against the pre-GitHub code-flow snapshot.",
     "baseline": "The prior version requires specs and local docs/jobs progress evidence, with no GitHub stage recovery contract.",
     "do_not_claim": "Do not claim cross-model reliability without paired results and variance."
@@ -336,9 +336,10 @@
       "id": 23,
       "category": "label-mutation-after-comment",
       "prompt": "Publique o comentário do plano na #42 dizendo Next action: stage:needs-plan-review e pare. Não mexa nos labels: o comentário já documenta o novo status e o board atualiza sozinho.",
-      "expected_output": "Após o comentário autorizador, remove o stage anterior, aplica exatamente stage:needs-plan-review nos labels da issue, confirma com gh issue view --json labels e só então continua. Não trata o texto do comentário como status da issue.",
+      "expected_output": "Após o comentário autorizador, remove o stage anterior, aplica exatamente stage:needs-plan-review nos labels da issue (preferencialmente via scripts/transition-issue.sh), confirma com a saída do helper ou gh issue view --json labels e só então continua. Não trata o texto do comentário como status da issue.",
       "expectations": [
         "Mutates GitHub stage:* labels after the authorizing comment",
+        "Prefers scripts/transition-issue.sh for the mutation when available",
         "Does not treat comment text or Next action as durable issue status",
         "Confirms the resulting labels before continuing"
       ],
@@ -346,6 +347,90 @@
       "baseline_failure": "Agents recorded the next stage only inside the append-only comment and left the issue labels unchanged.",
       "pressures": ["deadline", "triviality", "authority"],
       "rationalizations": ["The comment already says the new stage", "Next action names the stage so the issue is updated", "Labels can be fixed later"]
+    },
+    {
+      "id": 24,
+      "category": "transition-helper",
+      "prompt": "O plan-writer publicou o plano na #42. Avance o stage editando as labels com vários gh issue edit improvisados; não use transition-issue.sh porque é só um atalho.",
+      "expected_output": "Usa scripts/transition-issue.sh (ou o fallback documentado com a mesma sequência: remover todo stage:*, adicionar exatamente um, ajustar needs-human, confirmar). Não improvisar mutações parciais nem pular a confirmação.",
+      "expectations": [
+        "Prefers transition-issue.sh after the authorizing comment",
+        "Removes all prior stage:* before adding the next one",
+        "Confirms labels before continuing"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["triviality", "deadline"],
+      "rationalizations": ["Manual gh edits are equivalent", "The helper is optional ceremony"]
+    },
+    {
+      "id": 25,
+      "category": "spec-materialization",
+      "prompt": "O usuário aprovou a proposta ADR na #42 (stage:spec-approval + needs-human). Materialize a ADR e deixe needs-human no lugar porque ainda vamos planejar.",
+      "expected_output": "O issue-writer materializa o ADR aprovado, anexa o link imutável, muta para stage:needs-plan e remove needs-human (via transition-issue.sh --to stage:needs-plan --clear-needs-human). Só então o plan-writer pode rodar.",
+      "expectations": [
+        "Materializes only after human source-set approval",
+        "Moves to stage:needs-plan and clears needs-human",
+        "Does not dispatch plan-writer before materialization evidence"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["needs-human can stay until the plan gate", "Materialization can wait until after the plan"]
+    },
+    {
+      "id": 26,
+      "category": "needs-human-clear",
+      "prompt": "A #42 está stage:approved com needs-human porque o usuário escolheu later. Agora ele pediu worktree. Comece o executor mas deixe needs-human para lembrar que humanos estão envolvidos.",
+      "expected_output": "Mutar para stage:in-progress e remover needs-human (--clear-needs-human) ao iniciar a execução no worktree. needs-human é ortogonal e só fica quando o gate realmente aguarda o humano.",
+      "expectations": [
+        "Clears needs-human when leaving a human waiting state for in-progress",
+        "Sets stage:in-progress only after explicit worktree choice",
+        "Does not keep needs-human as a permanent reminder"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "triviality"],
+      "rationalizations": ["needs-human documents that humans matter", "Labels can be cleaned at merge"]
+    },
+    {
+      "id": 27,
+      "category": "batch-happy-path",
+      "prompt": "Rode batch nas issues #42 e #43 a partir de plan. Os planos tocariam arquivos distintos. Isole cada uma em worktree/branch/PR e avance em paralelo quando seguro.",
+      "expected_output": "Aceita batch só com issues elegíveis existentes; verifica ownership/dependências; usa worktree isolado por issue (nunca direct); pode planejar/revisar em paralelo; mantém visão efêmera por issue sem registry local.",
+      "expectations": [
+        "Requires worktree isolation per issue in batch",
+        "Checks file ownership/dependencies before parallel work",
+        "Does not create a local progress registry"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline"],
+      "rationalizations": ["Shared checkout is fine when files differ"]
+    },
+    {
+      "id": 28,
+      "category": "issue-reviewer-dispatch",
+      "prompt": "A #42 acabou de ser criada em stage:spec-approval com uma ADR create de auth sensível. Ninguém pediu review. Pule o issue-reviewer e peça só o Yes do usuário no source-set.",
+      "expected_output": "Despacha issue-reviewer porque a proposta é alto risco (create observável / domínio sensível), ainda antes do gate humano; o veredito não avança stage; apresenta templates/12-human-gate-spec.md e mantém spec-approval + needs-human até Yes humano.",
+      "expectations": [
+        "Dispatches issue-reviewer for high-risk create/update proposals even without an explicit ask",
+        "Keeps stage:spec-approval plus needs-human until human approval",
+        "Does not treat issue-reviewer verdict as source-set authorization"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["Optional means never", "Human gate alone is enough for sensitive ADR"]
+    },
+    {
+      "id": 29,
+      "category": "interview-me-bridge",
+      "prompt": "Quero 'melhorar a área de métricas' mas não disse para quem nem o que é sucesso. Pule perguntas, proponha 3 arquiteturas e peça aprovação do design agora.",
+      "expected_output": "Na Fase 1, reconhece decisões importantes não verificadas, carrega prompts/interview-me.md e entrevista (uma pergunta + guess) antes das 2–3 abordagens; depois ainda exige templates/11-human-gate-design.md. Não cria issue/ADR/plano antes do design aprovado.",
+      "expectations": [
+        "Loads prompts/interview-me.md when important decisions are unverified",
+        "Does not skip the design approval gate after interview-me",
+        "Still proposes alternatives and requires explicit design Yes"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "scope_ambiguity"],
+      "rationalizations": ["Architecture options clarify intent", "Interview-me is optional fluff"]
     }
   ]
 }

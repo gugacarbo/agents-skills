@@ -99,16 +99,6 @@ const SESSION_DIR = process.env.SESSION_DIR || "/tmp/brainstorm";
 const CONTENT_DIR = path.join(SESSION_DIR, "content");
 const STATE_DIR = path.join(SESSION_DIR, "state");
 const SUPERPOWERS_VERSION = readSuperpowersVersion();
-const SUPERPOWERS_BRAND_IMAGE_URL =
-	"https://primeradiant.com/brand/superpowers-visual-brainstorming-logo.png";
-const TELEMETRY_DISABLE_ENV_VARS = [
-	"SUPERPOWERS_DISABLE_TELEMETRY",
-	"DISABLE_TELEMETRY",
-	"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
-];
-const SUPERPOWERS_TELEMETRY_DISABLED = TELEMETRY_DISABLE_ENV_VARS.some((name) =>
-	isTruthyEnv(process.env[name]),
-);
 let ownerPid = process.env.SESSION_OWNER_PID
 	? Number(process.env.SESSION_OWNER_PID)
 	: null;
@@ -141,7 +131,7 @@ function initialToken() {
 const tokenInfo = initialToken();
 let TOKEN = tokenInfo.value;
 let tokenSource = tokenInfo.source;
-let COOKIE_NAME = `brainstorm-key-${PORT}`; // refined to the actual bound port in onListen
+let COOKIE_NAME = `code-flow-visual-${PORT}`; // refined to the actual bound port in onListen
 
 const MIME_TYPES = {
 	".html": "text/html",
@@ -188,10 +178,10 @@ function bootstrapPage(key) {
 	const jsonKey = JSON.stringify(String(key));
 	return `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Opening Brainstorm Companion</title></head>
+<head><meta charset="utf-8"><title>Opening code-flow Visual Companion</title></head>
 <body>
 <script>
-try { sessionStorage.setItem('brainstorm-session-key', ${jsonKey}); } catch (e) {}
+try { sessionStorage.setItem('code-flow-visual-session-key', ${jsonKey}); } catch (e) {}
 location.replace('/');
 </script>
 </body>
@@ -229,13 +219,6 @@ function readSuperpowersVersion() {
 	return "unknown";
 }
 
-function isTruthyEnv(value) {
-	if (!value) return false;
-	const normalized = String(value).trim().toLowerCase();
-	if (!normalized) return false;
-	return !["0", "false", "no", "off"].includes(normalized);
-}
-
 function escapeHtmlText(value) {
 	return String(value)
 		.replace(/&/g, "&amp;")
@@ -246,23 +229,12 @@ function escapeHtmlText(value) {
 
 function brandMarkup() {
 	const version = escapeHtmlText(SUPERPOWERS_VERSION);
-	const text = SUPERPOWERS_TELEMETRY_DISABLED
-		? `Prime Radiant Superpowers v${version}`
-		: `Superpowers v${version}`;
-	const logo = SUPERPOWERS_TELEMETRY_DISABLED
-		? ""
-		: '<img class="brand-logo" src="' +
-			SUPERPOWERS_BRAND_IMAGE_URL +
-			"?v=" +
-			encodeURIComponent(SUPERPOWERS_VERSION) +
-			'" alt="Prime Radiant" referrerpolicy="no-referrer" decoding="async">';
+	const text = `code-flow visual companion v${version}`;
 
 	return (
-		'<div class="brand"><a href="https://github.com/obra/superpowers">' +
-		logo +
-		'<span class="brand-copy">' +
-		text +
-		"</span></a></div>"
+		'<div class="brand"><span class="brand-copy">' +
+		escapeHtmlText(text) +
+		"</span></div>"
 	);
 }
 
@@ -756,7 +728,7 @@ function startServer() {
 		// Cookie name keys on the ACTUAL bound port (may differ from the preferred
 		// one after an EADDRINUSE fallback) so it can't collide with another server's
 		// cookie in the shared localhost jar.
-		COOKIE_NAME = `brainstorm-key-${PORT}`;
+		COOKIE_NAME = `code-flow-visual-${PORT}`;
 		const info = JSON.stringify({
 			type: "server-started",
 			port: Number(PORT),

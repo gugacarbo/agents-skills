@@ -52,10 +52,14 @@ assert_template_references() {
     07-implementation-evidence-template.md \
     08-implementation-review-template.md \
     09-integration-report-template.md \
-    10-delivery-report-template.md; do
+    10-delivery-report-template.md \
+    11-human-gate-design.md \
+    12-human-gate-spec.md \
+    13-human-gate-plan.md \
+    14-human-gate-merge.md; do
     [ -f "$SKILL/templates/$template" ] || fail "missing template: $template"
     rg -Fq -- "templates/$template" \
-      "$SKILL/SKILL.md" "$SKILL/README.md" "$SKILL/agents" "$SKILL/phases" \
+      "$SKILL/SKILL.md" "$SKILL/README.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/references" \
       || fail "template is not referenced by the active flow: $template"
   done
   [ ! -e "$SKILL/templates/07-task-evidence-template.md" ] || fail 'legacy 07-task-evidence template still exists'
@@ -65,7 +69,13 @@ assert_template_references() {
 test_router_and_subagents() {
   assert_contains '/code-flow issue <#N\|URL> [phase]' "$SKILL/SKILL.md"
   assert_contains '/code-flow batch <#N\|URL>... --from <phase>' "$SKILL/SKILL.md"
-  assert_contains '/code-flow tool <doctor\|bootstrap\|review-package>' "$SKILL/SKILL.md"
+  assert_contains '/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>' "$SKILL/SKILL.md"
+  assert_contains 'Alias de `/code-flow issue create`' "$SKILL/SKILL.md"
+  assert_contains 'scripts/transition-issue.sh' "$SKILL/references/github-flow.md"
+  assert_contains 'gh issue edit' "$SKILL/references/github-flow.md"
+  [ -f "$SKILL/references/orchestrator-cheatsheet.md" ] || fail 'missing orchestrator cheatsheet'
+  assert_contains 'orchestrator-cheatsheet.md' "$SKILL/SKILL.md"
+  assert_contains 'Matriz stage → fase → ação' "$SKILL/references/orchestrator-cheatsheet.md"
   for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-delivery-review needs-changes ready-to-merge blocked; do
     assert_contains "stage:$stage" "$SKILL/references/github-flow.md"
   done
@@ -87,9 +97,22 @@ test_router_and_subagents() {
   assert_contains 'gh issue view <n> --json labels' "$SKILL/references/github-flow.md"
   assert_contains 'texto de comentário sozinho não é atualização de status' "$SKILL/SKILL.md"
   assert_contains 'Mencionar um stage no comentário não é mudança de estado' "$SKILL/references/evidence-contract.md"
-  for file in 00-issue-context.md 01-brainstorm.md 02-create-issue.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
+  for file in 00-issue-context.md 01-brainstorm.md 01_1-visual-companion.md 02-create-issue.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
     [ -f "$SKILL/phases/$file" ] || fail "missing phase: $file"
   done
+  assert_contains 'prompts/interview-me.md' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'decisões importantes ainda não verificadas' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'templates/11-human-gate-design.md' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'Fast-path (sem pular gates)' "$SKILL/phases/01-brainstorm.md"
+  assert_contains 'agents/02-issue-reviewer.md' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'alto risco' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'mutar labels para `stage:needs-plan`' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'templates/12-human-gate-spec.md' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'templates/13-human-gate-plan.md' "$SKILL/phases/03-plan.md"
+  assert_contains 'templates/14-human-gate-merge.md' "$SKILL/phases/06-integrate.md"
+  [ -f "$SKILL/prompts/interview-me.md" ] || fail 'missing prompts/interview-me.md'
+  assert_contains 'code-flow vs super-planning' "$SKILL/README.md"
+  assert_contains 'code-toolbox' "$SKILL/README.md"
   [ ! -e "$SKILL/phases/02-spec.md" ] || fail 'legacy phase-02 spec file exists'
   assert_contains '/code-flow <brainstorm\|create-issue\|plan\|dispatch\|review\|integrate>' "$SKILL/SKILL.md"
   assert_exact_agents
@@ -145,6 +168,10 @@ test_issue_evidence_contract() {
   assert_contains 'stage:spec-approval' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'aprovar o source-set' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'Não mudar labels, criar plano, implementar código nem' "$SKILL/agents/02-issue-reviewer.md"
+  assert_contains 'pedido explícito do usuário **ou** alto risco' "$SKILL/agents/02-issue-reviewer.md"
+  assert_contains 'Best-effort mutate' "$SKILL/scripts/transition-issue.sh"
+  assert_contains 'best-effort' "$SKILL/references/github-flow.md"
+  assert_contains 'zero `stage:*`' "$SKILL/references/github-flow.md"
 
   assert_contains 'Implemente o plano aprovado como uma unidade' "$SKILL/agents/05-executor.md"
   assert_contains 'Pode organizar o trabalho internamente' "$SKILL/agents/05-executor.md"
@@ -168,7 +195,7 @@ test_issue_creation_and_mode_boundaries() {
   assert_contains 'conteúdo proposto de ADR/spec' "$SKILL/references/github-flow.md"
   assert_contains 'Não escrever' "$SKILL/references/github-flow.md"
   assert_contains 'ADR/spec formal primeiro' "$SKILL/references/github-flow.md"
-  assert_contains 'Só `/code-flow issue create` cria a issue de entrega' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'alias: `/code-flow create-issue`' "$SKILL/phases/02-create-issue.md"
   assert_contains 'Não despachar `plan-writer` antes dessa evidência existir' "$SKILL/phases/02-create-issue.md"
   assert_contains 'Após o usuário selecionar explicitamente um Epic, crie-o no GitHub' "$SKILL/phases/02-create-issue.md"
   assert_contains 'Não criar nem atualizar' "$SKILL/agents/01-issue-writer.md"
@@ -194,6 +221,7 @@ test_no_local_workflow_state() {
   [ ! -e "$SKILL/templates/progress-template.txt" ] || fail 'legacy progress template exists'
   [ ! -e "$SKILL/platforms/continuation" ] || fail 'legacy watchdog platform exists'
   [ ! -e "$SKILL/prompts/watchdogs" ] || fail 'legacy watchdog prompts exist'
+  [ -f "$SKILL/prompts/interview-me.md" ] || fail 'interview-me prompt missing'
   [ ! -e "$SKILL/scripts/materialize-watchdogs.sh" ] || fail 'legacy watchdog materializer exists'
   [ ! -e "$SKILL/scripts/log-task.sh" ] || fail 'legacy task logger exists'
   [ ! -e "$SKILL/phases/08-reference.md" ] || fail 'obsolete phase-08 reference exists'
@@ -206,10 +234,20 @@ test_helpers() {
   bash -n "$SKILL/scripts/doctor.sh"
   bash -n "$SKILL/scripts/review-package.sh"
   bash -n "$SKILL/scripts/bootstrap.sh"
+  bash -n "$SKILL/scripts/transition-issue.sh"
+  sh -n "$SKILL/scripts/transition-issue.sh"
   bash -n "$SKILL/scripts/visual-companion/start-server.sh"
   bash -n "$SKILL/scripts/visual-companion/stop-server.sh"
   node --check "$SKILL/scripts/visual-companion/server.cjs"
   assert_contains '--github' "$SKILL/scripts/doctor.sh"
+  assert_contains 'transition-issue.sh' "$SKILL/scripts/doctor.sh"
+  assert_contains 'transition-issue.sh' "$SKILL/scripts/bootstrap.sh"
+  assert_contains '--to' "$SKILL/scripts/transition-issue.sh"
+  assert_contains '--dry-run' "$SKILL/scripts/transition-issue.sh"
+  assert_contains '--allow-repair' "$SKILL/scripts/transition-issue.sh"
+  assert_contains 'code-flow-visual-' "$SKILL/scripts/visual-companion/server.cjs"
+  ! rg -Fq -- 'primeradiant.com' "$SKILL/scripts/visual-companion/server.cjs" || fail 'external primeradiant brand URL still present'
+  ! rg -Fq -- 'brainstorm-key-' "$SKILL/scripts/visual-companion/server.cjs" || fail 'legacy brainstorm-key cookie still present'
   assert_contains '--pr' "$SKILL/scripts/review-package.sh"
   assert_contains 'git merge-base' "$SKILL/scripts/review-package.sh"
   assert_contains 'mktemp' "$SKILL/scripts/review-package.sh"
@@ -224,10 +262,145 @@ test_bootstrap_excludes_legacy_helpers() {
   tmp=$(mktemp -d)
   target="$tmp/.code-flow"
   sh "$SKILL/scripts/bootstrap.sh" --target-dir "$target" >/dev/null
-  for helper in bootstrap.sh doctor.sh review-package.sh; do
+  for helper in bootstrap.sh doctor.sh review-package.sh transition-issue.sh; do
     [ -x "$target/$helper" ] || fail "bootstrap did not install $helper"
   done
   [ ! -e "$target/materialize-watchdogs.sh" ] || fail 'bootstrap installed watchdog materializer'
+}
+
+test_transition_issue_dry_run() {
+  local tmp fake out
+  tmp=$(mktemp -d)
+  fake="$tmp/fake-bin"
+  mkdir -p "$fake"
+  cat > "$fake/gh" <<'EOF'
+#!/usr/bin/env sh
+case "$1 $2" in
+  "issue view")
+    printf '%s\n' '{"number":42,"url":"https://example.test/issues/42","labels":[{"name":"stage:needs-plan"},{"name":"delivery"}]}'
+    ;;
+  "label list")
+    printf '%s\n' 'stage:needs-plan'
+    printf '%s\n' 'stage:needs-plan-review'
+    printf '%s\n' 'needs-human'
+    printf '%s\n' 'delivery'
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+EOF
+  chmod +x "$fake/gh"
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:needs-plan --to stage:needs-plan-review --dry-run)
+  printf '%s\n' "$out" | rg -Fq '"issue":42' || fail "dry-run missing issue id: $out"
+  printf '%s\n' "$out" | rg -Fq '"to":"stage:needs-plan-review"' || fail "dry-run missing to stage: $out"
+  printf '%s\n' "$out" | rg -Fq '"dry_run":true' || fail "dry-run flag missing: $out"
+}
+
+test_transition_issue_edges() {
+  local tmp fake out rc
+  tmp=$(mktemp -d)
+  fake="$tmp/fake-bin"
+  mkdir -p "$fake"
+  cat > "$fake/gh" <<'EOF'
+#!/usr/bin/env sh
+case "$1 $2" in
+  "issue view")
+    printf '%s\n' '{"number":42,"url":"https://example.test/issues/42","labels":[{"name":"stage:needs-plan"},{"name":"delivery"}]}'
+    ;;
+  "label list")
+    printf '%s\n' 'stage:needs-plan'
+    printf '%s\n' 'stage:needs-plan-review'
+    printf '%s\n' 'stage:approved'
+    printf '%s\n' 'needs-human'
+    printf '%s\n' 'delivery'
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+EOF
+  chmod +x "$fake/gh"
+
+  rc=0
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:approved --to stage:needs-plan-review --dry-run 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || fail "expected --require-from mismatch to fail"
+  printf '%s\n' "$out" | rg -Fq "expected current stage" || fail "mismatch error missing: $out"
+
+  rc=0
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to stage:approved --clear-stage --dry-run 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || fail "expected --to + --clear-stage to fail"
+  printf '%s\n' "$out" | rg -Fq "mutually exclusive" || fail "mutual exclusion error missing: $out"
+
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --clear-stage --dry-run)
+  printf '%s\n' "$out" | rg -Fq '"to":null' || fail "clear-stage dry-run should have null to: $out"
+  printf '%s\n' "$out" | rg -Fq '"dry_run":true' || fail "clear-stage dry-run flag missing: $out"
+}
+
+test_transition_issue_mutation() {
+  local tmp fake state out
+  tmp=$(mktemp -d)
+  fake="$tmp/fake-bin"
+  state="$tmp/labels.json"
+  mkdir -p "$fake"
+  printf '%s\n' '[{"name":"stage:needs-plan"},{"name":"delivery"}]' > "$state"
+  cat > "$fake/gh" <<EOF
+#!/usr/bin/env sh
+STATE="$state"
+case "\$1 \$2" in
+  "issue view")
+    printf '{"number":42,"url":"https://example.test/issues/42","labels":%s}\n' "\$(cat "\$STATE")"
+    ;;
+  "label list")
+    printf '%s\n' 'stage:needs-plan'
+    printf '%s\n' 'stage:needs-plan-review'
+    printf '%s\n' 'needs-human'
+    printf '%s\n' 'delivery'
+    ;;
+  "issue edit")
+    # \$3=number; remaining flags: --remove-label X / --add-label Y
+    shift 2
+    issue_num="\$1"
+    shift
+    while [ "\$#" -gt 0 ]; do
+      case "\$1" in
+        --remove-label)
+          jq --arg n "\$2" '[.[] | select(.name != \$n)]' "\$STATE" > "\$STATE.tmp" && mv "\$STATE.tmp" "\$STATE"
+          shift 2
+          ;;
+        --add-label)
+          jq --arg n "\$2" '. + [{"name":\$n}]' "\$STATE" > "\$STATE.tmp" && mv "\$STATE.tmp" "\$STATE"
+          shift 2
+          ;;
+        *)
+          shift
+          ;;
+      esac
+    done
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+EOF
+  chmod +x "$fake/gh"
+
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:needs-plan --to stage:needs-plan-review)
+  printf '%s\n' "$out" | rg -Fq '"to":"stage:needs-plan-review"' || fail "mutation missing to: $out"
+  printf '%s\n' "$out" | rg -Fq '"dry_run":false' || fail "mutation should not be dry-run: $out"
+  jq -e '[.[].name] | index("stage:needs-plan-review") != null' "$state" >/dev/null \
+    || fail "state missing needs-plan-review: $(cat "$state")"
+  jq -e '[.[].name] | index("stage:needs-plan") == null' "$state" >/dev/null \
+    || fail "state still has old stage: $(cat "$state")"
+
+  # Ambiguous stages without --allow-repair must fail
+  printf '%s\n' '[{"name":"stage:needs-plan"},{"name":"stage:approved"}]' > "$state"
+  rc=0
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to stage:needs-plan-review >/dev/null 2>&1 || rc=$?
+  [ "$rc" -ne 0 ] || fail "expected ambiguous stages without --allow-repair to fail"
+
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to stage:needs-plan-review --allow-repair)
+  printf '%s\n' "$out" | rg -Fq '"to":"stage:needs-plan-review"' || fail "allow-repair mutation failed: $out"
 }
 
 test_companion_uses_temporary_session() {
@@ -244,16 +417,35 @@ test_companion_uses_temporary_session() {
 }
 
 test_doctor_github() {
-  local tmp fake
+  local tmp fake out
   tmp=$(mktemp -d)
   fake="$tmp/fake-bin"
   mkdir -p "$fake"
   cat > "$fake/gh" <<'EOF'
 #!/usr/bin/env sh
-exit 0
+case "$1 $2" in
+  "auth status"|"repo view")
+    exit 0
+    ;;
+  "issue view")
+    printf '%s\n' '{"number":42,"url":"https://example.test/issues/42","labels":[{"name":"stage:needs-plan"},{"name":"delivery"}]}'
+    ;;
+  "label list")
+    printf '%s\n' 'stage:needs-plan'
+    printf '%s\n' 'stage:needs-plan-review'
+    printf '%s\n' 'needs-human'
+    printf '%s\n' 'delivery'
+    ;;
+  *)
+    exit 0
+    ;;
+esac
 EOF
   chmod +x "$fake/gh"
-  (cd "$REPO_ROOT" && PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --target-dir "$SKILL/scripts" --github --issue 42) >/dev/null
+  out=$(cd "$REPO_ROOT" && PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --target-dir "$SKILL/scripts" --github --issue 42)
+  printf '%s\n' "$out" | rg -Fq 'PASS transition-issue-dry-run' || fail "doctor missing PASS transition-issue-dry-run: $out"
+  printf '%s\n' "$out" | rg -Fq 'PASS gh-issue 42' || fail "doctor missing PASS gh-issue: $out"
+  ! printf '%s\n' "$out" | rg -Fq 'WARN transition-issue dry-run failed' || fail "doctor still warns on dry-run with valid fake gh"
 }
 
 test_review_package() {
@@ -314,6 +506,9 @@ test_issue_creation_and_mode_boundaries
 test_no_local_workflow_state
 test_helpers
 test_bootstrap_excludes_legacy_helpers
+test_transition_issue_dry_run
+test_transition_issue_edges
+test_transition_issue_mutation
 test_companion_uses_temporary_session
 test_doctor_github
 test_review_package

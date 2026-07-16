@@ -17,7 +17,7 @@ Para alvos issue/batch existentes:
 1. Confirme que cada alvo é uma issue de entrega/bug existente, não umbrella, auditoria ou tracking. Esta checagem de elegibilidade vem antes de qualquer reparo de label.
 2. Se for inelegível, explique que está fora deste fluxo de entrega e pare sem adicionar, remover ou substituir labels.
 3. Leia body, labels, PRs ligados e comentários anteriores de evidência (oito campos), plano e review de uma issue elegível.
-4. Liste toda label `stage:*`. Exatamente um stage de `references/github-flow.md` é necessário para uma issue elegível retomável; `needs-human` é ortogonal.
+4. Liste toda label `stage:*`. Exatamente um stage de `references/github-flow.md` é necessário para uma issue elegível retomável; `needs-human` é ortogonal. O resume segue a tabela de `references/github-flow.md` e o cheatsheet em `references/orchestrator-cheatsheet.md` (labels são a fonte de verdade; não inferir stage só do texto do comentário).
 5. Resolva o branch default do repositório e inspecione paths de ADR/spec ligados nos commits registrados.
 6. Para batch, retenha uma visão efêmera de dispatch por issue: URL, stage atual, ciclo de plano ativo, links de fontes, blockers e próxima fase. Não escrever arquivo de estado ou registry.
 

@@ -32,11 +32,20 @@ issue/ADR/spec do repositório e `templates/03-issue-template.md` como proposta
 e pedido de aprovação append-only. Inclui o design aprovado, rascunho ADR/spec
 ou racional no-spec; ainda não materialize o ADR/spec formal.
 
-Só `/code-flow issue create` cria a issue de entrega. A aprovação humana
-autoriza o `issue-writer` a materializar o ADR/spec aprovado exatamente como
-aprovado (ou reter o racional no-spec), anexar o link imutável e mutar labels
-Não despachar `plan-writer` antes dessa evidência existir. `issue-reviewer` é opcional e
-nunca substitui o gate humano.
+Só `/code-flow issue create` (alias: `/code-flow create-issue`) cria a issue de
+entrega. A aprovação humana autoriza o `issue-writer` a materializar o ADR/spec
+aprovado exatamente como aprovado (ou reter o racional no-spec), anexar o link
+imutável e mutar labels para `stage:needs-plan` (remova `needs-human` quando não
+for mais necessário), preferencialmente via `scripts/transition-issue.sh`.
+Não despachar `plan-writer` antes dessa evidência existir.
+
+Após a issue existir em `stage:spec-approval` + `needs-human` e **antes** da
+aprovação humana do source-set, despache `agents/02-issue-reviewer.md` quando o
+usuário pedir essa auditoria **ou** quando a proposta for alto risco: impacto
+`create`/`update` com mudança observável ampla, conflito entre fonte aceita e
+código, ou domínio sensível já sinalizado. O veredito do `issue-reviewer` é
+append-only e **nunca** substitui o gate humano nem avança o stage. Use
+`templates/12-human-gate-spec.md` para apresentar a aprovação do source-set.
 
 Após o usuário selecionar explicitamente um Epic, crie-o no GitHub a partir do
 padrão local e `templates/01-epic.md`. É só tracking: sem stage de entrega nem
