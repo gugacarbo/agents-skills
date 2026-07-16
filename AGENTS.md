@@ -59,6 +59,9 @@ pnpm build               # artefatos publicados válidos
   locks e diretórios de desenvolvimento antes de copiar para `dist/`.
 - O hook `scripts/pre-commit` usa `scripts/shared.sh`; não mover o arquivo sem
   atualizar o caminho do source.
+- `skills/skill-master` validate (`scripts/quick_validate.py`) usa PyYAML se
+  disponível; sem o pacote cai num parser mínimo de frontmatter. Não deixar o
+  monorepo build depender de `pip install PyYAML` para passar.
 
 ## Mapa de contexto
 
