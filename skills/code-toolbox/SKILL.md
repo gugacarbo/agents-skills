@@ -67,4 +67,4 @@ Repository mode uses a versioned Markdown delivery record at the repository's es
 
 ## Non-goals
 
-Do not redesign `bootstrap`, the visual companion, or `log-task.sh`. Watchdogs are not part of this skill. `log-task.sh` is a legacy helper outside the router, bootstrap, and workflow; it is never evidence or a source of delivery state. Do not create a dashboard, JSON registry, or generated progress ledger.
+Do not redesign `bootstrap` or the visual companion. Watchdogs are not part of this skill. Do not create a dashboard, JSON registry, or generated progress ledger.

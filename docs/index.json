@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "SPEC-0001",
+    "path": "docs/specs/0001-code-toolbox-six-agent-issue-evidence.md",
+    "layer": "specs",
+    "title": "Code-toolbox coordena entregas com seis agentes e evidência por comentário",
+    "status": "accepted",
+    "builds-on": [],
+    "superseded-by": null,
+    "implemented-by": []
+  }
+]

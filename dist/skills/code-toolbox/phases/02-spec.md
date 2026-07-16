@@ -24,8 +24,6 @@ For `not required`:
 2. For an issue, `/code-toolbox issue create` creates the issue at `stage:spec-approval` plus `needs-human` and includes the rationale in its body; source-set approval moves it to `stage:needs-plan`. In repository mode, obtain human approval and initialize the versioned delivery record at the approved documentation path with its source-set approval section before planning.
 3. Give the approved rationale and immutable source links to `plan-author`; a later plan comment cannot retroactively replace this gate.
 
-Do not run `spec-document-reviewer` by default. It remains available for a user-requested additional audit of a required spec.
-
 ## Explicit issue creation
 
 `/code-toolbox issue create` is valid only after this phase has produced one prepared source set: an immutable ADR/spec path for `create`/`update`, or a concrete `not required` rationale. Create one eligible delivery/bug issue whose body links that source set and the investigation summary, then apply exactly `stage:spec-approval` and `needs-human`. Stop for source-set approval; do not plan, dispatch work, or select `direct`.

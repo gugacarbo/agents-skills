@@ -8,13 +8,11 @@ SKILL="$REPO_ROOT/skills/code-toolbox"
 
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 assert_contains() { rg -Fq -- "$1" "$2" || fail "expected $2 to contain: $1"; }
-assert_not_contains() { ! rg -Fq -- "$1" "$2" || fail "expected $2 not to contain: $1"; }
 
 test_router_and_subagents() {
   assert_contains '/code-toolbox issue <#N\|URL> [phase]' "$SKILL/SKILL.md"
   assert_contains '/code-toolbox batch <#N\|URL>... --from <phase>' "$SKILL/SKILL.md"
   assert_contains '/code-toolbox tool <doctor\|bootstrap\|review-package>' "$SKILL/SKILL.md"
-  assert_not_contains 'tool <doctor\|bootstrap\|review-package\|log-task>' "$SKILL/SKILL.md"
   assert_contains 'stage:blocked' "$SKILL/SKILL.md"
   for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-task-review blocked; do
     assert_contains "stage:$stage" "$SKILL/references/github-flow.md"
@@ -54,6 +52,20 @@ test_no_local_workflow_state() {
   [ ! -e "$SKILL/platforms/continuation" ] || fail 'legacy watchdog platform exists'
   [ ! -e "$SKILL/prompts/watchdogs" ] || fail 'legacy watchdog prompts exist'
   [ ! -e "$SKILL/scripts/materialize-watchdogs.sh" ] || fail 'legacy watchdog materializer exists'
+  [ ! -e "$SKILL/scripts/log-task.sh" ] || fail 'legacy task logger exists'
+  for artifact in \
+    agents/spec-document-reviewer.md \
+    docs/red-flags.md \
+    prompts/find-docs.md \
+    prompts/pre-write-approval.md \
+    prompts/post-write-approval.md \
+    templates/.gitignore-template \
+    templates/decisions-template.md \
+    templates/plan-template.md \
+    templates/spec-template.md \
+    templates/testing-anti-patterns.md; do
+    [ ! -e "$SKILL/$artifact" ] || fail "legacy orphan artifact exists: $artifact"
+  done
   assert_contains 'Do not create local task trackers' "$SKILL/phases/08-reference.md"
   assert_contains 'append-only' "$SKILL/references/github-flow.md"
   assert_contains 'Closure matrix' "$SKILL/references/evidence-contract.md"
@@ -84,9 +96,7 @@ test_bootstrap_excludes_legacy_helpers() {
   for helper in bootstrap.sh doctor.sh review-package.sh; do
     [ -x "$target/$helper" ] || fail "bootstrap did not install $helper"
   done
-  [ ! -e "$target/log-task.sh" ] || fail 'bootstrap installed legacy task logger'
   [ ! -e "$target/materialize-watchdogs.sh" ] || fail 'bootstrap installed watchdog materializer'
-  assert_not_contains 'log-task.sh' "$SKILL/scripts/bootstrap.sh"
 }
 
 test_companion_uses_temporary_session() {

@@ -27,6 +27,4 @@ Specs are conditional: create or update one only for a contract, observable beha
 
 Issue execution is worktree-only. `/code-toolbox issue create` is the sole issue-creation route and is available only after the spec gate prepares an ADR/spec or explicit no-spec rationale; it is incompatible with repository `direct` mode. `direct` creates no issue and uses no labels or GitHub comments. Repository mode keeps one versioned Markdown delivery record with append-only plan, independent plan review, task evidence, code reviews, and DoD closure—not a local progress registry. Rejected reviews, `BLOCKED`, and audit failures are recorded there with a stop/resume instruction, never as GitHub state. For parallel issue tasks, task branches are assembled and independently re-reviewed before the issue PR. After that PR is approved, merge/integration is suggested as an explicit optional final action; it is never automatic.
 
-`log-task.sh` is a legacy helper outside the router, bootstrap, and workflow. It is never a source of delivery state or evidence.
-
 See [SKILL.md](SKILL.md) for gates, agent roles, and the full workflow.
