@@ -21,19 +21,20 @@ O `issue-writer` classifica o impacto de spec:
 
 | Resultado | Quando usar | Ação necessária |
 | --- | --- | --- |
-| `create` | Novo contrato, comportamento observável ou decisão durável | Embutir rascunho ADR/spec no padrão do repositório na nova issue e pedir aprovação humana antes de criar o documento formal. |
-| `update` | Um ADR/spec aceito governa comportamento alterado | Embutir a atualização proposta no padrão do repositório na nova issue e pedir aprovação humana antes de mudar o documento formal. |
-| `not required` | Refator interno, restauração documentada, testes, docs, config ou sem mudança observável | Colocar o racional no-spec exato na nova issue e pedir aprovação humana; não criar spec só pelo workflow. |
+| `create` | Novo contrato, comportamento observável ou decisão durável | Embutir rascunho ADR/spec no padrão do repositório no **body** da issue e pedir aprovação humana antes de criar o documento formal. |
+| `update` | Um ADR/spec aceito governa comportamento alterado | Embutir a atualização proposta no padrão do repositório no **body** da issue e pedir aprovação humana antes de mudar o documento formal. |
+| `not required` | Refator interno, restauração documentada, testes, docs, config ou sem mudança observável | Colocar o racional no-spec exato no **body** da issue e pedir aprovação humana; não criar spec só pelo workflow. |
 
 ADRs/specs aceitos definem a intenção. Se uma fonte conflitar com o design
-aprovado ou o código, pare e resolva antes de planejar. O `issue-writer` cria a
-issue de entrega em `stage:spec-approval` + `needs-human`, usando o padrão de
-issue/ADR/spec do repositório e `templates/03-issue-template.md` como proposta
-e pedido de aprovação append-only. Inclui o design aprovado, rascunho ADR/spec
-ou racional no-spec; ainda não materialize o ADR/spec formal.
+aprovado ou o código, pare e resolva antes de planejar. O `issue-writer` cria ou
+**sobrescreve o body** de uma issue de entrega existente (incl. **draft**) em
+`stage:spec-approval` + `needs-human`, usando o padrão de issue/ADR/spec do
+repositório e `templates/03-issue-template.md` como estrutura do body (nunca como comentário). Inclui o design aprovado, rascunho ADR/spec ou racional
+no-spec; ainda não materialize o ADR/spec formal.
 
-Só `/code-flow issue create` (alias: `/code-flow create-issue`) cria a issue de
-entrega. A aprovação humana autoriza o `issue-writer` a materializar o ADR/spec
+`/code-flow issue create` (alias: `/code-flow create-issue`) cria a issue de
+entrega quando ainda não houver alvo, ou despacha o `issue-writer` para
+preencher/atualizar uma issue draft já indicada pelo usuário. A aprovação humana autoriza o `issue-writer` a materializar o ADR/spec
 aprovado exatamente como aprovado (ou reter o racional no-spec), anexar o link
 imutável e mutar labels para `stage:needs-plan` (remova `needs-human` quando não
 for mais necessário), preferencialmente via `scripts/transition-issue.sh`.

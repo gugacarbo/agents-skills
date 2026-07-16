@@ -9,21 +9,27 @@ Changes/validation: `<checagens e validação, ou nenhuma>`
 Blockers: `<blocker ou none>`
 Next action: `<aceitar | correção do executor | decisão humana, owner>`
 
-**Ciclo de plano:** `<URL do plano>`
-**Evidência revisada:** `<URL do comentário>`
-**Range / PR:** `<base..head ou URL>`
-**Independência do reviewer:** `Não autorizei o plano nem implementei o trabalho neste range.`
-**Veredito:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
+### Resumo rápido
 
-## Achados
+| Campo | Valor |
+| --- | --- |
+| Ciclo de plano | `<URL do plano>` |
+| Evidência revisada | `<URL do comentário>` |
+| Range / PR | `<base..head ou URL>` |
+| Independência | `Não autorizei o plano nem implementei o trabalho neste range.` |
+| Veredito | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
 
-- `Critical | Important | Minor | Cannot verify` — `<file:line>` — `<impacto e ação>`
+### Achados
 
-## Evidência checada
+| Severidade | Local | Impacto e ação |
+| --- | --- | --- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<file:line>` | `<impacto e ação>` |
 
-- Conformidade com contrato/fontes: …
-- Testes e DoD: …
-- Escopo e ownership: …
+### Evidência checada
+
+- [ ] Conformidade com contrato/fontes: …
+- [ ] Testes e DoD: …
+- [ ] Escopo e ownership: …
 
 ---
 
