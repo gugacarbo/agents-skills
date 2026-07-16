@@ -5,7 +5,7 @@ description: Investiga o contexto da entrega, prepara o source-set condicional d
 
 # Issue Writer
 
-Investigue a área focada do repositório, ADRs/specs aceitos, código/testes,
+Investigue a área focada do repositório, ADRs/specs, código/testes,
 convenções, dependências, decisões de produto abertas e o padrão local atual
 (regra 2 do `SKILL.md`). Não publique source-set enquanto uma decisão
 obrigatória do usuário estiver aberta.
@@ -23,19 +23,25 @@ libere a issue para planejamento. Nunca aprove você mesmo.
 
 O source-set vive **só no body da issue**, nunca em comentário.
 
-| Situação                      | Ação                                                                                                                                       |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Issue ainda não existe        | Crie a issue de entrega/bug (pode ser **draft**) e escreva o body completo com `templates/03-issue-template.md`.                           |
-| Issue já existe (incl. draft) | **Sobrescreva/edite o body** com a proposta atualizada; não publique comentário paralelo com o source-set.                                 |
-| Refine pós-review ou gate     | Reescreva o body; o `issue-reviewer` continua append-only em comentário — não duplique a proposta lá.                                      |
-| Pós-aprovação humana          | Edite o body para anexar o link imutável do ADR/spec materializado; mutue para `stage:needs-plan` e remova `needs-human` quando aplicável. |
+| Situação                      | Ação                                                                                                                                                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Issue ainda não existe        | Crie a issue de entrega/bug (pode ser **draft**) e escreva o body completo com `templates/03-issue-template.md`.                                                                                                                    |
+| Issue já existe (incl. draft) | **Sobrescreva/edite o body** com a proposta atualizada; não publique comentário paralelo com o source-set.                                                                                                                          |
+| `stage:needs-issue-fix`       | Reescreva o body com os achados do reviewer e publique um comentário append-only com `templates/10-issue-note-template.md` resumindo a mudança; o `issue-reviewer` continua append-only em comentário — não duplique a proposta lá. |
+| Pós-aprovação humana          | Edite o body para anexar o link imutável do ADR/spec materializado; mutue para `stage:needs-plan` e remova `needs-human` quando aplicável.                                                                                          |
 
-Com o body pronto, aplique `stage:spec-approval` + `needs-human` na issue (não
-só no texto do body). O envelope de oito campos fica no topo do body conforme
-`templates/03-issue-template.md` e `references/evidence-contract.md`.
+Com o body pronto, aplique somente `stage:spec-approval` na issue. Se veio de
+`stage:needs-issue-fix`, use `scripts/transition-issue.sh` para voltar ao stage
+de review. Não adicione
+`needs-human` ao encaminhar o source-set para review: essa label é adicionada
+ou removida pelo `issue-reviewer` conforme o veredito publicado. O envelope de
+oito campos fica no topo do body conforme `templates/03-issue-template.md` e
+`references/evidence-contract.md`.
 
 Comentários append-only permanecem para `issue-reviewer`, plano, evidência do
 executor e reviews — **não** para o source-set.
 
-Não planejar, implementar, pular gates (ex.: não definir `stage:approved` ou
+## Não Deve
+
+**Não** planejar, implementar, pular gates (ex.: não definir `stage:approved` ou
 além sem autorização) nem aprovar o source-set.

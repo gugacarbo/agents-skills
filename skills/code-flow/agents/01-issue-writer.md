@@ -23,19 +23,33 @@ libere a issue para planejamento. Nunca aprove você mesmo.
 
 O source-set vive **só no body da issue**, nunca em comentário.
 
-| Situação                      | Ação                                                                                                                                       |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Issue ainda não existe        | Crie a issue de entrega/bug (pode ser **draft**) e escreva o body completo com `templates/03-issue-template.md`.                           |
-| Issue já existe (incl. draft) | **Sobrescreva/edite o body** com a proposta atualizada; não publique comentário paralelo com o source-set.                                 |
-| Refine pós-review ou gate     | Reescreva o body; o `issue-reviewer` continua append-only em comentário — não duplique a proposta lá.                                      |
-| Pós-aprovação humana          | Edite o body para anexar o link imutável do ADR/spec materializado; mutue para `stage:needs-plan` e remova `needs-human` quando aplicável. |
+| Situação                      | Ação                                                                                                                                                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Issue ainda não existe        | Crie a issue de entrega/bug (pode ser **draft**) e escreva o body completo com `templates/03-issue-template.md`.                                                                                                                    |
+| Issue já existe (incl. draft) | **Sobrescreva/edite o body** com a proposta atualizada; não publique comentário paralelo com o source-set.                                                                                                                          |
+| `stage:needs-issue-fix`       | Reescreva o body com os achados do reviewer e publique um comentário append-only com `templates/10-issue-note-template.md` resumindo a mudança; o `issue-reviewer` continua append-only em comentário — não duplique a proposta lá. |
+| Pós-aprovação humana          | Edite o body para anexar o link imutável do ADR/spec materializado; mutue para `stage:needs-plan` e remova `needs-human` quando aplicável.                                                                                          |
 
-Com o body pronto, aplique `stage:spec-approval` + `needs-human` na issue (não
-só no texto do body). O envelope de oito campos fica no topo do body conforme
-`templates/03-issue-template.md` e `references/evidence-contract.md`.
+Com o body pronto, aplique somente `stage:spec-approval` na issue. Se veio de
+`stage:needs-issue-fix`, use `scripts/transition-issue.sh` para voltar ao stage
+de review. Não adicione
+`needs-human` ao encaminhar o source-set para review: essa label é adicionada
+ou removida pelo `issue-reviewer` conforme o veredito publicado. O envelope de
+oito campos fica no topo do body conforme `templates/03-issue-template.md` e
+`templates/evidence-contract-template.md`.
 
 Comentários append-only permanecem para `issue-reviewer`, plano, evidência do
 executor e reviews — **não** para o source-set.
+
+## Nota de correção após `needs-issue-fix`
+
+Quando corrigir o body em resposta a `stage:needs-issue-fix`, além de reescrever
+o body, publique um comentário append-only com
+`templates/10-issue-note-template.md` resumindo a mudança aplicada. O
+comentário registra o envelope de oito campos e um mapa dos achados do
+`issue-reviewer` versus as correções tomadas — **não** duplica o source-set,
+que continua vivendo só no body. Publique o comentário antes de mutar as labels
+de volta a `stage:spec-approval` no mesmo turno.
 
 Não planejar, implementar, pular gates (ex.: não definir `stage:approved` ou
 além sem autorização) nem aprovar o source-set.

@@ -25,8 +25,8 @@ Responda com **uma** opção literal:
 | Opção      | Significado                                                                       |
 | :--------- | :-------------------------------------------------------------------------------- |
 | **Yes**    | Mutar para `stage:approved`; depois ainda pedir execução e `worktree` ou `later`. |
-| **No**     | Rejeitar; devolver a `stage:needs-plan` (ou bloquear no ciclo 3).                 |
-| **Refine** | Pedir ajustes; novo ciclo de plano + reviewer fresco.                             |
+| **No**     | Rejeitar; devolver a `stage:needs-plan-fix` (ou bloquear no ciclo 3).             |
+| **Refine** | Pedir ajustes; `stage:needs-plan-fix`, novo ciclo de plano + reviewer fresco.     |
 
 ---
 

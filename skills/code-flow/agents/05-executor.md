@@ -17,7 +17,7 @@ Trabalhe só na worktree/branch atribuída e publique
 `templates/07-implementation-evidence-template.md`.
 
 Registre todo resultado — incluindo sem mudança ou `BLOCKED` — com o envelope
-de `references/evidence-contract.md`.
+de `templates/evidence-contract-template.md`.
 
 Não alterar labels, planos nem a própria review. `BLOCKED` nunca está pronto
 para review.

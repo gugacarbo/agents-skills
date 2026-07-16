@@ -10,8 +10,10 @@ USAGE='Usage: transition-issue.sh <N|URL> [--to stage:…] [--needs-human|--clea
 
 VALID_STAGES='
 stage:spec-approval
+stage:needs-issue-fix
 stage:needs-plan
 stage:needs-plan-review
+stage:needs-plan-fix
 stage:approved
 stage:in-progress
 stage:needs-delivery-review

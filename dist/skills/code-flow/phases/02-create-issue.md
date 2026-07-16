@@ -28,7 +28,7 @@ O `issue-writer` classifica o impacto de spec:
 ADRs/specs aceitos definem a intenção. Se uma fonte conflitar com o design
 aprovado ou o código, pare e resolva antes de planejar. O `issue-writer` cria ou
 **sobrescreve o body** de uma issue de entrega existente (incl. **draft**) em
-`stage:spec-approval` + `needs-human`, usando o padrão de issue/ADR/spec do
+`stage:spec-approval`, sem `needs-human`, usando o padrão de issue/ADR/spec do
 repositório e `templates/03-issue-template.md` como estrutura do body (nunca como comentário). Inclui o design aprovado, rascunho ADR/spec ou racional
 no-spec; ainda não materialize o ADR/spec formal.
 
@@ -40,13 +40,14 @@ imutável e mutar labels para `stage:needs-plan` (remova `needs-human` quando n�
 for mais necessário), preferencialmente via `scripts/transition-issue.sh`.
 Não despachar `plan-writer` antes dessa evidência existir.
 
-Após a issue existir em `stage:spec-approval` + `needs-human` e **antes** da
-aprovação humana do source-set, despache `agents/02-issue-reviewer.md` quando o
-usuário pedir essa auditoria **ou** quando a proposta for alto risco: impacto
-`create`/`update` com mudança observável ampla, conflito entre fonte aceita e
-código, ou domínio sensível já sinalizado. O veredito do `issue-reviewer` é
-append-only e **nunca** substitui o gate humano nem avança o stage. Use
-`templates/12-human-gate-spec.md` para apresentar a aprovação do source-set.
+Após a issue existir em `stage:spec-approval` e **antes** da aprovação humana
+do source-set, despache `agents/02-issue-reviewer.md`, inclusive para propostas
+de alto risco. O review é obrigatório antes do gate humano; em `PEÇO AJUSTES`,
+o `issue-reviewer` atribui `stage:needs-issue-fix` e devolve ao `issue-writer`.
+Após a correção do body, o `issue-writer` retorna a `stage:spec-approval` para
+nova review. Em veredito que abre o gate humano, o reviewer adiciona
+`needs-human`. O veredito nunca substitui o gate humano. Use
+`templates/12-human-gate-spec.md` somente depois dessa review.
 
 Após o usuário selecionar explicitamente um Epic, crie-o no GitHub a partir do
 padrão local e `templates/01-epic.md`. É só tracking: sem stage de entrega nem

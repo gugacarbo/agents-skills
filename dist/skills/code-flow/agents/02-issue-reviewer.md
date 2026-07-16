@@ -19,6 +19,12 @@ Use um veredito literal: `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou
 
 Registre todo resultado com o envelope de `references/evidence-contract.md`.
 
-A issue permanece em `stage:spec-approval` + `needs-human` até um humano
-aprovar o source-set. Não mudar labels, criar plano, implementar código nem
-autoaprovar.
+A issue permanece em `stage:spec-approval` enquanto o source-set aguarda o
+gate antes de um humano aprovar o source-set. Depois de publicar o veredito,
+adicione `needs-human` para `APROVO`, `APROVO COM RESSALVAS` ou `NÃO APROVO`
+quando o próximo passo exigir decisão humana. Em `PEÇO AJUSTES`, você deve
+atribuir `stage:needs-issue-fix`, remover `needs-human` e devolver o source-set
+ao `issue-writer`, preferencialmente com
+`scripts/transition-issue.sh <issue> --to stage:needs-issue-fix --clear-needs-human`.
+Confirme a mutação com `gh issue view <n> --json labels`. Não criar plano,
+implementar código nem autoaprovar.

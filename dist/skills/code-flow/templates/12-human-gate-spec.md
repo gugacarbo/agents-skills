@@ -11,7 +11,8 @@
 ## Em jogo
 
 A proposta de ADR/spec embutida na issue **ou** o racional
-`Spec impact: not required` — ainda em `stage:spec-approval` + `needs-human`.
+`Spec impact: not required` — em `stage:spec-approval` após a review do
+`issue-reviewer`, com `needs-human` aguardando sua decisão.
 
 ## Você aprova
 
@@ -30,5 +31,5 @@ Responda com **uma** opção literal:
 
 ---
 
-> **Regra:** Um veredito de `issue-reviewer` (se houver) **não** substitui este
-> **Yes**. Não avança stage sem **Yes** explícito.
+> **Regra:** O veredito de `issue-reviewer` abre este gate, mas **não** substitui
+> o **Yes**. Não avança stage sem **Yes** explícito.

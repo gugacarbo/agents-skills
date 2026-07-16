@@ -98,8 +98,11 @@ pode ter feito a review da implementação; ela também é distinta do
 `plan-writer` e do `executor`. O orquestrador preserva as demais regras de
 isolamento de worktree e paralelismo entre issues.
 
-Não são criadas labels novas. `issue-writer` e `issue-reviewer` trabalham sob
-`stage:spec-approval` com `needs-human` até a aprovação humana do source set.
+Não são criadas labels novas. O `issue-writer` encaminha o source-set em
+`stage:spec-approval` sem `needs-human`; o `issue-reviewer` adiciona essa label
+após publicar um veredito que abre o gate humano. O `plan-writer` também
+encaminha `stage:needs-plan-review` sem `needs-human`; o `plan-reviewer` a
+adiciona após um veredito aprovador ou bloqueante.
 Depois disso, a sequência continua:
 
 ```text
@@ -116,16 +119,16 @@ cria uma issue ou estado GitHub.
 
 ## Casos de borda
 
-| #   | QUANDO ⟨gatilho⟩                                                       | o sistema DEVE ⟨resposta⟩                                                                                            |
-| --- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 1   | uma decisão de produto ainda não foi dada                              | o `issue-writer` pede a decisão e não cria a issue nem improvisa o source set.                                       |
-| 2   | a mudança altera contrato, comportamento observável ou decisão durável | o `issue-writer` cria/atualiza ADR/spec e a issue inicia em `stage:spec-approval` + `needs-human`.                   |
-| 3   | a mudança é interna                                                    | o `issue-writer` registra a justificativa de spec não necessária, e o gate humano continua em `stage:spec-approval`. |
-| 4   | o `issue-reviewer` aprova o source set                                 | a issue continua em `stage:spec-approval`; só a aprovação humana a move para `stage:needs-plan`.                     |
-| 5   | um agente conclui sem mudanças de código                               | ele ainda publica o comentário/seção com todos os campos de evidência.                                               |
-| 6   | há modo repositório `direct`                                           | cada agente escreve no delivery record, sem criar issue, label ou comentário GitHub.                                 |
-| 7   | há review da implementação e auditoria final                           | duas instâncias fresh de `delivery-reviewer` são usadas, respeitando as restrições de independência.                 |
-| 8   | a implementação está bloqueada ou uma revisão é inválida               | o agente registra o bloqueio e próximo passo; o orquestrador aplica o gate existente e não avança.                   |
+| #   | QUANDO ⟨gatilho⟩                                                       | o sistema DEVE ⟨resposta⟩                                                                                               |
+| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 1   | uma decisão de produto ainda não foi dada                              | o `issue-writer` pede a decisão e não cria a issue nem improvisa o source set.                                          |
+| 2   | a mudança altera contrato, comportamento observável ou decisão durável | o `issue-writer` prepara a proposta no body e a issue inicia em `stage:spec-approval`, sem `needs-human`, até a review. |
+| 3   | a mudança é interna                                                    | o `issue-writer` registra a justificativa de spec não necessária, e o gate humano continua em `stage:spec-approval`.    |
+| 4   | o `issue-reviewer` aprova o source set                                 | a issue continua em `stage:spec-approval`; só a aprovação humana a move para `stage:needs-plan`.                        |
+| 5   | um agente conclui sem mudanças de código                               | ele ainda publica o comentário/seção com todos os campos de evidência.                                                  |
+| 6   | há modo repositório `direct`                                           | cada agente escreve no delivery record, sem criar issue, label ou comentário GitHub.                                    |
+| 7   | há review da implementação e auditoria final                           | duas instâncias fresh de `delivery-reviewer` são usadas, respeitando as restrições de independência.                    |
+| 8   | a implementação está bloqueada ou uma revisão é inválida               | o agente registra o bloqueio e próximo passo; o orquestrador aplica o gate existente e não avança.                      |
 
 ## Questões em aberto
 

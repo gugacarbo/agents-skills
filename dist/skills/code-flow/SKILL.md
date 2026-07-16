@@ -12,16 +12,15 @@ reviews ou implementação você mesmo.
 
 ## Comandos
 
-| Invocação                                                               | Comportamento                                                                                                                                                                        |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/code-flow`                                                            | Sem issue: explique que a entrega exige issue GitHub e ofereça `issue create` ou `issue <#N>` / `batch`.                                                                             |
-| `/code-flow issue create`                                               | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
-| `/code-flow create-issue`                                               | Alias de `/code-flow issue create` (canônico: `issue create`).                                                                                                                       |
-| `/code-flow issue <#N\|URL> [phase]`                                    | Valida uma issue elegível existente e retoma seu stage ou fase nomeada.                                                                                                              |
-| `/code-flow batch <#N\|URL>... --from <phase>`                          | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes.                                                                                                               |
-| `/code-flow brainstorm`                                                 | Fase 1 sem issue ainda; segue para `issue create` após o design aprovado.                                                                                                            |
-| `/code-flow <plan\|dispatch\|review\|integrate>`                        | Exige issue (`issue <#N> [phase]`); recuse e peça `issue create` se não houver.                                                                                                      |
-| `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para.                                                                                                                                                               |
+| Invocação                                                               | Comportamento                                                                                                                                                                      |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/code-flow`                                                            | Sem issue: explique que a entrega exige issue GitHub e ofereça `issue create` ou `issue <#N>` / `batch`.                                                                           |
+| `/code-flow <issue create\|create-issue\|issue>`                        | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** entra em `stage:spec-approval` para review antes do gate humano. |
+| `/code-flow issue <#N\|URL> [phase]`                                    | Valida uma issue elegível existente e retoma seu stage ou fase nomeada.                                                                                                            |
+| `/code-flow batch <#N\|URL>... --from <phase>`                          | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes.                                                                                                             |
+| `/code-flow brainstorm`                                                 | Fase 1 sem issue ainda; segue para `issue create` após o design aprovado.                                                                                                          |
+| `/code-flow <plan\|dispatch\|review\|integrate>`                        | Exige issue (`issue <#N> [phase]`); recuse e peça `issue create` se não houver.                                                                                                    |
+| `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para.                                                                                                                                                             |
 
 `issue create` é a única rota canônica de criação de issue (`create-issue` é
 alias). Fases nomeadas nunca bypassam gates; `batch` nunca cria issues.
@@ -45,9 +44,9 @@ entrega; a implementação fica no plano aprovado de cada filha e numa passagem
 ## Fluxo de entrega
 
 1. **Fases 0–1:** estabelecer contexto do repositório, escopo, padrões locais, riscos e decisões abertas do usuário.
-2. **Fase 2:** preparar o source-set, decidir `create`, `update` ou `not required` para ADR/spec, e criar ou atualizar o **body** da issue de entrega com a proposta ou racional no-spec em `stage:spec-approval` + `needs-human`; ainda não materializar o documento formal.
+2. **Fase 2:** preparar o source-set, decidir `create`, `update` ou `not required` para ADR/spec, e criar ou atualizar o **body** da issue de entrega com a proposta ou racional no-spec em `stage:spec-approval`, sem `needs-human`; o `issue-reviewer` atribui `stage:needs-issue-fix` em `PEÇO AJUSTES` ou adiciona `needs-human` quando o gate humano estiver pronto. Ainda não materializar o documento formal.
 3. **Aprovação humana da fonte:** materializar o ADR/spec aprovado quando necessário, registrar o link imutável e ir para `stage:needs-plan`.
-4. **Fase 3:** `plan-writer` publica o plano; `plan-reviewer` publica um veredito independente. Um veredito aprovador ainda aguarda aprovação humana daquele snapshot exato em `stage:needs-plan-review` + `needs-human`.
+4. **Fase 3:** `plan-writer` publica o plano e encaminha para `stage:needs-plan-review` sem `needs-human`; `plan-reviewer` atribui `stage:needs-plan-fix` em `PEÇO AJUSTES` ou adiciona essa label quando o snapshot aguardar aprovação humana.
 5. **Aprovação humana do plano:** ir para `stage:approved`. A execução ainda precisa de pedido explícito e escolha `worktree` ou `later`.
 6. **Fases 4–6:** executar o plano aprovado como uma unidade (`in-progress` →
    `needs-delivery-review`); a review da implementação vai para
@@ -97,7 +96,8 @@ A evidência é append-only. Registre todo resultado — incluindo sem mudança,
 `BLOCKED`, erros e reviews rejeitadas — antes de mudar estado. Mudar estado
 significa mutar labels GitHub `stage:*` / `needs-human` após o comentário
 autorizador; texto de comentário sozinho não é atualização de status.
-O orquestrador muta labels após os posts dos papéis; subagentes não mutam
-labels, exceto `issue-writer` na criação e na materialização pós-aprovação
-(ver `references/github-flow.md`). Não criar trackers de task, logs de progresso
-ou registries de workflow separados.
+O orquestrador muta `stage:*` após os posts dos papéis, exceto o
+`issue-reviewer` em `PEÇO AJUSTES` (`stage:needs-issue-fix`) e o
+`plan-reviewer` em `PEÇO AJUSTES` (`stage:needs-plan-fix`); ambos também
+ajustam `needs-human` conforme o próprio veredito. O `issue-writer` o remove
+na materialização pós-aprovação (ver `references/github-flow.md`). Não criar trackers de task, logs de progresso ou registries de workflow separados.

@@ -14,7 +14,7 @@ Publique `templates/08-implementation-review-template.md` para a review da
 implementação ou `templates/09-integration-report-template.md` para a auditoria
 final.
 
-Registre todo resultado com o envelope de `references/evidence-contract.md`.
+Registre todo resultado com o envelope de `templates/evidence-contract-template.md`.
 
 O auditor final é uma instância fresca, distinta do reviewer da Fase 5, do
 plan-writer e do executor. Não mudar código, labels, planos, fazer merge nem

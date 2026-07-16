@@ -42,12 +42,12 @@ Next action: `<humano aprova este snapshot exato | revisar plano | decisão huma
 > Um veredito aprovador (`APROVO` ou `APROVO COM RESSALVAS`) ainda exige que o
 > **humano aprova este snapshot exato** antes da implementação.
 
-| Veredito               | Ação esperada                                     |
-| ---------------------- | ------------------------------------------------- |
-| `APROVO`               | Humano aprova snapshot → `stage:approved`         |
-| `APROVO COM RESSALVAS` | Humano aprova snapshot com ressalvas documentadas |
-| `PEÇO AJUSTES`         | Plan-writer revisa e publica novo snapshot        |
-| `NÃO APROVO`           | Bloquear até novo plano ou decisão humana         |
+| Veredito               | Ação esperada                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `APROVO`               | Humano aprova snapshot → `stage:approved`                                           |
+| `APROVO COM RESSALVAS` | Humano aprova snapshot com ressalvas documentadas                                   |
+| `PEÇO AJUSTES`         | Reviewer atribui `stage:needs-plan-fix`; plan-writer revisa e publica novo snapshot |
+| `NÃO APROVO`           | Bloquear até novo plano ou decisão humana                                           |
 
 ---
 

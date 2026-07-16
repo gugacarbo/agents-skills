@@ -8,6 +8,7 @@ SKILL="$REPO_ROOT/skills/code-flow"
 
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 assert_contains() { rg -Fq -- "$1" "$2" || fail "expected $2 to contain: $1"; }
+assert_not_contains() { ! rg -Fq -- "$1" "$2" || fail "expected $2 not to contain: $1"; }
 
 assert_envelope() {
   local file="$1" field line previous=0
@@ -76,7 +77,7 @@ test_router_and_subagents() {
   [ -f "$SKILL/references/orchestrator-cheatsheet.md" ] || fail 'missing orchestrator cheatsheet'
   assert_contains 'orchestrator-cheatsheet.md' "$SKILL/SKILL.md"
   assert_contains 'Matriz stage → fase → ação' "$SKILL/references/orchestrator-cheatsheet.md"
-  for stage in spec-approval needs-plan needs-plan-review approved in-progress needs-delivery-review needs-changes ready-to-merge blocked; do
+  for stage in spec-approval needs-issue-fix needs-plan needs-plan-review needs-plan-fix approved in-progress needs-delivery-review needs-changes ready-to-merge blocked; do
     assert_contains "stage:$stage" "$SKILL/references/github-flow.md"
   done
   if rg -Fq -- 'needs-task-review' \
@@ -172,20 +173,27 @@ test_issue_evidence_contract() {
   assert_contains 'body da issue' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'nunca em comentário' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'Sobrescreva' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'somente `stage:spec-approval`' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'essa label é adicionada' "$SKILL/agents/01-issue-writer.md"
+  assert_not_contains 'aplique `stage:spec-approval` + `needs-human`' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'templates/04-issue-review-template.md' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'stage:spec-approval' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'aprovar o source-set' "$SKILL/agents/02-issue-reviewer.md"
-  assert_contains 'Não mudar labels, criar plano, implementar código nem' "$SKILL/agents/02-issue-reviewer.md"
+  assert_contains 'atribuir `stage:needs-issue-fix`' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'pedido explícito do usuário **ou** alto risco' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'Best-effort mutate' "$SKILL/scripts/transition-issue.sh"
+  assert_contains 'stage:needs-issue-fix' "$SKILL/scripts/transition-issue.sh"
+  assert_contains 'stage:needs-plan-fix' "$SKILL/scripts/transition-issue.sh"
   assert_contains 'best-effort' "$SKILL/references/github-flow.md"
   assert_contains 'zero `stage:*`' "$SKILL/references/github-flow.md"
 
   assert_contains 'Implemente o plano aprovado como uma unidade' "$SKILL/agents/05-executor.md"
   assert_contains 'Pode organizar o trabalho internamente' "$SKILL/agents/05-executor.md"
   assert_contains 'Não decompor o plano em task IDs,' "$SKILL/agents/03-plan-writer.md"
+  assert_contains 'não adicione `needs-human`' "$SKILL/agents/03-plan-writer.md"
   assert_contains 'Não decompor este plano em task IDs.' "$SKILL/templates/05-plan-template.md"
   assert_contains 'Não exija decomposição em task IDs' "$SKILL/agents/04-plan-reviewer.md"
+  assert_contains 'atribuir `stage:needs-plan-fix`' "$SKILL/agents/04-plan-reviewer.md"
   assert_contains 'instância fresca' "$SKILL/agents/06-delivery-reviewer.md"
   assert_contains 'auditor final' "$SKILL/agents/06-delivery-reviewer.md"
   assert_contains 'APROVO COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"

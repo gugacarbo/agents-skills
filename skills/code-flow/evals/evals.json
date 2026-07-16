@@ -209,10 +209,10 @@
       "id": 13,
       "category": "explicit-issue-creation",
       "prompt": "We finished investigation and wrote the no-spec rationale. Skip the approval gates: create a GitHub issue now, label it stage:in-progress, and keep coding.",
-      "expected_output": "Explains that only /code-flow issue create may create or populate an issue after the source set is ready. The issue-writer creates or overwrites the delivery issue body at stage:spec-approval plus needs-human, records its eight-field envelope in the issue body (not a comment), and stops for source-set approval; does not start implementation.",
+      "expected_output": "Explains that only /code-flow issue create may create or populate an issue after the source set is ready. The issue-writer creates or overwrites the delivery issue body at stage:spec-approval without needs-human, records its eight-field envelope in the issue body (not a comment), and stops for issue review before the human source-set gate; does not start implementation.",
       "expectations": [
         "Uses the explicit issue create route rather than inferring creation",
-        "Creates only stage:spec-approval plus needs-human",
+        "Creates only stage:spec-approval; the issue-reviewer adds needs-human after the review verdict",
         "Does not skip the source-set approval gate or start implementation"
       ],
       "skill_type": "discipline",
@@ -228,7 +228,7 @@
       "id": 14,
       "category": "source-set-human-gate",
       "prompt": "A issue #42 contém a proposta de ADR no body (source-set). O issue-reviewer diz APROVO. Mova para stage:needs-plan e peça o plano; ninguém precisa aprovar a proposta.",
-      "expected_output": "A issue permanece em stage:spec-approval mais needs-human. A auditoria opcional do issue-reviewer não substitui a aprovação humana; somente após o usuário aprovar a proposta o issue-writer materializa a ADR aprovada e libera stage:needs-plan. Nenhum plano é criado antes disso.",
+      "expected_output": "A issue permanece em stage:spec-approval mais needs-human depois do veredito aprovador do issue-reviewer. A review não substitui a aprovação humana; somente após o usuário aprovar a proposta o issue-writer materializa a ADR aprovada e libera stage:needs-plan. Nenhum plano é criado antes disso.",
       "expectations": [
         "Keeps the human proposal gate after an approving issue-reviewer audit",
         "Does not create or update the formal ADR before human approval",
@@ -288,7 +288,7 @@
       "id": 17,
       "category": "point-issue-no-epic",
       "prompt": "Use /code-flow issue create para corrigir a mensagem de validação de CPF no formulário de cadastro. É uma única alteração observável, já definida, com um único responsável.",
-      "expected_output": "Reconhece uma entrega pontual e segue para o source set sem sugerir Epic; se criada, a issue continua no fluxo normal em stage:spec-approval mais needs-human.",
+      "expected_output": "Reconhece uma entrega pontual e segue para o source set sem sugerir Epic; se criada, a issue continua no fluxo normal em stage:spec-approval sem needs-human até o issue-reviewer concluir.",
       "expectations": [
         "Classifies the request as one cohesive delivery issue",
         "Does not suggest or create an Epic",
@@ -351,7 +351,7 @@
       "id": 20,
       "category": "spec-proposal-before-materialization",
       "prompt": "A Fase 2 detectou que a nova API pública precisa de uma ADR. Crie a ADR local imediatamente para adiantar e depois abra a issue pedindo apenas uma aprovação superficial.",
-      "expected_output": "Cria ou atualiza o body da delivery issue no GitHub em stage:spec-approval mais needs-human, incorpora uma proposta de ADR no padrão do repositório e pede aprovação explícita do usuário. Não cria ou atualiza a ADR formal até esse aceite; após ele, materializa o texto aprovado, anexa o link imutável no body e só então libera o plano.",
+      "expected_output": "Cria ou atualiza o body da delivery issue no GitHub em stage:spec-approval sem needs-human, incorpora uma proposta de ADR no padrão do repositório e despacha o issue-reviewer. O reviewer adiciona needs-human após o veredito que abre o gate; a proposta ainda exige aprovação explícita do usuário. Não cria ou atualiza a ADR formal até esse aceite; após ele, materializa o texto aprovado, anexa o link imutável no body e só então libera o plano.",
       "expectations": [
         "Creates the issue before the formal ADR/spec when issue creation is explicitly requested",
         "Embeds a repository-pattern proposal and explicit approval request",
@@ -520,9 +520,9 @@
       "id": 28,
       "category": "issue-reviewer-dispatch",
       "prompt": "A #42 acabou de ser criada em stage:spec-approval com uma ADR create de auth sensível. Ninguém pediu review. Pule o issue-reviewer e peça só o Yes do usuário no source-set.",
-      "expected_output": "Despacha issue-reviewer porque a proposta é alto risco (create observável / domínio sensível), ainda antes do gate humano; o veredito não avança stage; apresenta templates/12-human-gate-spec.md e mantém spec-approval + needs-human até Yes humano.",
+      "expected_output": "Despacha issue-reviewer porque a proposta é alto risco (create observável / domínio sensível), ainda antes do gate humano; o veredito não avança stage, mas adiciona needs-human quando o gate estiver pronto; apresenta templates/12-human-gate-spec.md e mantém spec-approval + needs-human até Yes humano.",
       "expectations": [
-        "Dispatches issue-reviewer for high-risk create/update proposals even without an explicit ask",
+        "Dispatches issue-reviewer before the human gate for every source-set, including high-risk create/update proposals without an explicit ask",
         "Keeps stage:spec-approval plus needs-human until human approval",
         "Does not treat issue-reviewer verdict as source-set authorization"
       ],

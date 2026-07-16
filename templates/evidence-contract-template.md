@@ -1,3 +1,14 @@
+---
+    Agent: <agent>
+    Phase/scope: <fase, ciclo ou range>
+    Summary: <resultado>
+    Sources/evidence: <links imutáveis, comandos, saída>
+    Decisions: <aplicadas, pendentes ou nenhuma>
+    Changes/validation: <mudanças e validação, ou nenhuma>
+    Blockers: <blocker ou none>
+    Next action: <ação e owner>
+---
+
 # Contrato de evidência
 
 A evidência é append-only e não substitui ADRs/specs aceitos. Publique o
@@ -9,17 +20,6 @@ Mencionar um stage no comentário não é mudança de estado.
 
 Todo resultado de todo papel usa estes campos nesta ordem, incluindo sem
 mudança, `BLOCKED`, erros, evidência ausente e rejeições:
-
-```text
-Agent: <agent>
-Phase/scope: <fase, ciclo ou range>
-Summary: <resultado>
-Sources/evidence: <links imutáveis, comandos, saída>
-Decisions: <aplicadas, pendentes ou nenhuma>
-Changes/validation: <mudanças e validação, ou nenhuma>
-Blockers: <blocker ou none>
-Next action: <ação e owner>
-```
 
 ### Exceção: source-set no body (`issue-writer`)
 

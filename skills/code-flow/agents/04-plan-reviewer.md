@@ -14,8 +14,15 @@ Não exija decomposição em task IDs.
 Publique `templates/06-review-template.md`. Use um veredito literal: `APROVO`,
 `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO`.
 
-Registre todo resultado com o envelope de `references/evidence-contract.md`.
+Registre todo resultado com o envelope de `templates/evidence-contract-template.md`.
 
 Um veredito aprovador não autoriza implementação: o snapshot exato do plano
-precisa de aprovação humana antes de `stage:approved`. Não reescrever o plano,
-mudar labels nem implementar.
+precisa de aprovação humana antes de `stage:approved`. Não reescrever o plano
+nem implementar. Depois de publicar o veredito, adicione `needs-human` para
+`APROVO`, `APROVO COM RESSALVAS` ou `NÃO APROVO` quando houver decisão humana
+pendente. Em `PEÇO AJUSTES` antes do terceiro ciclo, você deve atribuir `stage:needs-plan-fix`,
+remover `needs-human` e devolver o plano ao
+`plan-writer`, preferencialmente com
+`scripts/transition-issue.sh <issue> --to stage:needs-plan-fix --clear-needs-human`.
+No terceiro ciclo, use `stage:blocked` + `needs-human`. Confirme a mutação com
+`gh issue view <n> --json labels`.

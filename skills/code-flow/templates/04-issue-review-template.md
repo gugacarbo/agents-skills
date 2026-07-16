@@ -7,7 +7,7 @@ Sources/evidence: `<URL da issue, URL da proposta, padrão do repositório, ADR/
 Decisions: `<APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO; aprovação humana continua obrigatória>`
 Changes/validation: `<checagens e validação, ou nenhuma>`
 Blockers: `<fonte ausente, conflito ou none>`
-Next action: `<aprovação humana da proposta | ajuste do issue-writer | decisão humana, owner>`
+Next action: `<aprovação humana da proposta | stage:needs-issue-fix → ajuste do issue-writer | decisão humana, owner>`
 
 **Tipo:** `auditoria opcional do source-set`
 **Veredito:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
