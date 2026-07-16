@@ -2,7 +2,7 @@
 
 Esta pasta agrupa ferramentas auxiliares desenvolvidas para validar a skill code-toolbox sem misturar-se com o conteúdo publicado da skill.
 
-- `tests.sh` — Suite de testes de integração para o contrato por fases e os helpers de execução restantes.
+- `tests.sh` — Suite de integração do contrato por fases, dos seis agentes permitidos, do envelope obrigatório de evidências e dos helpers restantes.
 
 Para executar os testes:
 

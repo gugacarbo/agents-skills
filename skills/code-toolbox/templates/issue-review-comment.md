@@ -1,5 +1,14 @@
 ## Revisão independente
 
+Agent: `delivery-reviewer`
+Phase/scope: `<task, range, or assembled range>`
+Summary: `<review result>`
+Sources/evidence: `<task evidence URL, reviewed range/PR, and source links>`
+Decisions: `<literal verdict and required decisions>`
+Changes/validation: `<review checks and validation, or none>`
+Blockers: `<blocker or none>`
+Next action: `<accept | executor correction | human decision, owner>`
+
 **Plan cycle / task:** `<plan URL and Task-ID>`
 **Evidence reviewed:** `<comment URL>`
 **Range / PR:** `<base..head or URL>`
@@ -18,4 +27,4 @@
 
 ---
 
-*Process: code-toolbox — task/range review only. Use `issue-plan-review-comment.md` for plan review.*
+*Process: code-toolbox — append-only eight-field task/range review. Use `issue-plan-review-comment.md` for plan review.*

@@ -1,9 +1,7 @@
-# Phase 1: Investigate and Brainstorm
+# Phase 1: Prepare the source set
 
-Before issue creation, dispatch `agents/investigator.md` before proposing material implementation work. It explores the narrow repository area, ADRs/specs, current code/tests, conventions, and file ownership. The orchestrator uses the evidence to refine requirements and ask only unresolved product questions.
+Before issue creation, dispatch `agents/issue-writer.md`. It investigates the narrow repository area, accepted ADRs/specs, current code/tests, conventions, ownership, dependencies, risks, and unresolved product decisions.
 
-For a rough request, refine purpose, constraints, observable outcome, non-goals, risks, and edge cases. Use the visual companion only when it makes the next decision easier; it is optional.
+The orchestrator uses its evidence to refine purpose, constraints, observable outcome, non-goals, and edge cases. Ask the user only for unresolved product decisions; the issue-writer must not improvise them. Use the visual companion only when it makes the next decision easier.
 
-Do not create a decisions file as a default artifact. A durable decision belongs in an ADR only when Phase 2 determines that an architectural decision is required. Keep outputs concise and carry them into the spec gate or plan.
-
-Before leaving, record the repository evidence, unresolved decisions, likely spec impact, and proposed scope. This remains pre-issue work. Do not implement or publish a plan while a product decision remains open.
+The issue-writer records its complete eight-field evidence envelope: as an issue comment immediately after issue creation, or in direct mode as a delivery-record section. It does not plan or implement. Carry the approved facts into Phase 2.

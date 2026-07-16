@@ -1,5 +1,14 @@
 ## Plano de implementação
 
+Agent: `plan-writer`
+Phase/scope: `plan cycle <k>/3`
+Summary: `<plan result>`
+Sources/evidence: `<immutable source links and base SHA>`
+Decisions: `<applied, pending, or none>`
+Changes/validation: `<plan changes and validation, or none>`
+Blockers: `<blocker or none>`
+Next action: `plan-reviewer reviews this snapshot`
+
 **Plan cycle:** `1/3`
 **Base SHA:** `<full-sha>`
 **Spec impact:** `create | update | not required` — `<concrete reason>`
@@ -40,4 +49,4 @@
 
 ---
 
-*Process: code-toolbox — append-only plan snapshot. Independent review required.*
+*Process: code-toolbox — append-only eight-field plan snapshot. Independent review required.*

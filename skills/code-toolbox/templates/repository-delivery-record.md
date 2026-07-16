@@ -9,6 +9,26 @@ sources: []
 This is one versioned delivery record, not a generated registry. Keep every
 snapshot below append-only and commit each material update. Link every source,
 review, evidence, and DoD result to a full SHA or immutable repository URL.
+Every agent execution/outcome uses the ordered eight-field envelope: `Agent`,
+`Phase/scope`, `Summary`, `Sources/evidence`, `Decisions`,
+`Changes/validation`, `Blockers`, and `Next action`. This record is the only
+coordination surface in direct mode: never create an issue or use GitHub
+comments, labels, or stages.
+
+## Agent execution envelope
+
+Append this section once for every agent outcome, including no-change,
+`BLOCKED`, rejected review, error, or missing verdict. Do not replace a prior
+section.
+
+Agent: `<role>`
+Phase/scope: `<phase, cycle, task, range, or audit>`
+Summary: `<concise result>`
+Sources/evidence: `<immutable source, commit, command, output, or none>`
+Decisions: `<applied, pending, or none>`
+Changes/validation: `<files/effect and validation, or none>`
+Blockers: `<blocker and required human decision, or none>`
+Next action: `<action and owner>`
 
 ## Source-set approval
 
@@ -38,9 +58,7 @@ review, evidence, and DoD result to a full SHA or immutable repository URL.
 column and `review: not applicable`; never remove its task row.
 
 For every `BLOCKED`, rejected review, audit failure, or unresolved DoD item,
-append the exact blocker and `Resume: <phase/task>` here. This record is the
-only coordination surface in repository mode: never add GitHub labels/stages
-or post GitHub comments.
+append the exact blocker and `Resume: <phase/task>` here.
 
 ## DoD and final audit
 

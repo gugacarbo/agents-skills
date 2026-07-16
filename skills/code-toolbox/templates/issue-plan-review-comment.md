@@ -1,5 +1,14 @@
 ## Revisão independente do plano
 
+Agent: `plan-reviewer`
+Phase/scope: `plan cycle <k>/3`
+Summary: `<review result>`
+Sources/evidence: `<plan comment URL, immutable source links, and base SHA>`
+Decisions: `<literal verdict and required decisions>`
+Changes/validation: `<review checks and validation, or none>`
+Blockers: `<blocker or none>`
+Next action: `<approve plan | revise plan | human decision, owner>`
+
 **Plan cycle:** `<plan comment URL>`
 **Plan base SHA:** `<full SHA>`
 **Reviewer independence:** `I did not author this plan and have no implementation assignment for this cycle.`
@@ -18,4 +27,4 @@
 
 ---
 
-*Process: code-toolbox — plan review is independent from plan authorship and is not a task/code review.*
+*Process: code-toolbox — append-only eight-field plan review, independent from plan authorship and not a task/code review.*

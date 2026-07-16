@@ -9,6 +9,37 @@ SKILL="$REPO_ROOT/skills/code-toolbox"
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 assert_contains() { rg -Fq -- "$1" "$2" || fail "expected $2 to contain: $1"; }
 
+assert_envelope() {
+  local file="$1" field line previous=0
+  for field in \
+    'Agent:' \
+    'Phase/scope:' \
+    'Summary:' \
+    'Sources/evidence:' \
+    'Decisions:' \
+    'Changes/validation:' \
+    'Blockers:' \
+    'Next action:'; do
+    line=$(rg -n -F -- "$field" "$file" | head -n 1 | cut -d: -f1)
+    [ -n "$line" ] || fail "missing required evidence field in $file: $field"
+    [ "$line" -gt "$previous" ] || fail "evidence fields are out of order in $file: $field"
+    previous="$line"
+  done
+}
+
+assert_exact_agents() {
+  local actual expected
+  actual=$(find "$SKILL/agents" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
+  expected=$(printf '%s\n' \
+    delivery-reviewer.md \
+    executor.md \
+    issue-reviewer.md \
+    issue-writer.md \
+    plan-reviewer.md \
+    plan-writer.md)
+  [ "$actual" = "$expected" ] || fail "unexpected code-toolbox agent topology: $actual"
+}
+
 test_router_and_subagents() {
   assert_contains '/code-toolbox issue <#N\|URL> [phase]' "$SKILL/SKILL.md"
   assert_contains '/code-toolbox batch <#N\|URL>... --from <phase>' "$SKILL/SKILL.md"
@@ -21,30 +52,53 @@ test_router_and_subagents() {
   for file in 00-issue-context.md 01-brainstorm.md 02-spec.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
     [ -f "$SKILL/phases/$file" ] || fail "missing phase: $file"
   done
-  for agent in investigator.md spec-author.md plan-author.md plan-reviewer.md general-executor.md code-reviewer.md spec-compliance-auditor.md; do
-    [ -f "$SKILL/agents/$agent" ] || fail "missing agent: $agent"
+  assert_exact_agents
+  assert_contains 'Exactly six agents' "$SKILL/SKILL.md"
+}
+
+test_issue_evidence_contract() {
+  local template
+  for template in \
+    issue-source-set-comment.md \
+    issue-source-set-review-comment.md \
+    issue-plan-comment.md \
+    issue-plan-review-comment.md \
+    issue-task-evidence.md \
+    issue-review-comment.md \
+    issue-integration-comment.md; do
+    [ -f "$SKILL/templates/$template" ] || fail "missing issue evidence template: $template"
+    assert_envelope "$SKILL/templates/$template"
   done
+
+  assert_envelope "$SKILL/templates/repository-delivery-record.md"
+  assert_contains 'templates/issue-source-set-comment.md' "$SKILL/agents/issue-writer.md"
+  assert_contains 'templates/issue-source-set-review-comment.md' "$SKILL/agents/issue-reviewer.md"
+  assert_contains 'stage:spec-approval' "$SKILL/agents/issue-reviewer.md"
+  assert_contains 'human approves the source set' "$SKILL/agents/issue-reviewer.md"
+  assert_contains 'Do not change labels, create a plan, implement code, or self-approve' "$SKILL/agents/issue-reviewer.md"
+
+  assert_contains 'Implement exactly one stable task ID' "$SKILL/agents/executor.md"
+  assert_contains 'fresh instance' "$SKILL/agents/delivery-reviewer.md"
+  assert_contains 'final auditor' "$SKILL/agents/delivery-reviewer.md"
 }
 
 test_issue_creation_and_mode_boundaries() {
   assert_contains 'When this workflow creates a delivery issue' "$SKILL/references/github-flow.md"
   assert_contains 'Create the issue at `stage:spec-approval` plus `needs-human`' "$SKILL/references/github-flow.md"
-  assert_contains 'Only `/code-toolbox issue create` may create the delivery issue' "$SKILL/phases/02-spec.md"
-  assert_contains 'then apply exactly `stage:spec-approval` and `needs-human`' "$SKILL/phases/02-spec.md"
+  assert_contains 'Only `/code-toolbox issue create` creates the delivery issue' "$SKILL/phases/02-spec.md"
+  assert_contains 'applies exactly `stage:spec-approval` and `needs-human`' "$SKILL/phases/02-spec.md"
 
-  assert_contains 'direct` uses the current checkout, creates no issue, applies no labels' "$SKILL/phases/04-dispatch.md"
-  assert_contains 'direct` is allowed only in this mode' "$SKILL/SKILL.md"
-  assert_contains 'no GitHub issue, labels, comments' "$SKILL/SKILL.md"
+  assert_contains 'direct` uses the current checkout and writes every envelope' "$SKILL/phases/04-dispatch.md"
+  assert_contains 'direct` is repository-only' "$SKILL/SKILL.md"
+  assert_contains 'no issue, label, stage, or GitHub comment' "$SKILL/SKILL.md"
 
-  # Repository-mode rejection, BLOCKED evidence, and review all use the
-  # versioned delivery record. GitHub mutation is reserved for issue mode.
-  assert_contains 'repository delivery record' "$SKILL/agents/plan-reviewer.md"
-  assert_contains 'In repository mode append the rejection and required changes to the delivery record' "$SKILL/phases/03-plan.md"
-  assert_contains 'then stop with no GitHub labels, stages, or comments' "$SKILL/phases/03-plan.md"
-  assert_contains 'in issue mode retain `stage:blocked` plus `needs-human`' "$SKILL/phases/05-review.md"
-  assert_contains 'repository mode append the blocker and `Resume: <phase/task>` to the delivery record, then stop without GitHub state' "$SKILL/phases/05-review.md"
-  assert_contains 'Repository mode never changes GitHub labels/stages or posts GitHub comments' "$SKILL/agents/code-reviewer.md"
-  assert_contains 'Repository mode creates no issue, labels, stages, or GitHub comments' "$SKILL/phases/06-integrate.md"
+  # Repository-mode evidence is versioned and never mutates GitHub.
+  assert_contains 'direct-mode delivery record' "$SKILL/agents/plan-reviewer.md"
+  assert_contains 'Direct: append stop/resume and start a new cycle' "$SKILL/phases/03-plan.md"
+  assert_contains '`BLOCKED` is never review-ready' "$SKILL/phases/05-review.md"
+  assert_contains 'Direct mode never creates an issue, label, or GitHub comment' "$SKILL/agents/issue-writer.md"
+  assert_contains 'Direct mode never writes GitHub state' "$SKILL/agents/executor.md"
+  assert_contains 'Direct mode creates no issue, labels, stages, or GitHub comments' "$SKILL/phases/06-integrate.md"
 }
 
 test_no_local_workflow_state() {
@@ -53,19 +107,6 @@ test_no_local_workflow_state() {
   [ ! -e "$SKILL/prompts/watchdogs" ] || fail 'legacy watchdog prompts exist'
   [ ! -e "$SKILL/scripts/materialize-watchdogs.sh" ] || fail 'legacy watchdog materializer exists'
   [ ! -e "$SKILL/scripts/log-task.sh" ] || fail 'legacy task logger exists'
-  for artifact in \
-    agents/spec-document-reviewer.md \
-    docs/red-flags.md \
-    prompts/find-docs.md \
-    prompts/pre-write-approval.md \
-    prompts/post-write-approval.md \
-    templates/.gitignore-template \
-    templates/decisions-template.md \
-    templates/plan-template.md \
-    templates/spec-template.md \
-    templates/testing-anti-patterns.md; do
-    [ ! -e "$SKILL/$artifact" ] || fail "legacy orphan artifact exists: $artifact"
-  done
   assert_contains 'Do not create local task trackers' "$SKILL/phases/08-reference.md"
   assert_contains 'append-only' "$SKILL/references/github-flow.md"
   assert_contains 'Closure matrix' "$SKILL/references/evidence-contract.md"
@@ -178,6 +219,7 @@ EOF
 }
 
 test_router_and_subagents
+test_issue_evidence_contract
 test_issue_creation_and_mode_boundaries
 test_no_local_workflow_state
 test_helpers

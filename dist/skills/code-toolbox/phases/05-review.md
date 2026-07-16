@@ -1,11 +1,11 @@
-# Phase 5: Code Review
+# Phase 5: Delivery review
 
-For every task with `DONE` or `DONE_WITH_CONCERNS` evidence, dispatch a fresh `code-reviewer` that did not author the plan or implement any work in its reviewed range. `BLOCKED` is never review-ready: in issue mode retain `stage:blocked` plus `needs-human`; in repository mode append the blocker and `Resume: <phase/task>` to the delivery record, then stop without GitHub state. In issue mode, the issue remains at `stage:needs-task-review` while independent task review, assembled-diff review when applicable, DoD, final audit, and PR approval are pending. Give the reviewer the plan snapshot, task ID, executor evidence, relevant ADR/spec links, PR/range, and a package from `scripts/review-package.sh`.
+For each `DONE` or `DONE_WITH_CONCERNS` task, dispatch a fresh `agents/delivery-reviewer.md` distinct from the executor and plan-writer. Give it the task/range, source set, plan, executor envelope, and review package. `BLOCKED` is never review-ready.
 
-In issue mode, the reviewer posts an append-only verdict with `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES`, or `NÃO APROVO` using [`templates/issue-review-comment.md`](../templates/issue-review-comment.md). In repository mode, append the same verdict, required action, and `Resume: <phase/task>` only to the delivery record; never post a GitHub comment or alter labels/stages. It checks scope, contract compliance, tests, error handling, and ownership.
+The reviewer posts `templates/issue-review-comment.md` in issue mode or appends the same ordered eight-field envelope to the direct-mode delivery record. It uses `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES`, or `NÃO APROVO` and checks scope, contract, validation, error paths, and ownership.
 
-- Critical/Important finding or `NÃO APROVO`: return only the affected task to an executor, collect new evidence, and re-review. In issue mode return to `stage:in-progress`; in repository mode append the rejection and `Resume: Phase 4 / <Task-ID>` to the delivery record, then stop without GitHub state.
-- Minor finding: record it in the review comment and closure matrix.
-- A clean review maps the task ID to its commit/PR and review URL. Every planned task needs evidence and a review. If the user cancels a task, retain its matrix row with the immutable cancellation decision as its evidence and mark review `not applicable`; never silently omit it. When parallel work was assembled, a separate fresh reviewer must approve the assembled range after conflict resolution and integration verification. When all planned task and assembled-range reviews are clean, proceed directly to Phase 6 while retaining `stage:needs-task-review` until a merge decision. It does not mark the entire issue closed.
+- Critical/Important finding or `NÃO APROVO`: return only the affected task to Phase 4. Issue mode returns to `stage:in-progress`; direct mode records `Resume: Phase 4 / <Task-ID>` and stops.
+- Minor finding: retain it in the review and closure matrix.
+- A clean review maps task ID to commit/PR and evidence. Parallel work also needs a fresh assembled-range review after assembly.
 
-Do not treat an implementer report, a green test, or a PR as independent review.
+When all task/range reviews are clean, proceed to Phase 6 while retaining `stage:needs-task-review` for issue mode. Direct mode remains GitHub-free.

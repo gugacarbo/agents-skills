@@ -15,11 +15,11 @@ Exactly one `stage:*` label applies to a delivery issue. It identifies the issue
 | Label | Precise meaning | Next action |
 | --- | --- | --- |
 | `stage:spec-approval` | Initial source set is prepared: required ADR/spec is ready, or spec impact is explicitly not required | Human approves the source set before planning. |
-| `stage:needs-plan` | Approved source set has no current plan snapshot | Dispatch/await plan-author. |
+| `stage:needs-plan` | Approved source set has no current plan snapshot | Dispatch/await plan-writer. |
 | `stage:needs-plan-review` | Current plan snapshot exists and has not received a valid independent verdict | Dispatch/await plan-reviewer. |
 | `stage:approved` | Current plan has a literal approving verdict | Human selects `worktree` or `later`; issue execution never uses `direct`. |
 | `stage:in-progress` | Approved tasks are implementing or being fixed | Await task evidence or blockers. |
-| `stage:needs-task-review` | Every planned task has non-blocked evidence; independent task review, assembled-diff review when applicable, DoD, final audit, PR approval, and merge decision remain before closure | Dispatch/await reviewers and auditor, then present optional integration. |
+| `stage:needs-task-review` | Every planned task has non-blocked evidence; independent task review, assembled-diff review when applicable, DoD, final `delivery-reviewer` audit, PR approval, and merge decision remain before closure | Dispatch/await `delivery-reviewer` instances, then present optional integration. |
 | `stage:blocked` | A human decision or external correction is required | Present the recorded blocker; do not guess. |
 
 `needs-human` is orthogonal. Add it for `spec-approval`, `approved` + `later`, blocked decisions, review failure, the third requested-change cycle, and the optional post-PR integration decision. Before adding a stage, remove every existing `stage:*` label. After a merged/closed delivery, remove both the stage and `needs-human` labels.
@@ -43,11 +43,11 @@ in-progress → needs-task-review → task + assembled-diff review → final aud
 | Observed state | Resume action |
 | --- | --- |
 | `stage:spec-approval` | Present the prepared ADR/spec or no-spec rationale for human source-set approval; do not plan. |
-| `stage:needs-plan` | Start or await Phase 3 plan-author work. |
+| `stage:needs-plan` | Start or await Phase 3 plan-writer work. |
 | `stage:needs-plan-review` | Dispatch or await the current independent plan review. |
 | `stage:approved` | Ask `worktree` or `later`; do not edit code yet. `direct` is repository-only. |
 | `stage:in-progress` | Dispatch/resume the earliest planned task without `DONE`/`DONE_WITH_CONCERNS` evidence or resolve its blocker. |
-| `stage:needs-task-review` | Dispatch/await independent task reviews, assembled-diff review when applicable, DoD, final audit, and PR approval. After approval, offer—not automatically perform—merge/integration. |
+| `stage:needs-task-review` | Dispatch/await independent `delivery-reviewer` task/range reviews, assembled-diff review when applicable, DoD, final audit, and PR approval. After approval, offer—not automatically perform—merge/integration. |
 | `stage:blocked` | Present the recorded human decision; do not guess. |
 | Eligible issue with zero/multiple stages or comment drift | Set `stage:blocked` + `needs-human` and explain the mismatch. |
 | Ineligible issue | Explain that it is outside the delivery flow and stop without touching labels. |
@@ -58,7 +58,7 @@ One cycle is one append-only plan comment plus one append-only review comment. T
 
 `APROVO` | `APROVO COM RESSALVAS` | `PEÇO AJUSTES` | `NÃO APROVO`
 
-Do not edit a submitted plan or review comment. A material plan change starts a new cycle, replaces `stage:approved` with `stage:needs-plan`, and requires a new reviewer. If a reviewer requires a product/access choice, use `NÃO APROVO` and block rather than consuming an adjustment cycle. The plan-reviewer must be distinct from the plan-author. Every code reviewer must also be distinct from the plan author and executors whose work is in its reviewed range.
+Do not edit a submitted plan or review comment. A material plan change starts a new cycle, replaces `stage:approved` with `stage:needs-plan`, and requires a new reviewer. If a reviewer requires a product/access choice, use `NÃO APROVO` and block rather than consuming an adjustment cycle. The plan-reviewer must be distinct from the plan-writer. Every `delivery-reviewer` instance must also be distinct from the plan-writer and executors whose work is in its reviewed range.
 
 ## Batch rules
 
