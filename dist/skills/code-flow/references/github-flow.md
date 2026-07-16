@@ -30,7 +30,7 @@ o próximo gate; comentários append-only retêm o status exato do trabalho.
 | `stage:spec-approval` | A issue contém ADR/spec proposto ou racional no-spec explícito, aguardando aprovação humana | Humano aprova a proposta; `issue-writer` materializa o ADR/spec aprovado quando necessário e move para `stage:needs-plan`. |
 | `stage:needs-plan` | Source-set aprovado sem snapshot atual de plano | Despachar/aguardar plan-writer. |
 | `stage:needs-plan-review` | Snapshot atual do plano aguarda veredito independente ou aprovação humana após veredito aprovador | Despachar/aguardar plan-reviewer, depois aguardar aprovação humana do plano. |
-| `stage:approved` | Plano atual tem veredito aprovador literal e aprovação humana explícita | Humano escolhe `worktree` ou `later`; execução de issue nunca usa `direct`. |
+| `stage:approved` | Plano atual tem veredito aprovador literal e aprovação humana explícita | Humano escolhe `worktree` ou `later`; execução nunca usa o checkout compartilhado sem worktree. |
 | `stage:in-progress` | O plano aprovado está sendo implementado pela primeira vez como uma unidade | Aguardar evidência do executor ou blockers. |
 | `stage:needs-delivery-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5). |
 | `stage:needs-changes` | A review da implementação (ou auditoria final) pediu ajustes corrigíveis | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-delivery-review`. |
@@ -136,7 +136,7 @@ auditoria final pede ajustes → needs-changes → executor → needs-delivery-r
 | `stage:spec-approval` | Apresentar a proposta de ADR/spec ou racional no-spec para aprovação humana; não escrever ADR/spec formal nem plano. |
 | `stage:needs-plan` | Iniciar ou aguardar o plan-writer da Fase 3. |
 | `stage:needs-plan-review` | Despachar/aguardar a review independente do plano atual, depois apresentar um snapshot aprovador para aprovação humana. |
-| `stage:approved` | Perguntar `worktree` ou `later`; ainda não editar código. `direct` é só repositório. |
+| `stage:approved` | Perguntar `worktree` ou `later`; ainda não editar código. |
 | `stage:in-progress` | Despachar/retomar o executor único do plano aprovado, ou resolver seu blocker. |
 | `stage:needs-delivery-review` | Despachar/aguardar a review independente da implementação (Fase 5). |
 | `stage:needs-changes` | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-delivery-review`. |
@@ -170,4 +170,4 @@ ciclo de plano, base SHA, agentes atribuídos, blockers, branch/worktree, PR e
 próxima ação. Não persistir como registry ou arquivo de progresso; labels/comentários
 da issue e o PR são a evidência durável. Uma issue bloqueada não para issues
 não relacionadas. Agentes de plano/review podem rodar em paralelo. Cada issue
-usa uma worktree, branch e PR isolados; batch não tem modo `direct`.
+usa uma worktree, branch e PR isolados.

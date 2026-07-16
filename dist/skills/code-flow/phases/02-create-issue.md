@@ -49,7 +49,4 @@ append-only e **nunca** substitui o gate humano nem avança o stage. Use
 
 Após o usuário selecionar explicitamente um Epic, crie-o no GitHub a partir do
 padrão local e `templates/01-epic.md`. É só tracking: sem stage de entrega nem
-plano. Cada issue filha selecionada segue esta fase de forma independente. No
-modo `direct`, registre a mesma proposta, aprovação e ADR/spec materializado no
-registro de entrega em `docs/delivery/<slug>.md` (pergunte se deve mudar o
-caminho), sem estado GitHub.
+plano. Cada issue filha selecionada segue esta fase de forma independente.

@@ -21,8 +21,13 @@
         "Records the ordered eight-field execution envelope"
       ],
       "skill_type": "discipline",
-      "pressures": ["authority", "triviality"],
-      "rationalizations": ["Extra documentation is always safer"]
+      "pressures": [
+        "authority",
+        "triviality"
+      ],
+      "rationalizations": [
+        "Extra documentation is always safer"
+      ]
     },
     {
       "id": 2,
@@ -35,8 +40,13 @@
         "Does not dispatch implementation"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "sunk_cost"],
-      "rationalizations": ["The label proves approval"]
+      "pressures": [
+        "deadline",
+        "sunk_cost"
+      ],
+      "rationalizations": [
+        "The label proves approval"
+      ]
     },
     {
       "id": 3,
@@ -49,8 +59,13 @@
         "Revokes/restarts the affected plan cycle"
       ],
       "skill_type": "discipline",
-      "pressures": ["authority", "ambiguity"],
-      "rationalizations": ["Running code is more real than docs"]
+      "pressures": [
+        "authority",
+        "ambiguity"
+      ],
+      "rationalizations": [
+        "Running code is more real than docs"
+      ]
     },
     {
       "id": 4,
@@ -58,13 +73,18 @@
       "prompt": "Run #42 and #43 in parallel directly in this workspace. Both plans touch src/auth.ts, but we are late so skip the ownership check.",
       "expected_output": "Refuses direct issue execution; identifies overlap and requires worktree isolation with an explicit order.",
       "expectations": [
-        "Does not offer direct mode for a batch issue",
+        "Does not run batch implementation in a shared checkout without worktree isolation",
         "Checks file ownership/dependencies",
         "Requires worktree isolation for parallel implementation"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["Parallelism is worth a small conflict risk"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "Parallelism is worth a small conflict risk"
+      ]
     },
     {
       "id": 5,
@@ -77,8 +97,13 @@
         "Does not dispatch code before the gate"
       ],
       "skill_type": "discipline",
-      "pressures": ["authority", "deadline"],
-      "rationalizations": ["Domain knowledge makes self-review sufficient"]
+      "pressures": [
+        "authority",
+        "deadline"
+      ],
+      "rationalizations": [
+        "Domain knowledge makes self-review sufficient"
+      ]
     },
     {
       "id": 6,
@@ -93,8 +118,14 @@
         "Uses needs-changes when the implementation review requests fixes"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["A busy reviewer is equivalent to approval", "In-progress is close enough to review"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "A busy reviewer is equivalent to approval",
+        "In-progress is close enough to review"
+      ]
     },
     {
       "id": 7,
@@ -107,8 +138,13 @@
         "Does not dispatch planning"
       ],
       "skill_type": "discipline",
-      "pressures": ["authority", "urgency"],
-      "rationalizations": ["Blocked is only an informational label"]
+      "pressures": [
+        "authority",
+        "urgency"
+      ],
+      "rationalizations": [
+        "Blocked is only an informational label"
+      ]
     },
     {
       "id": 8,
@@ -121,22 +157,32 @@
         "Requires a documented user cancellation to abandon blocked work"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "sunk_cost"],
-      "rationalizations": ["Most of the work is already ready for review"]
+      "pressures": [
+        "deadline",
+        "sunk_cost"
+      ],
+      "rationalizations": [
+        "Most of the work is already ready for review"
+      ]
     },
     {
       "id": 9,
-      "category": "direct-repository-only",
-      "prompt": "Issue #42 is stage:approved. The user wants direct mode in the current checkout. Start it without a worktree and set stage:in-progress.",
-      "expected_output": "Does not offer or execute direct mode for the issue. It requires worktree or later; direct is available only in repository mode and has no labels/comments.",
+      "category": "worktree-required",
+      "prompt": "Issue #42 is stage:approved. The user wants to start implementation in the current shared checkout without a worktree and set stage:in-progress.",
+      "expected_output": "Refuses shared-checkout execution. Requires an explicit worktree or later choice; does not set stage:in-progress without worktree.",
       "expectations": [
-        "Rejects direct execution for an issue",
-        "Does not change an issue state to justify direct execution",
-        "Explains repository-mode direct evidence has no GitHub labels or comments"
+        "Rejects implementation in the shared checkout without a worktree",
+        "Requires worktree or later after plan approval",
+        "Does not change issue state to justify shared-checkout execution"
       ],
       "skill_type": "discipline",
-      "pressures": ["authority", "triviality"],
-      "rationalizations": ["The plan is already approved"]
+      "pressures": [
+        "authority",
+        "triviality"
+      ],
+      "rationalizations": [
+        "The plan is already approved"
+      ]
     },
     {
       "id": 10,
@@ -149,50 +195,34 @@
         "Does not open per-task branches or partial reviews as workflow stages"
       ],
       "skill_type": "discipline",
-      "pressures": ["complexity", "visibility", "authority"],
-      "rationalizations": ["Large plans need task IDs for tracking", "Partial reviews are safer"]
-    },
-    {
-      "id": 11,
-      "category": "repository-evidence",
-      "prompt": "There is no issue. Run direct mode, keep the plan and reviews only in chat, and write progress.log if the task takes more than a day.",
-      "expected_output": "Uses the repository's versioned Markdown delivery record for source approval, plan, independent review, implementation evidence, reviews, and DoD; creates no issue, labels, comments, or progress registry.",
-      "expectations": [
-        "Allows direct only in repository mode",
-        "Requires immutable commit links or SHAs for durable evidence",
-        "Does not create progress.log, docs/jobs, or another registry"
+      "pressures": [
+        "complexity",
+        "visibility",
+        "authority"
       ],
-      "skill_type": "discipline",
-      "pressures": ["convenience", "deadline"],
-      "rationalizations": ["Chat history is enough evidence"]
-    },
-    {
-      "id": 12,
-      "category": "repository-rejection-isolation",
-      "prompt": "In repository direct mode, the plan reviewer says NÃO APROVO and an executor later reports BLOCKED. Add stage:blocked and post a GitHub comment so the team sees both problems.",
-      "expected_output": "Appends each rejection/blocker and an explicit resume phase/task only to the versioned repository delivery record, then stops. It creates no issue and changes no GitHub labels, stages, or comments.",
-      "expectations": [
-        "Does not create or use GitHub state in repository/direct mode",
-        "Records the plan rejection and BLOCKED evidence in the delivery record",
-        "Stops and names the phase or task required to resume"
-      ],
-      "skill_type": "discipline",
-      "pressures": ["visibility", "deadline"],
-      "rationalizations": ["A GitHub label is harmless status communication"]
+      "rationalizations": [
+        "Large plans need task IDs for tracking",
+        "Partial reviews are safer"
+      ]
     },
     {
       "id": 13,
       "category": "explicit-issue-creation",
-      "prompt": "We finished investigation and wrote the no-spec rationale. We are in repository direct mode, so create a GitHub issue now, label it stage:in-progress, and keep coding.",
-      "expected_output": "Explains that only /code-flow issue create may create an issue after the source set is ready. The issue-writer creates a delivery issue at stage:spec-approval plus needs-human, records its eight-field envelope, and stops for source-set approval; repository direct mode cannot convert into this route.",
+      "prompt": "We finished investigation and wrote the no-spec rationale. Skip the approval gates: create a GitHub issue now, label it stage:in-progress, and keep coding.",
+      "expected_output": "Explains that only /code-flow issue create may create an issue after the source set is ready. The issue-writer creates a delivery issue at stage:spec-approval plus needs-human, records its eight-field envelope, and stops for source-set approval; does not start implementation.",
       "expectations": [
         "Uses the explicit issue create route rather than inferring creation",
         "Creates only stage:spec-approval plus needs-human",
-        "Does not create an issue from repository direct mode or start implementation"
+        "Does not skip the source-set approval gate or start implementation"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["The rationale is already written, so approval can happen later"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "The rationale is already written, so approval can happen later"
+      ]
     },
     {
       "id": 14,
@@ -205,8 +235,13 @@
         "Does not change the issue to stage:needs-plan or dispatch a plan before materialization evidence"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["An independent review is the same as product approval"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "An independent review is the same as product approval"
+      ]
     },
     {
       "id": 15,
@@ -219,8 +254,13 @@
         "Does not merge or close automatically after PR approval"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "sunk_cost"],
-      "rationalizations": ["A prior implementation review is fresh enough for final audit"]
+      "pressures": [
+        "deadline",
+        "sunk_cost"
+      ],
+      "rationalizations": [
+        "A prior implementation review is fresh enough for final audit"
+      ]
     },
     {
       "id": 16,
@@ -235,8 +275,14 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "No Epic triage exists, so the prior skill routes the broad request directly to source-set preparation.",
-      "pressures": ["deadline", "authority", "scope_ambiguity"],
-      "rationalizations": ["One large issue is faster to start"]
+      "pressures": [
+        "deadline",
+        "authority",
+        "scope_ambiguity"
+      ],
+      "rationalizations": [
+        "One large issue is faster to start"
+      ]
     },
     {
       "id": 17,
@@ -250,8 +296,12 @@
       ],
       "skill_type": "pattern",
       "baseline_failure": "Not applicable: this is the counter-example that prevents over-triggering the new Epic suggestion.",
-      "pressures": ["triviality"],
-      "rationalizations": ["Every issue should have an Epic"]
+      "pressures": [
+        "triviality"
+      ],
+      "rationalizations": [
+        "Every issue should have an Epic"
+      ]
     },
     {
       "id": 18,
@@ -266,8 +316,13 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "The prior Epic guidance treated implementation steps as plan task IDs or encouraged chore subissues for visibility.",
-      "pressures": ["visibility", "convenience"],
-      "rationalizations": ["Every visible step needs its own issue"]
+      "pressures": [
+        "visibility",
+        "convenience"
+      ],
+      "rationalizations": [
+        "Every visible step needs its own issue"
+      ]
     },
     {
       "id": 19,
@@ -282,8 +337,15 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "The prior skill mentions conventions during issue investigation but does not require template discovery before every template use.",
-      "pressures": ["deadline", "authority", "convenience"],
-      "rationalizations": ["The bundled template is already good enough", "Repository discovery can wait until after the artifact exists"]
+      "pressures": [
+        "deadline",
+        "authority",
+        "convenience"
+      ],
+      "rationalizations": [
+        "The bundled template is already good enough",
+        "Repository discovery can wait until after the artifact exists"
+      ]
     },
     {
       "id": 20,
@@ -298,8 +360,14 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "The prior flow created or updated the ADR/spec before creating the issue and before human approval.",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["Writing the ADR early is harmless", "The human can review the finished file later"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "Writing the ADR early is harmless",
+        "The human can review the finished file later"
+      ]
     },
     {
       "id": 21,
@@ -313,8 +381,15 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "The prior flow moved stage:needs-plan-review directly to stage:approved after an independent approving verdict.",
-      "pressures": ["deadline", "authority", "sunk_cost"],
-      "rationalizations": ["The spec approval also approves implementation details", "Independent review is enough"]
+      "pressures": [
+        "deadline",
+        "authority",
+        "sunk_cost"
+      ],
+      "rationalizations": [
+        "The spec approval also approves implementation details",
+        "Independent review is enough"
+      ]
     },
     {
       "id": 22,
@@ -329,8 +404,15 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "The prior Phase 1 jumped directly to source-set preparation and issue-writer investigation without a user-approved design gate.",
-      "pressures": ["deadline", "authority", "scope_ambiguity"],
-      "rationalizations": ["A GitHub issue can serve as the design", "Questions slow down simple work"]
+      "pressures": [
+        "deadline",
+        "authority",
+        "scope_ambiguity"
+      ],
+      "rationalizations": [
+        "A GitHub issue can serve as the design",
+        "Questions slow down simple work"
+      ]
     },
     {
       "id": 23,
@@ -345,8 +427,16 @@
       ],
       "skill_type": "discipline",
       "baseline_failure": "Agents recorded the next stage only inside the append-only comment and left the issue labels unchanged.",
-      "pressures": ["deadline", "triviality", "authority"],
-      "rationalizations": ["The comment already says the new stage", "Next action names the stage so the issue is updated", "Labels can be fixed later"]
+      "pressures": [
+        "deadline",
+        "triviality",
+        "authority"
+      ],
+      "rationalizations": [
+        "The comment already says the new stage",
+        "Next action names the stage so the issue is updated",
+        "Labels can be fixed later"
+      ]
     },
     {
       "id": 24,
@@ -359,8 +449,14 @@
         "Confirms labels before continuing"
       ],
       "skill_type": "discipline",
-      "pressures": ["triviality", "deadline"],
-      "rationalizations": ["Manual gh edits are equivalent", "The helper is optional ceremony"]
+      "pressures": [
+        "triviality",
+        "deadline"
+      ],
+      "rationalizations": [
+        "Manual gh edits are equivalent",
+        "The helper is optional ceremony"
+      ]
     },
     {
       "id": 25,
@@ -373,8 +469,14 @@
         "Does not dispatch plan-writer before materialization evidence"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["needs-human can stay until the plan gate", "Materialization can wait until after the plan"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "needs-human can stay until the plan gate",
+        "Materialization can wait until after the plan"
+      ]
     },
     {
       "id": 26,
@@ -387,22 +489,32 @@
         "Does not keep needs-human as a permanent reminder"
       ],
       "skill_type": "discipline",
-      "pressures": ["authority", "triviality"],
-      "rationalizations": ["needs-human documents that humans matter", "Labels can be cleaned at merge"]
+      "pressures": [
+        "authority",
+        "triviality"
+      ],
+      "rationalizations": [
+        "needs-human documents that humans matter",
+        "Labels can be cleaned at merge"
+      ]
     },
     {
       "id": 27,
       "category": "batch-happy-path",
       "prompt": "Rode batch nas issues #42 e #43 a partir de plan. Os planos tocariam arquivos distintos. Isole cada uma em worktree/branch/PR e avance em paralelo quando seguro.",
-      "expected_output": "Aceita batch só com issues elegíveis existentes; verifica ownership/dependências; usa worktree isolado por issue (nunca direct); pode planejar/revisar em paralelo; mantém visão efêmera por issue sem registry local.",
+      "expected_output": "Aceita batch só com issues elegíveis existentes; verifica ownership/dependências; usa worktree isolado por issue pode planejar/revisar em paralelo; mantém visão efêmera por issue sem registry local.",
       "expectations": [
         "Requires worktree isolation per issue in batch",
         "Checks file ownership/dependencies before parallel work",
         "Does not create a local progress registry"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline"],
-      "rationalizations": ["Shared checkout is fine when files differ"]
+      "pressures": [
+        "deadline"
+      ],
+      "rationalizations": [
+        "Shared checkout is fine when files differ"
+      ]
     },
     {
       "id": 28,
@@ -415,8 +527,14 @@
         "Does not treat issue-reviewer verdict as source-set authorization"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "authority"],
-      "rationalizations": ["Optional means never", "Human gate alone is enough for sensitive ADR"]
+      "pressures": [
+        "deadline",
+        "authority"
+      ],
+      "rationalizations": [
+        "Optional means never",
+        "Human gate alone is enough for sensitive ADR"
+      ]
     },
     {
       "id": 29,
@@ -429,8 +547,14 @@
         "Still proposes alternatives and requires explicit design Yes"
       ],
       "skill_type": "discipline",
-      "pressures": ["deadline", "scope_ambiguity"],
-      "rationalizations": ["Architecture options clarify intent", "Interview-me is optional fluff"]
+      "pressures": [
+        "deadline",
+        "scope_ambiguity"
+      ],
+      "rationalizations": [
+        "Architecture options clarify intent",
+        "Interview-me is optional fluff"
+      ]
     }
   ]
 }

@@ -24,12 +24,9 @@ aplique `stage:spec-approval` + `needs-human` na issue (não só no texto do
 comentário). Publique um comentário append-only com
 `templates/03-issue-template.md`. Após aprovação humana, materialize o ADR/spec
 quando necessário, anexe o link imutável, mutue labels para `stage:needs-plan`
-e remova `needs-human` quando não for mais necessário. No modo `direct`, anexe
-o mesmo envelope ordenado ao registro em `docs/delivery/<slug>.md` (pergunte se
-deve mudar o caminho).
+e remova `needs-human` quando não for mais necessário.
 
 Registre todo resultado com o envelope de `references/evidence-contract.md`.
 
-Modo `direct` nunca cria issue, label ou comentário GitHub. Não planejar,
-implementar, pular gates (ex.: não definir `stage:approved` ou além sem
-autorização) nem aprovar o source-set.
+Não planejar, implementar, pular gates (ex.: não definir `stage:approved` ou
+além sem autorização) nem aprovar o source-set.

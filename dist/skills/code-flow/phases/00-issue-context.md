@@ -1,6 +1,8 @@
 # Fase 0: Contexto da issue
 
 Use esta fase para `/code-flow issue`, `/code-flow batch` e `/code-flow issue create`.
+Fases `plan` / `dispatch` / `review` / `integrate` exigem uma issue elegível;
+sem issue, oriente para `issue create`.
 
 Para `issue create`, estabeleça o contexto do pedido antes da Fase 1: resolva o
 repositório/branch default, carregue guidance aplicável e ADRs/specs aceitos,

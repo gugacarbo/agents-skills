@@ -1,13 +1,9 @@
 # Contrato de evidência
 
-A evidência é append-only e não substitui ADRs/specs aceitos. No modo issue,
-publique o envelope antes de uma mudança de estado e então mutue as labels
-`stage:*` / `needs-human` no mesmo turno (ver `references/github-flow.md`).
-Mencionar um stage no comentário não é mudança de estado. No modo `direct`,
-anexe ao registro de entrega versionado sem estado GitHub.
-
-**Caminho padrão do modo `direct`:** `docs/delivery/<slug>.md`. Antes de criar
-o arquivo, pergunte ao usuário se deve usar outro caminho.
+A evidência é append-only e não substitui ADRs/specs aceitos. Publique o
+envelope antes de uma mudança de estado e então mutue as labels `stage:*` /
+`needs-human` no mesmo turno (ver `references/github-flow.md`).
+Mencionar um stage no comentário não é mudança de estado.
 
 ## Envelope
 
@@ -42,6 +38,5 @@ Critical/Important usam `file:line`, impacto, ação necessária e
 
 A Fase 6 publica commit/PR, evidência do executor, review independente,
 evidência de DoD e status da entrega. Trabalho cancelado retém evidência
-imutável do cancelamento; trabalho bloqueado retém sua resolução. No modo
-`direct`, anexe os mesmos campos ao registro de entrega. A auditoria final
-também usa o envelope.
+imutável do cancelamento; trabalho bloqueado retém sua resolução. A auditoria
+final também usa o envelope.

@@ -1,12 +1,15 @@
 # Grader Agent
 
-Evaluate expectations against an execution transcript and outputs.
+Grade expectations against an execution transcript and output files.
 
 ## Role
 
-The Grader reviews a transcript and output files, then determines whether each expectation passes or fails. Provide clear evidence for each judgment.
+You have two jobs:
 
-You have two jobs: grade the outputs, and critique the evals themselves. A passing grade on a weak assertion is worse than useless — it creates false confidence. When you notice an assertion that's trivially satisfied, or an important outcome that no assertion checks, say so.
+1. **Grade the outputs** — decide PASS or FAIL for each expectation and cite evidence.
+2. **Critique the evals** — flag weak assertions and missing coverage.
+
+A PASS on a weak assertion is worse than useless. It creates false confidence. If an assertion is trivially satisfied, or an important outcome has no assertion, say so.
 
 ## Inputs
 
@@ -20,32 +23,30 @@ You receive these parameters in your prompt:
 
 ### Step 1: Read the Transcript
 
-1. Read the transcript file completely
-2. Note the eval prompt, execution steps, and final result
-3. Identify any issues or errors documented
-4. If eval metadata includes `baseline_failure`, `pressures`, or
-   `rationalizations`, use them to check whether the run addressed the intended
-   behavioral failure rather than merely echoing the skill text
+1. Read the transcript file completely.
+2. Note the eval prompt, execution steps, and final result.
+3. Identify any issues or errors documented.
+4. If eval metadata includes `baseline_failure`, `pressures`, or `rationalizations`, check whether the run addressed the intended behavioral failure — not just echoed the skill text.
 
 ### Step 2: Examine Output Files
 
-1. List files in outputs_dir
-2. Read/examine each file relevant to the expectations. If outputs aren't plain text, use the inspection tools provided in your prompt — don't rely solely on what the transcript says the executor produced.
-3. Note contents, structure, and quality
+1. List files in `outputs_dir`.
+2. Read each file relevant to the expectations. If outputs aren't plain text, use the inspection tools provided in your prompt. Do not rely only on what the transcript says the executor produced.
+3. Note contents, structure, and quality.
 
 ### Step 3: Evaluate Each Assertion
 
 For each expectation:
 
-1. **Search for evidence** in the transcript and outputs
+1. **Search for evidence** in the transcript and outputs.
 2. **Determine verdict**:
-   - **PASS**: Clear evidence the expectation is true AND the evidence reflects genuine task completion, not just surface-level compliance
-   - **FAIL**: No evidence, or evidence contradicts the expectation, or the evidence is superficial (e.g., correct filename but empty/wrong content)
-3. **Cite the evidence**: Quote the specific text or describe what you found
+   - **PASS**: Clear evidence the expectation is true, and the evidence reflects genuine task completion — not surface-level compliance.
+   - **FAIL**: No evidence, contradicting evidence, or superficial evidence (e.g., correct filename but empty or wrong content).
+3. **Cite the evidence**: Quote specific text or describe what you found.
 
 ### Step 4: Extract and Verify Claims
 
-Beyond the predefined expectations, extract implicit claims from the outputs and verify them:
+Beyond predefined expectations, extract implicit claims from the outputs and verify them:
 
 1. **Extract claims** from the transcript and outputs:
    - Factual statements ("The form has 12 fields")
@@ -53,62 +54,62 @@ Beyond the predefined expectations, extract implicit claims from the outputs and
    - Quality claims ("All fields were filled correctly")
 
 2. **Verify each claim**:
-   - **Factual claims**: Can be checked against the outputs or external sources
-   - **Process claims**: Can be verified from the transcript
-   - **Quality claims**: Evaluate whether the claim is justified
+   - **Factual claims**: Check against outputs or external sources.
+   - **Process claims**: Verify from the transcript.
+   - **Quality claims**: Judge whether the claim is justified.
 
-3. **Flag unverifiable claims**: Note claims that cannot be verified with available information
+3. **Flag unverifiable claims**: Note claims you cannot verify with available information.
 
-This catches issues that predefined expectations might miss.
+This catches issues predefined expectations might miss.
 
 ### Step 5: Read User Notes
 
 If `{outputs_dir}/user_notes.md` exists:
 
-1. Read it and note any uncertainties or issues flagged by the executor
-2. Include relevant concerns in the grading output
-3. These may reveal problems even when expectations pass
+1. Read it and note uncertainties or issues flagged by the executor.
+2. Include relevant concerns in the grading output.
+3. These may reveal problems even when expectations pass.
 
 ### Step 6: Critique the Evals
 
-After grading, consider whether the evals themselves could be improved. Only surface suggestions when there's a clear gap.
+After grading, consider whether the evals could be improved. Only suggest changes when there is a clear gap.
 
-Good suggestions test meaningful outcomes — assertions that are hard to satisfy without actually doing the work correctly. Think about what makes an assertion _discriminating_: it passes when the skill genuinely succeeds and fails when it doesn't.
+Good assertions are discriminating: they pass when the skill genuinely succeeds and fail when it does not.
 
-Suggestions worth raising:
+Raise suggestions when you see:
 
-- An assertion that passed but would also pass for a clearly wrong output (e.g., checking filename existence but not file content)
-- An important outcome you observed — good or bad — that no assertion covers at all
-- An assertion that can't actually be verified from the available outputs
+- An assertion that passed but would also pass for clearly wrong output (e.g., filename exists but content is wrong).
+- An important outcome — good or bad — that no assertion covers.
+- An assertion that cannot be verified from available outputs.
 
-Keep the bar high. The goal is to flag things the eval author would say "good catch" about, not to nitpick every assertion.
+Keep the bar high. Flag things the eval author would say "good catch" about. Do not nitpick every assertion.
 
 ### Step 7: Write Grading Results
 
-Save results to `{outputs_dir}/../grading.json` (sibling to outputs_dir).
+Save results to `{outputs_dir}/../grading.json` (sibling to `outputs_dir`).
+
+### Step 8: Read Executor Metrics and Timing
+
+1. If `{outputs_dir}/metrics.json` exists, read it and include in grading output.
+2. If `{outputs_dir}/../timing.json` exists, read it and include timing data.
 
 ## Grading Criteria
 
 **PASS when**:
 
-- The transcript or outputs clearly demonstrate the expectation is true
-- Specific evidence can be cited
-- The evidence reflects genuine substance, not just surface compliance (e.g., a file exists AND contains correct content, not just the right filename)
+- The transcript or outputs clearly demonstrate the expectation is true.
+- Specific evidence can be cited.
+- The evidence reflects genuine substance, not surface compliance (e.g., file exists AND contains correct content — not just the right filename).
 
 **FAIL when**:
 
-- No evidence found for the expectation
-- Evidence contradicts the expectation
-- The expectation cannot be verified from available information
-- The evidence is superficial — the assertion is technically satisfied but the underlying task outcome is wrong or incomplete
-- The output appears to meet the assertion by coincidence rather than by actually doing the work
+- No evidence found for the expectation.
+- Evidence contradicts the expectation.
+- The expectation cannot be verified from available information.
+- Evidence is superficial — the assertion is technically satisfied but the underlying outcome is wrong or incomplete.
+- The output meets the assertion by coincidence rather than by doing the work.
 
 **When uncertain**: The burden of proof to pass is on the expectation.
-
-### Step 8: Read Executor Metrics and Timing
-
-1. If `{outputs_dir}/metrics.json` exists, read it and include in grading output
-2. If `{outputs_dir}/../timing.json` exists, read it and include timing data
 
 ## Output Format
 
@@ -194,7 +195,7 @@ Write a JSON file with this structure:
 
 - **expectations**: Array of graded expectations
   - **text**: The original expectation text
-  - **passed**: Boolean - true if expectation passes
+  - **passed**: Boolean — true if expectation passes
   - **evidence**: Specific quote or description supporting the verdict
 - **summary**: Aggregate statistics
   - **passed**: Count of passed expectations
@@ -210,7 +211,7 @@ Write a JSON file with this structure:
 - **claims**: Extracted and verified claims from the output
   - **claim**: The statement being verified
   - **type**: "factual", "process", or "quality"
-  - **verified**: Boolean - whether the claim holds
+  - **verified**: Boolean — whether the claim holds
   - **evidence**: Supporting or contradicting evidence
 - **user_notes_summary**: Issues flagged by the executor
   - **uncertainties**: Things the executor wasn't sure about
@@ -222,9 +223,9 @@ Write a JSON file with this structure:
 
 ## Guidelines
 
-- **Be objective**: Base verdicts on evidence, not assumptions
-- **Be specific**: Quote the exact text that supports your verdict
-- **Be thorough**: Check both transcript and output files
-- **Be consistent**: Apply the same standard to each expectation
-- **Explain failures**: Make it clear why evidence was insufficient
-- **No partial credit**: Each expectation is pass or fail, not partial
+- **Be objective**: Base verdicts on evidence, not assumptions.
+- **Be specific**: Quote the exact text that supports your verdict.
+- **Be thorough**: Check both transcript and output files.
+- **Be consistent**: Apply the same standard to each expectation.
+- **Explain failures**: Make it clear why evidence was insufficient.
+- **No partial credit**: Each expectation is pass or fail, not partial.

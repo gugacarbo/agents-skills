@@ -5,23 +5,21 @@ um ciclo de plano append-only com links imutáveis das fontes, base SHA, impacto
 de spec, objetivo e limites, critérios de aceite, abordagem de verificação/TDD,
 casos EARS, riscos, rollback e DoD binário. Não peça decomposição em task IDs —
 o plano é uma unidade de implementação. O envelope completo de oito campos
-acompanha o comentário do plano ou a seção do registro no modo `direct`.
+acompanha o comentário do plano.
 
-No modo issue, publique `templates/05-plan-template.md` e então mutue labels
-para `stage:needs-plan-review` (remova `stage:*` anterior primeiro). Não trate
-o comentário do plano como mudança de stage. No modo `direct`, anexe ao
-registro versionado em `docs/delivery/<slug>.md` (pergunte se deve mudar o
-caminho); não criar estado GitHub nem registry local.
+Publique `templates/05-plan-template.md` e então mutue labels para
+`stage:needs-plan-review` (remova `stage:*` anterior primeiro). Não trate o
+comentário do plano como mudança de stage. Preferir `scripts/transition-issue.sh`.
 
 Despache imediatamente um `agents/04-plan-reviewer.md` fresco com o snapshot
-literal. Ele publica `templates/06-review-template.md` ou a seção equivalente
-do registro com todos os oito campos e um veredito literal:
+literal. Ele publica `templates/06-review-template.md` com todos os oito campos
+e um veredito literal:
 
 | Resultado | Ação |
 | --- | --- |
-| `APROVO` / `APROVO COM RESSALVAS` | Issue: manter labels em `stage:needs-plan-review` + `needs-human` e apresentar o snapshot revisado para aprovação humana; direct: anexar o veredito e aguardar aprovação humana. |
-| `PEÇO AJUSTES` | Issue: mutar labels de volta para `stage:needs-plan`; no ciclo 3 bloquear + `needs-human`. Direct: anexar stop/resume e iniciar novo ciclo. |
-| `NÃO APROVO`, erro, veredito ausente ou decisão de produto/acesso | Issue: mutar labels para `stage:blocked` + `needs-human`; direct: anexar blocker e parar. |
+| `APROVO` / `APROVO COM RESSALVAS` | Manter labels em `stage:needs-plan-review` + `needs-human` e apresentar o snapshot revisado para aprovação humana. |
+| `PEÇO AJUSTES` | Mutar labels de volta para `stage:needs-plan`; no ciclo 3 bloquear + `needs-human`. |
+| `NÃO APROVO`, erro, veredito ausente ou decisão de produto/acesso | Mutar labels para `stage:blocked` + `needs-human`. |
 
 Após um veredito independente aprovador, o humano aprova ou rejeita o snapshot
 exato do comentário do plano com `templates/13-human-gate-plan.md`. Só a
