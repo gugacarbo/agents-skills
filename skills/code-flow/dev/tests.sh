@@ -97,7 +97,7 @@ test_router_and_subagents() {
   assert_contains 'só labels são status durável' "$SKILL/references/github-flow.md"
   assert_contains 'gh issue view <n> --json labels' "$SKILL/references/github-flow.md"
   assert_contains 'texto de comentário sozinho não é atualização de status' "$SKILL/SKILL.md"
-  assert_contains 'Mencionar um stage no comentário não é mudança de estado' "$SKILL/references/evidence-contract.md"
+  assert_contains 'Mencionar um stage no comentário não é mudança de estado' "$SKILL/templates/evidence-contract-template.md"
   for file in 00-issue-context.md 01-brainstorm.md 02-create-issue.md 03-plan.md 04-dispatch.md 05-review.md 06-integrate.md; do
     [ -f "$SKILL/phases/$file" ] || fail "missing phase: $file"
   done
@@ -218,7 +218,7 @@ test_issue_creation_and_mode_boundaries() {
   assert_contains 'nunca como comentário' "$SKILL/phases/02-create-issue.md"
   assert_contains '### Rascunho ou racional no-spec' "$SKILL/templates/03-issue-template.md"
   assert_contains 'Não criar nem atualizar' "$SKILL/agents/01-issue-writer.md"
-  assert_contains 'Exceção: source-set no body' "$SKILL/references/evidence-contract.md"
+  assert_contains 'Exceção: source-set no body' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'autoriza a materialização formal do ADR/spec' "$SKILL/templates/03-issue-template.md"
   assert_contains 'gates obrigatórios separados' "$SKILL/phases/03-plan.md"
   assert_contains 'humano aprova este snapshot exato' "$SKILL/templates/06-review-template.md"
@@ -245,7 +245,7 @@ test_no_local_workflow_state() {
   [ ! -e "$SKILL/phases/08-reference.md" ] || fail 'obsolete phase-08 reference exists'
   assert_contains 'Não criar trackers de task' "$SKILL/SKILL.md"
   assert_contains 'append-only' "$SKILL/references/github-flow.md"
-  assert_contains 'Evidência de fechamento' "$SKILL/references/evidence-contract.md"
+  assert_contains 'Evidência de fechamento' "$SKILL/templates/evidence-contract-template.md"
 }
 
 test_helpers() {
