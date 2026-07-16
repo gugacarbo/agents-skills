@@ -11,7 +11,8 @@ ROOT="$(repo_root)"
 cd "$ROOT"
 detect_runner
 
-python3 "$ROOT/scripts/docs-check" && python3 "$ROOT/scripts/skills-check"
+python3 "$ROOT/scripts/docs-check"
+python3 "$ROOT/scripts/skills-check"
 
 ${NODE_ENV_RUNNER} lint-staged
 ${NODE_ENV_RUNNER} test-staged

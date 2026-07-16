@@ -39,6 +39,7 @@ pnpm build
 ```bash
 pnpm test                # exit 0
 pnpm build               # artefatos publicados válidos
+pnpm skills-check        # relações e arquivos publicados das skills válidos
 ```
 
 ## Como deployar

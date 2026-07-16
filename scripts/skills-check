@@ -38,7 +38,7 @@ WHITELIST = {"package.json", "LICENSE.txt", "VERSION", ".gitignore",
              "evals.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"}
 IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "build",
                 "vendor", "__pycache__", ".next", "target", ".tox",
-                ".mypy_cache", ".pytest_cache", ".ruff_cache", "dev"}
+                ".mypy_cache", ".pytest_cache", ".ruff_cache", "dev", "tests"}
 PARSE_EXTS = {".md", ".sh", ".py", ".html", ".js", ".cjs", ".mjs"}
 
 EXIT_ORPHAN, EXIT_BROKEN, EXIT_CIRCULAR, EXIT_CROSS_SKILL, EXIT_DEPTH = 1, 2, 4, 8, 16
