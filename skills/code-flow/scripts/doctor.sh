@@ -30,7 +30,7 @@ check_file() { [ -f "$TARGET_DIR/$1" ] && printf 'PASS %s\n' "$1" || { printf 'F
 check_command git
 check_command sh
 check_command bash
-for file in review-package.sh doctor.sh bootstrap.sh transition-issue.sh; do check_file "$file"; done
+for helper in review-package doctor bootstrap transition-issue; do check_file "$helper.sh"; done
 
 # Visual companion lives next to scripts/ when TARGET_DIR is the skill scripts dir,
 # or under a skill root; check both layouts.

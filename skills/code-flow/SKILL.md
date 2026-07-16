@@ -23,6 +23,11 @@ reviews ou implementação você mesmo.
 | `/code-flow <plan\|dispatch\|review\|integrate>`                        | Exige issue (`issue <#N> [phase]`); recuse e peça `issue create` se não houver.                                                                                                    |
 | `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para.                                                                                                                                                             |
 
+Os helpers correspondentes são [`scripts/doctor.sh`](scripts/doctor.sh),
+[`scripts/bootstrap.sh`](scripts/bootstrap.sh),
+[`scripts/review-package.sh`](scripts/review-package.sh) e
+[`scripts/transition-issue.sh`](scripts/transition-issue.sh).
+
 `issue create` é a única rota canônica de criação de issue (`create-issue` é
 alias). Fases nomeadas nunca bypassam gates; `batch` nunca cria issues.
 Entrega e evidência vivem em issues GitHub (labels + comentários append-only).
