@@ -12,6 +12,6 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true
 	},
-	"include": ["skills/code-toolbox/**/*.js"],
+	"include": ["skills/code-flow/**/*.js"],
 	"exclude": ["node_modules"]
 }

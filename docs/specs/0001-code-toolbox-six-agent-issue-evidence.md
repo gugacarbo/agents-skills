@@ -5,11 +5,11 @@ builds-on: []
 implemented-by: []
 ---
 
-# Code-toolbox coordena entregas com seis agentes e evidência por comentário
+# Code-flow coordena entregas com seis agentes e evidência por comentário
 
 ## Objetivo
 
-Reduzir a topologia da `code-toolbox` a seis papéis explícitos, mantendo os
+Reduzir a topologia da `code-flow` a seis papéis explícitos, mantendo os
 gates humanos e a revisão independente. Toda execução de agente deve deixar
 evidência append-only no artefato durável da entrega: um comentário na issue
 no modo issue, ou uma seção equivalente no delivery record no modo repositório
@@ -146,7 +146,7 @@ aprovados para implementação.
 ```bash
 pnpm test
 pnpm build
-bash skills/code-toolbox/dev/tests.sh
+bash skills/code-flow/dev/tests.sh
 python3 scripts/docs-check
 ```
 

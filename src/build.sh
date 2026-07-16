@@ -54,7 +54,7 @@ remove_ignored_artifacts() {
     -name .cache -o \
     -name __pycache__ -o \
     -name .turbo -o \
-    -name .code-toolbox \
+    -name .code-flow \
   \) -prune -exec rm -rf {} \;
 
   find "$build_dir" -type f \( \
@@ -98,6 +98,9 @@ remove_test_artifacts "$BUILD_OUTPUT_DIR"
 remove_ignored_artifacts "$BUILD_OUTPUT_DIR"
 
 mkdir -p "$BUILD_TARGET_DIR"
+# Migration cleanup: publishing code-flow must not leave the renamed skill
+# discoverable under its former name.
+rm -rf "$BUILD_TARGET_DIR/code-toolbox"
 cp -R "$BUILD_OUTPUT_DIR/." "$BUILD_TARGET_DIR/"
 
 printf '[OK] Build concluido com %s skill(s) em %s\n' "$copied_count" "$BUILD_OUTPUT_DIR"

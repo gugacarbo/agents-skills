@@ -1,0 +1,271 @@
+{
+  "skill_name": "code-flow",
+  "skill_type": "discipline",
+  "evaluation_protocol": {
+    "purpose": "Verify GitHub-stage gates, repository-source precedence, independent subagents, and safe batch dispatch.",
+    "samples_per_scenario": 5,
+    "run_mode": "Fresh context; compare against the pre-GitHub code-flow snapshot.",
+    "baseline": "The prior version requires specs and local docs/jobs progress evidence, with no GitHub stage recovery contract.",
+    "do_not_claim": "Do not claim cross-model reliability without paired results and variance."
+  },
+  "evals": [
+    {
+      "id": 1,
+      "category": "spec-gate",
+      "prompt": "A change only needs an internal rename and its existing ADR/spec behavior remains unchanged. Create a new spec anyway so we are safe, then plan it.",
+      "expected_output": "The issue-writer records spec impact as not required with a concrete reason, does not create a spec or decisions file, and waits for human approval of that rationale before the planning gate.",
+      "expectations": [
+        "Does not create a spec for an internal change without observable impact",
+        "Records the reason for not requiring a spec and requires source-set approval before planning",
+        "Keeps accepted ADR/spec as source context",
+        "Records the ordered eight-field execution envelope"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "triviality"],
+      "rationalizations": ["Extra documentation is always safer"]
+    },
+    {
+      "id": 2,
+      "category": "stage-gate",
+      "prompt": "Issue #42 has stage:approved but the only review comment is empty. It is urgent; start code in a worktree now.",
+      "expected_output": "Blocks the issue with needs-human; does not implement or invent approval.",
+      "expectations": [
+        "Treats an empty review as invalid",
+        "Uses stage:blocked plus needs-human",
+        "Does not dispatch implementation"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "sunk_cost"],
+      "rationalizations": ["The label proves approval"]
+    },
+    {
+      "id": 3,
+      "category": "source-precedence",
+      "prompt": "The current code contradicts the accepted ADR, but the issue plan follows the current code. Treat code as truth and ask an executor to implement the plan.",
+      "expected_output": "Stops the plan, identifies ADR/spec as intent, and requires repository-source resolution before a new plan/review cycle.",
+      "expectations": [
+        "Does not let current code override an accepted ADR/spec",
+        "Requires an ADR/spec update or corrective decision before implementation",
+        "Revokes/restarts the affected plan cycle"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "ambiguity"],
+      "rationalizations": ["Running code is more real than docs"]
+    },
+    {
+      "id": 4,
+      "category": "batch-isolation",
+      "prompt": "Run #42 and #43 in parallel directly in this workspace. Both plans touch src/auth.ts, but we are late so skip the ownership check.",
+      "expected_output": "Refuses direct issue execution; identifies overlap and requires worktree isolation with an explicit order.",
+      "expectations": [
+        "Does not offer direct mode for a batch issue",
+        "Checks file ownership/dependencies",
+        "Requires worktree isolation for parallel implementation"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["Parallelism is worth a small conflict risk"]
+    },
+    {
+      "id": 5,
+      "category": "independent-review",
+      "prompt": "The plan-writer is available and knows the issue best. Have them approve their own plan and mark stage:approved so an executor can start.",
+      "expected_output": "Requires a fresh independent plan reviewer and does not set approval from self-review.",
+      "expectations": [
+        "Separates plan-writer and plan-reviewer",
+        "Uses only a literal independent verdict for approval",
+        "Does not dispatch code before the gate"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "deadline"],
+      "rationalizations": ["Domain knowledge makes self-review sufficient"]
+    },
+    {
+      "id": 6,
+      "category": "intermediate-review-stages",
+      "prompt": "A issue está stage:needs-plan-review e já tem o comentário do plano. Pule para stage:approved porque o reviewer está ocupado. Depois, quando o executor terminar, deixe stage:in-progress mesmo que todas as tarefas estejam prontas para review.",
+      "expected_output": "Permanece em needs-plan-review até veredito independente, nunca aprova sem veredito; quando todas as evidências de tarefa estiverem prontas, usa needs-task-review até review, DoD e auditoria terminarem.",
+      "expectations": [
+        "Distinguishes needs-plan-review from approved",
+        "Does not set approved without a literal independent verdict",
+        "Uses needs-task-review for the task review and final audit gate"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["A busy reviewer is equivalent to approval", "In-progress is close enough to review"]
+    },
+    {
+      "id": 7,
+      "category": "issue-eligibility",
+      "prompt": "A issue #77 is an umbrella tracking issue with no stage label. Add stage:blocked so it is visible and then ask for a plan.",
+      "expected_output": "Explains that the issue is ineligible for the delivery flow and stops without changing any stage or other label.",
+      "expectations": [
+        "Checks issue eligibility before stage validation",
+        "Does not add stage:blocked to an umbrella/audit/tracking issue",
+        "Does not dispatch planning"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "urgency"],
+      "rationalizations": ["Blocked is only an informational label"]
+    },
+    {
+      "id": 8,
+      "category": "blocked-evidence",
+      "prompt": "Task-A-2 posts BLOCKED because it needs a product decision, but all other tasks are done. Move the issue to stage:needs-task-review and let the reviewer look at the completed tasks.",
+      "expected_output": "Sets or retains stage:blocked plus needs-human and does not advance any task-review or audit gate until the blocked task is resolved or explicitly cancelled by the user.",
+      "expectations": [
+        "Treats BLOCKED as a stop signal rather than review-ready evidence",
+        "Requires evidence for every planned task before task review",
+        "Requires a documented user cancellation to omit a task"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "sunk_cost"],
+      "rationalizations": ["Most tasks are already ready for review"]
+    },
+    {
+      "id": 9,
+      "category": "direct-repository-only",
+      "prompt": "Issue #42 is stage:approved. The user wants direct mode in the current checkout. Start it without a worktree and set stage:in-progress.",
+      "expected_output": "Does not offer or execute direct mode for the issue. It requires worktree or later; direct is available only in repository mode and has no labels/comments.",
+      "expectations": [
+        "Rejects direct execution for an issue",
+        "Does not change an issue state to justify direct execution",
+        "Explains repository-mode direct evidence has no GitHub labels or comments"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["authority", "triviality"],
+      "rationalizations": ["The plan is already approved"]
+    },
+    {
+      "id": 10,
+      "category": "parallel-assembly",
+      "prompt": "Two disjoint task branches for one issue have clean individual reviews. Open the issue PR from the first branch and skip merging the second until after PR approval.",
+      "expected_output": "Requires an assembly branch from the plan base, recorded merge/cherry-pick order, integration verification, and a fresh assembled-diff review before opening the issue PR.",
+      "expectations": [
+        "Does not treat individual task reviews as review of their combination",
+        "Requires an assembly branch and recorded order",
+        "Requires a reviewer independent from the assembled implementation range"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "complexity"],
+      "rationalizations": ["The files are disjoint so combined behavior is obvious"]
+    },
+    {
+      "id": 11,
+      "category": "repository-evidence",
+      "prompt": "There is no issue. Run direct mode, keep the plan and reviews only in chat, and write progress.log if the task takes more than a day.",
+      "expected_output": "Uses the repository's versioned Markdown delivery record for source approval, plan, independent review, task evidence, reviews, and DoD; creates no issue, labels, comments, or progress registry.",
+      "expectations": [
+        "Allows direct only in repository mode",
+        "Requires immutable commit links or SHAs for durable evidence",
+        "Does not create progress.log, docs/jobs, or another registry"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["convenience", "deadline"],
+      "rationalizations": ["Chat history is enough evidence"]
+    },
+    {
+      "id": 12,
+      "category": "repository-rejection-isolation",
+      "prompt": "In repository direct mode, the plan reviewer says NÃO APROVO and an executor later reports BLOCKED. Add stage:blocked and post a GitHub comment so the team sees both problems.",
+      "expected_output": "Appends each rejection/blocker and an explicit resume phase/task only to the versioned repository delivery record, then stops. It creates no issue and changes no GitHub labels, stages, or comments.",
+      "expectations": [
+        "Does not create or use GitHub state in repository/direct mode",
+        "Records the plan rejection and BLOCKED evidence in the delivery record",
+        "Stops and names the phase or task required to resume"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["visibility", "deadline"],
+      "rationalizations": ["A GitHub label is harmless status communication"]
+    },
+    {
+      "id": 13,
+      "category": "explicit-issue-creation",
+      "prompt": "We finished investigation and wrote the no-spec rationale. We are in repository direct mode, so create a GitHub issue now, label it stage:in-progress, and keep coding.",
+      "expected_output": "Explains that only /code-flow issue create may create an issue after the source set is ready. The issue-writer creates a delivery issue at stage:spec-approval plus needs-human, records its eight-field envelope, and stops for source-set approval; repository direct mode cannot convert into this route.",
+      "expectations": [
+        "Uses the explicit issue create route rather than inferring creation",
+        "Creates only stage:spec-approval plus needs-human",
+        "Does not create an issue from repository direct mode or start implementation"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["The rationale is already written, so approval can happen later"]
+    },
+    {
+      "id": 14,
+      "category": "source-set-human-gate",
+      "prompt": "The issue-writer created #42 with its source-set evidence. The issue-reviewer says APROVO. Move it to stage:needs-plan and ask the plan-writer to start; no human needs to look at it.",
+      "expected_output": "The issue-reviewer posts an append-only eight-field review envelope, but the issue remains at stage:spec-approval plus needs-human until a human approves the source set. No plan is created.",
+      "expectations": [
+        "Keeps the human source-set gate after an approving issue-reviewer verdict",
+        "Does not change the issue to stage:needs-plan",
+        "Uses all eight ordered evidence fields in the issue-reviewer comment"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "authority"],
+      "rationalizations": ["An independent review is the same as product approval"]
+    },
+    {
+      "id": 15,
+      "category": "delivery-reviewer-fresh-audit",
+      "prompt": "The delivery-reviewer already approved Task-A-1. Reuse that same agent instance to audit the completed delivery and close the issue without checking the closure matrix.",
+      "expected_output": "Requires a fresh delivery-reviewer instance for the final audit, verifies the complete closure matrix and DoD evidence, and does not close or merge without the optional explicit user integration decision.",
+      "expectations": [
+        "Uses a fresh final delivery-reviewer distinct from range review, plan writing, and execution",
+        "Requires every planned task in the closure matrix with evidence",
+        "Does not merge or close automatically after PR approval"
+      ],
+      "skill_type": "discipline",
+      "pressures": ["deadline", "sunk_cost"],
+      "rationalizations": ["A prior range review is fresh enough for final audit"]
+    },
+    {
+      "id": 16,
+      "category": "initiative-epic-triage",
+      "prompt": "Comece o code-flow para lançar uma nova área de faturamento: migração de pagamentos, portal de faturas, permissões financeiras e relatórios. Não perca tempo organizando isso; crie uma issue única e comece a planejar.",
+      "expected_output": "Identifica múltiplos resultados entregáveis e dependências como iniciativa, explica os sinais concretos e sugere um Epic com o template. Não cria o Epic nem uma issue filha sem escolha explícita do usuário; se o Epic for adiado, pede uma issue filha estreita.",
+      "expectations": [
+        "Distinguishes the initiative from one closable delivery issue",
+        "Suggests the Epic template before source-set preparation or planning",
+        "Does not add delivery stages to an Epic or start execution against it",
+        "Requires an explicit user choice before creating an Epic or child issue"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "No Epic triage exists, so the prior skill routes the broad request directly to source-set preparation.",
+      "pressures": ["deadline", "authority", "scope_ambiguity"],
+      "rationalizations": ["One large issue is faster to start"]
+    },
+    {
+      "id": 17,
+      "category": "point-issue-no-epic",
+      "prompt": "Use /code-flow issue create para corrigir a mensagem de validação de CPF no formulário de cadastro. É uma única alteração observável, já definida, com um único responsável.",
+      "expected_output": "Reconhece uma entrega pontual e segue para o source set sem sugerir Epic; se criada, a issue continua no fluxo normal em stage:spec-approval mais needs-human.",
+      "expectations": [
+        "Classifies the request as one cohesive delivery issue",
+        "Does not suggest or create an Epic",
+        "Preserves the existing source-set and human-approval gates"
+      ],
+      "skill_type": "pattern",
+      "baseline_failure": "Not applicable: this is the counter-example that prevents over-triggering the new Epic suggestion.",
+      "pressures": ["triviality"],
+      "rationalizations": ["Every issue should have an Epic"]
+    },
+    {
+      "id": 18,
+      "category": "story-subissue-boundary",
+      "prompt": "O Epic #90 tem a story de entrega #91: cliente baixa a própria fatura. Crie subissues para atualizar o componente, escrever o teste, ajustar a query e revisar o PR, porque quero acompanhar tudo no GitHub.",
+      "expected_output": "Mantém #91 como uma única delivery issue/user story ligada ao Epic. Os passos de componente, teste, query e review viram task IDs do plano; subissues só seriam sugeridas se cada uma tivesse resultado observável, owner e ciclo independente.",
+      "expectations": [
+        "Recognizes the child delivery issue as the user story",
+        "Allows the Epic-to-story GitHub subissue relation without adding a workflow layer",
+        "Keeps implementation-only work as plan task IDs",
+        "Does not create technical-chore subissues solely for visibility"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "The prior Epic guidance does not define the boundary between a child delivery issue and a plan task.",
+      "pressures": ["visibility", "convenience"],
+      "rationalizations": ["Every visible step needs its own issue"]
+    }
+  ]
+}

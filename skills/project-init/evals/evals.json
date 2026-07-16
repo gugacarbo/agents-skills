@@ -142,7 +142,7 @@
 		{
 			"id": 24,
 			"prompt": "/project-init base-only in ./base-skills. Which skills does the base template recommend?",
-			"expected_output": "Scaffolds `_base` only. From the `_base/AGENTS.md` Skills section, recommends installing `commit-changes` (conventional commits workflow) and `code-toolbox` (planning multi-step tasks). Does NOT list `project-init` as a recommended skill at the base layer (that entry only appears in the `typescript` layer's Skills section). Prints the CASA Standard install command and the base scaffolded file list (`.editorconfig`, `.gitignore`, `AGENTS.md`).",
+			"expected_output": "Scaffolds `_base` only. From the `_base/AGENTS.md` Skills section, recommends installing `commit-changes` (conventional commits workflow) and `code-flow` (planning multi-step tasks). Does NOT list `project-init` as a recommended skill at the base layer (that entry only appears in the `typescript` layer's Skills section). Prints the CASA Standard install command and the base scaffolded file list (`.editorconfig`, `.gitignore`, `AGENTS.md`).",
 			"files": []
 		}
 	]

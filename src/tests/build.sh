@@ -56,7 +56,7 @@ test_build_copies_skills_and_removes_stale_output() {
     "$fixture/.cache" \
     "$fixture/__pycache__" \
     "$fixture/.turbo" \
-    "$fixture/.code-toolbox"
+    "$fixture/.code-flow"
   printf 'fixture\n' >"$fixture/SKILL.md"
   printf 'keep\n' >"$fixture/.gitignore"
   printf 'keep\n' >"$fixture/.env.example"
@@ -78,30 +78,38 @@ test_build_copies_skills_and_removes_stale_output() {
     sh "$BUILD_SCRIPT"
 
   assert_exists "$output/commit-changes/SKILL.md"
-  assert_exists "$output/code-toolbox/SKILL.md"
+  assert_exists "$output/code-flow/SKILL.md"
   assert_not_exists "$output/stale-skill"
   assert_not_exists "$output/skill-master/dev"
-  assert_not_exists "$output/code-toolbox/dev"
+  assert_not_exists "$output/code-flow/dev"
   assert_not_exists "$output/task-completion-notifier/tests"
   assert_not_exists "$output/skill-master/package.json"
-  assert_not_exists "$output/code-toolbox/package.json"
+  assert_not_exists "$output/code-flow/package.json"
   assert_not_exists "$output/task-completion-notifier/package.json"
   assert_exists "$output/$fixture_name/SKILL.md"
   assert_exists "$output/$fixture_name/.gitignore"
   assert_exists "$output/$fixture_name/.env.example"
   for ignored_path in \
     node_modules .pnpm-store build out .next .nuxt .idea logs coverage .cache \
-    __pycache__ .turbo .code-toolbox .env .env.local swap.swp swap.swo backup~ \
+    __pycache__ .turbo .code-flow .env .env.local swap.swp swap.swo backup~ \
     .DS_Store Thumbs.db build.log state.tsbuildinfo; do
     assert_not_exists "$output/$fixture_name/$ignored_path"
   done
   assert_exists "$target/commit-changes/SKILL.md"
-  assert_exists "$target/code-toolbox/SKILL.md"
+  mkdir -p "$target/code-toolbox"
+  printf 'legacy\n' >"$target/code-toolbox/SKILL.md"
+
+  AGENTS_SKILLS_BUILD_OUTPUT="$output" \
+    AGENTS_SKILLS_BUILD_TARGET="$target" \
+    sh "$BUILD_SCRIPT"
+
+  assert_exists "$target/code-flow/SKILL.md"
+  assert_not_exists "$target/code-toolbox"
   assert_not_exists "$target/skill-master/dev"
-  assert_not_exists "$target/code-toolbox/dev"
+  assert_not_exists "$target/code-flow/dev"
   assert_not_exists "$target/task-completion-notifier/tests"
   assert_not_exists "$target/skill-master/package.json"
-  assert_not_exists "$target/code-toolbox/package.json"
+  assert_not_exists "$target/code-flow/package.json"
   assert_not_exists "$target/task-completion-notifier/package.json"
   assert_not_exists "$target/$fixture_name/__pycache__"
 }
