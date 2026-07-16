@@ -9,23 +9,31 @@ Changes/validation: `<checagens da auditoria e validação, ou nenhuma>`
 Blockers: `<blocker ou none>`
 Next action: `<oferecer integração explícita | resolver achado | fechar, owner>`
 
-**PR:** `<URL>`
-**Aprovação do PR:** `approved | pending | not applicable`
-**Auditoria final:** `APROVO | APROVO COM RESSALVAS | PEÇO AJUSTES | NÃO APROVO`
+### Resumo rápido
+
+| Campo | Valor |
+| --- | --- |
+| PR | `<URL>` |
+| Aprovação do PR | `approved \| pending \| not applicable` |
+| Auditoria final | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
+
+### Mapa de entrega
 
 | Entrega | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
 | --- | --- | --- | --- | --- | --- |
 | Plano aprovado | | | | | |
 
-## Definição de pronto
+### Definição de pronto
 
 ```text
 <comando> — <resultado>
 ```
 
-## Decisão opcional de integração
+### Decisão opcional de integração
 
-`Aguardar pedido explícito do usuário para merge | merged em <commit> | not applicable`
+| Decisão | Valor |
+| --- | --- |
+| Integração | `Aguardar pedido explícito do usuário para merge \| merged em <commit> \| not applicable` |
 
 ---
 

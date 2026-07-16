@@ -5,7 +5,7 @@ Carregue antes de retomar uma issue ou mutar labels. Contratos completos:
 
 ## Ordem obrigatória
 
-1. Comentário/evidência autorizadora (envelope de oito campos) publicado.
+1. Evidência autorizadora publicada (comentário append-only **ou** body da issue para `issue-writer` / source-set).
 2. Mutar labels via `scripts/transition-issue.sh` (fallback: `gh issue edit`).
 3. Confirmar com a saída JSON do helper ou `gh issue view <n> --json labels`.
 4. Só então continuar (despachar próximo agente ou prompt humano).
@@ -17,7 +17,7 @@ Texto de comentário / `Next action:` **não** é status. Labels são a fonte de
 | Ator | Quando |
 | --- | --- |
 | Orquestrador | Após posts dos papéis (plano, reviews, evidência do executor, auditoria). |
-| `issue-writer` | Na criação (`spec-approval` + `needs-human`) e na materialização pós-aprovação → `needs-plan`. |
+| `issue-writer` | Na criação ou edição do body (`spec-approval` + `needs-human`) e na materialização pós-aprovação → `needs-plan`. |
 | Demais papéis | Nunca mutam labels. |
 
 ## Matriz stage → fase → ação

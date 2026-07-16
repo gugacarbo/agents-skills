@@ -9,42 +9,75 @@ Changes/validation: `<mudanças do plano e validação, ou nenhuma>`
 Blockers: `<blocker ou none>`
 Next action: `plan-reviewer revisa este snapshot`
 
-**Ciclo de plano:** `1/3`
-**Base SHA:** `<full-sha>`
-**Impacto de spec:** `create | update | not required` — `<motivo concreto>`
-**Aprovação da proposta:** `<URL/comentário humano ou revisão imutável do repositório>`
-**ADR/spec materializado:** `<blob URL imutável ou not required>`
+### Metadados do ciclo
+
+| Campo | Valor |
+| --- | --- |
+| **Ciclo de plano** | `<k>/3` |
+| **Base SHA** | `<full-sha>` |
+| **Impacto de spec** | `create \| update \| not required` — `<motivo concreto>` |
+| **Aprovação da proposta** | `<URL/comentário humano ou revisão imutável do repositório>` |
+| **ADR/spec materializado** | `<blob URL imutável ou not required>` |
+
+---
 
 ## Fontes do repositório
 
-- ADR/spec: `<blob URL imutável no SHA completo ou não aplicável>`
-- Evidência do comportamento atual: `<path:line no commit ou URL imutável>`
+| Tipo | Referência |
+| --- | --- |
+| ADR/spec | `<blob URL imutável no SHA completo ou não aplicável>` |
+| Comportamento atual | `<path:line no commit ou URL imutável>` |
+
+---
 
 ## Objetivo e limites
 
-…
+**Objetivo:** …
+
+**Fora de escopo:** …
+
+---
 
 ## Critérios de aceite
 
-- …
+- [ ] …
+- [ ] …
+
+---
 
 ## Verificação / TDD
 
-…
+| Etapa | Comando / evidência | Resultado esperado |
+| --- | --- | --- |
+| RED | `<teste ou comando>` | `<falha esperada>` |
+| GREEN | `<teste ou comando>` | `<passa>` |
+| Regressão | `<comando>` | `<exit 0 ou critério>` |
+
+---
 
 ## Casos de borda (EARS)
 
 | # | WHEN | the system MUST |
 | --- | --- | --- |
 | 1 | | |
+| 2 | | |
+
+---
 
 ## Definição de pronto
 
+- [ ] Critérios de aceite verificados
+- [ ] Casos EARS cobertos ou justificados
+- [ ] Verificação/TDD executada conforme plano
 - [ ] …
+
+---
 
 ## Riscos, rollout e rollback
 
-…
+| Risco | Mitigação | Rollback |
+| --- | --- | --- |
+| … | … | … |
 
 ---
 

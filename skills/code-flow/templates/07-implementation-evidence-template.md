@@ -9,28 +9,36 @@ Changes/validation: `<arquivos, comandos e resultados>`
 Blockers: `<blocker ou none>`
 Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 
-**Ciclo de plano:** `<URL>`
-**Status:** `DONE | DONE_WITH_CONCERNS | BLOCKED`
-**Base SHA / branch:** `<SHA> / <branch>`
-**Commits / PR:** `<links>`
+### Resumo rápido
 
-## Arquivos alterados
+| Campo | Valor |
+| --- | --- |
+| Ciclo de plano | `<URL>` |
+| Status | `DONE \| DONE_WITH_CONCERNS \| BLOCKED` |
+| Base SHA / branch | `<SHA> / <branch>` |
+| Commits / PR | `<links>` |
 
-- …
+### Arquivos alterados
 
-## Verificação
+| Arquivo | Mudança |
+| --- | --- |
+| `path/to/file` | `<descrição breve>` |
+
+### Verificação
 
 ```text
 <comando> — <resultado>
 ```
 
-## Evidência TDD
+### Evidência TDD
 
-`not applicable | RED: … | GREEN: …`
+| Fase | Evidência |
+| --- | --- |
+| TDD | `not applicable \| RED: … \| GREEN: …` |
 
-## Ressalvas ou blocker
+### Ressalvas ou blocker
 
-…
+> `<nenhuma | descrição da ressalva ou blocker>`
 
 ---
 

@@ -169,6 +169,9 @@ test_issue_evidence_contract() {
   done
 
   assert_contains 'templates/03-issue-template.md' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'body da issue' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'nunca em comentário' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'Sobrescreva' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'templates/04-issue-review-template.md' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'stage:spec-approval' "$SKILL/agents/02-issue-reviewer.md"
   assert_contains 'aprovar o source-set' "$SKILL/agents/02-issue-reviewer.md"
@@ -196,15 +199,18 @@ test_issue_evidence_contract() {
 }
 
 test_issue_creation_and_mode_boundaries() {
-  assert_contains 'Quando este fluxo cria uma issue de entrega' "$SKILL/references/github-flow.md"
+  assert_contains 'Quando este fluxo cria ou preenche uma issue de entrega' "$SKILL/references/github-flow.md"
   assert_contains 'conteúdo proposto de ADR/spec' "$SKILL/references/github-flow.md"
   assert_contains 'Não escrever' "$SKILL/references/github-flow.md"
   assert_contains 'ADR/spec formal primeiro' "$SKILL/references/github-flow.md"
   assert_contains 'alias: `/code-flow create-issue`' "$SKILL/phases/02-create-issue.md"
   assert_contains 'Não despachar `plan-writer` antes dessa evidência existir' "$SKILL/phases/02-create-issue.md"
   assert_contains 'Após o usuário selecionar explicitamente um Epic, crie-o no GitHub' "$SKILL/phases/02-create-issue.md"
-  assert_contains 'Não criar nem atualizar' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'sobrescreve o body' "$SKILL/phases/02-create-issue.md"
+  assert_contains 'nunca como comentário' "$SKILL/phases/02-create-issue.md"
   assert_contains '### Rascunho ou racional no-spec' "$SKILL/templates/03-issue-template.md"
+  assert_contains 'Não criar nem atualizar' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'Exceção: source-set no body' "$SKILL/references/evidence-contract.md"
   assert_contains 'autoriza a materialização formal do ADR/spec' "$SKILL/templates/03-issue-template.md"
   assert_contains 'gates obrigatórios separados' "$SKILL/phases/03-plan.md"
   assert_contains 'humano aprova este snapshot exato' "$SKILL/templates/06-review-template.md"

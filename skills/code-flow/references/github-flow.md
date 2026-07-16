@@ -12,11 +12,12 @@ pode usar este fluxo. Uma issue umbrella, auditoria ou tracking genérico é
 inelegível: explique por quê e pare sem adicionar, remover ou substituir qualquer
 label `stage:*`. `batch` recebe apenas números/URLs de issues existentes.
 
-Quando este fluxo cria uma issue de entrega, prepare o contexto do repositório e
-uma proposta no padrão do repositório primeiro. Crie a issue em
-`stage:spec-approval` mais `needs-human`; o body e o comentário do source-set
-devem incluir o conteúdo proposto de ADR/spec ou declarar
-`Spec impact: not required` com o motivo, e pedir aprovação humana explicitamente.
+Quando este fluxo cria ou preenche uma issue de entrega, prepare o contexto do
+repositório e uma proposta no padrão do repositório primeiro. Crie a issue (ou
+edite o body de uma existente, incl. draft) em `stage:spec-approval` mais
+`needs-human`; o **body** da issue deve incluir o conteúdo proposto de ADR/spec
+ou declarar `Spec impact: not required` com o motivo, e pedir aprovação humana
+explicitamente. O `issue-writer` nunca publica o source-set em comentário.
 Após essa aprovação, materialize o ADR/spec (quando necessário) e anexe seu link
 imutável antes de planejar.
 
@@ -116,7 +117,7 @@ comentário.
 
 ```text
 fase 0 → fase 1 → fase 2: investigar → decidir impacto de spec → preparar proposta
-criar issue de entrega: proposta/racional no-spec + spec-approval + needs-human
+criar/preencher issue de entrega: proposta/racional no-spec no body + spec-approval + needs-human
 aprovação humana da proposta → materializar ADR/spec quando necessário → needs-plan → needs-plan-review
   ├─ reviewer independente aprova → aguardar aprovação humana do plano → approved → worktree in-progress
   ├─ pede ajustes (ciclo < 3) → needs-plan

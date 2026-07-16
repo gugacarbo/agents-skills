@@ -18,6 +18,6 @@ gate). Os gates humanos de source-set e plano nas fases seguintes permanecem.
 
 Não criar estado GitHub, escrever ADR/spec formal, criar plano nem iniciar
 implementação nesta fase. O design aprovado segue para a Fase 2, onde o
-`issue-writer` o registra na proposta GitHub.
+`issue-writer` o registra no body da issue GitHub.
 Não criar documento de design separado, log de progresso ou commit só para esta
 fase.

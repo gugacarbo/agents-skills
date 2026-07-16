@@ -1,16 +1,34 @@
-# Gate humano: source-set / spec (Fase 2)
+# Gate humano · source-set / spec
 
-**Em jogo:** a proposta de ADR/spec embutida na issue **ou** o racional
-`Spec impact: not required`, ainda em `stage:spec-approval` + `needs-human`.
+| | |
+|---|---|
+| **Fase** | 2 — criar issue |
+| **Stage** | `stage:spec-approval` + `needs-human` |
+| **Próximo** | Materializar ADR/spec (se necessário) → `stage:needs-plan` |
 
-**Você aprova:** materializar o ADR/spec exatamente como proposto (quando
-necessário) e liberar `stage:needs-plan`.
+---
 
-Responda com uma opção literal:
+## Em jogo
 
-- **Yes** — aprovar a proposta/racional; `issue-writer` materializa e avança.
-- **No** — rejeitar; manter `spec-approval` + `needs-human` até nova proposta.
-- **Refine** — pedir edição concreta da proposta antes de materializar.
+A proposta de ADR/spec embutida na issue **ou** o racional
+`Spec impact: not required` — ainda em `stage:spec-approval` + `needs-human`.
 
-Um veredito de `issue-reviewer` (se houver) **não** substitui este Yes.
-Não avança stage sem Yes explícito.
+## Você aprova
+
+Materializar o ADR/spec exatamente como proposto (quando necessário) e liberar
+`stage:needs-plan`.
+
+## Resposta
+
+Responda com **uma** opção literal:
+
+| Opção | Significado |
+|:------|:------------|
+| **Yes** | Aprovar a proposta/racional; `issue-writer` materializa e avança. |
+| **No** | Rejeitar; manter `spec-approval` + `needs-human` até nova proposta. |
+| **Refine** | Pedir edição concreta da proposta antes de materializar. |
+
+---
+
+> **Regra:** Um veredito de `issue-reviewer` (se houver) **não** substitui este
+> **Yes**. Não avança stage sem **Yes** explícito.

@@ -7,10 +7,11 @@ sem issue, oriente para `issue create`.
 Para `issue create`, estabeleça o contexto do pedido antes da Fase 1: resolva o
 repositório/branch default, carregue guidance aplicável e ADRs/specs aceitos,
 inspecione a área estreita de código/teste e registre a evidência de baseline.
-Ainda não há alvo de entrega no GitHub, então não valide labels nem crie estado
-GitHub nesta fase. A Fase 2 cria a issue de entrega aprovada ou, quando o
-usuário selecionou explicitamente durante o triage de iniciativa, seu Epic de
-tracking.
+Ainda não há alvo de entrega no GitHub (ou há apenas um draft indicado pelo
+usuário), então não valide labels de stage nesta fase salvo retomada de issue
+existente. A Fase 2 cria ou preenche o body da issue de entrega aprovada ou,
+quando o usuário selecionou explicitamente durante o triage de iniciativa, seu
+Epic de tracking.
 
 ## Validar antes do dispatch
 

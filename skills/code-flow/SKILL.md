@@ -15,7 +15,7 @@ reviews ou implementação você mesmo.
 | Invocação | Comportamento |
 | --- | --- |
 | `/code-flow` | Sem issue: explique que a entrega exige issue GitHub e ofereça `issue create` ou `issue <#N>` / `batch`. |
-| `/code-flow issue create` | Roda Fases 0–2 e cria uma issue de entrega cuja proposta ADR/spec aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
+| `/code-flow issue create` | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** aguarda aprovação humana em `stage:spec-approval` + `needs-human`. |
 | `/code-flow create-issue` | Alias de `/code-flow issue create` (canônico: `issue create`). |
 | `/code-flow issue <#N\|URL> [phase]` | Valida uma issue elegível existente e retoma seu stage ou fase nomeada. |
 | `/code-flow batch <#N\|URL>... --from <phase>` | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes. |
@@ -45,7 +45,7 @@ entrega; a implementação fica no plano aprovado de cada filha e numa passagem
 ## Fluxo de entrega
 
 1. **Fases 0–1:** estabelecer contexto do repositório, escopo, padrões locais, riscos e decisões abertas do usuário.
-2. **Fase 2:** preparar o source-set, decidir `create`, `update` ou `not required` para ADR/spec, e criar a issue de entrega com a proposta ou racional no-spec em `stage:spec-approval` + `needs-human`; ainda não materializar o documento formal.
+2. **Fase 2:** preparar o source-set, decidir `create`, `update` ou `not required` para ADR/spec, e criar ou atualizar o **body** da issue de entrega com a proposta ou racional no-spec em `stage:spec-approval` + `needs-human`; ainda não materializar o documento formal.
 3. **Aprovação humana da fonte:** materializar o ADR/spec aprovado quando necessário, registrar o link imutável e ir para `stage:needs-plan`.
 4. **Fase 3:** `plan-writer` publica o plano; `plan-reviewer` publica um veredito independente. Um veredito aprovador ainda aguarda aprovação humana daquele snapshot exato em `stage:needs-plan-review` + `needs-human`.
 5. **Aprovação humana do plano:** ir para `stage:approved`. A execução ainda precisa de pedido explícito e escolha `worktree` ou `later`.
@@ -83,7 +83,7 @@ Despache apenas estes papéis:
 
 | Agente | Responsabilidade |
 | --- | --- |
-| `issue-writer` | Contexto, proposta, criação da issue e materialização formal do ADR/spec após aprovação. |
+| `issue-writer` | Contexto, proposta no body da issue, criação/atualização da issue e materialização formal do ADR/spec após aprovação. |
 | `issue-reviewer` | Auditoria independente do source-set quando pedida ou em alto risco (Fase 2); nunca substitui o gate humano. |
 | `plan-writer` | Um plano de implementação append-only. |
 | `plan-reviewer` | Veredito literal independente de um snapshot de plano. |

@@ -21,6 +21,14 @@ Blockers: <blocker ou none>
 Next action: <ação e owner>
 ```
 
+### Exceção: source-set no body (`issue-writer`)
+
+O `issue-writer` registra o envelope no **body da issue** (estrutura de
+`templates/03-issue-template.md`), não em comentário. Se a issue já existir
+(incl. draft), **sobrescreva/edite o body** com a proposta atual; refine e
+materialização pós-aprovação também atualizam o body. Comentários append-only
+permanecem para os demais papéis.
+
 ## Evidência de implementação e review
 
 Um comentário do executor cobre o plano aprovado como uma unidade e inclui
