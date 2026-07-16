@@ -1,12 +1,1 @@
-[
-	{
-		"id": "SPEC-0001",
-		"path": "docs/specs/0001-realtime-jobs-dashboard-spec.md",
-		"layer": "specs",
-		"title": "Observe code-toolbox jobs through an authenticated real-time web dashboard",
-		"status": "draft",
-		"builds-on": [],
-		"superseded-by": null,
-		"implemented-by": []
-	}
-]
+[]

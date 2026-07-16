@@ -85,20 +85,10 @@ function decodeFrame(buffer) {
 
 // ========== Configuration ==========
 
-const PORT_FILE = process.env.SESSION_PORT_FILE || null;
 const randomPort = () => 49152 + Math.floor(Math.random() * 16383);
-// Prefer an explicit port, else the port this session last bound (so a restart
-// reuses it and an already-open browser tab reconnects), else a random high port.
+// Prefer an explicit port; companion sessions are intentionally independent.
 function preferredPort() {
 	if (process.env.SESSION_PORT) return Number(process.env.SESSION_PORT);
-	if (PORT_FILE) {
-		try {
-			const p = Number(fs.readFileSync(PORT_FILE, "utf-8").trim());
-			if (Number.isInteger(p) && p > 1023 && p < 65536) return p;
-		} catch (_e) {
-			/* no prior port recorded */
-		}
-	}
 	return randomPort();
 }
 let PORT = preferredPort();
@@ -129,9 +119,6 @@ let ownerPid = process.env.SESSION_OWNER_PID
 // remote binds — and defeats DNS rebinding — where a Host/Origin allowlist
 // cannot. It rides the served URL as ?key= and is mirrored into a cookie on
 // first load so same-origin subresources and the WebSocket carry it for free.
-// Persisted alongside the port (SESSION_TOKEN_FILE) so a restart keeps the
-// same key and an already-open tab's cookie still validates.
-const TOKEN_FILE = process.env.SESSION_TOKEN_FILE || null;
 function generateToken() {
 	return crypto.randomBytes(32).toString("hex");
 }
@@ -147,17 +134,6 @@ function chmodOwnerOnly(file) {
 function initialToken() {
 	if (process.env.SESSION_TOKEN) {
 		return { value: process.env.SESSION_TOKEN, source: "env" };
-	}
-	if (TOKEN_FILE) {
-		try {
-			const t = fs.readFileSync(TOKEN_FILE, "utf-8").trim();
-			if (/^[0-9a-f]{32,}$/i.test(t)) {
-				chmodOwnerOnly(TOKEN_FILE);
-				return { value: t, source: "file" };
-			}
-		} catch (_e) {
-			/* no prior token recorded */
-		}
 	}
 	return { value: generateToken(), source: "generated" };
 }
@@ -584,7 +560,7 @@ function handleMessage(text) {
 	}
 	touchActivity();
 	console.log(JSON.stringify({ source: "user-event", ...event }));
-	if (event?.choice) {
+	if (typeof event?.type === "string" && event.payload && typeof event.payload === "object") {
 		const eventsFile = path.join(STATE_DIR, "events");
 		fs.appendFileSync(eventsFile, `${JSON.stringify(event)}\n`);
 	}
@@ -644,7 +620,7 @@ const IDLE_TIMEOUT_MS = (() => {
 	const ms = Number(process.env.SESSION_IDLE_TIMEOUT_MS);
 	return Number.isFinite(ms) && ms > 0 ? ms : 4 * 60 * 60 * 1000;
 })();
-// How often the watchdog checks for owner-death / idleness. Configurable mainly
+// How often lifecycle monitoring checks for owner-death / idleness. Configurable mainly
 // so tests can run fast; production default is 60s.
 const LIFECYCLE_CHECK_MS = (() => {
 	const ms = Number(process.env.SESSION_LIFECYCLE_CHECK_MS);
@@ -781,31 +757,13 @@ function startServer() {
 		// one after an EADDRINUSE fallback) so it can't collide with another server's
 		// cookie in the shared localhost jar.
 		COOKIE_NAME = `brainstorm-key-${PORT}`;
-		// Record the bound port AND token so the next restart of this session reuses
-		// them — but ONLY when we got our preferred port. On a fallback we bound a
-		// *different* port because someone else holds the preferred one; persisting
-		// would overwrite the shared files and strand that other session's open tab.
-		if (PORT_FILE && !triedFallback) {
-			try {
-				fs.writeFileSync(PORT_FILE, String(PORT));
-			} catch (_e) {
-				/* best effort */
-			}
-			if (TOKEN_FILE) {
-				try {
-					fs.writeFileSync(TOKEN_FILE, TOKEN, { mode: 0o600 });
-					chmodOwnerOnly(TOKEN_FILE);
-				} catch (_e) {
-					/* best effort */
-				}
-			}
-		}
 		const info = JSON.stringify({
 			type: "server-started",
 			port: Number(PORT),
 			host: HOST,
 			url_host: URL_HOST,
 			url: companionUrl(),
+			session_dir: SESSION_DIR,
 			screen_dir: CONTENT_DIR,
 			state_dir: STATE_DIR,
 			idle_timeout_ms: IDLE_TIMEOUT_MS,

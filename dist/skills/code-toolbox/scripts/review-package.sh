@@ -42,26 +42,30 @@ if ! head_commit=$(git rev-parse --verify --quiet "${head}^{commit}"); then
   exit 2
 fi
 
-if [ -z "$out" ]; then
-  repo_root=$(git rev-parse --show-toplevel)
-  workspace="$repo_root/.code-toolbox/sdd-workspace"
-  out="$workspace/review-$base_commit..$head_commit.diff"
+if ! merge_base=$(git merge-base "$base_commit" "$head_commit"); then
+  printf 'BASE and HEAD do not have a merge base: %s %s\n' "$base" "$head" >&2
+  exit 2
 fi
 
-mkdir -p "$(dirname "$out")"
+if [ -z "$out" ]; then
+  out=$(mktemp "${TMPDIR:-/tmp}/code-toolbox-review.XXXXXX.md")
+else
+  mkdir -p "$(dirname "$out")"
+fi
 
 {
   printf '> **Process:** `code-toolbox` — ephemeral review package.\n\n'
-  printf '# Review package: %s..%s\n\n' "$base_commit" "$head_commit"
+  printf '# Review package: %s..%s\n\n' "$merge_base" "$head_commit"
   [ -z "$pr_url" ] || printf 'PR: %s\n\n' "$pr_url"
+  printf 'Requested base: %s\n\n' "$base_commit"
   printf '## Commits\n'
-  git log --oneline --decorate "${base_commit}..${head_commit}"
+  git log --oneline --decorate "${merge_base}..${head_commit}"
   printf '\n## Files changed\n'
-  git diff --stat "${base_commit}..${head_commit}"
+  git diff --stat "${merge_base}..${head_commit}"
   printf '\n## Diff\n'
-  git diff --find-renames --find-copies --function-context "${base_commit}..${head_commit}"
+  git diff --find-renames --find-copies --function-context "${merge_base}..${head_commit}"
 } > "$out"
 
-commits=$(git rev-list --count "${base_commit}..${head_commit}")
+commits=$(git rev-list --count "${merge_base}..${head_commit}")
 bytes=$(wc -c < "$out" | tr -d '[:space:]')
 printf 'wrote %s: %s commit(s), %s bytes\n' "$out" "$commits" "$bytes"

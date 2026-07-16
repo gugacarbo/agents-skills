@@ -148,13 +148,14 @@
 		};
 	}
 
-	/** @param {{ type: string; text?: string; choice?: string; id?: string|null; value?: string; [key: string]: unknown }} event */
+	/** @param {{ type: string; [key: string]: unknown }} event */
 	function sendEvent(event) {
-		event.timestamp = Date.now();
+		const { type, ...payload } = event;
+		const message = { type, payload, timestamp: Date.now() };
 		if (ws && ws.readyState === WebSocket.OPEN) {
-			ws.send(JSON.stringify(event));
+			ws.send(JSON.stringify(message));
 		} else {
-			eventQueue.push(event);
+			eventQueue.push(message);
 		}
 	}
 

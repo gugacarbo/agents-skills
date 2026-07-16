@@ -22,10 +22,10 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ -n "$TARGET_DIR" ] || usage
-[ -f "$SOURCE_DIR/scripts/log-task.sh" ] || { printf '%s\n' "Error: source is not a code-toolbox skill" >&2; exit 1; }
+[ -f "$SOURCE_DIR/scripts/review-package.sh" ] || { printf '%s\n' "Error: source is not a code-toolbox skill" >&2; exit 1; }
 
 mkdir -p "$TARGET_DIR"
-for file in log-task.sh review-package.sh doctor.sh bootstrap.sh materialize-watchdogs.sh; do
+for file in review-package.sh doctor.sh bootstrap.sh; do
   cp "$SOURCE_DIR/scripts/$file" "$TARGET_DIR/$file"
 done
 chmod +x "$TARGET_DIR"/*.sh

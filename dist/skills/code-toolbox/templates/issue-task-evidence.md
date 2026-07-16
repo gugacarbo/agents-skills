@@ -26,3 +26,5 @@
 ---
 
 *Process: code-toolbox — executor evidence for independent review.*
+
+`BLOCKED` is not review-ready. It must identify the exact required decision or correction and keeps the issue blocked until resolved.

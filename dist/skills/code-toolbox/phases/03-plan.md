@@ -7,18 +7,18 @@ The plan must include: source links at immutable commits, `Spec impact`, a base 
 ## Publication
 
 - **Issue mode:** post the complete plan using [`templates/issue-plan-comment.md`](../templates/issue-plan-comment.md), set `stage:needs-plan-review`, and retain its comment URL as cycle `k`.
-- **Repository mode:** write the plan at the repository's `docs/plans/` convention and identify the committed revision under review.
+- **Repository mode:** create or extend one versioned delivery record using [`templates/repository-delivery-record.md`](../templates/repository-delivery-record.md) at the repository's established documentation path. If the repository has no convention, ask the user to select its tracked Markdown path. Append the plan snapshot and record its full commit SHA/immutable URL; do not create a registry, job file, or progress log.
 
 Plans are append-only. Never edit a submitted/approved issue plan. Any material change posts a new cycle, removes `stage:approved`, and returns to `stage:needs-plan`.
 
 ## Review loop
 
-Immediately dispatch a fresh `agents/plan-reviewer.md` with the literal plan comment URL/text or repository plan revision. In issue mode, the issue remains at `stage:needs-plan-review` until a literal verdict exists. The reviewer must not be the plan author.
+Immediately dispatch a fresh `agents/plan-reviewer.md` with the literal plan comment URL/text or repository delivery-record revision. In issue mode, the issue remains at `stage:needs-plan-review` until a literal verdict exists. The reviewer must not be the plan author and must declare that independence in its review evidence.
 
 | Result | Action |
 | --- | --- |
-| `APROVO` / `APROVO COM RESSALVAS` | In issue mode set `stage:approved`; retain nits in the review comment. |
-| `PEÇO AJUSTES` | Return to `stage:needs-plan` and repeat. At cycle 3, block with `needs-human`. |
-| `NÃO APROVO`, product/access decision, error, empty output, or missing literal verdict | Set `stage:blocked` plus `needs-human`; stop. |
+| `APROVO` / `APROVO COM RESSALVAS` | In issue mode set `stage:approved`; in repository mode append an approval review with its immutable revision. Retain nits in the review evidence. |
+| `PEÇO AJUSTES` | In issue mode return to `stage:needs-plan` and repeat; at cycle 3, block with `needs-human`. In repository mode append the rejection and required changes to the delivery record, stop execution, and resume only at a new plan cycle. |
+| `NÃO APROVO`, product/access decision, error, empty output, or missing literal verdict | In issue mode set `stage:blocked` plus `needs-human`; stop. In repository mode append the rejection/blocker and exact human decision needed to the delivery record, then stop with no GitHub labels, stages, or comments. |
 
-Do not ask for another human approval between plan publication and its independent review. The only human gate here is approval of a required ADR/spec before planning.
+Do not ask for another human approval between plan publication and its independent review. The only human gate here is source-set approval—either a required ADR/spec or an explicit no-spec rationale—before planning.

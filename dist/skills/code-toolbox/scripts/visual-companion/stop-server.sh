@@ -3,9 +3,7 @@
 # Stop the brainstorm server and clean up
 # Usage: stop-server.sh <session_dir>
 #
-# Kills the server process. Only deletes session directory if it's
-# under /tmp (ephemeral). Persistent directories (.code-toolbox/) are
-# kept so mockups can be reviewed later.
+# Kills the server process and removes the temporary companion session.
 
 SESSION_DIR="$1"
 
@@ -17,6 +15,13 @@ fi
 STATE_DIR="${SESSION_DIR}/state"
 PID_FILE="${STATE_DIR}/server.pid"
 SERVER_ID_FILE="${STATE_DIR}/server-instance-id"
+TEMP_ROOT="${TMPDIR:-/tmp}"
+
+cleanup_session() {
+  case "$SESSION_DIR" in
+    "$TEMP_ROOT"/code-toolbox-brainstorm-*) rm -rf "$SESSION_DIR" ;;
+  esac
+}
 
 mark_stopped() {
   local reason="$1"
@@ -79,6 +84,7 @@ if [[ -f "$PID_FILE" ]]; then
   if ! is_brainstorm_server "$pid"; then
     rm -f "$PID_FILE" "$SERVER_ID_FILE"
     mark_stopped "stale_pid"
+    cleanup_session
     echo '{"status": "stale_pid"}'
     exit 0
   fi
@@ -110,12 +116,10 @@ if [[ -f "$PID_FILE" ]]; then
   rm -f "$PID_FILE" "$SERVER_ID_FILE" "${STATE_DIR}/server.log"
   mark_stopped "stop-server.sh"
 
-  # Only delete ephemeral /tmp directories
-  if [[ "$SESSION_DIR" == /tmp/* ]]; then
-    rm -rf "$SESSION_DIR"
-  fi
+  cleanup_session
 
   echo '{"status": "stopped"}'
 else
+  cleanup_session
   echo '{"status": "not_running"}'
 fi

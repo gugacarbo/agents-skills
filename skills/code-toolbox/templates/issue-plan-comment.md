@@ -2,12 +2,13 @@
 
 **Plan cycle:** `1/3`
 **Base SHA:** `<full-sha>`
-**Spec impact:** `create | update | not required` — `<reason>`
+**Spec impact:** `create | update | not required` — `<concrete reason>`
+**Source-set approval:** `<human approval URL/comment or immutable repository revision>`
 
 ## Repository sources
 
-- ADR/spec: `<immutable blob URL or not applicable>`
-- Current-behavior evidence: `<path:line or commit>`
+- ADR/spec: `<immutable blob URL at full SHA or not applicable>`
+- Current-behavior evidence: `<path:line at commit or immutable URL>`
 
 ## Goal and boundaries
 

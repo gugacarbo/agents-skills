@@ -1,7 +1,9 @@
 ## Integration and closure
 
 **PR:** `<URL>`
+**PR approval:** `approved | pending | not applicable`
 **Final audit:** `APROVO | APROVO COM RESSALVAS | NÃO APROVO`
+**Assembly review:** `<URL or not applicable>`
 
 | Task | Commit / PR | Executor evidence | Independent review | DoD evidence | Status |
 | --- | --- | --- | --- | --- | --- |
@@ -13,10 +15,10 @@
 <command> — <result>
 ```
 
-## Remaining decision
+## Optional integration decision
 
-`none | <documented user decision>`
+`Await explicit user request to merge | merged at <commit> | not applicable`
 
 ---
 
-*Process: code-toolbox — append-only closure evidence before issue close.*
+*Process: code-toolbox — append-only PR-ready evidence. Never merge automatically after approval.*

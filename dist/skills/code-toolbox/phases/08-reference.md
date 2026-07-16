@@ -11,4 +11,4 @@ Load [`../references/github-flow.md`](../references/github-flow.md) for issue la
 - No task is accepted without independent code review.
 - No issue closes without the final closure matrix and DoD evidence.
 
-`docs/jobs`, task briefs, reports, and `progress.log` are not part of this workflow. Do not recreate them under another name.
+Do not create local task trackers, briefs, reports, or progress logs. Issue comments, labels, linked pull requests, and repository documents are the durable workflow evidence.

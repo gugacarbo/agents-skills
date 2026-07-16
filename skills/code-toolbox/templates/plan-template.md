@@ -7,15 +7,16 @@ spec-impact: not-required
 implemented-by: []
 ---
 
-> **Process:** `code-toolbox` — repository-mode implementation plan.
+> **Process:** `code-toolbox` — repository-mode implementation plan. Keep plan review, task evidence, code reviews, and DoD closure in the versioned delivery record; do not create a registry or progress log.
 
 # [Feature Name] Implementation Plan
 
 ## Sources and spec impact
 
-- **Accepted ADR/spec:** `<path/blob URL or not applicable>`
-- **Current behavior evidence:** `<path:line>`
+- **Accepted ADR/spec:** `<path/blob URL at full SHA or not applicable>`
+- **Current behavior evidence:** `<path:line at full SHA>`
 - **Spec impact:** `create | update | not required` — `<reason>`
+- **Source-set approval:** `<human evidence or immutable revision>`
 
 ## Summary
 
@@ -27,7 +28,9 @@ implemented-by: []
 
 **Mode:** [sequential | parallel, with reason]
 
-**Worktree decision:** [pending | approved | direct | later]
+**Execution decision:** [pending | worktree | direct]
+
+`direct` is repository-only: it creates no issue and uses no labels or GitHub comments.
 
 ## Tasks
 

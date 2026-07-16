@@ -28,18 +28,18 @@ A question about a UI topic is not automatically a visual question. "What kind o
 
 Do NOT offer the companion upfront. Offer it only when the next question would genuinely be easier to understand visually. The offer must be its own message:
 
-> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. To do that, I'll create temporary files under `.code-toolbox/` in the project. It's still new and can be token-intensive. Want me to open it for you?"
+> "This next part might be easier if I show you — I can put together mockups, diagrams, and comparisons in a browser tab as we go. It starts a temporary local server and can be token-intensive. Want me to open it for you?"
 
 Wait for the user's response. If they decline, continue text-only and do not offer it again unless they raise it.
 
-Before starting the companion, explicitly warn that it will create temporary files under `.code-toolbox/` in the project directory.
+Before starting the companion, explicitly warn that it creates a temporary local session outside the repository and that it will be removed during cleanup.
 
 ## Starting a Session
 
 Start the companion only after the user approves it:
 
 ```bash
-scripts/visual-companion/start-server.sh --project-dir /path/to/project --open
+scripts/visual-companion/start-server.sh --open
 ```
 
 > **Requirement:** Requires Node.js to run. If `node` is not available, skip the visual companion and proceed with text-only brainstorming.
@@ -51,12 +51,13 @@ This returns JSON like:
   "type": "server-started",
   "port": 52341,
   "url": "http://localhost:52341/?key=ab12...",
-  "screen_dir": "/path/to/project/.code-toolbox/brainstorm/12345-1706000000/content",
-  "state_dir": "/path/to/project/.code-toolbox/brainstorm/12345-1706000000/state"
+  "session_dir": "/tmp/code-toolbox-brainstorm-12345-1706000000",
+  "screen_dir": "/tmp/code-toolbox-brainstorm-12345-1706000000/content",
+  "state_dir": "/tmp/code-toolbox-brainstorm-12345-1706000000/state"
 }
 ```
 
-Save `screen_dir` and `state_dir`. Always share the complete URL, including `?key=...`.
+Save `session_dir`, `screen_dir`, and `state_dir`. Always share the complete URL, including `?key=...`.
 
 If the startup JSON is not captured, read `$STATE_DIR/server-info`.
 
@@ -117,6 +118,4 @@ The companion assets live here:
 
 Use these files as-is unless you need to change companion behavior.
 
-> **Namespace note:** The `.code-toolbox/` directory is shared between the visual companion (`brainstorm/`) and vendored helpers. Ensure files don't collide; brainstorm outputs go under `.code-toolbox/brainstorm/` only.
-
-> **Cleanup:** After completing the brainstorm session, run `stop-server.sh` to clean up the background server process.
+> **Cleanup:** After completing the brainstorm session, run `stop-server.sh <session_dir>` to stop the background server and remove the temporary session.

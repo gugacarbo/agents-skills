@@ -20,6 +20,6 @@ You implement exactly one stable task ID. You are not the planner, code reviewer
 2. Change only assigned files/scope. If a product decision, ownership conflict, or plan gap appears, stop and report `BLOCKED`.
 3. Run the stated focused verification and required broader checks. Preserve TDD RED/GREEN evidence when required.
 4. Commit only in the assigned branch/worktree. Do not alter issue labels, the approved plan, or another task’s branch.
-5. Publish one append-only task-evidence comment from `templates/issue-task-evidence.md`; never create `docs/jobs`, a task brief, report, or progress log.
+5. Publish one append-only task-evidence comment from `templates/issue-task-evidence.md` in issue mode, or append it to the versioned repository delivery record in repository mode; never create `docs/jobs`, a task brief, report, or progress log. In repository mode, `BLOCKED` includes the exact decision plus `Resume: <phase/task>` and never changes GitHub labels/stages or posts a GitHub comment. `BLOCKED` is a stop signal, never a review-ready completion.
 
 Return at most 15 lines: `DONE`, `DONE_WITH_CONCERNS`, or `BLOCKED`; task ID; commit/PR; verification; evidence URL; and blocker/concern.

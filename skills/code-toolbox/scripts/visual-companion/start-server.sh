@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 # Bash required: uses [[ ]], local, process substitution, and OS-detection (is_windows_like_shell)
 # Start the brainstorm server and output connection info
-# Usage: start-server.sh [--project-dir <path>] [--host <bind-host>] [--url-host <display-host>] [--foreground] [--background]
+# Usage: start-server.sh [--host <bind-host>] [--url-host <display-host>] [--foreground] [--background]
 #
 # Starts server on a random high port, outputs JSON with URL.
 # Each session gets its own directory to avoid conflicts.
 #
 # Options:
-#   --project-dir <path>  Store session files under <path>/.code-toolbox/brainstorm/
-#                         instead of /tmp. Files persist after server stops.
 #   --host <bind-host>    Host/interface to bind (default: 127.0.0.1).
 #                         Use 0.0.0.0 in remote/containerized environments.
 #   --url-host <host>     Hostname shown in returned URL JSON.
@@ -21,7 +19,6 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Parse arguments
-PROJECT_DIR=""
 FOREGROUND="false"
 FORCE_BACKGROUND="false"
 BIND_HOST="127.0.0.1"
@@ -29,10 +26,6 @@ URL_HOST=""
 IDLE_TIMEOUT_MINUTES=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --project-dir)
-      PROJECT_DIR="$2"
-      shift 2
-      ;;
     --host)
       BIND_HOST="$2"
       shift 2
@@ -106,22 +99,7 @@ umask 077
 # Generate unique session directory with random component
 SESSION_ID="$$-$(date +%s)-${RANDOM:-0}${RANDOM:-0}"
 
-if [[ -n "$PROJECT_DIR" ]]; then
-  PROJECT_GITIGNORE="${PROJECT_DIR}/.code-toolbox/.gitignore"
-  if [[ ! -e "$PROJECT_GITIGNORE" ]]; then
-    mkdir -p "${PROJECT_DIR}/.code-toolbox"
-    # A flat non-vendored helper install has no templates/ sibling. The
-    # companion needs only this one ignore rule, so create it directly.
-    printf 'brainstorm/\n' > "$PROJECT_GITIGNORE"
-  fi
-  SESSION_DIR="${PROJECT_DIR}/.code-toolbox/brainstorm/${SESSION_ID}"
-  # Persist the bound port and key per project so a restart reuses them and an
-  # already-open browser tab reconnects to the same URL with a valid cookie.
-  export SESSION_PORT_FILE="${PROJECT_DIR}/.code-toolbox/brainstorm/.last-port"
-  export SESSION_TOKEN_FILE="${PROJECT_DIR}/.code-toolbox/brainstorm/.last-token"
-else
-  SESSION_DIR="/tmp/brainstorm-${SESSION_ID}"
-fi
+SESSION_DIR="${TMPDIR:-/tmp}/code-toolbox-brainstorm-${SESSION_ID}"
 
 STATE_DIR="${SESSION_DIR}/state"
 PID_FILE="${STATE_DIR}/server.pid"
@@ -161,7 +139,7 @@ fi
 # Windows/MSYS2: Node.js cannot see POSIX PIDs from the MSYS2 namespace.
 # Passing a PID node cannot verify causes server to log owner-pid-invalid
 # and self-terminate at the 60-second lifecycle check. Clear it so the
-# watchdog is disabled and the idle timeout becomes the only shutdown trigger.
+# lifecycle monitor is disabled and the idle timeout becomes the only shutdown trigger.
 if is_windows_like_shell; then
   OWNER_PID=""
 fi
@@ -200,7 +178,7 @@ for _ in {1..50}; do
         health_result=$(curl -s -o /dev/null -w "%{http_code}" "$server_url" 2>/dev/null || true)
       fi
       if [[ "$health_result" != "200" ]]; then
-        echo "{\"error\": \"Server started but health check failed (HTTP $health_result). Retry with: $SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
+        echo "{\"error\": \"Server started but health check failed (HTTP $health_result). Retry with: $SCRIPT_DIR/start-server.sh --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
         exit 1
       fi
     fi
@@ -214,7 +192,7 @@ for _ in {1..50}; do
       sleep 0.1
     done
     if [[ "$alive" != "true" ]]; then
-      echo "{\"error\": \"Server started but was killed. Retry in a persistent terminal with: $SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
+      echo "{\"error\": \"Server started but was killed. Retry in a persistent terminal with: $SCRIPT_DIR/start-server.sh --host $BIND_HOST --url-host $URL_HOST --foreground\"}"
       exit 1
     fi
     echo "$server_line"
