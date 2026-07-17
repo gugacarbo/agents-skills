@@ -5,7 +5,7 @@
 
 ## OVERVIEW
 
-`skill-master` is a local skill for drafting, evaluating, benchmarking, and improving Codex/Claude skills. It is more complex than the tracked `commit-changes` skill and contains Python tooling, agent prompt templates, references, assets, and an HTML eval viewer.
+`skill-master` is a local skill for drafting, evaluating, benchmarking, and improving Codex/Claude skills. It is more complex than the tracked `commit-changes` skill and contains Python tooling, agent prompt templates, references, and an HTML eval viewer.
 
 ## STRUCTURE
 
@@ -17,7 +17,6 @@ skill-master/
 ├── references/              # authoring, testing, discipline, and eval schemas
 ├── scripts/                 # Python eval, benchmark, packaging, validation helpers
 ├── eval-viewer/             # prompt-approval + result-review viewer HTML and generators
-└── assets/                  # bundled review UI asset
 ```
 
 ## WHERE TO LOOK

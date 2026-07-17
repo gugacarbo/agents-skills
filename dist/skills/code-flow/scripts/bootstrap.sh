@@ -25,8 +25,8 @@ done
 [ -f "$SOURCE_DIR/scripts/review-package.sh" ] || { printf '%s\n' "Error: source is not a code-flow skill" >&2; exit 1; }
 
 mkdir -p "$TARGET_DIR"
-for file in review-package.sh doctor.sh bootstrap.sh transition-issue.sh; do
-  cp "$SOURCE_DIR/scripts/$file" "$TARGET_DIR/$file"
+for helper in review-package doctor bootstrap transition-issue; do
+  cp "$SOURCE_DIR/scripts/$helper.sh" "$TARGET_DIR/$helper.sh"
 done
 chmod +x "$TARGET_DIR"/*.sh
 printf '%s\n' "$TARGET_DIR"

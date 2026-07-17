@@ -1,0 +1,10 @@
+{
+  "format": 1,
+  "skill": "super-planning",
+  "repository": "file:///home/gustavo/.agents/skills/super-planning",
+  "ref": "unversioned-local-install",
+  "commit": "sha256-5fcf82e7355cdc81f3a134ea446d9c6266f16061f37740950f6a1aaa388b5cc4",
+  "version": "36badae",
+  "skillPath": "/home/gustavo/Apps/agent-skills/.super-planning",
+  "generatedAt": "2026-07-17T00:25:21.282993+00:00"
+}

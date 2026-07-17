@@ -1,7 +1,7 @@
 # Cheatsheet do orquestrador
 
 Carregue antes de retomar uma issue ou mutar labels. Contratos completos:
-`github-flow.md`, `evidence-contract.md`.
+`github-flow.md`, `templates/evidence-contract-template.md`.
 
 ## Ordem obrigatória
 

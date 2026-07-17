@@ -14,7 +14,7 @@ Não exija decomposição em task IDs.
 Publique `templates/06-review-template.md`. Use um veredito literal: `APROVO`,
 `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO`.
 
-Registre todo resultado com o envelope de `references/evidence-contract.md`.
+Registre todo resultado com o envelope de `templates/evidence-contract-template.md`.
 
 Um veredito aprovador não autoriza implementação: o snapshot exato do plano
 precisa de aprovação humana antes de `stage:approved`. Não reescrever o plano

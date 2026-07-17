@@ -157,6 +157,8 @@ overwrite an existing skill version used as a baseline.
 - [`references/testing.md`](references/testing.md): TDD mapping, eval design, baseline comparison, grading, and iteration.
 - [`references/discipline-skills.md`](references/discipline-skills.md): pressure tests, rationalizations, red flags, and loophole closure.
 - [`references/schemas.md`](references/schemas.md): JSON formats for evals, runs, grading, timing, and benchmarks.
-- `agents/`: grader, analyzer, and blind comparator prompts.
+- [`agents/grader.md`](agents/grader.md): grades assertion evidence and eval coverage.
+- [`agents/analyzer.md`](agents/analyzer.md): analyzes benchmark outcomes after comparison.
+- [`agents/comparator.md`](agents/comparator.md): blindly compares paired eval outputs.
 - `eval-viewer/`: prompt approval and qualitative/quantitative review UIs.
 - `scripts/`: evaluation, aggregation, description optimization, validation, and packaging tools.

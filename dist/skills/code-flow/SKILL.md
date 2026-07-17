@@ -15,12 +15,18 @@ reviews ou implementação você mesmo.
 | Invocação                                                               | Comportamento                                                                                                                                                                      |
 | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/code-flow`                                                            | Sem issue: explique que a entrega exige issue GitHub e ofereça `issue create` ou `issue <#N>` / `batch`.                                                                           |
-| `/code-flow <issue create\|create-issue\|issue>`                        | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** entra em `stage:spec-approval` para review antes do gate humano. |
+| `/code-flow issue create`                                               | Roda Fases 0–2 e cria ou preenche uma issue de entrega (incl. draft existente) cuja proposta ADR/spec no **body** entra em `stage:spec-approval` para review antes do gate humano. |
+| `/code-flow create-issue`                                               | Alias de `/code-flow issue create` (canônico: `issue create`).                                                                                                                     |
 | `/code-flow issue <#N\|URL> [phase]`                                    | Valida uma issue elegível existente e retoma seu stage ou fase nomeada.                                                                                                            |
 | `/code-flow batch <#N\|URL>... --from <phase>`                          | Roda trilhas isoladas para issues elegíveis de entrega/bug existentes.                                                                                                             |
 | `/code-flow brainstorm`                                                 | Fase 1 sem issue ainda; segue para `issue create` após o design aprovado.                                                                                                          |
 | `/code-flow <plan\|dispatch\|review\|integrate>`                        | Exige issue (`issue <#N> [phase]`); recuse e peça `issue create` se não houver.                                                                                                    |
 | `/code-flow tool <doctor\|bootstrap\|review-package\|transition-issue>` | Roda um helper e para.                                                                                                                                                             |
+
+Os helpers correspondentes são [`scripts/doctor.sh`](scripts/doctor.sh),
+[`scripts/bootstrap.sh`](scripts/bootstrap.sh),
+[`scripts/review-package.sh`](scripts/review-package.sh) e
+[`scripts/transition-issue.sh`](scripts/transition-issue.sh).
 
 `issue create` é a única rota canônica de criação de issue (`create-issue` é
 alias). Fases nomeadas nunca bypassam gates; `batch` nunca cria issues.
@@ -70,7 +76,7 @@ Um Epic/umbrella existente é inelegível para o fluxo de entrega.
 
 Leia [`references/github-flow.md`](references/github-flow.md) antes de mudar
 stages de issue ou retomar uma issue. Leia
-[`references/evidence-contract.md`](references/evidence-contract.md) antes de
+[`templates/evidence-contract-template.md`](templates/evidence-contract-template.md) antes de
 publicar evidência, revisar implementação ou fechar a entrega. Para resume e
 mutação de labels, use
 [`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md)

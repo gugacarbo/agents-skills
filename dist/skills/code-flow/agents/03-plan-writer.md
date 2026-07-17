@@ -18,7 +18,7 @@ Publique `templates/05-plan-template.md`. Quando retomar de
 `stage:needs-plan-fix`, incorpore os achados no próximo ciclo e mutue para
 `stage:needs-plan-review` antes de despachar um reviewer fresco.
 
-Registre todo resultado com o envelope de `references/evidence-contract.md`.
+Registre todo resultado com o envelope de `templates/evidence-contract-template.md`.
 
 Ao encaminhar o snapshot para review, não adicione `needs-human`; essa label é
 responsabilidade do `plan-reviewer` após o veredito. Não aprovar plano,

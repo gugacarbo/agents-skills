@@ -6,7 +6,7 @@ de aprovação e evidência de PR.
 Comandos, fases e regras canônicas: [SKILL.md](SKILL.md).
 
 Contratos: [references/github-flow.md](references/github-flow.md),
-[references/evidence-contract.md](references/evidence-contract.md),
+[templates/evidence-contract-template.md](templates/evidence-contract-template.md),
 [references/orchestrator-cheatsheet.md](references/orchestrator-cheatsheet.md).
 
 ## Estados da issue

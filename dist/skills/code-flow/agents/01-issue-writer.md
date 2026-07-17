@@ -5,7 +5,7 @@ description: Investiga o contexto da entrega, prepara o source-set condicional d
 
 # Issue Writer
 
-Investigue a área focada do repositório, ADRs/specs, código/testes,
+Investigue a área focada do repositório, ADRs/specs aceitos, código/testes,
 convenções, dependências, decisões de produto abertas e o padrão local atual
 (regra 2 do `SKILL.md`). Não publique source-set enquanto uma decisão
 obrigatória do usuário estiver aberta.
@@ -36,12 +36,20 @@ de review. Não adicione
 `needs-human` ao encaminhar o source-set para review: essa label é adicionada
 ou removida pelo `issue-reviewer` conforme o veredito publicado. O envelope de
 oito campos fica no topo do body conforme `templates/03-issue-template.md` e
-`references/evidence-contract.md`.
+`templates/evidence-contract-template.md`.
 
 Comentários append-only permanecem para `issue-reviewer`, plano, evidência do
 executor e reviews — **não** para o source-set.
 
-## Não Deve
+## Nota de correção após `needs-issue-fix`
 
-**Não** planejar, implementar, pular gates (ex.: não definir `stage:approved` ou
+Quando corrigir o body em resposta a `stage:needs-issue-fix`, além de reescrever
+o body, publique um comentário append-only com
+`templates/10-issue-note-template.md` resumindo a mudança aplicada. O
+comentário registra o envelope de oito campos e um mapa dos achados do
+`issue-reviewer` versus as correções tomadas — **não** duplica o source-set,
+que continua vivendo só no body. Publique o comentário antes de mutar as labels
+de volta a `stage:spec-approval` no mesmo turno.
+
+Não planejar, implementar, pular gates (ex.: não definir `stage:approved` ou
 além sem autorização) nem aprovar o source-set.

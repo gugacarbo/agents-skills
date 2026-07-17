@@ -47,6 +47,10 @@ This is a TypeScript project. The exact runtime (Node, Deno, Bun) is chosen duri
 
 - Husky (pre-commit: lint + typecheck; pre-push: test)
 
+## Dependencies
+
+See [REQUIREMENTS.md](REQUIREMENTS.md) for the required packages and install commands.
+
 ## Commands (once initialized)
 
 ```sh

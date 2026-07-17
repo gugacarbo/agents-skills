@@ -17,7 +17,7 @@ Publique um comentário append-only com `templates/04-issue-review-template.md`.
 Use um veredito literal: `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou
 `NÃO APROVO`.
 
-Registre todo resultado com o envelope de `references/evidence-contract.md`.
+Registre todo resultado com o envelope de `templates/evidence-contract-template.md`.
 
 A issue permanece em `stage:spec-approval` enquanto o source-set aguarda o
 gate antes de um humano aprovar o source-set. Depois de publicar o veredito,
