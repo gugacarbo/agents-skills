@@ -1,37 +1,29 @@
-## Proposta de issue aguardando aprovação
+## Proposta de entrega
 
 Agent: `issue-writer`
-Phase/scope: `fase 2 / source-set proposto`
-Summary: `<resultado proposto da entrega e ação de ADR/spec>`
-Sources/evidence: `<padrão/template do repositório, links de ADR/spec aceitos, evidência de código/teste e decisões do usuário>`
-Decisions: `<create | update | not required, racional exato e aprovação solicitada>`
-Changes/validation: `<apenas rascunho; nenhum ADR/spec formal antes da aprovação>`
+Phase/scope: `issue / source-set`
+Summary: `<resultado e próximo gate aplicável>`
+Sources/evidence: `<padrão local, fontes aceitas e código/testes>`
+Decisions: `<create | update | not required, com racional>`
+Changes/validation: `<body criado/atualizado; documento formal ainda não materializado quando houver gate>`
 Blockers: `<blocker ou none>`
-Next action: `<humano aprova/rejeita esta proposta | resolver decisão, owner>`
+Next action: `<execução autorizada | plano | review/gate de fonte | decisão, owner>`
 
-**Tipo:** `proposta de source-set`
-**Aprovação solicitada:** `<sim — aguardando humano>`
+## Objetivo e limites
 
----
+<resultado fechável, fora de escopo e critérios de sucesso>
 
-## ADR/spec proposto
+## Impacto de spec
 
-| Campo                              | Valor                                                                                |
-| ---------------------------------- | ------------------------------------------------------------------------------------ |
-| **Ação**                           | `create` \| `update` \| `not required`                                               |
-| **Caminho / documento aceito**     | `<path ou não aplicável>`                                                            |
-| **Fonte do padrão do repositório** | `<template, schema, artefato canônico ou nenhum padrão compatível>`                  |
-| **Materialização**                 | Não criar nem atualizar o ADR/spec formal até o usuário aprovar esta proposta exata. |
+| Campo                 | Valor                              |
+| --------------------- | ---------------------------------- |
+| Ação                  | `create \| update \| not required` |
+| Fonte aceita          | `<URL/path ou not applicable>`     |
+| Padrão do repositório | `<form/template/guidance>`         |
 
-### Rascunho ou racional no-spec
+### Proposta ou racional
 
-<Para `create`/`update`, inserir aqui o rascunho completo no padrão do repositório.
-Para `not required`, inserir o racional concreto e a evidência de que nenhum
-contrato observável ou decisão durável muda.>
+<Rascunho completo para `create/update`; racional concreto para `not required`.>
 
----
-
-_Processo: code-flow — proposta e pedido de aprovação no **body da issue**
-(editável em refine; nunca duplicar o source-set em comentário). A aprovação
-humana autoriza a materialização formal do ADR/spec e o planejamento; nunca
-autoriza implementação._
+_O source-set vive no body. O próximo gate depende do risco recalculado; este
+template nunca registra o nome da classificação interna._

@@ -1,18 +1,16 @@
-# Dev: Testes e Scripts Auxiliares do code-flow
+# Desenvolvimento da `code-flow`
 
-Esta pasta agrupa ferramentas auxiliares desenvolvidas para validar a skill code-flow sem misturar-se com o conteúdo publicado da skill.
-
-- `tests.sh` — Suite de integração do contrato por fases, dos seis agentes permitidos, do envelope obrigatório de evidências e dos helpers restantes.
-
-Para executar os testes:
+Execute a suíte estrutural e os helpers fake-GitHub com:
 
 ```bash
-bash skills/code-flow/dev/tests.sh
+pnpm --filter @gugacarbo/skill-code-flow test
 ```
 
-Para executar a partir da raiz do workspace:
+A suíte valida topologia publicada, operações semânticas, matriz adaptativa,
+ausência de perfil nos templates, opt-in nativo, criação idempotente de labels
+fallback e remoção do bootstrap.
 
-```bash
-cd <SKILLS_DIR>
-bash skills/code-flow/dev/tests.sh
-```
+`evals/evals.json` é o corpus comportamental. Para declarar a skill verificada,
+use o workflow pareado do `skill-master`: snapshot antigo versus candidato,
+cinco amostras fresh por cenário, grading com evidência e revisão humana. A
+presença dos prompts ou o teste estrutural verde não substitui esse benchmark.

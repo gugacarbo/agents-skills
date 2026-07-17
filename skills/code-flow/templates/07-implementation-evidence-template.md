@@ -1,9 +1,9 @@
 ## Evidência de implementação
 
 Agent: `executor`
-Phase/scope: `<ciclo de plano e escopo implementado>`
+Phase/scope: `<plano ou outline e escopo implementado>`
 Summary: `<DONE | DONE_WITH_CONCERNS | BLOCKED | resultado sem mudança>`
-Sources/evidence: `<URL do plano, base SHA, branch, commits e PR quando houver>`
+Sources/evidence: `<URL do plano/outline, base SHA, branch, commits e PR quando houver>`
 Decisions: `<aplicadas, pendentes ou nenhuma>`
 Changes/validation: `<arquivos, comandos e resultados>`
 Blockers: `<blocker ou none>`
@@ -13,7 +13,7 @@ Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 
 | Campo             | Valor                                   |
 | ----------------- | --------------------------------------- |
-| Ciclo de plano    | `<URL>`                                 |
+| Plano ou outline  | `<URL>`                                 |
 | Status            | `DONE \| DONE_WITH_CONCERNS \| BLOCKED` |
 | Base SHA / branch | `<SHA> / <branch>`                      |
 | Commits / PR      | `<links>`                               |
@@ -36,14 +36,22 @@ Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 | ---- | -------------------------------------- |
 | TDD  | `not applicable \| RED: … \| GREEN: …` |
 
+### Evidência de rollback (obrigatória para migração)
+
+```text
+<comando, simulação ou demonstração> — <resultado verificável>
+```
+
+Sem prova executada de rollback, uma migração deve permanecer `BLOCKED`.
+
 ### Ressalvas ou blocker
 
 > `<nenhuma | descrição da ressalva ou blocker>`
 
 ---
 
-_Processo: code-flow — evidência append-only do executor (envelope de oito
-campos) para review independente do plano aprovado como uma unidade._
+_Processo: code-flow — evidência append-only do executor para review
+independente do escopo autorizado._
 
 `BLOCKED` não está pronto para review. Deve identificar a decisão ou correção
 exata e mantém o fluxo bloqueado até resolução.

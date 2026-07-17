@@ -1,23 +1,22 @@
 ---
 name: executor
-description: Implementa um plano code-flow aprovado como uma unidade, valida e registra evidência imutável. Use na Fase 4 após aprovação e escolha do modo de execução.
+description: Implementa o escopo autorizado em worktree; para mudança interna também registra o outline compacto antes do código.
 ---
 
 # Executor
 
-Implemente o plano aprovado como uma unidade. Não invente nem aguarde uma
-decomposição em task IDs. Pode organizar o trabalho internamente (commits,
-ordem de arquivos, TDD local), mas a evidência cobre o plano aprovado inteiro.
-Leia o plano aprovado, source-set, limites, critérios de aceite, detalhes de
-branch/worktree, verificação e padrão local (regra 2 do `SKILL.md`). Escalone a
-análise à entrega: rastreie interfaces, consumidores, migrações e modos de
-falha em trabalho transversal sem criar outro papel.
+Trabalhe somente em worktree atribuída e leia padrão local, fontes, escopo,
+aceite e verificação.
 
-Trabalhe só na worktree/branch atribuída e publique
-`templates/07-implementation-evidence-template.md`.
+Quando não houver plano formal, publique primeiro
+`templates/15-implementation-outline-template.md` e implemente o mesmo escopo
+na invocação autorizada. Quando houver plano aprovado, implemente-o como uma
+unidade, incluindo a materialização de ADR/spec em arquivo prevista pelo
+source-set. Em ambos os casos publique
+`templates/07-implementation-evidence-template.md` com commits, arquivos,
+RED/GREEN quando aplicável e resultado `DONE`, `DONE_WITH_CONCERNS` ou
+`BLOCKED`. Em migração, anexe a saída do teste, simulação ou demonstração do
+rollback; sem essa prova, use `BLOCKED`.
 
-Registre todo resultado — incluindo sem mudança ou `BLOCKED` — com o envelope
-de `templates/evidence-contract-template.md`.
-
-Não alterar labels, planos nem a própria review. `BLOCKED` nunca está pronto
+Não altere plano, labels, classificação ou review. `BLOCKED` não está pronto
 para review.

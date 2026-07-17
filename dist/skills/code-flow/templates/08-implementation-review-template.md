@@ -1,7 +1,7 @@
 ## Revisão independente da implementação
 
 Agent: `delivery-reviewer`
-Phase/scope: `<plano aprovado / range implementado>`
+Phase/scope: `<plano ou outline / range implementado>`
 Summary: `<resultado da review>`
 Sources/evidence: `<URL da evidência do executor, range/PR e links das fontes>`
 Decisions: `<veredito literal e decisões necessárias>`
@@ -13,10 +13,10 @@ Next action: `<aceitar | correção do executor | decisão humana, owner>`
 
 | Campo              | Valor                                                           |
 | ------------------ | --------------------------------------------------------------- |
-| Ciclo de plano     | `<URL do plano>`                                                |
+| Plano ou outline   | `<URL>`                                                         |
 | Evidência revisada | `<URL do comentário>`                                           |
 | Range / PR         | `<base..head ou URL>`                                           |
-| Independência      | `Não autorizei o plano nem implementei o trabalho neste range.` |
+| Independência      | `Não produzi o artefato revisado nem implementei este range.`   |
 | Veredito           | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO`  |
 
 ### Achados

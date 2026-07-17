@@ -1,184 +1,105 @@
-# Contrato do fluxo GitHub
+# Workflow GitHub: nativo ou fallback
 
-Use esta referência depois que a issue de entrega existir. As Fases 0–2 investigam
-e decidem o impacto de spec antes da criação; a issue resultante carrega a
-proposta de ADR/spec ou o racional no-spec para aprovação humana. Não escrever
-nem atualizar o ADR/spec formal primeiro.
+Toda entrega usa uma issue elegível. Epic, auditoria e tracker genérico ficam
+fora do fluxo e não recebem mutação.
 
-## Elegibilidade e criação da issue
+## Resolver a máquina de estado
 
-Só uma issue de entrega existente ou uma bug issue com entrega de implementação
-pode usar este fluxo. Uma issue umbrella, auditoria ou tracking genérico é
-inelegível: explique por quê e pare sem adicionar, remover ou substituir qualquer
-label `stage:*`. `batch` recebe apenas números/URLs de issues existentes.
+1. Descubra guidance, forms, labels, estados, gates, evidência e entregas
+   recentes sem mutar nada.
+2. Recalcule o risco antes de interpretar o estado.
+3. Se existir qualquer `stage:*`, use fallback e nunca ofereça workflow nativo.
+4. Sem `stage:*`, preencha e apresente
+   [`templates/16-native-workflow-mapping.md`](../templates/16-native-workflow-mapping.md)
+   com uma linha por capacidade. Considere o workflow nativo elegível somente
+   se cada linha for `PASS`.
+5. Se alguma linha for `FAIL`, declare `NATIVE_INCOMPLETE`, selecione fallback
+   imediatamente e não peça outra decisão. Se todas forem `PASS`, declare
+   `NATIVE_ELIGIBLE` e peça opt-in explícito. Sem `Yes`, selecione fallback
+   integralmente; “sem me perguntar” e equivalentes contam como ausência/recusa
+   e seguem fallback no mesmo turno.
+6. Em retomada nativa, revalide e apresente novamente o mapeamento, depois peça
+   novo opt-in. O aceite não é persistido.
+   Sem reconfirmação, recusa ou incompatibilidade, encerre a atuação da skill
+   sem comentário, label, fechamento ou outra mutação.
 
-Quando este fluxo cria ou preenche uma issue de entrega, prepare o contexto do
-repositório e uma proposta no padrão do repositório primeiro. Crie a issue (ou
-edite o body de uma existente, incl. draft) em `stage:spec-approval`, sem
-`needs-human`; o **body** da issue deve incluir o conteúdo proposto de ADR/spec
-ou declarar `Spec impact: not required` com o motivo, e pedir aprovação humana
-explicitamente. O `issue-writer` nunca publica o source-set em comentário.
-Após essa aprovação, materialize o ADR/spec (quando necessário) e anexe seu link
-imutável antes de planejar.
+Nunca migre automaticamente entre máquinas nem misture marcadores nativos e
+fallback na mesma execução. `transition-issue.sh` serve exclusivamente ao
+fallback e não decide qual workflow usar.
 
-## Stages precisos
+Qualquer `stage:*` existente fixa o fallback.
 
-Exatamente uma label `stage:*` aplica-se a uma issue de entrega. Ela identifica
-o próximo gate; comentários append-only retêm o status exato do trabalho.
+## Stages fallback
 
-| Label                         | Significado preciso                                                                                 | Próxima ação                                                                                                               |
-| ----------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `stage:spec-approval`         | A issue contém ADR/spec proposto ou racional no-spec explícito, aguardando aprovação humana         | Humano aprova a proposta; `issue-writer` materializa o ADR/spec aprovado quando necessário e move para `stage:needs-plan`. |
-| `stage:needs-issue-fix`       | O `issue-reviewer` pediu correções ao source-set                                                    | `issue-writer` corrige o body e retorna a `stage:spec-approval` para nova review.                                          |
-| `stage:needs-plan`            | Source-set aprovado sem snapshot atual de plano                                                     | Despachar/aguardar plan-writer.                                                                                            |
-| `stage:needs-plan-review`     | Snapshot atual do plano aguarda veredito independente ou aprovação humana após veredito aprovador   | Despachar/aguardar plan-reviewer, depois aguardar aprovação humana do plano.                                               |
-| `stage:needs-plan-fix`        | O `plan-reviewer` pediu correções ao snapshot atual do plano                                        | `plan-writer` publica o próximo ciclo e retorna a `stage:needs-plan-review`.                                               |
-| `stage:approved`              | Plano atual tem veredito aprovador literal e aprovação humana explícita                             | Humano escolhe `worktree` ou `later`; execução nunca usa o checkout compartilhado sem worktree.                            |
-| `stage:in-progress`           | O plano aprovado está sendo implementado pela primeira vez como uma unidade                         | Aguardar evidência do executor ou blockers.                                                                                |
-| `stage:needs-delivery-review` | Existe evidência não bloqueada do executor; a review independente da implementação ainda não fechou | Despachar/aguardar `delivery-reviewer` (Fase 5).                                                                           |
-| `stage:needs-changes`         | A review da implementação (ou auditoria final) pediu ajustes corrigíveis                            | Despachar/retomar o executor sobre os achados; nova evidência volta a `needs-delivery-review`.                             |
-| `stage:ready-to-merge`        | Review da implementação aprovou; restam auditoria final, DoD, aprovação do PR e decisão de merge    | Despachar auditoria final (Fase 6), depois oferecer integração opcional.                                                   |
-| `stage:blocked`               | Decisão humana ou correção externa é necessária                                                     | Apresentar o blocker registrado; não adivinhar.                                                                            |
+Exatamente um `stage:*` representa o próximo gate enquanto a issue está ativa.
+O significado de `stage:approved` depende do risco recalculado: para mudança
+interna sem plano formal, significa “racional no-spec válido, aguardando ordem
+de execução”; nos demais caminhos, significa “plano aprovado”.
 
-`needs-human` é ortogonal. O `issue-reviewer` atribui `stage:needs-issue-fix`
-em `PEÇO AJUSTES`; após veredito que exige gate humano, adiciona-a em
-`spec-approval`. O `plan-reviewer` atribui `stage:needs-plan-fix` em
-`PEÇO AJUSTES`; após veredito aprovador, adiciona-a em `needs-plan-review`.
-Em seguida, adicione-a em
-`approved` + `later`, decisões bloqueadas, falha de
-review que exige produto/acesso, o terceiro ciclo de pedido de ajuste do plano e
-a decisão opcional de integração pós-PR. Antes de adicionar um stage, remova
-toda label `stage:*` existente. Após entrega merged/fechada, remova o stage e
-`needs-human`.
+| Label                         | Próxima ação                                                 |
+| ----------------------------- | ------------------------------------------------------------ |
+| `stage:spec-approval`         | Review/gate de source-set exigido pelo risco.                |
+| `stage:needs-issue-fix`       | `issue-writer` corrige o source-set.                         |
+| `stage:needs-plan`            | `plan-writer` produz plano formal.                           |
+| `stage:needs-plan-review`     | Review independente e gate humano do plano.                  |
+| `stage:needs-plan-fix`        | Corrigir o plano e revisar novamente.                        |
+| `stage:approved`              | Recalcular risco; aguardar ordem explícita e criar worktree. |
+| `stage:in-progress`           | Executor implementa o escopo autorizado.                     |
+| `stage:needs-delivery-review` | Review independente da implementação.                        |
+| `stage:needs-changes`         | Executor corrige achados e retorna à review.                 |
+| `stage:ready-to-merge`        | Auditoria aplicável, PR aprovado e merge explícito.          |
+| `stage:blocked`               | Decisão humana ou dependência externa necessária.            |
 
-## Mutação de labels (obrigatória)
+`needs-human` é ortogonal e marca o gate humano atual. Após merge, remova
+`stage:*` e `needs-human`.
 
-O status da issue é o conjunto de labels do GitHub, não o texto do comentário.
-Escrever `stage:*`, `needs-human` ou uma frase de transição dentro de um
-comentário append-only não muda a issue. Após o comentário de evidência
-autorizador existir, mutue as labels imediatamente.
+Não antecipe `needs-human` enquanto um reviewer ou auditor ainda precisa agir.
+No fallback, aplique-o quando o próximo ator for humano:
 
-**Preferido:** `scripts/transition-issue.sh` (também via
-`/code-flow tool transition-issue`):
+- source-set moderado `create/update`: já na entrada em
+  `stage:spec-approval`; em hard trigger, somente depois do veredito do
+  `issue-reviewer`;
+- plano: em `stage:needs-plan-review` somente depois do veredito do
+  `plan-reviewer`;
+- execução: sempre em `stage:approved`, inclusive ao sair do gate de plano;
+- merge: em `stage:ready-to-merge` depois da delivery review quando não houver
+  auditoria final, ou somente depois que a auditoria aplicável aprovar;
+- blocker: sempre em `stage:blocked`.
+
+Ao voltar para correção ou trabalho de agente, remova `needs-human`. Uma
+transição entre dois gates humanos pode preservá-lo.
+
+## Entrada por risco
+
+- Mudança interna no-spec: criar issue diretamente em
+  `stage:approved + needs-human`.
+- Mudança moderada com `Spec impact: not required`: entrar em
+  `stage:needs-plan`.
+- Mudança moderada `create/update`: entrar em
+  `stage:spec-approval + needs-human`; após aprovação humana, limpar o marcador
+  e seguir a `stage:needs-plan`.
+- Hard trigger: entrar em `stage:spec-approval`, exigir `issue-reviewer`, então
+  aplicar `needs-human`; após o gate, limpar e seguir ao plano.
+
+## Mutação fallback
+
+Publique a evidência autorizadora e então use o helper no mesmo turno:
 
 ```bash
-# Após comentário autorizador: remove stage:* antigo, aplica o próximo, confirma
-./scripts/transition-issue.sh 42 --require-from stage:needs-plan --to stage:needs-plan-review
-
-./scripts/transition-issue.sh 42 --to stage:blocked --needs-human
-./scripts/transition-issue.sh 42 --to stage:needs-plan --clear-needs-human
-./scripts/transition-issue.sh 42 --clear-stage --clear-needs-human   # pós-merge
-./scripts/transition-issue.sh 42 --to stage:approved --dry-run
+scripts/transition-issue.sh 42 --require-from stage:needs-plan --to stage:needs-plan-review
+scripts/transition-issue.sh 42 --to stage:blocked --needs-human --allow-repair
+scripts/transition-issue.sh 42 --clear-stage --clear-needs-human
 ```
 
-O helper lê labels, remove todo `stage:*`, aplica exatamente um `--to` (whitelist
-da tabela), ajusta `needs-human`, confirma com `gh issue view --json labels` e
-imprime JSON (`issue`, `from`, `to`, `needs_human`, `labels`). Não posta
-comentários e não escolhe o próximo stage.
+O helper remove stages antigos, cria labels allow-listed ausentes somente em
+execução real, aplica o alvo e confirma via `gh issue view <n> --json labels`.
+`--dry-run` nunca cria nem altera labels. Mencionar um stage em texto não é
+mudança de estado.
 
-A mutação é **best-effort**, não uma chamada atômica da API: cada
-`gh issue edit` é separado. Se o add falhar após o remove, a issue pode ficar
-com zero `stage:*` (drift → `blocked` + `needs-human` na Fase 0). O helper
-confirma após o remove e após o fim; se a confirmação falhar, repare com
-`--allow-repair --to <stage>` (ou o fallback manual abaixo) no mesmo turno.
+## Drift e promoção
 
-**Fallback manual** (se o script estiver indisponível):
-
-```bash
-# 1) Remova toda label stage:* existente (liste antes)
-gh issue view 42 --json labels -q '.labels[].name'
-gh issue edit 42 --remove-label "stage:needs-plan"
-
-# 2) Adicione exatamente um próximo stage
-gh issue edit 42 --add-label "stage:needs-plan-review"
-
-# 3) Adicione ou remova needs-human conforme a transição
-gh issue edit 42 --add-label "needs-human"
-# ou: gh issue edit 42 --remove-label "needs-human"
-
-# 4) Confirme antes de continuar
-gh issue view 42 --json labels
-```
-
-Sequência obrigatória (com ou sem helper):
-
-1. Remova toda label `stage:*` existente.
-2. Adicione exatamente uma próxima label `stage:*` da tabela acima.
-3. Adicione ou remova `needs-human` conforme a transição exigir.
-4. Confirme com `gh issue view <n> --json labels` antes de continuar.
-
-O orquestrador aplica as mutações de `stage:*` depois dos posts dos papéis,
-exceto os reviewers em `PEÇO AJUSTES`: o `issue-reviewer` atribui
-`stage:needs-issue-fix` e o `plan-reviewer` atribui `stage:needs-plan-fix`.
-Eles também aplicam `needs-human` conforme seus próprios vereditos; o
-`issue-writer` remove-a na materialização pós-aprovação. Nunca pare após apenas
-registrar o novo stage no body do comentário.
-
-| Racionalização                                               | Contraponto                                                    |
-| ------------------------------------------------------------ | -------------------------------------------------------------- |
-| “O comentário já diz o novo stage.”                          | Texto de comentário é narrativa; só labels são status durável. |
-| “Next action nomeia o stage, então a issue está atualizada.” | `Next action` não é mutação de label.                          |
-| “Vou atualizar as labels depois / após o próximo passo.”     | Mutue labels no mesmo turno do comentário autorizador.         |
-
-## Tabela de transição
-
-```text
-fase 0 → fase 1 → fase 2: investigar → decidir impacto de spec → preparar proposta
-criar/preencher issue de entrega: proposta/racional no-spec no body + spec-approval
-  ├─ issue-reviewer pede ajustes → needs-issue-fix → issue-writer corrige body → spec-approval
-  └─ gate humano aprova proposta → materializar ADR/spec quando necessário → needs-plan → needs-plan-review
-  ├─ reviewer independente aprova → aguardar aprovação humana do plano → approved → worktree in-progress
-  ├─ plan-reviewer pede ajustes (ciclo < 3) → needs-plan-fix → plan-writer → needs-plan-review
-  └─ rejeita/erros/terceiro ajuste → blocked + needs-human
-in-progress → needs-delivery-review → review da implementação
-  ├─ APROVO / APROVO COM RESSALVAS → ready-to-merge → auditoria final/DoD → aprovação do PR
-  │    └─ integração/merge opcional confirmada pelo usuário → fechar
-  ├─ PEÇO AJUSTES / achados Critical|Important → needs-changes → executor → needs-delivery-review
-  └─ NÃO APROVO com decisão de produto/acesso → blocked + needs-human
-auditoria final pede ajustes → needs-changes → executor → needs-delivery-review
-```
-
-## Regras de resume
-
-| Estado observado                                                | Ação de resume                                                                                                                     |
-| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `stage:spec-approval`                                           | Apresentar a proposta de ADR/spec ou racional no-spec para aprovação humana; não escrever ADR/spec formal nem plano.               |
-| `stage:needs-issue-fix`                                         | Despachar/retomar o issue-writer para corrigir o body e retornar a `stage:spec-approval`.                                          |
-| `stage:needs-plan`                                              | Iniciar ou aguardar o plan-writer da Fase 3.                                                                                       |
-| `stage:needs-plan-review`                                       | Despachar/aguardar a review independente do plano atual, depois apresentar um snapshot aprovador para aprovação humana.            |
-| `stage:needs-plan-fix`                                          | Despachar/retomar o plan-writer para publicar o próximo ciclo e retornar a `stage:needs-plan-review`.                              |
-| `stage:approved`                                                | Perguntar `worktree` ou `later`; ainda não editar código.                                                                          |
-| `stage:in-progress`                                             | Despachar/retomar o executor único do plano aprovado, ou resolver seu blocker.                                                     |
-| `stage:needs-delivery-review`                                   | Despachar/aguardar a review independente da implementação (Fase 5).                                                                |
-| `stage:needs-changes`                                           | Despachar o executor para corrigir os achados da review/auditoria; após evidência não bloqueada, voltar a `needs-delivery-review`. |
-| `stage:ready-to-merge`                                          | Despachar auditoria final, DoD e aprovação do PR (Fase 6). Após isso, oferecer — não executar automaticamente — merge/integração.  |
-| `stage:blocked`                                                 | Apresentar a decisão humana registrada; não adivinhar.                                                                             |
-| Issue elegível com zero/múltiplos stages ou drift de comentário | Definir `stage:blocked` + `needs-human` e explicar o mismatch.                                                                     |
-| Issue inelegível                                                | Explicar que está fora do fluxo de entrega e parar sem tocar labels.                                                               |
-
-## Ciclos de plano
-
-Um ciclo é um comentário append-only de plano mais um comentário append-only de
-review. O plano deve identificar `Plan cycle: k/3`, o base SHA do repositório e
-os links das fontes. Não decompor em task IDs. A review deve citar a URL desse
-comentário de plano e usar um veredito literal:
-
-`APROVO` | `APROVO COM RESSALVAS` | `PEÇO AJUSTES` | `NÃO APROVO`
-
-Não editar um comentário de plano ou review já submetido. Uma mudança material
-de plano, rejeição humana ou pedido humano de ajustes inicia um novo ciclo,
-substitui `stage:approved` ou `stage:needs-plan-review` por `stage:needs-plan-fix`
-e exige um novo reviewer. Se o reviewer exigir escolha de produto/acesso, use
-`NÃO APROVO` e bloqueie em vez de consumir um ciclo de ajuste. O plan-reviewer
-deve ser distinto do plan-writer. Toda instância de `delivery-reviewer` também
-deve ser distinta do plan-writer e do executor cujo trabalho está no range
-revisado.
-
-## Regras de batch
-
-Mantenha uma visão efêmera de orquestração por issue: URL, stage observado,
-ciclo de plano, base SHA, agentes atribuídos, blockers, branch/worktree, PR e
-próxima ação. Não persistir como registry ou arquivo de progresso; labels/comentários
-da issue e o PR são a evidência durável. Uma issue bloqueada não para issues
-não relacionadas. Agentes de plano/review podem rodar em paralelo. Cada issue
-usa uma worktree, branch e PR isolados.
+No fallback, zero ou múltiplos stages em issue já gerenciada são drift. Antes
+de reparar, confirme que não há workflow nativo aguardando opt-in. Se o risco
+recalculado tornou o stage insuficiente, registre a promoção e mova para o
+primeiro gate obrigatório; nunca trate `approved` antigo como aprovação do
+escopo novo.

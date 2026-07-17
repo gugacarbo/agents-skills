@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
-# Best-effort mutate code-flow stage:* / needs-human labels on a GitHub issue.
+# Best-effort mutate fallback stage:* / needs-human labels on a GitHub issue.
 # Not a single atomic API call: remove-then-add can leave zero stage:* if a
 # later gh edit fails — confirm after and repair with --allow-repair if needed.
-# Does not post comments or choose the next stage — the orchestrator decides.
+# Does not select native vs fallback, post comments, or choose the next stage.
 
 USAGE='Usage: transition-issue.sh <N|URL> [--to stage:…] [--needs-human|--clear-needs-human] [--clear-stage] [--require-from stage:…] [--dry-run] [--allow-repair]'
 
@@ -107,18 +107,12 @@ if [ "$CLEAR_STAGE" -eq 0 ] && [ "$ALLOW_REPAIR" -eq 0 ]; then
   fi
 fi
 
-# Ensure target labels exist in the repository before mutating.
+# Inspect repository labels. Missing allow-listed targets are created only in a
+# real mutation; dry-run never creates labels.
 REPO_LABELS=$(gh label list --limit 200 --json name -q '.[].name')
 label_exists() {
   printf '%s\n' "$REPO_LABELS" | grep -Fxq -- "$1"
 }
-
-if [ -n "$TO" ]; then
-  label_exists "$TO" || die "Error: repository label '$TO' does not exist; create it before transitioning"
-fi
-if [ -n "$NEEDS_HUMAN" ]; then
-  label_exists "needs-human" || die "Error: repository label 'needs-human' does not exist; create it before transitioning"
-fi
 
 REMOVE_STAGES="$CURRENT_STAGES"
 PLANNED_NEEDS_HUMAN="$HAS_NEEDS_HUMAN"
@@ -136,6 +130,23 @@ if [ "$DRY_RUN" -eq 1 ]; then
   printf '{"issue":%s,"from":%s,"to":%s,"needs_human":%s,"dry_run":true,"labels":null}\n' \
     "$ISSUE_NUMBER" "$FROM_LIST" "$TO_JSON" "$NEEDS_JSON"
   exit 0
+fi
+
+ensure_label() {
+  label_name="$1"
+  label_color="$2"
+  label_description="$3"
+  label_exists "$label_name" && return 0
+  gh label create "$label_name" --color "$label_color" --description "$label_description" >/dev/null \
+    || die "Error: failed to create fallback label '$label_name'"
+  REPO_LABELS=$(printf '%s\n%s\n' "$REPO_LABELS" "$label_name")
+}
+
+if [ -n "$TO" ]; then
+  ensure_label "$TO" "1D76DB" "code-flow fallback state"
+fi
+if [ -n "$NEEDS_HUMAN" ]; then
+  ensure_label "needs-human" "D93F0B" "human decision required"
 fi
 
 # Remove every existing stage:* label.

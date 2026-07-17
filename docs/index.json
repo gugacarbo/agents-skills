@@ -1,9 +1,9 @@
 [
   {
     "id": "SPEC-0001",
-    "path": "docs/specs/0001-code-toolbox-six-agent-issue-evidence.md",
+    "path": "docs/specs/0001-code-flow-adaptive-governance.md",
     "layer": "specs",
-    "title": "Code-flow coordena entregas com seis agentes e evidência por comentário",
+    "title": "Code-flow aplica governança proporcional ao risco sem misturar workflows",
     "status": "accepted",
     "builds-on": [],
     "superseded-by": null,

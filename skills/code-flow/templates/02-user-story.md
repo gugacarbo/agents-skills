@@ -41,7 +41,8 @@ Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
 
 **Regras desta issue**
 
-Esta é uma issue elegível de entrega/bug. Aplicar `stage:*`, aprovação do
-source-set, plano, execução, review e fechamento apenas aqui. Manter a
-implementação dentro do plano aprovado desta issue como uma unidade do executor;
-criar outra issue filha só para um resultado de entrega independentemente fechável.
+Esta é uma issue elegível de entrega/bug. Aplicar `stage:*` e somente os gates
+selecionados pelo risco nesta issue. O escopo autorizado usa plano formal ou
+outline compacto conforme a matriz adaptativa e é implementado como uma unidade
+do executor; criar outra issue filha só para um resultado independentemente
+fechável.

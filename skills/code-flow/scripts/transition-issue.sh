@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
-# Best-effort mutate code-flow stage:* / needs-human labels on a GitHub issue.
+# Best-effort mutate fallback stage:* / needs-human labels on a GitHub issue.
 # Not a single atomic API call: remove-then-add can leave zero stage:* if a
 # later gh edit fails — confirm after and repair with --allow-repair if needed.
-# Does not post comments or choose the next stage — the orchestrator decides.
+# Does not select native vs fallback, post comments, or choose the next stage.
 
 USAGE='Usage: transition-issue.sh <N|URL> [--to stage:…] [--needs-human|--clear-needs-human] [--clear-stage] [--require-from stage:…] [--dry-run] [--allow-repair]'
 
@@ -76,6 +76,10 @@ done
 $USAGE"
 [ -z "$TO" ] || [ "$CLEAR_STAGE" -eq 0 ] || die "Error: --to and --clear-stage are mutually exclusive"
 [ -z "$NEEDS_HUMAN" ] || [ "$CLEAR_NEEDS_HUMAN" -eq 0 ] || die "Error: --needs-human and --clear-needs-human are mutually exclusive"
+if [ "$CLEAR_STAGE" -eq 1 ]; then
+  [ -z "$NEEDS_HUMAN" ] || die "Error: --clear-stage cannot be combined with --needs-human"
+  [ "$CLEAR_NEEDS_HUMAN" -eq 1 ] || die "Error: --clear-stage requires --clear-needs-human"
+fi
 
 command -v gh >/dev/null 2>&1 || die "Error: gh is required"
 command -v jq >/dev/null 2>&1 || die "Error: jq is required"
@@ -90,6 +94,8 @@ fi
 ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,url)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
 [ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != "null" ] || die "Error: could not resolve issue: $ISSUE"
+ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
+[ -n "$ISSUE_REPO" ] || die "Error: could not resolve issue repository from URL: $ISSUE"
 
 CURRENT_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r '[.labels[].name | select(startswith("stage:"))] | join("\n")')
 STAGE_COUNT=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name | select(startswith("stage:"))] | length')
@@ -101,24 +107,15 @@ if [ -n "$REQUIRE_FROM" ]; then
     || die "Error: expected current stage '$REQUIRE_FROM' on #$ISSUE_NUMBER; found: ${CURRENT_STAGES:-"(none)"}"
 fi
 
-if [ "$CLEAR_STAGE" -eq 0 ] && [ "$ALLOW_REPAIR" -eq 0 ]; then
+if [ "$ALLOW_REPAIR" -eq 0 ]; then
   if [ "$STAGE_COUNT" -eq 0 ] || [ "$STAGE_COUNT" -gt 1 ]; then
     die "Error: issue #$ISSUE_NUMBER has $STAGE_COUNT stage:* label(s); use --allow-repair or fix manually (found: ${CURRENT_STAGES:-none})"
   fi
 fi
 
-# Ensure target labels exist in the repository before mutating.
-REPO_LABELS=$(gh label list --limit 200 --json name -q '.[].name')
 label_exists() {
-  printf '%s\n' "$REPO_LABELS" | grep -Fxq -- "$1"
+  gh label view "$1" --repo "$ISSUE_REPO" >/dev/null 2>&1
 }
-
-if [ -n "$TO" ]; then
-  label_exists "$TO" || die "Error: repository label '$TO' does not exist; create it before transitioning"
-fi
-if [ -n "$NEEDS_HUMAN" ]; then
-  label_exists "needs-human" || die "Error: repository label 'needs-human' does not exist; create it before transitioning"
-fi
 
 REMOVE_STAGES="$CURRENT_STAGES"
 PLANNED_NEEDS_HUMAN="$HAS_NEEDS_HUMAN"
@@ -138,17 +135,33 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
+ensure_label() {
+  label_name="$1"
+  label_color="$2"
+  label_description="$3"
+  label_exists "$label_name" && return 0
+  gh label create "$label_name" --repo "$ISSUE_REPO" --color "$label_color" --description "$label_description" >/dev/null \
+    || die "Error: failed to create fallback label '$label_name'"
+}
+
+if [ -n "$TO" ]; then
+  ensure_label "$TO" "1D76DB" "code-flow fallback state"
+fi
+if [ -n "$NEEDS_HUMAN" ]; then
+  ensure_label "needs-human" "D93F0B" "human decision required"
+fi
+
 # Remove every existing stage:* label.
 if [ -n "$REMOVE_STAGES" ]; then
   printf '%s\n' "$REMOVE_STAGES" | while IFS= read -r stage_label; do
     [ -n "$stage_label" ] || continue
-    gh issue edit "$ISSUE_NUMBER" --remove-label "$stage_label" >/dev/null
+    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$stage_label" >/dev/null
   done
 fi
 
 # Confirm removals before adding (narrows the empty-stage window on failure).
 if [ -n "$REMOVE_STAGES" ] || [ -n "$TO" ]; then
-  AFTER_REMOVE=$(gh issue view "$ISSUE_NUMBER" --json labels)
+  AFTER_REMOVE=$(gh issue view "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --json labels)
   AFTER_REMOVE_COUNT=$(printf '%s' "$AFTER_REMOVE" | jq '[.labels[].name | select(startswith("stage:"))] | length')
   if [ -n "$TO" ] && [ "$AFTER_REMOVE_COUNT" -ne 0 ]; then
     die "Error: expected zero stage:* after remove before adding '$TO'; got $AFTER_REMOVE_COUNT — repair manually or retry with --allow-repair"
@@ -159,21 +172,21 @@ if [ -n "$REMOVE_STAGES" ] || [ -n "$TO" ]; then
 fi
 
 if [ -n "$TO" ]; then
-  gh issue edit "$ISSUE_NUMBER" --add-label "$TO" >/dev/null \
+  gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$TO" >/dev/null \
     || die "Error: failed to add '$TO' after removing prior stage:* — issue may have zero stage:*; repair with --allow-repair --to $TO"
 fi
 
 if [ -n "$NEEDS_HUMAN" ]; then
   if [ "$HAS_NEEDS_HUMAN" -eq 0 ]; then
-    gh issue edit "$ISSUE_NUMBER" --add-label "needs-human" >/dev/null
+    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "needs-human" >/dev/null
   fi
 elif [ "$CLEAR_NEEDS_HUMAN" -eq 1 ]; then
   if [ "$HAS_NEEDS_HUMAN" -gt 0 ]; then
-    gh issue edit "$ISSUE_NUMBER" --remove-label "needs-human" >/dev/null
+    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "needs-human" >/dev/null
   fi
 fi
 
-CONFIRM=$(gh issue view "$ISSUE_NUMBER" --json labels)
+CONFIRM=$(gh issue view "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --json labels)
 CONFIRM_STAGES=$(printf '%s' "$CONFIRM" | jq '[.labels[].name | select(startswith("stage:"))]')
 CONFIRM_STAGE_COUNT=$(printf '%s' "$CONFIRM" | jq '[.labels[].name | select(startswith("stage:"))] | length')
 CONFIRM_NEEDS=$(printf '%s' "$CONFIRM" | jq '[.labels[].name | select(. == "needs-human")] | length')

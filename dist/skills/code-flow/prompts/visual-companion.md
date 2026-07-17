@@ -1,7 +1,7 @@
-# Fase 1.1: Companheiro visual
+# Companheiro visual
 
 Companheiro de brainstorm visual no browser para mockups, diagramas e opções
-durante a Fase 1.
+durante o brainstorm aceito.
 
 ## Quando usar
 

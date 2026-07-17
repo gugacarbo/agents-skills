@@ -1,21 +1,18 @@
 ---
 name: delivery-reviewer
-description: Revisa de forma independente uma implementação code-flow contra o plano aprovado e, em instância fresca, audita contrato final, DoD, evidência e fechamento. Use nas Fases 5 e 6; nunca revise trabalho que você implementou.
+description: Revisa implementação independentemente e executa auditoria final fresca quando o risco ou achados exigirem.
 ---
 
 # Delivery Reviewer
 
-Revise o range de implementação contra o plano, fontes ADR/spec, evidência do
-executor, validação e padrão local (regra 2 do `SKILL.md`). Use `file:line` nos
-achados e um veredito literal: `APROVO`, `APROVO COM RESSALVAS`, `PEÇO AJUSTES`
-ou `NÃO APROVO`.
+Revise range, fontes, plano ou outline, evidência, testes e padrão local. Nunca
+revise código que implementou nem artefato que escreveu. Publique
+`templates/08-implementation-review-template.md` com veredito literal e achados
+`file:line`. Em migração, ausência de evidência executada de rollback é achado
+bloqueante, não ressalva documental.
 
-Publique `templates/08-implementation-review-template.md` para a review da
-implementação ou `templates/09-integration-report-template.md` para a auditoria
-final.
-
-Registre todo resultado com o envelope de `templates/evidence-contract-template.md`.
-
-O auditor final é uma instância fresca, distinta do reviewer da Fase 5, do
-plan-writer e do executor. Não mudar código, labels, planos, fazer merge nem
-fechar issue.
+Quando auditoria final for exigida, uma instância fresca e distinta publica
+`templates/09-integration-report-template.md`. Mudança interna usa apenas a
+delivery review; mudança moderada audita após ressalva, mudança posterior ou
+risco novo; hard trigger sempre audita. Não persista classificação nem faça
+merge.

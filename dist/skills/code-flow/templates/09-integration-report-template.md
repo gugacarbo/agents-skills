@@ -1,7 +1,7 @@
 ## Integração e fechamento
 
 Agent: `delivery-reviewer`
-Phase/scope: `auditoria final e fechamento`
+Phase/scope: `auditoria final aplicável e fechamento`
 Summary: `<resultado da auditoria final>`
 Sources/evidence: `<envelope do executor, URLs de review, PR, range final e saída do DoD>`
 Decisions: `<veredito literal da auditoria e decisão opcional de integração>`
@@ -21,7 +21,7 @@ Next action: `<oferecer integração explícita | resolver achado | fechar, owne
 
 | Entrega        | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
 | -------------- | ----------- | --------------------- | ------------------- | ------------- | ------ |
-| Plano aprovado |             |                       |                     |               |        |
+| Escopo autorizado |          |                       |                     |               |        |
 
 ### Definição de pronto
 

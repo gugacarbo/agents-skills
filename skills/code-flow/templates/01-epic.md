@@ -46,8 +46,10 @@
 
 - Cada filha deve ser uma issue de entrega/bug, usando `templates/02-user-story.md`.
 - O GitHub pode ligá-la como subissue deste Epic.
-- Aplicar labels `stage:*` e o fluxo code-flow de fonte, plano, execução e review **apenas nas filhas**.
-- Manter a implementação dentro do plano aprovado de cada filha — sem decompor em task IDs nem criar subissues de chore.
+- Aplicar `stage:*` e os gates selecionados pelo risco **apenas nas filhas**.
+- Cada filha usa plano formal ou outline compacto conforme a matriz adaptativa;
+  implementar o escopo autorizado como uma unidade, sem task IDs nem subissues
+  de chore.
 
 ## Decisões e riscos transversais
 

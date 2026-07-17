@@ -1,48 +1,35 @@
 # code-flow
 
-Coordena entregas não triviais via papéis independentes, issues GitHub, gates
-de aprovação e evidência de PR.
+Coordena entregas por issue com classificação de risco efêmera, workflow do
+repositório por opt-in, fallback `stage:*`, reviews independentes e merge
+explícito.
 
-Comandos, fases e regras canônicas: [SKILL.md](SKILL.md).
+Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
+[references/risk-profiles.md](references/risk-profiles.md). Estado e retomada:
+[references/github-flow.md](references/github-flow.md).
 
-Contratos: [references/github-flow.md](references/github-flow.md),
-[templates/evidence-contract-template.md](templates/evidence-contract-template.md),
-[references/orchestrator-cheatsheet.md](references/orchestrator-cheatsheet.md).
+## Caminhos de entrega
 
-## Estados da issue
+| Risco calculado | Caminho mínimo |
+| --- | --- |
+| Interno, localizado e reversível | issue no-spec → autorização de execução → outline + execução → review independente → merge explícito |
+| Observável ou transversal moderado | source gate se necessário → plano/review/aprovação → execução → delivery review → auditoria condicional → merge explícito |
+| Sensível ou de alto impacto | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → merge explícito |
 
-```mermaid
-flowchart TD
-  spec["stage:spec-approval"] -->|"aprovação da proposta"| plan["stage:needs-plan"]
-  spec -->|"issue-reviewer pede ajustes"| issueFix["stage:needs-issue-fix"]
-  issueFix -->|"issue-writer corrige o source-set"| spec
-  plan -->|"plano publicado"| planReview["stage:needs-plan-review"]
-  planReview -->|"plano aprovado + aprovação humana"| approved["stage:approved"]
-  planReview -->|"plan-reviewer pede ajustes (ciclo < 3)"| planFix["stage:needs-plan-fix"]
-  planFix -->|"plan-writer publica novo ciclo"| planReview
-  approved -->|"worktree + execução autorizada"| progress["stage:in-progress"]
-  progress -->|"evidência do executor"| deliveryReview["stage:needs-delivery-review"]
-  deliveryReview -->|"review aprovada"| ready["stage:ready-to-merge"]
-  deliveryReview -->|"ajustes solicitados"| changes["stage:needs-changes"]
-  ready -->|"auditoria final pede ajustes"| changes
-  changes -->|"nova evidência"| deliveryReview
-  ready -->|"DoD, aprovação do PR e merge"| closed["Fechada (sem stage)"]
+Os nomes internos da classificação nunca são persistidos. A operação os
+recalcula antes de interpretar o estado atual.
 
-  spec -. "decisão humana ou dependência externa" .-> blocked["stage:blocked + needs-human"]
-  planReview -. "rejeição, erro ou 3º ajuste" .-> blocked
-  progress -. "blocker" .-> blocked
-  deliveryReview -. "decisão de produto/acesso" .-> blocked
-```
+## Workflow do repositório
 
-`needs-human` é uma label ortogonal: aparece nos gates de aprovação e em
-`stage:blocked`, mas não substitui o `stage:*` atual.
+- Qualquer `stage:*` existente fixa o fallback.
+- Workflow nativo só pode ser usado após discovery, validação e opt-in humano.
+- O opt-in não é persistido; toda retomada nativa exige nova confirmação.
+- Sem reconfirmação, a skill encerra sua atuação sem mutar ou fechar a issue.
+- Nunca misture workflow nativo e fallback na mesma execução.
 
-## Quando usar code-flow vs super-planning
+## code-flow vs super-planning
 
-- **code-flow:** entrega governada com ADR/spec, stages GitHub, gates humanos e
-  evidência de PR; um plano aprovado executado como unidade (sem task IDs).
-- **super-planning:** decomposição multi-step com task registry, progresso
-  local e dispatch paralelo/sequencial de subagentes.
+- **code-flow:** entrega governada por issue, risco adaptativo, gates e PR.
+- **super-planning:** decomposição local em tarefas e registry de execução.
 
-Nome histórico: entregas antigas neste repo podem citar `code-toolbox`; a skill
-publicada é `code-flow` (não reescreva evidência histórica em `docs/delivery/`).
+Entregas históricas podem citar `code-toolbox`; não reescreva essa evidência.
