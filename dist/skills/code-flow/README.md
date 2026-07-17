@@ -10,11 +10,11 @@ Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
 
 ## Caminhos de entrega
 
-| Risco calculado | Caminho mínimo |
-| --- | --- |
-| Interno, localizado e reversível | issue no-spec → autorização de execução → outline + execução → review independente → merge explícito |
+| Risco calculado                    | Caminho mínimo                                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Interno, localizado e reversível   | issue no-spec → autorização de execução → outline + execução → review independente → merge explícito                      |
 | Observável ou transversal moderado | source gate se necessário → plano/review/aprovação → execução → delivery review → auditoria condicional → merge explícito |
-| Sensível ou de alto impacto | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → merge explícito |
+| Sensível ou de alto impacto        | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → merge explícito        |
 
 Os nomes internos da classificação nunca são persistidos. A operação os
 recalcula antes de interpretar o estado atual.

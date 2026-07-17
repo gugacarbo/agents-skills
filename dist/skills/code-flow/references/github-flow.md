@@ -9,12 +9,17 @@ fora do fluxo e não recebem mutação.
    recentes sem mutar nada.
 2. Recalcule o risco antes de interpretar o estado.
 3. Se existir qualquer `stage:*`, use fallback e nunca ofereça workflow nativo.
-4. Sem `stage:*`, considere o workflow nativo somente se ele mapear de forma
-   inequívoca estado retomável, gates exigidos, evidência, review independente
-   e merge explícito.
-5. Para issue nova, apresente o mapeamento e peça opt-in. Sem `Yes`, use
-   fallback integralmente.
-6. Em retomada nativa, revalide e peça novo opt-in. O aceite não é persistido.
+4. Sem `stage:*`, preencha e apresente
+   [`templates/16-native-workflow-mapping.md`](../templates/16-native-workflow-mapping.md)
+   com uma linha por capacidade. Considere o workflow nativo elegível somente
+   se cada linha for `PASS`.
+5. Se alguma linha for `FAIL`, declare `NATIVE_INCOMPLETE`, selecione fallback
+   imediatamente e não peça outra decisão. Se todas forem `PASS`, declare
+   `NATIVE_ELIGIBLE` e peça opt-in explícito. Sem `Yes`, selecione fallback
+   integralmente; “sem me perguntar” e equivalentes contam como ausência/recusa
+   e seguem fallback no mesmo turno.
+6. Em retomada nativa, revalide e apresente novamente o mapeamento, depois peça
+   novo opt-in. O aceite não é persistido.
    Sem reconfirmação, recusa ou incompatibilidade, encerre a atuação da skill
    sem comentário, label, fechamento ou outra mutação.
 
@@ -31,22 +36,38 @@ O significado de `stage:approved` depende do risco recalculado: para mudança
 interna sem plano formal, significa “racional no-spec válido, aguardando ordem
 de execução”; nos demais caminhos, significa “plano aprovado”.
 
-| Label | Próxima ação |
-| --- | --- |
-| `stage:spec-approval` | Review/gate de source-set exigido pelo risco. |
-| `stage:needs-issue-fix` | `issue-writer` corrige o source-set. |
-| `stage:needs-plan` | `plan-writer` produz plano formal. |
-| `stage:needs-plan-review` | Review independente e gate humano do plano. |
-| `stage:needs-plan-fix` | Corrigir o plano e revisar novamente. |
-| `stage:approved` | Recalcular risco; aguardar ordem explícita e criar worktree. |
-| `stage:in-progress` | Executor implementa o escopo autorizado. |
-| `stage:needs-delivery-review` | Review independente da implementação. |
-| `stage:needs-changes` | Executor corrige achados e retorna à review. |
-| `stage:ready-to-merge` | Auditoria aplicável, PR aprovado e merge explícito. |
-| `stage:blocked` | Decisão humana ou dependência externa necessária. |
+| Label                         | Próxima ação                                                 |
+| ----------------------------- | ------------------------------------------------------------ |
+| `stage:spec-approval`         | Review/gate de source-set exigido pelo risco.                |
+| `stage:needs-issue-fix`       | `issue-writer` corrige o source-set.                         |
+| `stage:needs-plan`            | `plan-writer` produz plano formal.                           |
+| `stage:needs-plan-review`     | Review independente e gate humano do plano.                  |
+| `stage:needs-plan-fix`        | Corrigir o plano e revisar novamente.                        |
+| `stage:approved`              | Recalcular risco; aguardar ordem explícita e criar worktree. |
+| `stage:in-progress`           | Executor implementa o escopo autorizado.                     |
+| `stage:needs-delivery-review` | Review independente da implementação.                        |
+| `stage:needs-changes`         | Executor corrige achados e retorna à review.                 |
+| `stage:ready-to-merge`        | Auditoria aplicável, PR aprovado e merge explícito.          |
+| `stage:blocked`               | Decisão humana ou dependência externa necessária.            |
 
 `needs-human` é ortogonal e marca o gate humano atual. Após merge, remova
 `stage:*` e `needs-human`.
+
+Não antecipe `needs-human` enquanto um reviewer ou auditor ainda precisa agir.
+No fallback, aplique-o quando o próximo ator for humano:
+
+- source-set moderado `create/update`: já na entrada em
+  `stage:spec-approval`; em hard trigger, somente depois do veredito do
+  `issue-reviewer`;
+- plano: em `stage:needs-plan-review` somente depois do veredito do
+  `plan-reviewer`;
+- execução: sempre em `stage:approved`, inclusive ao sair do gate de plano;
+- merge: em `stage:ready-to-merge` depois da delivery review quando não houver
+  auditoria final, ou somente depois que a auditoria aplicável aprovar;
+- blocker: sempre em `stage:blocked`.
+
+Ao voltar para correção ou trabalho de agente, remova `needs-human`. Uma
+transição entre dois gates humanos pode preservá-lo.
 
 ## Entrada por risco
 
@@ -54,10 +75,11 @@ de execução”; nos demais caminhos, significa “plano aprovado”.
   `stage:approved + needs-human`.
 - Mudança moderada com `Spec impact: not required`: entrar em
   `stage:needs-plan`.
-- Mudança moderada `create/update`: entrar em `stage:spec-approval`; após
-  aprovação humana, seguir a `stage:needs-plan`.
-- Hard trigger: entrar em `stage:spec-approval`, exigir `issue-reviewer` e gate
-  humano antes do plano.
+- Mudança moderada `create/update`: entrar em
+  `stage:spec-approval + needs-human`; após aprovação humana, limpar o marcador
+  e seguir a `stage:needs-plan`.
+- Hard trigger: entrar em `stage:spec-approval`, exigir `issue-reviewer`, então
+  aplicar `needs-human`; após o gate, limpar e seguir ao plano.
 
 ## Mutação fallback
 

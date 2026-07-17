@@ -15,11 +15,11 @@ Next action: `<execução autorizada | plano | review/gate de fonte | decisão, 
 
 ## Impacto de spec
 
-| Campo | Valor |
-| --- | --- |
-| Ação | `create \| update \| not required` |
-| Fonte aceita | `<URL/path ou not applicable>` |
-| Padrão do repositório | `<form/template/guidance>` |
+| Campo                 | Valor                              |
+| --------------------- | ---------------------------------- |
+| Ação                  | `create \| update \| not required` |
+| Fonte aceita          | `<URL/path ou not applicable>`     |
+| Padrão do repositório | `<form/template/guidance>`         |
 
 ### Proposta ou racional
 

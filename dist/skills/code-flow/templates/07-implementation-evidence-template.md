@@ -36,6 +36,14 @@ Next action: `<review do delivery-reviewer | resolver blocker, owner>`
 | ---- | -------------------------------------- |
 | TDD  | `not applicable \| RED: … \| GREEN: …` |
 
+### Evidência de rollback (obrigatória para migração)
+
+```text
+<comando, simulação ou demonstração> — <resultado verificável>
+```
+
+Sem prova executada de rollback, uma migração deve permanecer `BLOCKED`.
+
 ### Ressalvas ou blocker
 
 > `<nenhuma | descrição da ressalva ou blocker>`

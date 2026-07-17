@@ -9,8 +9,8 @@ Changes/validation: `<seções alteradas>`
 Blockers: `<blocker ou none>`
 Next action: `<nova review/gate | plano | decisão, owner>`
 
-| Achado | Seção alterada | Ação |
-| --- | --- | --- |
-| `<referência>` | `<seção>` | `<correção>` |
+| Achado         | Seção alterada | Ação         |
+| -------------- | -------------- | ------------ |
+| `<referência>` | `<seção>`      | `<correção>` |
 
 _O source-set completo continua somente no body._

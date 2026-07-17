@@ -1,7 +1,9 @@
 # Dispatch e execução
 
 Antes de executar, recalcule risco e confirme que o estado cobre o escopo
-atual. Toda execução usa worktree isolada.
+atual. Quando houver gate de source-set, reconfirme que o SHA-256 do body ainda
+é o aprovado; divergência invalida plano e execução. Toda execução usa worktree
+isolada.
 
 Em mudança interna, `stage:approved + needs-human` significa somente “aguarda
 ordem explícita de execução”. Após a ordem, crie worktree automaticamente,

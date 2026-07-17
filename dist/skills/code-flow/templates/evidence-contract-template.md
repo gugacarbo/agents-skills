@@ -18,6 +18,9 @@ muda a issue.
 O source-set do issue-writer é a exceção: fica no body segundo
 `templates/03-issue-template.md`. Os demais resultados são comentários
 append-only. O nome da classificação interna nunca integra evidência.
+O comentário de aprovação do source-set registra somente a URL da decisão e o
+SHA-256 do body aprovado; não duplica o source-set. Digest divergente invalida
+o gate.
 
 Opt-in de workflow nativo também não é evidência persistida: ele vale somente
 para a execução atual e deve ser pedido novamente em toda retomada. Sem

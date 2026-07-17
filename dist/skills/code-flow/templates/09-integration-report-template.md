@@ -19,15 +19,21 @@ Next action: `<oferecer integração explícita | resolver achado | fechar, owne
 
 ### Mapa de entrega
 
-| Entrega        | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
-| -------------- | ----------- | --------------------- | ------------------- | ------------- | ------ |
-| Escopo autorizado |          |                       |                     |               |        |
+| Entrega           | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
+| ----------------- | ----------- | --------------------- | ------------------- | ------------- | ------ |
+| Escopo autorizado |             |                       |                     |               |        |
 
 ### Definição de pronto
 
 ```text
 <comando> — <resultado>
 ```
+
+### Rollback de migração
+
+| Evidência executada             | Resultado restaurado  | Veredito                            |
+| ------------------------------- | --------------------- | ----------------------------------- |
+| `<URL/saída ou not applicable>` | `<estado verificado>` | `PASS \| BLOCKED \| not applicable` |
 
 ### Decisão opcional de integração
 

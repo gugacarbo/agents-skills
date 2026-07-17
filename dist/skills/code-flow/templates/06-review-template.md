@@ -15,8 +15,8 @@ Next action: `<gate humano | novo ciclo | decisão, owner>`
 
 ### Achados
 
-| Severidade | Seção/fonte | Impacto e ação |
-| --- | --- | --- |
-| `Critical | Important | Minor | Cannot verify` | `<referência>` | `<ação>` |
+| Severidade                                        | Seção/fonte    | Impacto e ação |
+| ------------------------------------------------- | -------------- | -------------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<ação>`       |
 
 _Veredito aprovador ainda exige aprovação humana do snapshot exato._

@@ -11,6 +11,7 @@ local, riscos e decisões do usuário. Não infira nem registre o nome da
 classificação interna.
 
 Publique `templates/04-issue-review-template.md` com `APROVO`,
-`APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO`. Em pedido de ajuste,
-devolva ao issue-writer; em veredito que abre gate, aguarde aprovação humana.
+`APROVO COM RESSALVAS`, `PEÇO AJUSTES` ou `NÃO APROVO`. Em rejeição corrigível,
+devolva ao issue-writer; se depender de decisão externa ou risco não resolvido,
+bloqueie para humano. Em veredito que abre gate, aguarde aprovação humana.
 Nunca autoaprove, planeje ou implemente.

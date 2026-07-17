@@ -12,16 +12,17 @@ anterior e exige nova avaliação antes de interpretar o stage.
 
 Hard trigger nunca pode ser rebaixado.
 
-| Perfil interno | Critérios observáveis cumulativos |
-| --- | --- |
-| `light` | Mudança interna, localizada, reversível, em um repositório, sem contrato observável, migração, permissão, segurança ou impacto de spec. |
-| `standard` | Default quando a mudança é observável ou transversal moderada, reversível e concentrada em um repositório, sem hard trigger. |
-| `assured` | Qualquer hard trigger abaixo. |
+| Perfil interno | Critérios observáveis cumulativos                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `light`        | Mudança interna, localizada, reversível, em um repositório, sem contrato observável, migração, permissão, segurança ou impacto de spec. |
+| `standard`     | Default quando a mudança é observável ou transversal moderada, reversível e concentrada em um repositório, sem hard trigger.            |
+| `assured`      | Qualquer hard trigger abaixo.                                                                                                           |
 
 ## Hard triggers
 
 - autenticação, autorização, permissões, segredos ou fronteiras de confiança;
-- migração de dados/esquema ou compatibilidade de contrato público;
+- migração de dados/esquema ou criação, alteração ou compatibilidade de
+  contrato público;
 - conflito entre ADR/spec aceita, código e pedido atual;
 - mudança cross-repo, irreversível ou com alto blast radius;
 - operação destrutiva, acesso privilegiado ou rollback não demonstrado.
@@ -31,13 +32,17 @@ de risco não removem hard trigger.
 
 ## Matriz de papéis e gates
 
-| Capacidade | `light` | `standard` | `assured` |
-| --- | --- | --- | --- |
-| Issue/source | `issue-writer`, racional no-spec, sem gate de fonte | gate humano somente em `create`/`update` | `issue-writer` + `issue-reviewer` + gate humano |
-| Plano | outline compacto pelo `executor`, sem review/gate de plano | `plan-writer` + `plan-reviewer` + gate humano | mesmos papéis, sempre separados |
-| Execução | ordem humana explícita; worktree automática | ordem explícita + worktree | ordem explícita + worktree |
-| Review | `delivery-reviewer` fresco | review independente; auditoria final condicional | review independente + auditoria final por outra instância fresca |
-| Merge | explícito | explícito | explícito |
+| Capacidade   | `light`                                                    | `standard`                                       | `assured`                                                        |
+| ------------ | ---------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| Issue/source | `issue-writer`, racional no-spec, sem gate de fonte        | gate humano somente em `create`/`update`         | `issue-writer` + `issue-reviewer` + gate humano                  |
+| Plano        | outline compacto pelo `executor`, sem review/gate de plano | `plan-writer` + `plan-reviewer` + gate humano    | mesmos papéis, sempre separados                                  |
+| Execução     | ordem humana explícita; worktree automática                | ordem explícita + worktree                       | ordem explícita + worktree                                       |
+| Review       | `delivery-reviewer` fresco                                 | review independente; auditoria final condicional | review independente + auditoria final por outra instância fresca |
+| Merge        | explícito                                                  | explícito                                        | explícito                                                        |
+
+Migração exige plano de rollback executável e evidência de teste, simulação ou
+demonstração equivalente do rollback. Uma descrição sem prova não satisfaz a
+auditoria do nível máximo.
 
 No nível intermediário, o mesmo reviewer pode revisar plano e entrega somente
 se não escreveu plano nem código. Ninguém revisa, aprova ou audita trabalho

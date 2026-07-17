@@ -15,8 +15,8 @@ Next action: `<gate humano | correção do issue-writer | decisão, owner>`
 
 ### Achados
 
-| Severidade | Fonte/seção | Impacto e ação |
-| --- | --- | --- |
-| `Critical | Important | Minor | Cannot verify` | `<referência>` | `<ação>` |
+| Severidade                                        | Fonte/seção    | Impacto e ação |
+| ------------------------------------------------- | -------------- | -------------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<ação>`       |
 
 _O veredito nunca substitui o gate humano de fonte._

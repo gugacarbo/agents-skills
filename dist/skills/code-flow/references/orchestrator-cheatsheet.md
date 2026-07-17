@@ -12,19 +12,23 @@
 
 ## Matriz stage → operação → ação
 
-| Stage fallback | Operação | Ação |
-| --- | --- | --- |
-| `stage:spec-approval` | issue | review/gate de fonte conforme risco |
-| `stage:needs-issue-fix` | issue | corrigir body e revisar quando exigido |
-| `stage:needs-plan` | plan | plano formal |
-| `stage:needs-plan-review` | plan | review independente + gate humano |
-| `stage:needs-plan-fix` | plan | novo ciclo de plano |
-| `stage:approved` | dispatch | recalcular risco; ordem explícita; worktree |
-| `stage:in-progress` | dispatch | executar ou resolver blocker |
-| `stage:needs-delivery-review` | review | review independente |
-| `stage:needs-changes` | dispatch | corrigir achados |
-| `stage:ready-to-merge` | integrate | auditoria aplicável + decisão de merge |
-| `stage:blocked` | context | apresentar blocker; não adivinhar |
+| Stage fallback                | Operação  | Ação                                        |
+| ----------------------------- | --------- | ------------------------------------------- |
+| `stage:spec-approval`         | issue     | review/gate de fonte conforme risco         |
+| `stage:needs-issue-fix`       | issue     | corrigir body e revisar quando exigido      |
+| `stage:needs-plan`            | plan      | plano formal                                |
+| `stage:needs-plan-review`     | plan      | review independente + gate humano           |
+| `stage:needs-plan-fix`        | plan      | novo ciclo de plano                         |
+| `stage:approved`              | dispatch  | recalcular risco; ordem explícita; worktree |
+| `stage:in-progress`           | dispatch  | executar ou resolver blocker                |
+| `stage:needs-delivery-review` | review    | review independente                         |
+| `stage:needs-changes`         | dispatch  | corrigir achados                            |
+| `stage:ready-to-merge`        | integrate | auditoria aplicável + decisão de merge      |
+| `stage:blocked`               | context   | apresentar blocker; não adivinhar           |
+
+`needs-human` aparece somente quando o próximo ator é humano: source-set após
+review aplicável, plano após plan-review, execução em `stage:approved`, merge
+após auditoria aplicável e blocker. Remova-o ao devolver trabalho a um agente.
 
 ## Independência
 

@@ -11,13 +11,13 @@ Next action: `<aceitar | correção do executor | decisão humana, owner>`
 
 ### Resumo rápido
 
-| Campo              | Valor                                                           |
-| ------------------ | --------------------------------------------------------------- |
-| Plano ou outline   | `<URL>`                                                         |
-| Evidência revisada | `<URL do comentário>`                                           |
-| Range / PR         | `<base..head ou URL>`                                           |
-| Independência      | `Não produzi o artefato revisado nem implementei este range.`   |
-| Veredito           | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO`  |
+| Campo              | Valor                                                          |
+| ------------------ | -------------------------------------------------------------- |
+| Plano ou outline   | `<URL>`                                                        |
+| Evidência revisada | `<URL do comentário>`                                          |
+| Range / PR         | `<base..head ou URL>`                                          |
+| Independência      | `Não produzi o artefato revisado nem implementei este range.`  |
+| Veredito           | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
 
 ### Achados
 
@@ -30,6 +30,7 @@ Next action: `<aceitar | correção do executor | decisão humana, owner>`
 - [ ] Conformidade com contrato/fontes: …
 - [ ] Testes e DoD: …
 - [ ] Escopo e ownership: …
+- [ ] Migração: prova executada de rollback verificada, ou `not applicable`.
 
 ---
 

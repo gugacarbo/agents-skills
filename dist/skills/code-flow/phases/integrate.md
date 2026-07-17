@@ -5,6 +5,10 @@ evidência, commits e aprovação do PR. Publique
 `templates/09-integration-report-template.md` quando houver auditoria final; na
 ausência dela, a review aprovada fornece a evidência de fechamento.
 
+Quando a auditoria aplicável aprovar, mantenha `stage:ready-to-merge` e aplique
+`needs-human`. Se nenhuma auditoria for exigida, esse marcador já deve ter sido
+aplicado pela delivery review.
+
 Achado corrigível volta a `stage:needs-changes`; decisão externa vai a
 `stage:blocked + needs-human`.
 

@@ -10,14 +10,14 @@ ISSUE=""
 
 usage() {
   printf '%s\n' 'Usage: doctor.sh [--github] [--issue <N|URL>]'
-  exit 1
+  exit "${1:-1}"
 }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --github) GITHUB_MODE=1; shift ;;
-    --issue) ISSUE="$2"; GITHUB_MODE=1; shift 2 ;;
-    --help|-h) usage ;;
+    --issue) [ "$#" -ge 2 ] || usage; ISSUE="$2"; GITHUB_MODE=1; shift 2 ;;
+    --help|-h) usage 0 ;;
     *) usage ;;
   esac
 done
