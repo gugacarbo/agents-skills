@@ -11,7 +11,7 @@
 
 | Task                      | Location                                      | Notes                                                                                    |
 | ------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Install destination rules | `src/install.sh`                              | Handles `--path`, `--global`, cwd named `skills`, repo-local fallback, and prompts.      |
+| Install destination rules | `src/install.sh`                              | Handles `--path`, `--global`, cwd named `skills`, global fallback, and prompts.          |
 | Clone/merge install mode  | `install.sh`                                  | `--init` clones repo; non-empty destinations merge without overwriting.                  |
 | README copy option        | `install.sh`                                  | `--instructions` preserves existing target README.                                       |
 | Update comparison         | `update.sh`                                   | Downloads archive, compares remote files to local target, then prompts before overwrite. |

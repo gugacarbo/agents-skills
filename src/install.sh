@@ -19,6 +19,7 @@ YES=0
 USE_GLOBAL=0
 USE_INIT=0
 USE_INSTRUCTIONS=0
+USE_FRESH=0
 TARGET_PATH=''
 
 if [ -t 1 ] && [ -z "${NO_COLOR-}" ]; then
@@ -75,6 +76,7 @@ Opcoes:
   -g, --global      Usa ~/.agents/skills como primeira escolha
       --init        Clona o repositorio de skills no destino (em vez de copiar)
       --instructions  Copia README.md do repositorio para o destino
+      --fresh       Remove as skills existentes no destino antes de instalar
   -y, --yes         Aprova automaticamente apenas a instalacao local do repo
   -h, --help        Mostra esta ajuda
 EOF
@@ -114,12 +116,6 @@ same_dir() {
   fi
 
   [ "$(resolve_existing_dir "$1")" = "$(resolve_existing_dir "$2")" ]
-}
-
-find_repo_root() {
-  if command -v git >/dev/null 2>&1; then
-    git -C "$1" rev-parse --show-toplevel 2>/dev/null || true
-  fi
 }
 
 confirm() {
@@ -176,6 +172,29 @@ copy_skills() {
   fi
 
   success "Instalacao concluida com $copied_count skill(s)"
+}
+
+remove_installed_skills() {
+  destination=$1
+  removed_count=0
+
+  [ -d "$destination" ] || return 0
+
+  if same_dir "$SKILLS_SOURCE_DIR" "$destination"; then
+    die "--fresh nao pode usar o diretorio-fonte de skills como destino"
+  fi
+
+  for skill_dir in "$destination"/* "$destination"/.[!.]* "$destination"/..?*; do
+    [ -d "$skill_dir" ] || continue
+    [ -f "$skill_dir/SKILL.md" ] || continue
+
+    skill_name=${skill_dir##*/}
+    rm -rf "$skill_dir"
+    removed_count=$((removed_count + 1))
+    info "Skill removida: $skill_name"
+  done
+
+  info "--fresh removeu $removed_count skill(s) existente(s) de $destination"
 }
 
 copy_instructions() {
@@ -287,6 +306,9 @@ while [ $# -gt 0 ]; do
     --instructions)
       USE_INSTRUCTIONS=1
       ;;
+    --fresh)
+      USE_FRESH=1
+      ;;
     -y|--yes)
       YES=1
       ;;
@@ -306,10 +328,13 @@ if [ "$USE_INIT" -eq 1 ]; then
   info "Flag --init detectada; o destino sera um git clone do repositorio de skills"
 fi
 
+if [ "$USE_INIT" -eq 1 ] && [ "$USE_FRESH" -eq 1 ]; then
+  die "--fresh nao pode ser usado com --init"
+fi
+
 GLOBAL_TARGET=$(expand_path "~/.agents/skills")
 CURRENT_DIR=$PWD
 CURRENT_DIR_NAME=${CURRENT_DIR##*/}
-CURRENT_REPO_ROOT=$(find_repo_root "$CURRENT_DIR")
 INSTALL_TARGET=''
 TARGET_KIND=''
 
@@ -325,26 +350,14 @@ elif [ "$CURRENT_DIR_NAME" = "skills" ]; then
   INSTALL_TARGET=$CURRENT_DIR
   TARGET_KIND=cwd-skills
   info "Diretorio atual termina com skills; instalando no local atual"
-elif [ -n "$CURRENT_REPO_ROOT" ]; then
-  INSTALL_TARGET=$CURRENT_REPO_ROOT/.agents/skills
-  TARGET_KIND=repo-local
-  info "Repositorio git detectado em $CURRENT_REPO_ROOT"
 else
-  INSTALL_TARGET=$CURRENT_DIR
-  TARGET_KIND=cwd-prompt
-  warn "Nenhum repo git detectado e a pasta atual nao parece ser skills"
-  info "Confirme se deseja instalar no diretorio atual ou use --global / --path"
+  INSTALL_TARGET=$GLOBAL_TARGET
+  TARGET_KIND=global
+  info "Diretorio atual nao termina com skills; usando o destino padrao global"
 fi
 
 case "$TARGET_KIND" in
   explicit|cwd-skills)
-    ;;
-  repo-local|cwd-prompt)
-    if [ "$YES" -eq 1 ]; then
-      info "Flag --yes aplicada; aprovando instalacao em $INSTALL_TARGET"
-    elif ! confirm "Instalar as skills em $INSTALL_TARGET?"; then
-      die "Instalacao cancelada pelo usuario"
-    fi
     ;;
   global)
     if [ "$YES" -eq 1 ]; then
@@ -363,6 +376,10 @@ esac
 if [ "$USE_INIT" -eq 1 ]; then
   clone_skills_repo "$INSTALL_TARGET"
 else
+  if [ "$USE_FRESH" -eq 1 ]; then
+    remove_installed_skills "$INSTALL_TARGET"
+  fi
+
   copy_skills "$INSTALL_TARGET"
 fi
 

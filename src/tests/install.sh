@@ -98,36 +98,54 @@ test_cwd_skills_installs_in_place() {
   assert_exists "$tmp/skills/$FIXTURE_SKILL/SKILL.md"
 }
 
-test_repo_flag_yes_installs_local_default() {
+test_fresh_removes_existing_skills_and_preserves_non_skill_files() {
+  local tmp target
+  tmp=$(mktemp -d)
+  target="$tmp/custom-skills"
+  mkdir -p "$target/old-skill" "$target/.hidden-old-skill"
+  printf '%s\n' '---' 'name: old-skill' '---' >"$target/old-skill/SKILL.md"
+  printf '%s\n' '---' 'name: hidden-old-skill' '---' >"$target/.hidden-old-skill/SKILL.md"
+  printf 'keep me\n' >"$target/README.md"
+
+  run_capture "$tmp/output.log" "$INSTALLER" --fresh --path "$target"
+
+  assert_not_exists "$target/old-skill"
+  assert_not_exists "$target/.hidden-old-skill"
+  assert_exists "$target/$FIXTURE_SKILL/SKILL.md"
+  grep -qx 'keep me' "$target/README.md"
+  assert_contains "--fresh removeu 2 skill(s)"
+}
+
+test_fresh_rejects_init() {
   local tmp
   tmp=$(mktemp -d)
-  mkdir -p "$tmp/project/work"
+
+  if run_capture "$tmp/output.log" "$INSTALLER" --fresh --init --path "$tmp/custom-skills"; then
+    fail "expected --fresh with --init to fail"
+  fi
+
+  assert_contains "--fresh nao pode ser usado com --init"
+}
+
+test_non_skills_directory_defaults_to_global_target() {
+  local tmp
+  tmp=$(mktemp -d)
+  mkdir -p "$tmp/home" "$tmp/project/work"
+  printf 'y\n' >"$tmp/tty-input"
   git -C "$tmp/project" init >/dev/null 2>&1
 
   (
     cd "$tmp/project/work"
-    run_capture "$tmp/output.log" "$INSTALLER" --yes
-  )
-
-  assert_exists "$tmp/project/.agents/skills/$FIXTURE_SKILL/SKILL.md"
-}
-
-test_non_repo_cwd_prompt_installs_with_yes() {
-  local tmp
-  tmp=$(mktemp -d)
-  mkdir -p "$tmp/work"
-
-  (
-    cd "$tmp/work"
-    run_capture "$tmp/output.log" "$INSTALLER" --yes
+    run_capture "$tmp/output.log" env HOME="$tmp/home" AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" "$INSTALLER" < /dev/null
   )
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
-  assert_exists "$tmp/work/$FIXTURE_SKILL/SKILL.md"
-  assert_contains "diretorio atual"
+  assert_exists "$tmp/home/.agents/skills/$FIXTURE_SKILL/SKILL.md"
+  assert_not_exists "$tmp/project/.agents/skills/$FIXTURE_SKILL"
+  assert_contains "destino padrao global"
 }
 
-test_non_repo_cwd_without_confirmation_does_not_install() {
+test_non_skills_directory_decline_does_not_install() {
   local tmp
   tmp=$(mktemp -d)
   mkdir -p "$tmp/home" "$tmp/work"
@@ -136,11 +154,10 @@ test_non_repo_cwd_without_confirmation_does_not_install() {
   (
     cd "$tmp/work"
     if run_capture "$tmp/output.log" env HOME="$tmp/home" AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" "$INSTALLER" < /dev/null; then
-      fail "expected cwd prompt without confirmation to fail"
+      fail "expected declined global installation to fail"
     fi
   )
 
-  LAST_OUTPUT=$(cat "$tmp/output.log")
   assert_not_exists "$tmp/work/$FIXTURE_SKILL/SKILL.md"
   assert_not_exists "$tmp/home/.agents/skills/$FIXTURE_SKILL"
 }
@@ -298,9 +315,10 @@ main() {
 
   test_explicit_path_installs_to_target
   test_cwd_skills_installs_in_place
-  test_repo_flag_yes_installs_local_default
-  test_non_repo_cwd_prompt_installs_with_yes
-  test_non_repo_cwd_without_confirmation_does_not_install
+  test_fresh_removes_existing_skills_and_preserves_non_skill_files
+  test_fresh_rejects_init
+  test_non_skills_directory_defaults_to_global_target
+  test_non_skills_directory_decline_does_not_install
   test_global_flag_prompts_even_with_yes
   test_init_clones_repo_to_target
   test_instructions_copies_readme_to_target

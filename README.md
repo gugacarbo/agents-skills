@@ -45,9 +45,10 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 | Opção             | Descrição                                                               |
 | ----------------- | ----------------------------------------------------------------------- |
 | `-p, --path PATH` | Instala as skills no caminho especificado                               |
-| `-g, --global`    | Usa `~/.agents/skills` como destino (sempre pede confirmação)           |
+| `-g, --global`    | Força `~/.agents/skills` como destino (sempre pede confirmação)         |
 | `--init`          | Clona o repositório via `git clone` em vez de copiar os arquivos        |
 | `--instructions`  | Copia o `README.md` do repositório para o destino                       |
+| `--fresh`         | Remove as skills existentes no destino antes de instalar (preserva outros arquivos) |
 | `-y, --yes`       | Aprova automaticamente a instalação local (não pula confirmação global) |
 | `-h, --help`      | Exibe a ajuda do comando                                                |
 
@@ -89,7 +90,7 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 ### Instalação
 
 ```sh
-# Instalação interativa (detecta destino automaticamente)
+# Instala na pasta atual se ela terminar em skills; caso contrário, em ~/.agents/skills
 ./skills.sh install
 
 # Instalação com aprovação automática (apenas local)
@@ -106,6 +107,9 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 
 # Copiar também o README.md
 ./skills.sh install --instructions --path ~/.agents/skills
+
+# Substituir as skills instaladas, preservando arquivos auxiliares do destino
+./skills.sh install --fresh --path ~/.agents/skills
 
 # Via curl (bootstrap remoto)
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install
