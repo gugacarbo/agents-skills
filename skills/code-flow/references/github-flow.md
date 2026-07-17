@@ -96,6 +96,23 @@ execução real, aplica o alvo e confirma via `gh issue view <n> --json labels`.
 `--dry-run` nunca cria nem altera labels. Mencionar um stage em texto não é
 mudança de estado.
 
+## Responsabilidade de mutação por agente
+
+Comentário, template publicado ou veredito **nunca** substitui a mutação de
+labels da issue. Cada agente é responsável por aplicar sua transição de estado
+no mesmo turno, **depois de publicar a evidência autorizadora**, em fallback
+ou na transição equivalente do workflow nativo confirmado. Publicar um
+comentário com o veredito e deixar o stage/`needs-human` desatualizado é drift.
+
+A referência canônica, com a tabela completa de responsabilidade por agente,
+stage inicial por risco, gates humanos sinalizados por `needs-human` e regras
+de remoção, vive em
+[`label-mutation-matrix.md`](label-mutation-matrix.md). Mantenha-a como fonte
+única; não duplique a matriz em phases, agents ou outros reference docs.
+
+Use `scripts/transition-issue.sh --dry-run` para pré-validar e sempre confirme
+com `gh issue view <n> --json labels` após mutar.
+
 ## Drift e promoção
 
 No fallback, zero ou múltiplos stages em issue já gerenciada são drift. Antes

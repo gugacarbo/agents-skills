@@ -227,6 +227,18 @@ test_doctor() {
   out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42)
   printf '%s\n' "$out" | grep -Fq 'PASS transition-issue-dry-run' || fail 'doctor did not probe fallback helper'
   printf '%s\n' "$out" | grep -Fq 'PASS gh-issue 42' || fail 'doctor did not inspect issue'
+
+  # Drift: stage:blocked without needs-human must WARN
+  printf '%s\n' '[{"name":"stage:blocked"}]' > "$state"
+  printf '%s\n' 'stage:blocked' > "$labels"
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1 || true)
+  printf '%s\n' "$out" | grep -Fq 'WARN stage:blocked without needs-human' || fail 'doctor missed blocked-without-human drift'
+
+  # Drift: multiple stage:* must FAIL
+  printf '%s\n' '[{"name":"stage:approved"},{"name":"stage:blocked"}]' > "$state"
+  printf '%s\n' 'stage:approved' 'stage:blocked' > "$labels"
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1 || true)
+  printf '%s\n' "$out" | grep -Fq 'FAIL drift: multiple stage:* labels' || fail 'doctor missed multi-stage drift'
 }
 
 test_evals_json() {
@@ -235,12 +247,69 @@ test_evals_json() {
     .evaluation_protocol.samples_per_scenario == 5 and
     (.evaluation_protocol.non_critical_threshold | contains("every non-critical scenario")) and
     .evaluation_protocol.baseline_sha == "36badae14c63717311e9a1e0a708113b7000524f" and
-    (.evals | length == 12) and
-    ([.evals[].id] | unique | length == 12) and
+    (.evals | length == 13) and
+    ([.evals[].id] | unique | length == 13) and
     ([.evals[] | select((.baseline_outcome | type) != "string" or (.baseline_outcome | length) == 0)] | length == 0) and
     ((.evals[] | select(.id == 6) | .expectations) | index("Presents the validated native-to-gate mapping before choosing") != null) and
-    ([.evals[] | select(.id == 3 or .id == 4 or .id == 5 or .id == 6 or .id == 7 or .id == 8 or .id == 10 or .id == 11 or .id == 12)] | length == 9)
+    ([.evals[] | select(.id == 3 or .id == 4 or .id == 5 or .id == 6 or .id == 7 or .id == 8 or .id == 10 or .id == 11 or .id == 12 or .id == 13)] | length == 10) and
+    ((.evals[] | select(.id == 13) | .category) == "label-mutation-discipline") and
+    ((.evals[] | select(.id == 13) | .baseline_failure) == "comment_without_label_mutation")
   ' "$SKILL/evals/evals.json" >/dev/null || fail 'eval corpus or verification protocol incomplete'
+}
+
+test_label_mutation() {
+  # Each agent must describe its label mutation via transition-issue.sh.
+  # This protects against the comment-without-label regression.
+  local a="$SKILL/agents"
+
+  # 01-issue-writer: defines initial stage per risk
+  assert_contains 'transition-issue.sh' "$a/01-issue-writer.md"
+  assert_contains 'stage:approved' "$a/01-issue-writer.md"
+  assert_contains 'needs-human' "$a/01-issue-writer.md"
+  assert_contains 'stage:spec-approval' "$a/01-issue-writer.md"
+  assert_contains 'stage:needs-plan' "$a/01-issue-writer.md"
+  assert_contains 'stage:needs-issue-fix' "$a/01-issue-writer.md"
+
+  # 02-issue-reviewer: applies needs-human on approval, blocked on external
+  assert_contains 'transition-issue.sh' "$a/02-issue-reviewer.md"
+  assert_contains 'needs-human' "$a/02-issue-reviewer.md"
+  assert_contains 'stage:needs-issue-fix' "$a/02-issue-reviewer.md"
+  assert_contains 'stage:blocked' "$a/02-issue-reviewer.md"
+
+  # 03-plan-writer: removes needs-human when publishing a cycle
+  assert_contains 'transition-issue.sh' "$a/03-plan-writer.md"
+  assert_contains 'clear-needs-human' "$a/03-plan-writer.md"
+  assert_contains 'stage:needs-plan' "$a/03-plan-writer.md"
+  assert_contains 'stage:blocked' "$a/03-plan-writer.md"
+
+  # 04-plan-reviewer: applies needs-human after APROVO (the reported case)
+  assert_contains 'transition-issue.sh' "$a/04-plan-reviewer.md"
+  assert_contains 'needs-human' "$a/04-plan-reviewer.md"
+  assert_contains 'stage:needs-plan-review' "$a/04-plan-reviewer.md"
+  assert_contains 'stage:needs-plan-fix' "$a/04-plan-reviewer.md"
+  assert_contains 'stage:blocked' "$a/04-plan-reviewer.md"
+
+  # 05-executor: mutates stage per evidence result
+  assert_contains 'transition-issue.sh' "$a/05-executor.md"
+  assert_contains 'stage:in-progress' "$a/05-executor.md"
+  assert_contains 'stage:needs-delivery-review' "$a/05-executor.md"
+  assert_contains 'stage:blocked --needs-human' "$a/05-executor.md"
+  assert_contains 'clear-needs-human' "$a/05-executor.md"
+
+  # 06-delivery-reviewer: ready-to-merge + needs-human, needs-changes, blocked
+  assert_contains 'transition-issue.sh' "$a/06-delivery-reviewer.md"
+  assert_contains 'stage:ready-to-merge' "$a/06-delivery-reviewer.md"
+  assert_contains 'needs-human' "$a/06-delivery-reviewer.md"
+  assert_contains 'stage:needs-changes' "$a/06-delivery-reviewer.md"
+  assert_contains 'stage:blocked' "$a/06-delivery-reviewer.md"
+
+  # Canonical mutation matrix must exist and be referenced
+  [ -f "$SKILL/references/label-mutation-matrix.md" ] || fail 'missing canonical label mutation matrix'
+  assert_contains 'label-mutation-matrix.md' "$SKILL/references/github-flow.md"
+
+  # Comments never replace label mutation
+  assert_contains 'Comentário' "$SKILL/references/label-mutation-matrix.md"
+  assert_contains 'nunca' "$SKILL/references/label-mutation-matrix.md"
 }
 
 test_structure
@@ -250,4 +319,5 @@ test_helpers_syntax
 test_transition_labels
 test_doctor
 test_evals_json
+test_label_mutation
 printf 'PASS code-flow tests\n'
