@@ -1,0 +1,52 @@
+version: "0.2"
+language: "en,pt,pt_BR"
+useGitignore: true
+import:
+  - "@cspell/dict-pt-br/cspell-ext.json"
+ignorePaths:
+  - node_modules
+  - dist
+  - build
+  - coverage
+  - .turbo
+  - pnpm-lock.yaml
+  - package-lock.json
+  - bun.lock
+  - bun.lockb
+words:
+  - AGENTS
+  - api
+  - apis
+  - async
+  - autofix
+  - biome
+  - bun
+  - cli
+  - codebase
+  - codex
+  - dotenv
+  - env
+  - eslint
+  - frontend
+  - github
+  - gitignore
+  - husky
+  - jsonc
+  - knip
+  - lint
+  - monorepo
+  - npm
+  - openai
+  - opencode
+  - pnpm
+  - repo
+  - repos
+  - sdk
+  - ts
+  - tsx
+  - turborepo
+  - typescript
+  - vite
+  - vitest
+  - yaml
+  - yml

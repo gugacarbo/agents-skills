@@ -45,13 +45,14 @@ The `Install` column uses `<pm>` as a placeholder for the resolved package manag
 
 Deeper template layers may override a tool from this table by reusing the same value in the `Tool` column and changing its description and/or install command. Tools omitted by deeper layers remain inherited.
 
-| Tool          | Type    | Purpose                                   | Install                     |
-| ------------- | ------- | ----------------------------------------- | --------------------------- |
-| casa-standard | repo    | Docs-check, ADRs, CI gate (recommended)   | (see setup instructions)    |
-| turbo         | global  | Monorepo orchestration (Turborepo)        | `<pm> add -w -D turbo`      |
-| lint-staged   | dev     | Run linters only on staged files          | `<pm> add -D lint-staged`   |
-| test-staged   | dev     | Run tests only on staged/changed files    | `<pm> add -D test-staged`   |
-| t3oss         | runtime | Type-safe environment variable management | `<pm> add @t3-oss/env-core` |
+| Tool          | Type    | Purpose                                   | Install                                 |
+| ------------- | ------- | ----------------------------------------- | --------------------------------------- |
+| casa-standard | repo    | Docs-check, ADRs, CI gate (recommended)   | (see setup instructions)                |
+| turbo         | global  | Monorepo orchestration (Turborepo)        | `<pm> add -w -D turbo`                  |
+| lint-staged   | dev     | Run linters only on staged files          | `<pm> add -D lint-staged`               |
+| test-staged   | dev     | Run tests only on staged/changed files    | `<pm> add -D test-staged`               |
+| t3oss         | runtime | Type-safe environment variable management | `<pm> add @t3-oss/env-core`             |
+| cspell        | dev     | Spell-check code and documentation        | `<pm> add -D cspell @cspell/dict-pt-br` |
 
 When `casa-standard` is selected, include these setup instructions:
 
@@ -69,6 +70,12 @@ python3 scripts/docs-check
 
 When `lint-staged` is selected, add `pnpm lint-staged` before the `exec` line in `scripts/pre-commit`.
 When `test-staged` is selected, add `pnpm test-staged` before the `exec` line in `scripts/pre-commit`.
+
+When `cspell` is selected:
+
+- Copy [the default CSpell configuration](optional-tools/cspell/files/cspell.config.yaml) to `cspell.config.yaml` in the target project. It enables English and Brazilian Portuguese dictionaries, respects `.gitignore`, and includes a small allowlist of common development terms.
+- Add a `spellcheck` script to `package.json`: `cspell .`.
+- Run `pnpm spellcheck` in CI. Use the resolved package manager in the corresponding CI command when it is not pnpm.
 
 ## Project Structure
 

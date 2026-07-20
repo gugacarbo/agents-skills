@@ -41,10 +41,11 @@ _base -> <family> -> <family>/<derivative>
 8. Read `AGENTS.md` and `REQUIREMENTS.md` for every resolved layer before producing setup instructions.
 9. Copy resolved layers in order, preserving dotfiles. Deeper layers overwrite shallower files at the same path. Files to be copied into the scaffolded project live under `<layer>/files/`, preserving the target directory structure. `AGENTS.md` and `REQUIREMENTS.md` at the layer root are template instructions, not scaffolded files.
 10. Merge optional tools across resolved layers by the `Tool` column. A deeper layer may override a tool's description or install command, but tools omitted deeper stay inherited.
-11. Do not offer a tool as optional when it is already mandatory in the resolved stack.
-12. Resolve setup instructions by concern section: the deepest layer that defines a concern wins for that concern.
-13. Recommend commands only. Do not run package managers, framework CLIs, or generate starter source files.
-14. Summarize the scaffolded files and the resolved next steps.
+11. For each selected optional tool, copy its assets from `<layer>/optional-tools/<tool>/files/` in resolved-layer order, after the regular scaffolded files. Deeper optional-tool assets overwrite shallower assets at the same path.
+12. Do not offer a tool as optional when it is already mandatory in the resolved stack.
+13. Resolve setup instructions by concern section: the deepest layer that defines a concern wins for that concern.
+14. Recommend commands only. Do not run package managers, framework CLIs, or generate starter source files.
+15. Summarize the scaffolded files and the resolved next steps.
 
 ## Cascade rules
 
@@ -65,6 +66,7 @@ Optional tools are merged by tool id, not by replacing a whole table.
 - Families and derivatives can override individual tools by reusing the same `Tool` value.
 - Families and derivatives can add new tools by introducing a new `Tool` value.
 - A tool that becomes mandatory through the resolved stack must not be shown as optional.
+- Optional-tool assets are copied only when that tool is selected. Keep them under `<layer>/optional-tools/<tool>/files/`, not the layer's regular `files/` directory.
 
 ## Directory and CLI safety
 
@@ -109,5 +111,6 @@ Not every template needs every section. Only define the concerns that layer actu
 - Put user-facing conventions in `AGENTS.md`.
 - Put dependency, file inventory, and install requirements in `REQUIREMENTS.md`.
 - Place files to be scaffolded into the target project under `<layer>/files/`, preserving the target directory structure (e.g. `files/.husky/pre-commit` → `.husky/pre-commit`).
+- Place files that belong to one optional tool under `<layer>/optional-tools/<tool>/files/`, preserving the target directory structure (e.g. `optional-tools/cspell/files/cspell.config.yaml` → `cspell.config.yaml`).
 - Prefer overriding one concern cleanly instead of restating unrelated concerns.
 - When adding a new concern, add it here first so the router contract stays explicit.
