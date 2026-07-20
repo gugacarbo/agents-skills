@@ -1,47 +1,38 @@
 # Cheatsheet do orquestrador
 
-## Ordem de resume
+## Ordem de entrada/resume
 
-1. validar elegibilidade da issue;
-2. descobrir fontes e workflow sem mutar;
-3. recalcular risco;
-4. resolver nativo ou fallback;
-5. interpretar o próximo gate;
+1. discovery read-only;
+2. validar elegibilidade antes de plano/código/review;
+3. ler/propor Complexity e recalcular risco;
+4. validar `Workflow` pela tabela de verdade;
+5. interpretar próximo gate sem pular estado;
 6. despachar papel independente aplicável;
-7. registrar evidência e só então mutar.
+7. validar evidência → precondição → mutação → estado final.
 
-## Matriz stage → operação → ação
+## Stage → operação
 
-| Stage fallback                | Operação  | Ação                                        |
-| ----------------------------- | --------- | ------------------------------------------- |
-| `stage:spec-approval`         | issue     | review/gate de fonte conforme risco         |
-| `stage:needs-issue-fix`       | issue     | corrigir body e revisar quando exigido      |
-| `stage:needs-plan`            | plan      | plano formal                                |
-| `stage:needs-plan-review`     | plan      | review independente + gate humano           |
-| `stage:needs-plan-fix`        | plan      | novo ciclo de plano                         |
-| `stage:approved`              | dispatch  | recalcular risco; ordem explícita; worktree |
-| `stage:in-progress`           | dispatch  | executar ou resolver blocker                |
-| `stage:needs-delivery-review` | review    | review independente                         |
-| `stage:needs-changes`         | dispatch  | corrigir achados                            |
-| `stage:ready-to-merge`        | integrate | auditoria aplicável + decisão de merge      |
-| `stage:blocked`               | context   | apresentar blocker; não adivinhar           |
+| Stage fallback                | Operação  | Próximo ator                                   |
+| ----------------------------- | --------- | ---------------------------------------------- |
+| `stage:spec-approval`         | issue     | reviewer ou humano conforme rigor              |
+| `stage:needs-issue-fix`       | issue     | issue-writer                                   |
+| `stage:needs-plan`            | plan      | plan-writer                                    |
+| `stage:needs-plan-review`     | plan      | reviewer; humano só após aprovação             |
+| `stage:needs-plan-fix`        | plan      | plan-writer                                    |
+| `stage:approved`              | dispatch  | humano autoriza; executor inicia               |
+| `stage:in-progress`           | dispatch  | executor                                       |
+| `stage:needs-delivery-review` | review    | delivery-reviewer                              |
+| `stage:needs-changes`         | dispatch  | executor na mesma worktree                     |
+| `stage:ready-to-merge`        | integrate | auditor aplicável; depois humano               |
+| `stage:ready-to-close`        | integrate | humano fecha/ajusta/aguarda                    |
+| `stage:blocked`               | context   | humano resolve; orquestrador usa resume target |
 
-`needs-human` aparece somente quando o próximo ator é humano: source-set após
-review aplicável, plano após plan-review, execução em `stage:approved`, merge
-após auditoria aplicável e blocker. Remova-o ao devolver trabalho a um agente.
+## Check rápido
 
-## Independência
-
-- `issue-reviewer` é obrigatório somente quando hard trigger exige source
-  review.
-- `plan-writer` nunca revisa o próprio plano.
-- `executor` nunca revisa a própria implementação.
-- auditoria final obrigatória usa instância distinta da delivery review.
-- no caminho moderado, um reviewer pode acumular as duas reviews somente se
-  não produziu plano nem código.
-
-## Opt-in nativo
-
-O aceite vale apenas para a execução atual. Em retomada, pergunte de novo. Sem
-reconfirmação, encerre a atuação sem mutar a issue; não aplique
-`stage:blocked`, não publique nota e não converta para fallback.
+- Header e estado concordam? Se não, pare por drift.
+- Source-set digest foi calculado somente entre marcadores?
+- Hard trigger/escopo/base mudaram desde o último gate?
+- Autor do evento aplicou a transição e o orquestrador a confirmou?
+- Próximo ator é humano? Só então `needs-human` pode existir.
+- `NO_CHANGES` usa close gate, nunca merge gate.
+- Em batch, cada ID continua independente; `--from` não carrega issue inelegível.

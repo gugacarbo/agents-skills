@@ -6,11 +6,13 @@ Execute a suíte estrutural e os helpers fake-GitHub com:
 pnpm --filter @gugacarbo/skill-code-flow test
 ```
 
-A suíte valida topologia publicada, operações semânticas, matriz adaptativa,
-ausência de perfil nos templates, opt-in nativo, criação idempotente de labels
-fallback e remoção do bootstrap.
+A suíte valida topologia publicada, comandos públicos, metadata, tabela de
+workflow, matriz de transições/ownership, blockers, `NO_CHANGES`, digest
+determinístico do source-set, criação idempotente de labels fallback e remoção
+do bootstrap.
 
 `evals/evals.json` é o corpus comportamental. Para declarar a skill verificada,
 use o workflow pareado do `skill-master`: snapshot antigo versus candidato,
-cinco amostras fresh por cenário, grading com evidência e revisão humana. A
-presença dos prompts ou o teste estrutural verde não substitui esse benchmark.
+cinco amostras fresh por cada um dos 14 cenários, grading com evidência e
+revisão humana. O protocolo fixa o modelo e effort da rodada; a presença dos
+prompts ou o teste estrutural verde não substitui esse benchmark.

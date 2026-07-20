@@ -11,7 +11,8 @@ assert_not_contains() { ! rg -Fq -- "$1" "$2" || fail "expected $2 not to contai
 
 assert_envelope() {
   local file="$1" field line previous=0
-  for field in 'Agent:' 'Phase/scope:' 'Summary:' 'Sources/evidence:' 'Decisions:' 'Changes/validation:' 'Blockers:' 'Next action:'; do
+  for field in 'Agent:' 'Phase/scope:' 'Summary:' 'Sources/evidence:' 'Decisions:' 'Changes/validation:' 'Blockers:' \
+    'Resume operation:' 'Resume stage:' 'Resume owner:' 'Next action:'; do
     line=$(rg -n -F -- "$field" "$file" | head -n 1 | cut -d: -f1)
     [ -n "$line" ] || fail "missing evidence field in $file: $field"
     [ "$line" -gt "$previous" ] || fail "evidence fields out of order in $file: $field"
@@ -34,30 +35,41 @@ test_structure() {
   [ -f "$SKILL/references/risk-profiles.md" ] || fail 'missing risk profiles reference'
   [ -f "$SKILL/templates/15-implementation-outline-template.md" ] || fail 'missing compact outline template'
   [ -f "$SKILL/templates/16-native-workflow-mapping.md" ] || fail 'missing native workflow mapping template'
+  [ -f "$SKILL/templates/17-human-gate-close.md" ] || fail 'missing NO_CHANGES close gate template'
+  [ -f "$SKILL/scripts/source-set-digest.py" ] || fail 'missing deterministic source-set digest helper'
 
-  ! rg -n --glob '*.md' 'phases/[0-9][0-9]-|Fase [0-9]|/code-flow tool <[^>]*bootstrap|\.code-flow' \
+  ! rg -n --glob '*.md' 'phases/[0-9][0-9]-|Fase [0-9]|/code-flow tool <[^>]*bootstrap|\.code-flow|/code-flow create-issue' \
     "$SKILL/SKILL.md" "$SKILL/README.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/prompts" "$SKILL/references" "$SKILL/templates" \
     || fail 'obsolete numbered/bootstrap/local-install contract remains active'
 }
 
 test_adaptive_contract() {
-  assert_contains 'Recalcule o risco antes de interpretar labels' "$SKILL/SKILL.md"
-  assert_contains 'O nível mais restritivo vence' "$SKILL/references/risk-profiles.md"
-  assert_contains 'Hard trigger nunca pode ser rebaixado' "$SKILL/references/risk-profiles.md"
-  assert_contains 'stage:approved + needs-human' "$SKILL/phases/dispatch.md"
-  assert_contains 'não ofereça `worktree|later`' "$SKILL/phases/dispatch.md"
-  assert_contains 'sem review/gate de fonte' "$SKILL/phases/issue.md"
-  assert_contains 'review independente obrigatória' "$SKILL/phases/issue.md"
-  assert_contains 'Auditoria final' "$SKILL/phases/review.md"
-  assert_contains 'Qualquer `stage:*`' "$SKILL/references/github-flow.md"
-  assert_contains 'O aceite não é persistido' "$SKILL/references/github-flow.md"
-  assert_contains 'encerre a atuação da skill' "$SKILL/references/github-flow.md"
-  assert_contains 'nunca ofereça workflow nativo' "$SKILL/references/github-flow.md"
-  assert_contains 'NATIVE_INCOMPLETE' "$SKILL/references/github-flow.md"
-  assert_contains 'fallback selecionado' "$SKILL/templates/16-native-workflow-mapping.md"
-  assert_contains 'sem me perguntar' "$SKILL/templates/16-native-workflow-mapping.md"
-  assert_contains 'só roda após aceite' "$SKILL/SKILL.md"
+  assert_contains 'Discovery read-only' "$SKILL/SKILL.md"
+  assert_contains 'Urgência, diff pequeno, complexidade S' "$SKILL/references/risk-profiles.md"
+  assert_contains '`S → light`' "$SKILL/references/risk-profiles.md"
+  assert_contains '`M/G → standard`' "$SKILL/references/risk-profiles.md"
+  assert_contains '`X/XL → assured`' "$SKILL/references/risk-profiles.md"
+  assert_contains 'WORKFLOW_DRIFT' "$SKILL/references/github-flow.md"
+  assert_contains 'NATIVE_INVALID' "$SKILL/references/github-flow.md"
+  assert_contains '`NATIVE_INVALID` pausa o fluxo' "$SKILL/SKILL.md"
+  assert_contains 'Workflow: fallback' "$SKILL/references/github-flow.md"
+  assert_contains 'fora dos marcadores protegidos' "$SKILL/references/github-flow.md"
+  assert_contains 'stage:ready-to-close' "$SKILL/phases/review.md"
+  assert_contains 'NO_CHANGES' "$SKILL/phases/dispatch.md"
+  assert_contains 'M/G no-spec: sem source gate' "$SKILL/phases/issue.md"
+  assert_contains 'Mudança de comportamento' "$SKILL/SKILL.md"
+  assert_contains '## Auditoria final' "$SKILL/phases/review.md"
+  assert_contains 'Plano aprovado nunca autoriza execução' "$SKILL/phases/plan.md"
+  assert_contains 'Terceiro ciclo' "$SKILL/phases/plan.md"
+  assert_contains 'Em retomada no meio da cadeia' "$SKILL/phases/plan.md"
+  assert_contains '`--from` é o piso' "$SKILL/phases/context.md"
+  assert_contains 'issue já adiante continua do próprio gate' "$SKILL/phases/context.md"
   assert_contains 'Merge nunca é automático' "$SKILL/templates/14-human-gate-merge.md"
+  assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
+  assert_contains 'Fechar' "$SKILL/templates/17-human-gate-close.md"
+  assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
+  assert_contains 'Prova `NO_CHANGES` sempre passa por `delivery-reviewer` independente' "$SKILL/SKILL.md"
+  assert_contains 'renomear papel, trocar sessão' "$SKILL/SKILL.md"
 
   if rg -n -i '\b(light|standard|assured)\b' "$SKILL/templates"; then
     fail 'profile name persisted in a template'
@@ -71,28 +83,22 @@ test_evidence_contract() {
     10-issue-note-template.md 15-implementation-outline-template.md; do
     assert_envelope "$SKILL/templates/$template"
   done
-  assert_contains 'Opt-in de workflow nativo também não é evidência persistida' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'Resume operation:' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains '<!-- code-flow:source-set:start -->' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains '<!-- code-flow:source-set:end -->' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'CRLF normalizado para LF' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'exatamente um LF final' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'templates/15-implementation-outline-template.md' "$SKILL/agents/05-executor.md"
-  assert_contains 'Comportamento observável localizado, por si só' "$SKILL/phases/issue.md"
-  assert_contains 'Sem prova executada de rollback' "$SKILL/templates/07-implementation-evidence-template.md"
-  assert_contains 'prova executada de rollback verificada' "$SKILL/templates/08-implementation-review-template.md"
-  assert_contains 'Rollback de migração' "$SKILL/templates/09-integration-report-template.md"
-  assert_contains 'plano formal ou outline compacto' "$SKILL/templates/01-epic.md"
-  assert_contains 'plano formal ou' "$SKILL/templates/02-user-story.md"
-  assert_not_contains 'plano aprovado de cada filha' "$SKILL/templates/01-epic.md"
+  assert_contains 'Mudança posterior no' "$SKILL/phases/issue.md"
+  assert_contains 'Prova NO_CHANGES' "$SKILL/templates/07-implementation-evidence-template.md"
+  assert_contains 'NO_CHANGES aprovado segue para ready-to-close' "$SKILL/templates/08-implementation-review-template.md"
+  assert_contains 'sem commit/PR/merge' "$SKILL/templates/17-human-gate-close.md"
   assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/04-issue-review-template.md"
   assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/06-review-template.md"
-  assert_contains 'create/update` ou hard trigger' "$SKILL/templates/12-human-gate-spec.md"
-  assert_contains 'arquivo só na execução' "$SKILL/templates/12-human-gate-spec.md"
-  assert_contains 'SHA-256 do body aprovado' "$SKILL/templates/12-human-gate-spec.md"
-  assert_contains 'Digest divergente invalida' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains 'reconfirme que o SHA-256' "$SKILL/phases/dispatch.md"
-  assert_contains 'só é materializado' "$SKILL/phases/issue.md"
-  assert_contains 'stage:approved + needs-human' "$SKILL/templates/13-human-gate-plan.md"
-  assert_contains 'somente se nenhuma auditoria final for exigida' "$SKILL/phases/review.md"
-  assert_contains '`NÃO APROVO` corrigível' "$SKILL/phases/issue.md"
-  assert_contains '`NÃO APROVO` corrigível' "$SKILL/phases/plan.md"
-  assert_contains '`NÃO APROVO` corrigível' "$SKILL/phases/review.md"
+  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"
+  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/06-review-template.md"
+  assert_contains 'Digest divergente' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'source-set digest' "$SKILL/phases/dispatch.md"
 }
 
 test_helpers_syntax() {
@@ -102,11 +108,32 @@ test_helpers_syntax() {
   bash -n "$SKILL/scripts/visual-companion/start-server.sh"
   bash -n "$SKILL/scripts/visual-companion/stop-server.sh"
   node --check "$SKILL/scripts/visual-companion/server.cjs"
+  python3 -m py_compile "$SKILL/scripts/source-set-digest.py"
   assert_not_contains '--target-dir' "$SKILL/scripts/doctor.sh"
   assert_contains 'fallback label' "$SKILL/scripts/transition-issue.sh"
   assert_contains 'gh label create' "$SKILL/scripts/transition-issue.sh"
   "$SKILL/scripts/doctor.sh" --help >/dev/null
   ! "$SKILL/scripts/doctor.sh" --issue >/dev/null 2>&1 || fail 'doctor accepted --issue without a value'
+}
+
+test_source_set_digest() {
+  local tmp body_a body_b body_c digest_a digest_b digest_c
+  tmp=$(mktemp -d)
+  body_a="$tmp/a.md"
+  body_b="$tmp/b.md"
+  body_c="$tmp/c.md"
+
+  printf '%s\n' 'Complexity: M' 'Workflow: fallback' '<!-- code-flow:source-set:start -->' 'alpha' 'beta' '<!-- code-flow:source-set:end -->' > "$body_a"
+  printf '%s\r\n' 'Complexity: G' 'Workflow: fallback' '<!-- code-flow:source-set:start -->' 'alpha' 'beta' '<!-- code-flow:source-set:end -->' > "$body_b"
+  printf '%s\n' 'Complexity: M' 'Workflow: fallback' '<!-- code-flow:source-set:start -->' 'alpha' 'changed' '<!-- code-flow:source-set:end -->' > "$body_c"
+
+  digest_a=$(python3 "$SKILL/scripts/source-set-digest.py" "$body_a")
+  digest_b=$(python3 "$SKILL/scripts/source-set-digest.py" "$body_b")
+  digest_c=$(python3 "$SKILL/scripts/source-set-digest.py" "$body_c")
+  [ "$digest_a" = "$digest_b" ] || fail 'metadata or CRLF changed source-set digest'
+  [ "$digest_a" != "$digest_c" ] || fail 'source-set content change did not change digest'
+  printf '%s\n' 'no markers' > "$tmp/invalid.md"
+  ! python3 "$SKILL/scripts/source-set-digest.py" "$tmp/invalid.md" >/dev/null 2>&1 || fail 'digest accepted missing markers'
 }
 
 make_fake_gh() {
@@ -191,6 +218,9 @@ test_transition_labels() {
   grep -Fxq 'needs-human' "$labels" || fail 'needs-human label was not created'
   [ "$(grep -Fxc 'needs-human' "$labels")" -eq 1 ] || fail 'needs-human label creation is not idempotent'
 
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:needs-delivery-review --to stage:ready-to-close --needs-human >/dev/null
+  jq -e '[.[].name] | index("stage:ready-to-close") != null and index("stage:needs-delivery-review") == null' "$state" >/dev/null || fail 'ready-to-close transition failed'
+
   rc=0
   PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:approved --to stage:blocked --dry-run >/dev/null 2>&1 || rc=$?
   [ "$rc" -ne 0 ] || fail 'require-from mismatch should fail'
@@ -246,78 +276,86 @@ test_evals_json() {
     .skill_name == "code-flow" and
     .evaluation_protocol.samples_per_scenario == 5 and
     (.evaluation_protocol.non_critical_threshold | contains("every non-critical scenario")) and
-    .evaluation_protocol.baseline_sha == "36badae14c63717311e9a1e0a708113b7000524f" and
-    (.evals | length == 13) and
-    ([.evals[].id] | unique | length == 13) and
-    ([.evals[] | select((.baseline_outcome | type) != "string" or (.baseline_outcome | length) == 0)] | length == 0) and
-    ((.evals[] | select(.id == 6) | .expectations) | index("Presents the validated native-to-gate mapping before choosing") != null) and
-    ([.evals[] | select(.id == 3 or .id == 4 or .id == 5 or .id == 6 or .id == 7 or .id == 8 or .id == 10 or .id == 11 or .id == 12 or .id == 13)] | length == 10) and
-    ((.evals[] | select(.id == 13) | .category) == "label-mutation-discipline") and
-    ((.evals[] | select(.id == 13) | .baseline_failure) == "comment_without_label_mutation")
+    .evaluation_protocol.baseline_sha == "272a74b32775c7ea687c2f5be9cc94b232d371cf" and
+    (.evals | length == 14) and
+    ([.evals[].id] | unique | length == 14) and
+    ([.evals[] | select((.baseline_failure | type) != "string" or (.baseline_failure | length) == 0)] | length == 0) and
+    ((.evals[] | select(.id == 12) | .baseline_failure) == "omits_transition_ownership_and_start_evidence") and
+    ((.evals[] | select(.id == 13) | .baseline_failure) == "lacks_no_changes_contract_and_human_close_gate") and
+    ((.evals[] | select(.id == 14) | .baseline_failure) == "regression_guard_batch_and_merge")
   ' "$SKILL/evals/evals.json" >/dev/null || fail 'eval corpus or verification protocol incomplete'
 }
 
 test_label_mutation() {
-  # Each agent must describe its label mutation via transition-issue.sh.
-  # This protects against the comment-without-label regression.
+  # Artifact producers apply transitions caused by their own artifact/verdict.
+  # Human-decision transitions remain orchestrator-owned.
   local a="$SKILL/agents"
 
-  # 01-issue-writer: defines initial stage per risk
-  assert_contains 'transition-issue.sh' "$a/01-issue-writer.md"
-  assert_contains 'stage:approved' "$a/01-issue-writer.md"
-  assert_contains 'needs-human' "$a/01-issue-writer.md"
+  # 01-issue-writer: persists body and applies the resulting issue stage.
   assert_contains 'stage:spec-approval' "$a/01-issue-writer.md"
   assert_contains 'stage:needs-plan' "$a/01-issue-writer.md"
-  assert_contains 'stage:needs-issue-fix' "$a/01-issue-writer.md"
 
-  # 02-issue-reviewer: applies needs-human on approval, blocked on external
-  assert_contains 'transition-issue.sh' "$a/02-issue-reviewer.md"
+  # 02-issue-reviewer: applies needs-human on approval, fix/blocked otherwise.
   assert_contains 'needs-human' "$a/02-issue-reviewer.md"
   assert_contains 'stage:needs-issue-fix' "$a/02-issue-reviewer.md"
-  assert_contains 'stage:blocked' "$a/02-issue-reviewer.md"
+  assert_contains 'blocker' "$a/02-issue-reviewer.md"
 
-  # 03-plan-writer: removes needs-human when publishing a cycle
-  assert_contains 'transition-issue.sh' "$a/03-plan-writer.md"
-  assert_contains 'clear-needs-human' "$a/03-plan-writer.md"
-  assert_contains 'stage:needs-plan' "$a/03-plan-writer.md"
-  assert_contains 'stage:blocked' "$a/03-plan-writer.md"
+  # 03-plan-writer: always sends a published plan to independent review.
+  assert_contains 'stage:needs-plan-review' "$a/03-plan-writer.md"
+  assert_contains 'sem' "$a/03-plan-writer.md"
+  assert_contains '`needs-human`' "$a/03-plan-writer.md"
 
-  # 04-plan-reviewer: applies needs-human after APROVO (the reported case)
-  assert_contains 'transition-issue.sh' "$a/04-plan-reviewer.md"
+  # 04-plan-reviewer: applies needs-human after APROVO.
   assert_contains 'needs-human' "$a/04-plan-reviewer.md"
   assert_contains 'stage:needs-plan-review' "$a/04-plan-reviewer.md"
   assert_contains 'stage:needs-plan-fix' "$a/04-plan-reviewer.md"
-  assert_contains 'stage:blocked' "$a/04-plan-reviewer.md"
 
   # 05-executor: mutates stage per evidence result
-  assert_contains 'transition-issue.sh' "$a/05-executor.md"
   assert_contains 'stage:in-progress' "$a/05-executor.md"
   assert_contains 'stage:needs-delivery-review' "$a/05-executor.md"
-  assert_contains 'stage:blocked --needs-human' "$a/05-executor.md"
-  assert_contains 'clear-needs-human' "$a/05-executor.md"
+  assert_contains 'stage:blocked + needs-human' "$a/05-executor.md"
+  assert_contains 'limpe' "$a/05-executor.md"
 
-  # 06-delivery-reviewer: ready-to-merge + needs-human, needs-changes, blocked
-  assert_contains 'transition-issue.sh' "$a/06-delivery-reviewer.md"
+  # 06-delivery-reviewer: separates merge and no-diff close gates.
   assert_contains 'stage:ready-to-merge' "$a/06-delivery-reviewer.md"
+  assert_contains 'stage:ready-to-close' "$a/06-delivery-reviewer.md"
   assert_contains 'needs-human' "$a/06-delivery-reviewer.md"
   assert_contains 'stage:needs-changes' "$a/06-delivery-reviewer.md"
-  assert_contains 'stage:blocked' "$a/06-delivery-reviewer.md"
+  assert_contains 'blocker' "$a/06-delivery-reviewer.md"
 
   # Canonical mutation matrix must exist and be referenced
   [ -f "$SKILL/references/label-mutation-matrix.md" ] || fail 'missing canonical label mutation matrix'
   assert_contains 'label-mutation-matrix.md' "$SKILL/references/github-flow.md"
+  assert_contains 'transition-issue.sh' "$SKILL/references/github-flow.md"
+  assert_contains 'gate humano plano aprova' "$SKILL/references/label-mutation-matrix.md"
+  assert_contains 'gate merge integra/ajusta/aguarda' "$SKILL/references/label-mutation-matrix.md"
+  assert_contains 'gate close fecha/ajusta/aguarda' "$SKILL/references/label-mutation-matrix.md"
 
-  # Comments never replace label mutation
-  assert_contains 'Comentário' "$SKILL/references/label-mutation-matrix.md"
-  assert_contains 'nunca' "$SKILL/references/label-mutation-matrix.md"
+  # Evidence precedes label mutation and never substitutes it.
+  assert_contains 'Evidência precede mutação de estado' "$SKILL/references/label-mutation-matrix.md"
+  assert_contains 'O autor do evento aplica a transição' "$SKILL/references/label-mutation-matrix.md"
+}
+
+test_workflow_truth_table() {
+  local flow="$SKILL/references/github-flow.md"
+  assert_contains '`fallback`' "$flow"
+  assert_contains 'exatamente um `stage:*`' "$flow"
+  assert_contains '`native`' "$flow"
+  assert_contains 'zero `stage:*`' "$flow"
+  assert_contains 'ausente (legado)' "$flow"
+  assert_contains 'migração explícita' "$flow"
+  assert_contains 'estado original' "$flow"
+  assert_contains 'compensação' "$flow"
 }
 
 test_structure
 test_adaptive_contract
 test_evidence_contract
 test_helpers_syntax
+test_source_set_digest
 test_transition_labels
 test_doctor
 test_evals_json
 test_label_mutation
+test_workflow_truth_table
 printf 'PASS code-flow tests\n'

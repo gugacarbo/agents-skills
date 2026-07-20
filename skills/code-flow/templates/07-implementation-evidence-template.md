@@ -1,57 +1,46 @@
 ## Evidência de implementação
 
 Agent: `executor`
-Phase/scope: `<plano ou outline e escopo implementado>`
-Summary: `<DONE | DONE_WITH_CONCERNS | BLOCKED | resultado sem mudança>`
-Sources/evidence: `<URL do plano/outline, base SHA, branch, commits e PR quando houver>`
-Decisions: `<aplicadas, pendentes ou nenhuma>`
-Changes/validation: `<arquivos, comandos e resultados>`
+Phase/scope: `<plano/outline e escopo>`
+Summary: `<DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED>`
+Sources/evidence: `<plano/outline, digest, base, branch, commits/PR>`
+Decisions: `<aplicadas ou none>`
+Changes/validation: `<arquivos/comandos/resultados ou prova NO_CHANGES>`
 Blockers: `<blocker ou none>`
-Next action: `<review do delivery-reviewer | resolver blocker, owner>`
+Resume operation: `<dispatch ou none>`
+Resume stage: `<stage:in-progress ou stage:needs-changes ou none>`
+Resume owner: `<executor/humano ou none>`
+Next action: `<delivery review | resolver blocker, owner>`
 
-### Resumo rápido
-
-| Campo             | Valor                                   |
-| ----------------- | --------------------------------------- |
-| Plano ou outline  | `<URL>`                                 |
-| Status            | `DONE \| DONE_WITH_CONCERNS \| BLOCKED` |
-| Base SHA / branch | `<SHA> / <branch>`                      |
-| Commits / PR      | `<links>`                               |
+| Campo            | Valor                                                 |
+| ---------------- | ----------------------------------------------------- |
+| Plano ou outline | `<URL>`                                               |
+| Status           | `DONE \| DONE_WITH_CONCERNS \| NO_CHANGES \| BLOCKED` |
+| Base/branch      | `<SHA> / <branch>`                                    |
+| Commits/PR       | `<links ou not applicable para NO_CHANGES>`           |
 
 ### Arquivos alterados
 
-| Arquivo        | Mudança             |
-| -------------- | ------------------- |
-| `path/to/file` | `<descrição breve>` |
+| Arquivo          | Mudança       |
+| ---------------- | ------------- |
+| `<path ou none>` | `<descrição>` |
 
 ### Verificação
 
 ```text
-<comando> — <resultado>
+<comando/prova> — <resultado>
 ```
 
-### Evidência TDD
-
-| Fase | Evidência                              |
-| ---- | -------------------------------------- |
-| TDD  | `not applicable \| RED: … \| GREEN: …` |
-
-### Evidência de rollback (obrigatória para migração)
+### Prova NO_CHANGES
 
 ```text
-<comando, simulação ou demonstração> — <resultado verificável>
+<consulta/teste que demonstra escopo já satisfeito ou not applicable>
 ```
 
-Sem prova executada de rollback, uma migração deve permanecer `BLOCKED`.
+### Rollback de migração
 
-### Ressalvas ou blocker
+```text
+<prova executada e estado restaurado ou not applicable>
+```
 
-> `<nenhuma | descrição da ressalva ou blocker>`
-
----
-
-_Processo: code-flow — evidência append-only do executor para review
-independente do escopo autorizado._
-
-`BLOCKED` não está pronto para review. Deve identificar a decisão ou correção
-exata e mantém o fluxo bloqueado até resolução.
+_NO_CHANGES não cria commit/PR vazio e ainda exige review independente._

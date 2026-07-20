@@ -30,6 +30,8 @@ check_command git
 check_command sh
 check_command bash
 for helper in review-package doctor transition-issue; do check_file "$helper.sh"; done
+check_file source-set-digest.py
+check_command python3
 
 if [ -f "$SCRIPT_DIR/visual-companion/server.cjs" ]; then
   check_command node
@@ -49,7 +51,21 @@ if [ "$GITHUB_MODE" -eq 1 ]; then
     gh repo view --json nameWithOwner >/dev/null 2>&1 && printf 'PASS gh-repository\n' || { printf 'FAIL gh repository access\n' >&2; failed=1; }
     gh label list --limit 1 >/dev/null 2>&1 && printf 'PASS gh-labels-read\n' || printf 'WARN cannot list repository labels\n' >&2
     if [ -n "$ISSUE" ]; then
-      gh issue view "$ISSUE" --json number,url,labels >/dev/null 2>&1 && printf 'PASS gh-issue %s\n' "$ISSUE" || { printf 'FAIL gh issue access: %s\n' "$ISSUE" >&2; failed=1; }
+      issue_json=$(gh issue view "$ISSUE" --json number,url,labels) || { printf 'FAIL gh issue access: %s\n' "$ISSUE" >&2; failed=1; continue; }
+      printf 'PASS gh-issue %s\n' "$ISSUE"
+
+      stage_count=$(printf '%s' "$issue_json" | jq '[.labels[].name | select(startswith("stage:"))] | length')
+      has_blocked=$(printf '%s' "$issue_json" | jq '[.labels[].name | select(. == "stage:blocked")] | length')
+      has_human=$(printf '%s' "$issue_json" | jq '[.labels[].name | select(. == "needs-human")] | length')
+
+      if [ "$stage_count" -gt 1 ]; then
+        printf 'FAIL drift: multiple stage:* labels on #%s\n' "$ISSUE" >&2
+        failed=1
+      fi
+      if [ "$has_blocked" -gt 0 ] && [ "$has_human" -eq 0 ]; then
+        printf 'WARN stage:blocked without needs-human on #%s\n' "$ISSUE" >&2
+      fi
+
       "$SCRIPT_DIR/transition-issue.sh" "$ISSUE" --to stage:needs-plan --allow-repair --dry-run >/dev/null 2>&1 \
         && printf 'PASS transition-issue-dry-run\n' \
         || printf 'WARN transition-issue dry-run failed\n' >&2

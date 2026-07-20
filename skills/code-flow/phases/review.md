@@ -1,25 +1,30 @@
 # Review da entrega
 
-Em `stage:needs-delivery-review`, despache `agents/06-delivery-reviewer.md`
-independente do executor e de qualquer artefato que ele revise. Forneça range,
-fontes, plano ou outline, evidência e pacote de `scripts/review-package.sh`.
+Em `stage:needs-delivery-review`, o orquestrador prepara pacote interno do
+range/PR e despacha `agents/06-delivery-reviewer.md`, independente do executor.
 
 Use `templates/08-implementation-review-template.md`:
 
-- `APROVO`/`APROVO COM RESSALVAS`: mover a `stage:ready-to-merge`;
-- `PEÇO AJUSTES`, `NÃO APROVO` corrigível ou achado Critical/Important:
-  `stage:needs-changes` sem `needs-human`;
-- decisão de produto/acesso: `stage:blocked + needs-human`.
+- diff aprovado sem auditoria: `stage:ready-to-merge + needs-human`;
+- diff aprovado com auditoria: `stage:ready-to-merge` sem `needs-human`;
+- `NO_CHANGES` comprovado: `stage:ready-to-close + needs-human`;
+- `AJUSTAR`, `Critical`, `Important` ou `Cannot verify`:
+  `stage:needs-changes`, sem `needs-human`;
+- decisão de produto/acesso: blocker com resume target de review/dispatch.
 
-Auditoria final:
+`APROVAR COM RESSALVAS` só avança com achados Minor não bloqueantes.
+Ao aprovar `NO_CHANGES`, anuncie o próximo gate completo:
+`Fechar / Ajustar / Aguardar`; fechar e limpar estado só depois de `Fechar`
+explícito.
 
-- mudança interna: não é uma segunda review; a delivery review cobre o fechamento;
-- mudança moderada: somente após ressalva, mudança posterior à review ou risco novo;
-- hard trigger: sempre, por outra instância fresca de `delivery-reviewer`.
+## Auditoria final
 
-Ao mover para `stage:ready-to-merge`, aplique `needs-human` imediatamente
-somente se nenhuma auditoria final for exigida. Caso contrário, a auditoria
-aplica o marcador após aprovação. Correções removem `needs-human`.
+- S: delivery review encerra a revisão.
+- M/G: auditoria fresca somente após ressalva, mudança posterior à review ou
+  risco novo.
+- X/XL ou hard trigger: sempre outra instância fresca, distinta de todos os
+  reviewers anteriores aplicáveis.
 
-Se uma ressalva promover risco, retome no primeiro gate obrigatório, não apenas
-na correção de código.
+Auditoria aprovadora mantém `stage:ready-to-merge` e adiciona `needs-human`.
+Correção volta ao mesmo executor/worktree e exige nova review. Risco promovido
+volta ao primeiro gate obrigatório, não apenas ao código.

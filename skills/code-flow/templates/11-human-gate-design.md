@@ -1,10 +1,9 @@
-# Gate humano · design solicitado
+# Gate humano · decisões pré-issue
 
-Use somente depois que o usuário aceitou executar o brainstorm e o resultado
-estiver fechado. Sem `Yes`, o design produzido não vira decisão.
+Use somente quando brainstorm fechou decisões materiais.
 
-| Resposta | Ação                                |
-| -------- | ----------------------------------- |
-| `Yes`    | Aceitar design e seguir para issue. |
-| `No`     | Rejeitar e parar.                   |
-| `Refine` | Ajustar e apresentar novamente.     |
+| Resposta   | Ação                                                          |
+| ---------- | ------------------------------------------------------------- |
+| `Aprovar`  | Manter resultado efêmero e incorporá-lo no source-set futuro. |
+| `Ajustar`  | Retomar somente as decisões indicadas.                        |
+| `Bloquear` | Parar; não criar issue/plano/código.                          |

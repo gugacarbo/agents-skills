@@ -1,18 +1,20 @@
-# Brainstorm condicional
+# Brainstorm pré-issue
 
-Use apenas quando houver decisões importantes de intenção, trade-off, sucesso
-ou escopo que não possam ser descobertas no repositório. Antes de iniciar,
-explique a lacuna e obtenha aceite explícito do usuário. `/code-flow brainstorm`
-é o convite explícito para este prompt, não autorização automática para criar
-issue ou código.
+Use apenas para decisões importantes de intenção, trade-off, sucesso ou escopo
+que não possam ser descobertas no repositório. Não produz plano formal nem
+código.
 
-1. Carregue `prompts/interview-me.md` quando a decisão exigir entrevista mais aprofundada.
-2. Faça perguntas materiais e concisas; não pergunte fatos descobríveis.
-3. Proponha 2–3 abordagens com trade-offs e recomendação.
-4. Ofereça `prompts/visual-companion.md` somente se a próxima decisão for
-   genuinamente visual.
-5. Use `templates/11-human-gate-design.md` para aprovar o resultado.
+`/code-flow brainstorm` já autoriza esta revisão inicial:
 
-Sem aceite inicial, não rode o brainstorm. Sem aprovação do design produzido,
-não o trate como decisão. Se nenhuma decisão importante estiver aberta, não
-ofereça este prompt e siga para a issue.
+1. recapitule decisões já confirmadas e lacunas materiais;
+2. ofereça `Aprofundar` ou `Seguir`;
+3. se nenhuma decisão material estiver aberta, não inicie entrevista nem gate
+   artificial; apresente o resumo e ofereça review adicional ou `Seguir` à
+   próxima entrada;
+4. se aprofundar, carregue `prompts/interview-me.md` e faça uma decisão por vez;
+5. ofereça `prompts/visual-companion.md` somente quando ver for claramente
+   melhor que ler;
+6. apresente `templates/11-human-gate-design.md` ao fechar decisões.
+
+O resultado aprovado permanece efêmero até a issue existir; então entra no
+bloco canônico do source-set. Visual temporário nunca é fonte de verdade.

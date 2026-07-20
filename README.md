@@ -42,15 +42,15 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 
 ## Opções do `install`
 
-| Opção             | Descrição                                                               |
-| ----------------- | ----------------------------------------------------------------------- |
-| `-p, --path PATH` | Instala as skills no caminho especificado                               |
-| `-g, --global`    | Força `~/.agents/skills` como destino (sempre pede confirmação)         |
-| `--init`          | Clona o repositório via `git clone` em vez de copiar os arquivos        |
-| `--instructions`  | Copia o `README.md` do repositório para o destino                       |
+| Opção             | Descrição                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| `-p, --path PATH` | Instala as skills no caminho especificado                                           |
+| `-g, --global`    | Força `~/.agents/skills` como destino (sempre pede confirmação)                     |
+| `--init`          | Clona o repositório via `git clone` em vez de copiar os arquivos                    |
+| `--instructions`  | Copia o `README.md` do repositório para o destino                                   |
 | `--fresh`         | Remove as skills existentes no destino antes de instalar (preserva outros arquivos) |
-| `-y, --yes`       | Aprova automaticamente a instalação local (não pula confirmação global) |
-| `-h, --help`      | Exibe a ajuda do comando                                                |
+| `-y, --yes`       | Aprova automaticamente a instalação local (não pula confirmação global)             |
+| `-h, --help`      | Exibe a ajuda do comando                                                            |
 
 ## Opções do `update`
 
@@ -82,7 +82,7 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 | `init-deep`                | Gera arquivos `AGENTS.md` hierárquicos no código (modo `--light`) |
 | `project-init`             | Scaffold de novos projetos a partir de templates curados          |
 | `skill-master`             | Criação, edição e avaliação de skills reutilizáveis para agentes  |
-| `code-flow`                | Planejamento e orquestração de implementações com subagentes      |
+| `code-flow`                | Entregas por issue com rigor adaptativo, reviews e gates humanos  |
 | `task-completion-notifier` | Notificação de conclusão de tarefas no desktop                    |
 
 ## Exemplos
@@ -166,7 +166,7 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
     ├── init-deep/             # Geração de AGENTS.md
     ├── project-init/          # Scaffold de projetos
     ├── skill-master/          # Autoria e avaliação de skills
-    ├── code-flow/          # Planejamento com subagentes
+    ├── code-flow/          # Entregas por issue com workflow verificável
     └── task-completion-notifier/ # Notificação de conclusão
 ```
 

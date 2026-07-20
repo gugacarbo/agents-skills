@@ -4,4 +4,4 @@
 
 | id | título | status |
 |---|---|---|
-| [SPEC-0001](0001-code-flow-adaptive-governance.md) | Code-flow aplica governança proporcional ao risco sem misturar workflows | accepted |
+| [SPEC-0001](0001-code-flow-adaptive-governance.md) | Code-flow governa entregas com contexto operacional retomável e rigor adaptativo | implemented |

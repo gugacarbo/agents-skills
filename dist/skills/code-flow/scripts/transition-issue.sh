@@ -2,6 +2,15 @@
 set -eu
 
 # Best-effort mutate fallback stage:* / needs-human labels on a GitHub issue.
+#
+# Idempotent:
+#   --needs-human        adds `needs-human` only when absent.
+#   --clear-needs-human  removes `needs-human` only when present.
+#
+# Drift guard:
+#   refuses to run when the issue has zero or multiple stage:* labels unless
+#   --allow-repair is given. --dry-run never creates or mutates labels.
+#
 # Not a single atomic API call: remove-then-add can leave zero stage:* if a
 # later gh edit fails — confirm after and repair with --allow-repair if needed.
 # Does not select native vs fallback, post comments, or choose the next stage.
@@ -19,6 +28,7 @@ stage:in-progress
 stage:needs-delivery-review
 stage:needs-changes
 stage:ready-to-merge
+stage:ready-to-close
 stage:blocked
 '
 

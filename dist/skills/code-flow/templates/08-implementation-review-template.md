@@ -1,38 +1,33 @@
-## Revisão independente da implementação
+## Revisão independente da entrega
 
 Agent: `delivery-reviewer`
-Phase/scope: `<plano ou outline / range implementado>`
-Summary: `<resultado da review>`
-Sources/evidence: `<URL da evidência do executor, range/PR e links das fontes>`
-Decisions: `<veredito literal e decisões necessárias>`
-Changes/validation: `<checagens e validação, ou nenhuma>`
+Phase/scope: `<plano/outline / range ou prova NO_CHANGES>`
+Summary: `<resultado>`
+Sources/evidence: `<executor, range/PR/prova, fontes>`
+Decisions: `<veredito literal>`
+Changes/validation: `<checagens>`
 Blockers: `<blocker ou none>`
-Next action: `<aceitar | correção do executor | decisão humana, owner>`
+Resume operation: `<review/dispatch ou none>`
+Resume stage: `<stage:needs-changes ou none>`
+Resume owner: `<executor/humano ou none>`
+Next action: `<merge gate | close gate | auditoria | correção>`
 
-### Resumo rápido
+| Campo         | Valor                                                       |
+| ------------- | ----------------------------------------------------------- |
+| Plano/outline | `<URL>`                                                     |
+| Evidência     | `<URL>`                                                     |
+| Range/PR      | `<base..head, URL ou not applicable>`                       |
+| Independência | `Não produzi o artefato revisado nem implementei o escopo.` |
+| Veredito      | `APROVAR \| APROVAR COM RESSALVAS \| AJUSTAR \| BLOQUEAR`   |
 
-| Campo              | Valor                                                          |
-| ------------------ | -------------------------------------------------------------- |
-| Plano ou outline   | `<URL>`                                                        |
-| Evidência revisada | `<URL do comentário>`                                          |
-| Range / PR         | `<base..head ou URL>`                                          |
-| Independência      | `Não produzi o artefato revisado nem implementei este range.`  |
-| Veredito           | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
+| Severidade                                        | Local/prova                | Impacto e ação |
+| ------------------------------------------------- | -------------------------- | -------------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<file:line ou evidência>` | `<ação>`       |
 
-### Achados
+- [ ] Contrato/fontes.
+- [ ] Testes/DoD ou prova NO_CHANGES.
+- [ ] Escopo/ownership.
+- [ ] Rollback de migração executado ou not applicable.
 
-| Severidade                                        | Local         | Impacto e ação     |
-| ------------------------------------------------- | ------------- | ------------------ |
-| `Critical \| Important \| Minor \| Cannot verify` | `<file:line>` | `<impacto e ação>` |
-
-### Evidência checada
-
-- [ ] Conformidade com contrato/fontes: …
-- [ ] Testes e DoD: …
-- [ ] Escopo e ownership: …
-- [ ] Migração: prova executada de rollback verificada, ou `not applicable`.
-
----
-
-_Processo: code-flow — review append-only da implementação (envelope de oito
-campos). Para review de plano use `templates/06-review-template.md`._
+_NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para
+ready-to-merge._

@@ -1,47 +1,31 @@
-## Integração e fechamento
+## Auditoria final e prontidão
 
-Agent: `delivery-reviewer`
-Phase/scope: `auditoria final aplicável e fechamento`
-Summary: `<resultado da auditoria final>`
-Sources/evidence: `<envelope do executor, URLs de review, PR, range final e saída do DoD>`
-Decisions: `<veredito literal da auditoria e decisão opcional de integração>`
-Changes/validation: `<checagens da auditoria e validação, ou nenhuma>`
+Agent: `delivery-reviewer (instância fresca)`
+Phase/scope: `auditoria final aplicável`
+Summary: `<resultado>`
+Sources/evidence: `<executor, reviews, PR/range, DoD>`
+Decisions: `<veredito literal>`
+Changes/validation: `<checagens>`
 Blockers: `<blocker ou none>`
-Next action: `<oferecer integração explícita | resolver achado | fechar, owner>`
+Resume operation: `<review ou none>`
+Resume stage: `<stage:needs-changes ou none>`
+Resume owner: `<executor/humano ou none>`
+Next action: `<merge gate | correção | blocker>`
 
-### Resumo rápido
+| Campo            | Valor         |
+| ---------------- | ------------- |
+| PR/range         | `<URL/range>` |
+| Aprovação/checks | `approved     | pending               | not applicable` |
+| Auditoria        | `APROVAR      | APROVAR COM RESSALVAS | AJUSTAR         | BLOQUEAR` |
 
-| Campo           | Valor                                                          |
-| --------------- | -------------------------------------------------------------- |
-| PR              | `<URL>`                                                        |
-| Aprovação do PR | `approved \| pending \| not applicable`                        |
-| Auditoria final | `APROVO \| APROVO COM RESSALVAS \| PEÇO AJUSTES \| NÃO APROVO` |
-
-### Mapa de entrega
-
-| Entrega           | Commit / PR | Evidência do executor | Review independente | Evidência DoD | Status |
-| ----------------- | ----------- | --------------------- | ------------------- | ------------- | ------ |
-| Escopo autorizado |             |                       |                     |               |        |
-
-### Definição de pronto
-
-```text
-<comando> — <resultado>
-```
+| Entrega           | Commit/PR | Evidência | Review | DoD | Status |
+| ----------------- | --------- | --------- | ------ | --- | ------ |
+| Escopo autorizado |           |           |        |     |        |
 
 ### Rollback de migração
 
-| Evidência executada             | Resultado restaurado  | Veredito                            |
-| ------------------------------- | --------------------- | ----------------------------------- |
-| `<URL/saída ou not applicable>` | `<estado verificado>` | `PASS \| BLOCKED \| not applicable` |
+| Evidência executada  | Estado restaurado | Veredito |
+| -------------------- | ----------------- | -------- |
+| `<URL/saída ou n/a>` | `<estado>`        | `PASS    | BLOCKED | n/a` |
 
-### Decisão opcional de integração
-
-| Decisão    | Valor                                                                                     |
-| ---------- | ----------------------------------------------------------------------------------------- |
-| Integração | `Aguardar pedido explícito do usuário para merge \| merged em <commit> \| not applicable` |
-
----
-
-_Processo: code-flow — evidência append-only pronta para PR (envelope de oito
-campos). Nunca fazer merge automático após aprovação._
+_Auditoria nunca faz merge; aprovação apenas abre o gate humano._

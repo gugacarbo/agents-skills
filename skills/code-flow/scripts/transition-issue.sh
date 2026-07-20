@@ -28,6 +28,7 @@ stage:in-progress
 stage:needs-delivery-review
 stage:needs-changes
 stage:ready-to-merge
+stage:ready-to-close
 stage:blocked
 '
 

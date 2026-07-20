@@ -1,10 +1,10 @@
 {
-	"name": "@gugacarbo/skill-code-flow",
-	"version": "0.0.0",
-	"private": true,
-	"description": "Development tooling for the code-flow skill.",
-	"scripts": {
-		"test": "bash dev/tests.sh",
-		"build": "bash -lc 'for file in scripts/*.sh scripts/visual-companion/*.sh; do bash -n \"$file\"; done; if command -v node >/dev/null 2>&1; then node --check scripts/visual-companion/server.cjs; fi'"
-	}
+  "name": "@gugacarbo/skill-code-flow",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Development tooling for the code-flow skill.",
+  "scripts": {
+    "test": "bash dev/tests.sh",
+    "build": "bash -lc 'for file in scripts/*.sh scripts/visual-companion/*.sh; do bash -n \"$file\"; done; python3 -c \"import ast, pathlib; ast.parse(pathlib.Path(\\\"scripts/source-set-digest.py\\\").read_text(encoding=\\\"utf-8\\\"))\"; if command -v node >/dev/null 2>&1; then node --check scripts/visual-companion/server.cjs; fi'"
+  }
 }

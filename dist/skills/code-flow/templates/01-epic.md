@@ -1,4 +1,4 @@
-<!-- Artefato só de tracking. Não adicionar labels stage:* ou needs-human a este Epic. -->
+<!-- Tracking only: não adicionar Complexity, Workflow, stage:* ou needs-human. -->
 
 # Epic: <título da iniciativa>
 
@@ -64,3 +64,6 @@ O Epic está completo quando:
 - [ ] Toda filha in-scope estiver fechada ou removida por decisão de produto registrada
 - [ ] As medidas de sucesso forem avaliadas
 - [ ] Qualquer decisão transversal tiver registro durável
+
+Depois dessas verificações, apresente checkpoint humano; não feche o Epic
+automaticamente.

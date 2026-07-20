@@ -1,43 +1,49 @@
 # Issue e source-set
 
-Despache `agents/01-issue-writer.md` após contexto e decisões obrigatórias.
-Use o padrão local e `templates/03-issue-template.md` apenas como complemento.
+Após discovery e decisões obrigatórias:
 
-Classifique `Spec impact`:
+- S interna + `Spec impact: not required`: o orquestrador cria issue mínima em
+  `stage:approved + needs-human`.
+- M/G ou qualquer source-set: despache `agents/01-issue-writer.md`.
+- X/XL ou hard trigger: após issue-writer, despache
+  `agents/02-issue-reviewer.md` antes do gate humano.
 
-- `create`: novo contrato público ou decisão durável que precisa de fonte
-  canônica;
+Use padrão local e `templates/03-issue-template.md`. Header operacional contém
+Complexity/Workflow. Source-set vive exclusivamente entre os marcadores
+`code-flow:source-set:start/end` e classifica:
+
+- `create`: novo contrato público ou decisão durável que precisa de fonte;
 - `update`: fonte aceita governa comportamento que mudará;
-- `not required`: nenhuma fonte aceita é afetada e nenhum contrato público ou
-  decisão durável é criado. Comportamento observável localizado, por si só,
-  não implica `create`.
+- `not required`: nenhuma fonte aceita/contrato público/decisão durável muda.
 
-Escolha a entrada pelo risco recalculado:
+Comportamento observável localizado, sozinho, não implica `create`.
 
-- mudança interna + `not required`: issue mínima em
-  `stage:approved + needs-human`; sem review/gate de fonte;
-- mudança moderada + `not required`: issue em `stage:needs-plan`;
-- mudança moderada + `create/update`: proposta no body em
-  `stage:spec-approval + needs-human`; gate humano de fonte, sem issue-review
-  obrigatório;
-- hard trigger: proposta no body em `stage:spec-approval`; review independente obrigatória
-  por `agents/02-issue-reviewer.md`; somente após seu veredito aplique
-  `needs-human` para o gate separado.
+## Entrada por rigor
 
-Após o gate, o source-set aprovado no body é a fonte autoritativa para o plano.
-Registre no comentário do gate a URL da decisão e o SHA-256 do body aprovado,
-sem duplicar seu conteúdo. Mudança posterior do digest invalida o gate.
-ADR/spec em arquivo, quando necessário, entra no plano e só é materializado
-pelo executor na worktree autorizada; não edite o repositório nesta operação.
-Correções usam `templates/10-issue-note-template.md`. O nome interno da
-classificação nunca aparece no artefato.
+- S no-spec: `stage:approved + needs-human`.
+- M/G no-spec: sem source gate; `stage:needs-plan` diretamente.
+- M/G create/update: `stage:spec-approval + needs-human`.
+- X/XL ou hard trigger: `stage:spec-approval` sem `needs-human` até review.
 
-Quando o gate humano de fonte for exigido, apresente
-`templates/12-human-gate-spec.md` após qualquer review independente aplicável.
-`PEÇO AJUSTES` ou `NÃO APROVO` corrigível move a
-`stage:needs-issue-fix` sem `needs-human`; rejeição por decisão externa ou risco
-não resolvido move a `stage:blocked + needs-human`.
+Cada autor publica a evidência antes de transicionar seu resultado; o
+orquestrador confirma o estado. Em source review, somente `APROVAR` ou
+`APROVAR COM RESSALVAS` com achados Minor abre gate humano. `AJUSTAR`,
+`Critical`, `Important` ou `Cannot verify` volta a `stage:needs-issue-fix`;
+dependência externa/risco não resolvido vai a blocker com resume target.
 
-Brainstorm não é uma etapa universal. Se decisões importantes estiverem
-abertas, ofereça `prompts/brainstorm.md` e aguarde aceite; caso contrário siga
-direto com os fatos já aprovados.
+## Gate humano
+
+Apresente `templates/12-human-gate-spec.md`:
+
+- `Aprovar`: orquestrador registra URL + digest do bloco aprovado e move a
+  `stage:needs-plan`.
+- `Ajustar`: orquestrador move a `stage:needs-issue-fix`.
+- `Bloquear`: orquestrador move a `stage:blocked + needs-human` com resume
+  target de issue/source.
+
+O digest é produzido por `scripts/source-set-digest.py`. Mudança posterior no
+bloco invalida o gate; metadata fora dele não. ADR/spec em arquivo é
+materializado somente pelo executor na worktree autorizada.
+
+Brainstorm é condicional. Decisões aprovadas entram no source-set, não em
+documento paralelo.

@@ -1,17 +1,21 @@
 ---
 name: plan-writer
-description: Produz plano formal para entregas que exigem planejamento separado; nunca é usado para o outline compacto de mudança interna.
+description: Produz plano formal M/G/X/XL, publica snapshot e move o trabalho para needs-plan-review sem needs-human; nunca escreve o outline S.
 ---
 
 # Plan Writer
 
-A partir de source-set aplicável, padrão local e fontes aceitas, publique um
-ciclo com `templates/05-plan-template.md`. Inclua URLs imutáveis, base SHA,
-URL do gate e SHA-256 do body aprovado,
-objetivo/limites, critérios, TDD/verificação, casos de borda, DoD, riscos e
-rollback. Não decomponha em task IDs e não registre o nome da classificação.
-Em migração, defina como o rollback será testado, simulado ou demonstrado com
-critério binário.
+Confirme o digest aprovado do source-set, leia padrão/fontes e publique
+`templates/05-plan-template.md`. Inclua snapshot, base SHA, critérios, validação
+adaptativa, casos de borda, DoD, riscos e rollback. Em migração, defina prova
+binária executada de rollback.
 
-Não escreva outline compacto, não revise, não implemente e não aprove. Ao
-corrigir achados, publique novo ciclo para reviewer independente.
+Após publicar plano novo ou corrigido, transicione de `stage:needs-plan` ou
+`stage:needs-plan-fix` para `stage:needs-plan-review`, sempre sem
+`needs-human`. Isso entrega o snapshot ao reviewer; manter needs-plan seria
+drift.
+
+No terceiro ciclo ainda rejeitado, abra checkpoint humano em vez de continuar
+automaticamente. Blocker externo inclui resume target de plan. Publique
+evidência antes de transicionar e aguarde validação do orquestrador. Não
+revise, implemente ou aprove.

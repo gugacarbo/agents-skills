@@ -1,13 +1,24 @@
-## Proposta de entrega
+# Proposta de entrega
 
-Agent: `issue-writer`
+| Campo      | Valor                    |
+| ---------- | ------------------------ |
+| Complexity | `S \| M \| G \| X \| XL` |
+| Workflow   | `native \| fallback`     |
+| Tipo       | `delivery issue \| bug`  |
+
+Agent: `issue-writer | orchestrator(S no-spec)`
 Phase/scope: `issue / source-set`
-Summary: `<resultado e próximo gate aplicável>`
-Sources/evidence: `<padrão local, fontes aceitas e código/testes>`
-Decisions: `<create | update | not required, com racional>`
-Changes/validation: `<body criado/atualizado; documento formal ainda não materializado quando houver gate>`
+Summary: `<resultado e próximo gate>`
+Sources/evidence: `<padrão local, fontes, código/testes>`
+Decisions: `<complexity, workflow e spec impact com racional>`
+Changes/validation: `<body criado/atualizado>`
 Blockers: `<blocker ou none>`
-Next action: `<execução autorizada | plano | review/gate de fonte | decisão, owner>`
+Resume operation: `<issue ou none>`
+Resume stage: `<stage alvo ou none>`
+Resume owner: `<owner ou none>`
+Next action: `<gate/papel e owner>`
+
+<!-- code-flow:source-set:start -->
 
 ## Objetivo e limites
 
@@ -23,7 +34,8 @@ Next action: `<execução autorizada | plano | review/gate de fonte | decisão, 
 
 ### Proposta ou racional
 
-<Rascunho completo para `create/update`; racional concreto para `not required`.>
+<Proposta completa para create/update; racional concreto para not required.>
+<!-- code-flow:source-set:end -->
 
-_O source-set vive no body. O próximo gate depende do risco recalculado; este
-template nunca registra o nome da classificação interna._
+_O digest protege somente o bloco marcado. O nome interno do perfil nunca é
+persistido._

@@ -1,7 +1,8 @@
 # Companheiro visual
 
-Companheiro de brainstorm visual no browser para mockups, diagramas e opções
-durante o brainstorm aceito.
+Companheiro efêmero no browser para mockups, diagramas e opções durante o
+brainstorm aceito. A descrição textual aprovada no source-set é sempre
+canônica; a sessão visual nunca é fonte normativa.
 
 ## Quando usar
 
@@ -41,7 +42,8 @@ Só após aprovação:
 scripts/visual-companion/start-server.sh --open
 ```
 
-Requer Node.js. Se `node` não estiver disponível, siga só em texto.
+Requer Node.js e browser controlável. Se qualquer um estiver indisponível,
+siga só em texto.
 
 O comando retorna JSON com `url` (incluindo `?key=...`), `session_dir`,
 `screen_dir` e `state_dir`. Salve esses paths e compartilhe a URL completa.

@@ -2,15 +2,18 @@
 
 Agent: `issue-writer`
 Phase/scope: `issue / correção de source-set`
-Summary: `<alteração feita no body>`
+Summary: `<alteração feita dentro do bloco marcado>`
 Sources/evidence: `<review/decisão, issue e fontes>`
 Decisions: `<achados incorporados>`
-Changes/validation: `<seções alteradas>`
+Changes/validation: `<seções alteradas + novo digest>`
 Blockers: `<blocker ou none>`
-Next action: `<nova review/gate | plano | decisão, owner>`
+Resume operation: `<issue ou none>`
+Resume stage: `<stage:needs-issue-fix ou none>`
+Resume owner: `<issue-writer ou none>`
+Next action: `<nova review/gate, owner>`
 
-| Achado         | Seção alterada | Ação         |
-| -------------- | -------------- | ------------ |
-| `<referência>` | `<seção>`      | `<correção>` |
+| Achado  | Seção alterada | Ação         |
+| ------- | -------------- | ------------ |
+| `<ref>` | `<seção>`      | `<correção>` |
 
-_O source-set completo continua somente no body._
+_Complexity/Workflow ficam fora do bloco e não entram no digest._

@@ -1,8 +1,8 @@
 # code-flow
 
-Coordena entregas por issue com classificação de risco efêmera, workflow do
-repositório por opt-in, fallback `stage:*`, reviews independentes e merge
-explícito.
+Coordena entregas por issue com discovery pré-issue limitado, complexidade
+persistida, risco efêmero, workflow retomável, reviews independentes e
+integração ou fechamento explícitos.
 
 Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
 [references/risk-profiles.md](references/risk-profiles.md). Estado e retomada:
@@ -10,22 +10,24 @@ Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
 
 ## Caminhos de entrega
 
-| Risco calculado                    | Caminho mínimo                                                                                                            |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Interno, localizado e reversível   | issue no-spec → autorização de execução → outline + execução → review independente → merge explícito                      |
-| Observável ou transversal moderado | source gate se necessário → plano/review/aprovação → execução → delivery review → auditoria condicional → merge explícito |
-| Sensível ou de alto impacto        | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → merge explícito        |
+| Complexidade/risco   | Caminho mínimo                                                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| S sem hard trigger   | issue mínima no-spec → autorização → outline + execução → review independente → integração/fechamento explícito               |
+| M/G sem hard trigger | source gate se aplicável → plano/review/aprovação → execução → delivery review → auditoria condicional → integração explícita |
+| X/XL ou hard trigger | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → integração explícita       |
 
-Os nomes internos da classificação nunca são persistidos. A operação os
-recalcula antes de interpretar o estado atual.
+`Complexity` representa esforço/coordenação; o rigor é recalculado e hard
+trigger sempre prevalece. Os nomes internos da classificação não são
+persistidos.
 
 ## Workflow do repositório
 
-- Qualquer `stage:*` existente fixa o fallback.
-- Workflow nativo só pode ser usado após discovery, validação e opt-in humano.
-- O opt-in não é persistido; toda retomada nativa exige nova confirmação.
-- Sem reconfirmação, a skill encerra sua atuação sem mutar ou fechar a issue.
-- Nunca misture workflow nativo e fallback na mesma execução.
+- `Workflow: native|fallback` vive no header da issue e precisa concordar com o
+  estado observado.
+- A primeira seleção nativa exige mapeamento completo e opt-in humano; depois é
+  reutilizada enquanto escopo e mapeamento continuarem válidos.
+- Contradição é drift; native inválido exige migração explícita para fallback.
+- Issues legadas com `stage:*` migram preguiçosamente para fallback.
 
 ## code-flow vs super-planning
 

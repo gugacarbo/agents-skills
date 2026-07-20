@@ -7,9 +7,12 @@ Sources/evidence: `<links imutáveis e base SHA>`
 Decisions: `<aplicadas ou none>`
 Changes/validation: `<plano e validação>`
 Blockers: `<blocker ou none>`
+Resume operation: `<plan ou none>`
+Resume stage: `<stage:needs-plan-fix ou none>`
+Resume owner: `<plan-writer ou none>`
 Next action: `plan-reviewer revisa este snapshot`
 
-Source-set aprovado: `<URL do gate + SHA-256 do body; digest atual confirmado>`
+Source-set aprovado: `<URL do gate + digest do bloco; digest atual confirmado>`
 
 ### Objetivo e limites
 
@@ -17,21 +20,19 @@ Source-set aprovado: `<URL do gate + SHA-256 do body; digest atual confirmado>`
 
 **Fora de escopo:** …
 
-### Critérios de aceite e verificação
+### Critérios e verificação adaptativa
 
 - [ ] …
 
-| Etapa     | Comando/evidência | Resultado esperado   |
-| --------- | ----------------- | -------------------- |
-| RED       | `<teste>`         | `<falha esperada>`   |
-| GREEN     | `<teste>`         | `<passa>`            |
-| Regressão | `<suite>`         | `<critério binário>` |
+| Tipo de mudança                 | Evidência anterior/falha       | Ação                    | Resultado binário esperado |
+| ------------------------------- | ------------------------------ | ----------------------- | -------------------------- |
+| `<código/docs/config/operação>` | `<RED, antes ou estado atual>` | `<comando/walkthrough>` | `<GREEN/depois/PASS>`      |
 
-### Prova de rollback (obrigatória para migração)
+### Prova de rollback para migração
 
-| Comando/simulação/demonstração | Resultado binário esperado        |
-| ------------------------------ | --------------------------------- |
-| `<como provar o rollback>`     | `<estado restaurado verificável>` |
+| Comando/simulação/demonstração | Resultado restaurado esperado |
+| ------------------------------ | ----------------------------- |
+| `<prova>`                      | `<critério binário>`          |
 
 ### Casos de borda, riscos e rollback
 
@@ -39,5 +40,4 @@ Source-set aprovado: `<URL do gate + SHA-256 do body; digest atual confirmado>`
 | ------------- | ------------------ | -------- |
 | …             | …                  | …        |
 
-_Plano formal append-only, sem task IDs. Review independente e aprovação
-humana deste snapshot são obrigatórias antes da execução._
+_Após publicação, mover para needs-plan-review sem needs-human._

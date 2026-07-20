@@ -1,11 +1,11 @@
 # Gate humano · source-set
 
-Use quando `create/update` ou hard trigger exigir aprovação humana do
-source-set. Se houver review independente obrigatória, apresente seu veredito
-antes deste gate.
+Apresente bloco exato, digest e review independente aplicável.
 
-| Resposta | Ação                                                                                      |
-| -------- | ----------------------------------------------------------------------------------------- |
-| `Yes`    | Registrar URL + SHA-256 do body aprovado; limpar o marcador e ir ao plano; arquivo só na execução. |
-| `No`     | Ir a `stage:needs-issue-fix` e limpar `needs-human`.                                      |
-| `Refine` | Mesma correção; repetir review aplicável antes do próximo gate.                           |
+| Resposta   | Ação do orquestrador                                                   |
+| ---------- | ---------------------------------------------------------------------- |
+| `Aprovar`  | Registrar URL + digest do bloco; ir a `stage:needs-plan`.              |
+| `Ajustar`  | Ir a `stage:needs-issue-fix`, limpar needs-human e devolver ao writer. |
+| `Bloquear` | Ir a `stage:blocked + needs-human` com resume target de issue/source.  |
+
+ADR/spec em arquivo só é materializado pelo executor na worktree autorizada.

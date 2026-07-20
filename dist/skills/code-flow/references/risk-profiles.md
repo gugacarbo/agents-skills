@@ -1,22 +1,41 @@
-# Classificação adaptativa de risco
+# Complexidade e rigor adaptativo
 
-Classifique no início e em toda retomada. A classificação é efêmera: use-a
-para escolher agentes e gates, mas nunca grave seu nome em labels, body,
-comentários, templates ou arquivos de controle.
+O orquestrador propõe a complexidade no discovery, explica o racional e o
+autor da issue a persiste. O usuário pode elevá-la. Complexidade mede
+esforço/coordenação; risco decide gates e continua efêmero.
 
-## Regra de decisão
+## Complexidade observável
 
-O nível mais restritivo vence. O usuário pode pedir mais rigor; nunca pode
-rebaixar um hard trigger. Mudança material de escopo invalida a classificação
-anterior e exige nova avaliação antes de interpretar o stage.
+| Valor | Critérios                                                                                                                           |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `S`   | Mudança interna e behavior-preserving, localizada, com caminho já conhecido, uma área, sem alterações acopladas e validação focada. |
+| `M`   | Um componente, poucas alterações acopladas e validação rotineira.                                                                   |
+| `G`   | Vários componentes ou coordenação relevante, ainda uma entrega em um repositório.                                                   |
+| `X`   | Mudança ampla/transversal ou com incerteza significativa, ainda fechável como uma entrega.                                          |
+| `XL`  | Múltiplos resultados/dependências ou coordenação excepcional; recomende decomposição/Epic.                                          |
 
-Hard trigger nunca pode ser rebaixado.
+Mapeamento inicial: `S → light`, `M/G → standard`, `X/XL → assured`. Esse
+mapeamento nunca rebaixa os critérios abaixo.
 
-| Perfil interno | Critérios observáveis cumulativos                                                                                                       |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `light`        | Mudança interna, localizada, reversível, em um repositório, sem contrato observável, migração, permissão, segurança ou impacto de spec. |
-| `standard`     | Default quando a mudança é observável ou transversal moderada, reversível e concentrada em um repositório, sem hard trigger.            |
-| `assured`      | Qualquer hard trigger abaixo.                                                                                                           |
+Não presuma caminho conhecido só porque o pedido parece pequeno. Comportamento
+observável em um componente, sem evidência de uma alteração única já
+localizada, começa em `M`; discovery pode demonstrar que todos os critérios de
+`S` estão presentes.
+
+## Regra de risco
+
+Recalcule em criação, retomada, antes de todo gate humano e quando base/escopo
+mudar. O nível mais restritivo vence. O usuário pode pedir mais rigor; nunca
+pode rebaixar hard trigger.
+
+| Perfil interno | Critérios observáveis cumulativos                                                                                     |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `light`        | S, interna, localizada, reversível, um repo, sem contrato observável, migração, permissão, segurança ou impacto spec. |
+| `standard`     | M/G sem hard trigger; mudança observável ou transversal moderada, reversível e concentrada em um repo.                |
+| `assured`      | X/XL ou qualquer hard trigger abaixo.                                                                                 |
+
+O nome interno nunca aparece em body, label, comentário, template ou arquivo
+de controle.
 
 ## Hard triggers
 
@@ -27,34 +46,40 @@ Hard trigger nunca pode ser rebaixado.
 - mudança cross-repo, irreversível ou com alto blast radius;
 - operação destrutiva, acesso privilegiado ou rollback não demonstrado.
 
-Urgência, tamanho pequeno do diff, reversibilidade alegada ou aceite genérico
-de risco não removem hard trigger.
+Urgência, diff pequeno, complexidade S, reversibilidade alegada ou aceite
+genérico de risco não removem hard trigger.
 
 ## Matriz de papéis e gates
 
-| Capacidade   | `light`                                                    | `standard`                                       | `assured`                                                        |
-| ------------ | ---------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
-| Issue/source | `issue-writer`, racional no-spec, sem gate de fonte        | gate humano somente em `create`/`update`         | `issue-writer` + `issue-reviewer` + gate humano                  |
-| Plano        | outline compacto pelo `executor`, sem review/gate de plano | `plan-writer` + `plan-reviewer` + gate humano    | mesmos papéis, sempre separados                                  |
-| Execução     | ordem humana explícita; worktree automática                | ordem explícita + worktree                       | ordem explícita + worktree                                       |
-| Review       | `delivery-reviewer` fresco                                 | review independente; auditoria final condicional | review independente + auditoria final por outra instância fresca |
-| Merge        | explícito                                                  | explícito                                        | explícito                                                        |
+| Capacidade   | S sem hard trigger                            | M/G sem hard trigger                                                           | X/XL ou hard trigger                                            |
+| ------------ | --------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Issue/source | orquestrador na issue mínima; sem source gate | `issue-writer`; `not required` vai direto ao plano, gate só em `create/update` | `issue-writer` + `issue-reviewer` + gate humano                 |
+| Plano        | outline do `executor`; sem gate próprio       | `plan-writer` + reviewer + gate humano                                         | writer/reviewer separados + gate humano                         |
+| Execução     | ordem explícita + worktree                    | ordem explícita + worktree                                                     | ordem explícita + worktree                                      |
+| Review       | `delivery-reviewer` fresco                    | review independente; auditoria condicional                                     | delivery review + auditoria final por instância fresca distinta |
+| Merge/close  | explícito                                     | explícito                                                                      | explícito                                                       |
 
-Migração exige plano de rollback executável e evidência de teste, simulação ou
-demonstração equivalente do rollback. Uma descrição sem prova não satisfaz a
-auditoria do nível máximo.
+Em M/G, o mesmo reviewer pode revisar plano e entrega se não escreveu plano
+nem código. Em X/XL/hard trigger, source reviewer, plan reviewer, delivery
+reviewer e auditor final são instâncias separadas. Migração exige rollback
+executável e evidência de teste, simulação ou demonstração equivalente.
 
-No nível intermediário, o mesmo reviewer pode revisar plano e entrega somente
-se não escreveu plano nem código. Ninguém revisa, aprova ou audita trabalho
-próprio.
+Sempre que reuso de reviewer for proposto, declare também essa fronteira:
+reuso controlado vale somente para M/G e nunca permite corrigir o artefato que
+será revisado; X/XL e hard trigger exigem separação por fase. Trocar o nome do
+papel ou abrir outra sessão não apaga autoria e nunca torna self-review
+independente.
 
-## Promoção
+## Promoção e drift de base
 
-Ao surgir risco novo:
+Ao surgir risco novo ou mudança material no branch alvo:
 
 1. pare antes de nova mutação;
 2. registre o fato e o primeiro gate agora obrigatório;
-3. descarte apenas aprovações que não cobrem o escopo novo;
-4. retome no source gate para `create`/`update` ou hard trigger; caso contrário,
+3. descarte somente aprovações que não cobrem o novo escopo;
+4. retome no source gate para `create/update` ou hard trigger; caso contrário,
    no gate de plano;
-5. nunca continue porque o stage anterior dizia `approved`.
+5. nunca continue porque stage/base anterior dizia `approved`.
+
+Drift de base não material atualiza o base SHA e repete a validação planejada.
+Conflito ou mudança na área autorizada é material.

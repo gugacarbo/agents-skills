@@ -1,21 +1,20 @@
-## Outline compacto de implementação
+## Outline compacto e evidência de início
 
 Agent: `executor`
-Phase/scope: `execução autorizada / outline`
-Summary: `<mudança interna a executar>`
-Sources/evidence: `<issue, base SHA, código/testes e padrão local>`
+Phase/scope: `execução S autorizada / início`
+Summary: `<mudança interna autorizada>`
+Sources/evidence: `<issue, digest, base SHA, código/testes>`
 Decisions: `<abordagem e limites>`
-Changes/validation: `nenhuma mudança ainda; outline publicado antes do código`
+Changes/validation: `nenhuma mudança ainda; publicar antes de in-progress`
 Blockers: `<blocker ou none>`
-Next action: `implementar este escopo na worktree autorizada`
-
-### Mudanças e verificação
+Resume operation: `<dispatch ou none>`
+Resume stage: `<stage:approved ou none>`
+Resume owner: `<executor/humano ou none>`
+Next action: `transicionar para in-progress; orquestrador valida; implementar`
 
 - Arquivos/áreas: …
 - Passos: …
-- Teste focado: …
+- Validação: …
 - Rollback: …
 
-_Este outline não possui gate humano próprio: a ordem explícita de execução já
-autorizou este escopo interno. Ele não substitui plano formal quando outro gate
-for exigido._
+_Decisão material ou risco novo interrompe e promove; não expanda o outline._

@@ -30,6 +30,8 @@ check_command git
 check_command sh
 check_command bash
 for helper in review-package doctor transition-issue; do check_file "$helper.sh"; done
+check_file source-set-digest.py
+check_command python3
 
 if [ -f "$SCRIPT_DIR/visual-companion/server.cjs" ]; then
   check_command node

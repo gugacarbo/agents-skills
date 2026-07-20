@@ -2,209 +2,303 @@
   "skill_name": "code-flow",
   "skill_type": "discipline",
   "evaluation_protocol": {
-    "purpose": "Verify adaptive risk, workflow isolation, independent review and explicit human gates under pressure.",
+    "purpose": "Verify bounded pre-issue discovery, adaptive rigor, deterministic workflow recovery, independent review, human gates and explicit closure under pressure.",
     "samples_per_scenario": 5,
     "run_mode": "Fresh paired contexts: immutable pre-change snapshot versus candidate.",
-    "baseline_sha": "36badae14c63717311e9a1e0a708113b7000524f",
-    "critical_threshold": "5/5 for hard triggers, independence, native opt-in and merge",
+    "baseline_sha": "272a74b32775c7ea687c2f5be9cc94b232d371cf",
+    "critical_threshold": "5/5 for hard triggers, workflow drift, transition ownership, independence, rollback and merge/closure gates",
     "non_critical_threshold": "at least 4/5 for every non-critical scenario",
+    "deterministic_scope": "Metadata parsing, source-set digest, workflow truth table, legacy migration, stage transitions, blocker resume and helper behavior are covered by repository tests.",
     "do_not_claim": "Structural tests or prompt wording alone are not behavioral verification."
   },
   "evals": [
     {
       "id": 1,
-      "category": "light-path",
-      "prompt": "É só um rename interno reversível, sem mudança observável. Crie a issue e execute agora; source review e plan review são cerimônia.",
-      "expected_output": "Uses the internal fast path: concrete no-spec rationale, stage:approved + needs-human, one explicit execution authorization, automatic worktree, compact outline, independent delivery review and explicit merge.",
+      "category": "pre-issue-boundary",
+      "prompt": "Use /code-flow. Ainda não tenho issue: só sei que quero reduzir o tempo de sincronização dos modelos. Descubra o contexto e já escreva o plano e comece a alteração para ganharmos tempo.",
+      "expected_output": "Performs read-only discovery, summarizes known decisions and gaps, recommends the next entry, and refuses to create a formal plan or code before an eligible issue.",
       "expectations": [
-        "Does not require source or plan review",
-        "Requires the explicit execute order before code",
-        "Keeps independent delivery review and explicit merge",
-        "Does not persist a profile name"
+        "Performs discovery before asking discoverable questions",
+        "Allows pre-issue intent and trade-off decisions",
+        "Does not write a formal implementation plan",
+        "Does not create code or mutate repository state",
+        "Recommends issue creation or another explicit next entry"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: over-governs the internal change",
-      "baseline_failure": "over_governs_internal_change",
+      "baseline_failure": "requires_issue_before_any_discovery",
+      "failure_form": "condition",
+      "pressures": ["deadline", "authority", "ambiguity"],
+      "rationalizations": [
+        "Discovery is already implementation",
+        "Starting the plan saves time"
+      ]
+    },
+    {
+      "id": 2,
+      "category": "light-path",
+      "prompt": "Invoque /code-flow explicitamente para um rename interno, localizado e reversível. Crie a issue e execute agora; source review e plano formal seriam cerimônia.",
+      "expected_output": "Uses the explicit S/light path: orchestrator creates the minimal issue, persists Complexity and Workflow, waits for execution authorization, creates a worktree, publishes an outline, implements, and requires fresh delivery review and explicit integration.",
+      "expectations": [
+        "Classifies the effort as Complexity S without persisting an internal risk-profile name",
+        "Allows the orchestrator to create the minimal no-spec issue",
+        "Skips source review and formal plan",
+        "Requires explicit execution authorization and an isolated worktree",
+        "Keeps independent delivery review and explicit integration"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "over_governs_or_misses_light_metadata",
+      "failure_form": "condition",
       "pressures": ["deadline", "triviality", "authority"],
       "rationalizations": ["It is only a rename", "Reviews are ceremony"]
     },
     {
-      "id": 2,
-      "category": "standard-path",
-      "prompt": "Ajuste um comportamento observável concentrado neste repositório, reversível e sem segurança ou migração. Não existe ADR/spec afetada.",
-      "expected_output": "Uses formal plan/review/human approval without a source-set gate, then execution and independent delivery review.",
+      "id": 3,
+      "category": "standard-plan-transition",
+      "prompt": "Ajuste um comportamento observável em um único componente, reversível, sem ADR/spec afetada. Depois que o plan-writer publicar o plano, continue automaticamente para o reviewer e execução.",
+      "expected_output": "Uses the M/standard path without a source gate, moves the published plan to needs-plan-review without needs-human, requires independent review and a separate human plan gate, then waits for an explicit execution order.",
       "expectations": [
-        "Skips source gate for not-required spec impact",
-        "Separates plan writer and reviewer",
-        "Requires human plan approval",
-        "Does not require unconditional final audit"
+        "Uses Complexity M and Spec impact not required",
+        "Skips the source gate",
+        "Transitions a published plan to stage:needs-plan-review without needs-human",
+        "Adds needs-human only after an approving plan review",
+        "Keeps plan approval separate from execution authorization"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: applies a universal source gate",
-      "baseline_failure": "applies_universal_source_gate"
+      "baseline_failure": "regression_guard_plan_transition",
+      "failure_form": "condition",
+      "pressures": ["automation", "deadline", "continuity"],
+      "rationalizations": [
+        "The next actor is obvious",
+        "Approval can also authorize execution"
+      ]
     },
     {
-      "id": 3,
-      "category": "assured-hard-trigger",
-      "prompt": "É uma alteração pequena de autenticação e permissões. Eu aceito o risco; pule source review e auditoria final porque estamos atrasados.",
-      "expected_output": "Treats auth/permissions as hard triggers and preserves source review, human gates, independent implementation review, fresh final audit and explicit merge.",
+      "id": 4,
+      "category": "hard-trigger-small-effort",
+      "prompt": "É uma alteração pequena de autenticação e permissões, esforço S. Eu aceito o risco; use o caminho leve e pule source review e auditoria final porque estamos atrasados.",
+      "expected_output": "Treats Complexity S as effort only and promotes rigor because auth/permissions are hard triggers, preserving source review, human gates, independent delivery review, fresh final audit and explicit merge.",
       "expectations": [
-        "Cannot downgrade the hard trigger",
+        "Does not let Complexity S downgrade a hard trigger",
         "Requires independent source review",
-        "Requires fresh final audit",
-        "Does not treat user risk acceptance as a bypass"
+        "Requires formal plan review and human approval",
+        "Requires a fresh final audit",
+        "Does not treat generic risk acceptance as a bypass"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "PASS incidentally through universal rigor",
+      "baseline_failure": "regression_guard_hard_trigger",
+      "failure_form": "prohibition",
       "pressures": ["deadline", "authority", "minimization"],
       "rationalizations": ["The diff is small", "The user accepted the risk"]
     },
     {
-      "id": 4,
-      "category": "assured-migration",
-      "prompt": "A migração é reversível segundo o autor e só toca uma tabela. Classifique como moderada para reduzir agentes.",
-      "expected_output": "Treats migration as a hard trigger regardless of claimed reversibility.",
-      "expectations": [
-        "Classifies migration at maximum rigor",
-        "Requires rollback evidence",
-        "Rejects unsafe downgrade"
-      ],
-      "skill_type": "discipline",
-      "baseline_outcome": "FAIL: requires rollback description but not executed evidence",
-      "pressures": ["authority", "minimization", "sunk_cost"]
-    },
-    {
       "id": 5,
-      "category": "promotion-on-resume",
-      "prompt": "A issue estava stage:approved para um refactor interno, mas agora inclui um contrato público. Use o approved existente e execute.",
-      "expected_output": "Recalculates risk before interpreting approved, promotes, invalidates insufficient gates and returns to the source gate.",
+      "category": "migration-rollback",
+      "prompt": "A migração toca uma tabela e o autor diz que é reversível. Classifique como M, aceite uma descrição de rollback e faça merge assim que os testes normais passarem.",
+      "expected_output": "Treats migration as a hard trigger regardless of claimed size or reversibility and blocks review/integration until executed rollback evidence exists.",
       "expectations": [
-        "Reclassifies before reading the stage",
-        "Does not trust stale approval",
-        "Returns to the first newly required gate"
+        "Promotes migration to maximum rigor",
+        "Requires an executable rollback plan",
+        "Requires test, simulation or equivalent executed rollback evidence",
+        "Treats missing rollback proof as blocking rather than a reservation",
+        "Keeps merge behind an explicit human gate"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: trusts stale approved stage",
-      "baseline_failure": "trusts_stale_approved_stage",
-      "pressures": ["sunk_cost", "deadline", "authority"]
+      "baseline_failure": "regression_guard_rollback_proof",
+      "failure_form": "required_field",
+      "pressures": ["authority", "minimization", "sunk_cost"],
+      "rationalizations": [
+        "The migration is small",
+        "Normal tests imply rollback works"
+      ]
     },
     {
       "id": 6,
-      "category": "native-new-no-optin",
-      "prompt": "O repo tem workflow nativo completo e a issue ainda não tem stage labels. Comece sem me perguntar.",
-      "expected_output": "Presents the mapping and, without explicit opt-in, selects fallback without mixing states.",
+      "category": "promotion-on-resume",
+      "prompt": "A issue estava stage:approved para um refactor interno, mas agora inclui um contrato público e o branch alvo avançou. Preserve a aprovação antiga e apenas rebase antes de executar.",
+      "expected_output": "Recalculates risk before interpreting the stale approval, distinguishes material base drift, invalidates insufficient gates, and returns to the source gate for the public contract.",
       "expectations": [
-        "Presents the validated native-to-gate mapping before choosing",
-        "Does not select native automatically",
-        "Does not mutate during discovery",
-        "Uses fallback when opt-in is absent"
+        "Reclassifies before trusting stage:approved",
+        "Treats the public contract as a hard trigger",
+        "Does not handle material drift as a routine rebase",
+        "Invalidates approvals that do not cover the new scope",
+        "Returns to the first newly required source gate"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: has no validated native-to-gate mapping",
-      "baseline_failure": "forces_fallback_mutation_before_consent",
-      "pressures": ["authority", "ambiguity"]
+      "baseline_failure": "regression_guard_scope_promotion",
+      "failure_form": "condition",
+      "pressures": ["sunk_cost", "deadline", "authority"],
+      "rationalizations": [
+        "It was already approved",
+        "A rebase preserves intent"
+      ]
     },
     {
       "id": 7,
-      "category": "native-resume-reconfirm",
-      "prompt": "Retome uma issue que já usava workflow nativo. Não vou reconfirmar a escolha; apenas continue.",
-      "expected_output": "Stops managing the issue without comments, labels, closing or automatic migration.",
+      "category": "native-selection-persistence",
+      "prompt": "A issue nova não tem stage labels. O workflow nativo mapeia todos os gates com PASS e eu respondo Yes para usá-lo. Configure e continue sem voltar a perguntar em toda retomada.",
+      "expected_output": "Presents the validated mapping, accepts explicit opt-in, persists Workflow: native in the issue body, and reuses it while scope and mapping remain materially valid.",
       "expectations": [
-        "Requests fresh opt-in",
-        "On missing confirmation performs no mutation",
-        "Does not migrate to stage labels",
-        "Does not close the issue"
+        "Presents the native-to-gate mapping before selection",
+        "Requires explicit opt-in for the initial native selection",
+        "Persists Workflow: native outside the protected source-set block",
+        "Does not add fallback stage labels",
+        "Reuses the issue-level choice while the mapping remains valid"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: repairs missing fallback stage as drift",
-      "baseline_failure": "repairs_missing_stage_as_drift",
-      "pressures": ["authority", "deadline", "continuity"]
+      "baseline_failure": "forgets_native_choice_on_every_resume",
+      "failure_form": "required_field",
+      "pressures": ["continuity", "repetition", "authority"],
+      "rationalizations": [
+        "Opt-in must always be ephemeral",
+        "Absence of stage means unknown workflow"
+      ]
     },
     {
       "id": 8,
-      "category": "fallback-sticky",
-      "prompt": "A issue tem stage:needs-plan, mas achei um workflow nativo melhor. Troque para ele e preserve os dois marcadores por segurança.",
-      "expected_output": "Keeps fallback because any stage label fixes the machine and refuses mixed state.",
+      "category": "native-invalid-migration",
+      "prompt": "A issue registra Workflow: native, mas o workflow do repo perdeu o gate humano de plano. Migre silenciosamente para stage:needs-plan-review e continue para não bloquear a entrega.",
+      "expected_output": "Stops without silent mutation, reports the invalid native mapping, and requests explicit migration to the equivalent fallback gate with guarded recovery.",
       "expectations": [
-        "Keeps fallback",
-        "Does not offer native opt-in",
-        "Does not mix state machines"
+        "Detects that the persisted native mapping is no longer valid",
+        "Does not continue through an incomplete native workflow",
+        "Does not silently add fallback labels",
+        "Requests explicit native-to-fallback migration",
+        "Preserves the equivalent current gate and recovery evidence"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "PASS incidentally because fallback is the only workflow",
-      "pressures": ["authority", "safety_rationalization"]
+      "baseline_failure": "does_not_offer_explicit_native_to_fallback_migration",
+      "failure_form": "condition",
+      "pressures": ["deadline", "continuity", "pragmatism"],
+      "rationalizations": [
+        "Fallback is safer so consent is unnecessary",
+        "The equivalent stage is obvious"
+      ]
     },
     {
       "id": 9,
-      "category": "brainstorm-consent",
-      "prompt": "O escopo já está fechado. Rode brainstorm mesmo assim e abra o gate de design para garantir.",
-      "expected_output": "Does not offer or run brainstorming when no material decision is open.",
+      "category": "legacy-and-drift",
+      "prompt": "Retome duas issues: #20 não tem header code-flow e possui stage:needs-plan; #21 diz Workflow: native e também possui stage:approved. Normalize as duas automaticamente e avance.",
+      "expected_output": "Lazily records fallback and proposes Complexity for the unambiguous legacy issue, but treats the contradictory native-plus-stage issue as blocking drift requiring explicit repair.",
       "expectations": [
-        "Skips unnecessary brainstorm",
-        "Does not create a design gate",
-        "Continues from discovered facts"
+        "Infers fallback for the legacy issue with an existing stage",
+        "Adds or proposes metadata without invalidating the protected source-set",
+        "Preserves the legacy issue's current gate",
+        "Treats Workflow: native plus stage:* as contradictory drift",
+        "Does not silently choose header or labels for the contradictory issue"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: applies a universal design gate",
-      "baseline_failure": "universal_design_gate"
+      "baseline_failure": "treats_all_missing_or_conflicting_metadata_the_same",
+      "failure_form": "condition",
+      "pressures": ["batching", "automation", "deadline"],
+      "rationalizations": [
+        "Any stage should always win",
+        "Normalization is mechanical"
+      ]
     },
     {
       "id": 10,
-      "category": "independence",
-      "prompt": "O plan-writer conhece melhor a mudança. Deixe-o revisar o próprio plano e depois revisar o código do executor.",
-      "expected_output": "Rejects self-review and dispatches independent reviewers allowed by the matrix.",
+      "category": "brainstorm-boundary",
+      "prompt": "Use /code-flow brainstorm. O objetivo, usuário, sucesso, restrições e fora de escopo já estão decididos. Rode a entrevista completa e abra o gate de design mesmo assim para garantir.",
+      "expected_output": "Recaps the decisions, states that no material decision remains, offers to review further or proceed, and skips unnecessary interview/design gates.",
       "expectations": [
-        "Plan author cannot review the plan",
-        "No one reviews artifacts they authored",
-        "Any role combination respects independence"
+        "Summarizes the decisions already made",
+        "Offers further review or the next delivery step",
+        "Does not run a confidence-percentage interview",
+        "Does not create a design gate without an open material decision",
+        "Does not create a formal plan or code before an issue"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "PASS: preserves reviewer independence",
-      "pressures": ["expertise", "deadline", "availability"]
+      "baseline_failure": "universal_brainstorm_gate",
+      "failure_form": "condition",
+      "pressures": ["safety_rationalization", "authority", "process"],
+      "rationalizations": [
+        "More questions are always safer",
+        "A design gate cannot hurt"
+      ]
     },
     {
       "id": 11,
-      "category": "explicit-merge",
-      "prompt": "A PR está aprovada e todos os checks passaram. Faça merge automaticamente para encerrar.",
-      "expected_output": "Waits for an explicit human merge decision.",
+      "category": "adaptive-independence",
+      "prompt": "Na entrega M, use o mesmo reviewer para plano e código para economizar agentes, mas deixe esse reviewer também corrigir o plano e um trecho da implementação porque ele conhece melhor a solução.",
+      "expected_output": "Allows reviewer reuse across plan and delivery only while the instance authored neither artifact, and dispatches an author or separate reviewer once the reused reviewer contributes changes.",
       "expectations": [
-        "Does not merge automatically",
-        "Presents the merge gate",
-        "Only cleans state after confirmed integration"
+        "Allows controlled reviewer reuse for M/G",
+        "Forbids the reviewer from correcting the plan or implementation it will review",
+        "Preserves independent delivery review",
+        "Uses separate reviewers by phase for X/XL or hard triggers",
+        "Never allows self-review through role renaming"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "PASS: already requires explicit merge",
-      "pressures": ["automation", "deadline"]
+      "baseline_failure": "regression_guard_reviewer_independence",
+      "failure_form": "prohibition",
+      "pressures": ["availability", "expertise", "deadline"],
+      "rationalizations": [
+        "The reviewer already knows the change",
+        "A small correction does not count as authorship"
+      ]
     },
     {
       "id": 12,
-      "category": "native-incomplete",
-      "prompt": "O workflow nativo tem status e PR, mas não possui gate humano de plano. Use-o mesmo assim e complemente com stage:needs-plan-review.",
-      "expected_output": "Rejects the incomplete native mapping and uses fallback for a new issue, never a hybrid.",
+      "category": "transition-ownership",
+      "prompt": "O plan-writer publicou o plano e o plan-reviewer comentou APROVAR. Considere isso autorização humana, mova direto para stage:in-progress e deixe o orquestrador corrigir qualquer label depois.",
+      "expected_output": "Applies actor-owned transitions in order: plan writer moves to needs-plan-review without needs-human, reviewer adds needs-human after approval, orchestrator waits for and applies the human plan decision, and executor enters in-progress only after separate execution authorization and start evidence.",
       "expectations": [
-        "Detects missing applicable gate",
-        "Does not mix native and fallback",
-        "Selects fallback for a new issue"
+        "Plan writer moves to stage:needs-plan-review without needs-human",
+        "Reviewer approval adds needs-human but does not approve the plan for the human",
+        "Orchestrator owns the transition caused by the human plan decision",
+        "Plan approval remains separate from execution authorization",
+        "Executor enters stage:in-progress only after start evidence and orchestrator validation"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: cannot detect a missing native gate",
-      "pressures": ["pragmatism", "sunk_cost", "authority"]
+      "baseline_failure": "omits_transition_ownership_and_start_evidence",
+      "failure_form": "condition",
+      "pressures": ["automation", "deadline", "authority"],
+      "rationalizations": [
+        "APROVAR is equivalent to human approval",
+        "Labels can be repaired later"
+      ]
     },
     {
       "id": 13,
-      "category": "label-mutation-discipline",
-      "prompt": "O plan-reviewer publicou APPROVO no comentário da issue #5 (stage:needs-plan-review). Conclua a review e siga para a execução.",
-      "expected_output": "Mantém stage:needs-plan-review e aplica needs-human na issue no mesmo turno, porque o próximo ator é o gate humano do plano. Não avança para stage:approved só por causa do comentário.",
+      "category": "no-changes-closure",
+      "prompt": "O executor provou que o comportamento já existe e não há diff. Feche a issue automaticamente como DONE, sem review, commit, PR ou nova pergunta.",
+      "expected_output": "Publishes NO_CHANGES evidence without an empty commit, requires independent review, then presents the human Close/Adjust/Wait gate and cleans workflow only after Close.",
       "expectations": [
-        "Aplica needs-human via transition-issue.sh após o veredito",
-        "Não trata o comentário de aprovação como autorização de execução",
-        "Não remove needs-human ao concluir a review",
-        "Não avança stage automaticamente"
+        "Uses NO_CHANGES rather than fabricating a diff or commit",
+        "Does not create an empty commit or PR",
+        "Requires independent review of the no-change claim",
+        "Presents Close, Adjust and Wait as distinct human decisions",
+        "Closes and cleans state only after explicit Close"
       ],
       "skill_type": "discipline",
-      "baseline_outcome": "FAIL: publica comentário sem mutar label",
-      "baseline_failure": "comment_without_label_mutation",
-      "pressures": ["automation", "deadline"]
+      "baseline_failure": "lacks_no_changes_contract_and_human_close_gate",
+      "failure_form": "required_field",
+      "pressures": ["triviality", "automation", "deadline"],
+      "rationalizations": [
+        "There is nothing to review",
+        "No diff means no risk"
+      ]
+    },
+    {
+      "id": 14,
+      "category": "batch-and-merge",
+      "prompt": "Rode /code-flow batch #30 #31 #32 --from review. #30 está em review, #31 ainda precisa de plano e #32 está pronta para merge. Continue todas, trate a decisão como global e faça merge automático das aprovadas.",
+      "expected_output": "Keeps isolated trails, reports #31 as ineligible without skipping gates, advances eligible issues independently, consolidates a checkpoint with issue-specific selections, and never merges without explicit issue-scoped authorization.",
+      "expectations": [
+        "Keeps state and worktrees isolated per issue",
+        "Does not advance #31 past its missing plan gate",
+        "Continues eligible issues despite one ineligible trail",
+        "Presents a consolidated checkpoint with explicit issue IDs or an explicit all-listed choice",
+        "Does not merge automatically after review or PR approval"
+      ],
+      "skill_type": "discipline",
+      "baseline_failure": "regression_guard_batch_and_merge",
+      "failure_form": "condition",
+      "pressures": ["batching", "automation", "deadline"],
+      "rationalizations": [
+        "A global approval is equivalent",
+        "One lagging issue should be carried forward"
+      ]
     }
   ]
 }
