@@ -13,7 +13,7 @@ Verifique objetivo, limites, aceite, validação, DoD, risco e rollback. Publiqu
   `stage:needs-plan-review` e aplique `needs-human`.
 - `AJUSTAR`, Critical, Important ou Cannot verify: mova a
   `stage:needs-plan-fix`, limpando needs-human.
-- Dependência externa/risco não resolvido: blocker com resume target de plan.
+- Dependência externa/risco não resolvido: blocker com `## Resume` de plan.
 
 Veredito não autoriza plano pelo humano nem execução. Publique evidência antes
 de transicionar e aguarde validação do orquestrador. Em M/G, pode revisar a

@@ -1,7 +1,7 @@
 ---
 status: implemented
 date: 2026-07-17
-builds-on: [ADR-0001]
+builds-on: [ADR-0001, ADR-0002]
 implemented-by:
   - skills/code-flow/SKILL.md
   - skills/code-flow/references/github-flow.md
@@ -15,15 +15,15 @@ implemented-by:
 ## Objetivo
 
 Permitir discovery pré-issue e entregas issue-based com esforço/coordenação
-persistidos, risco recalculado, workflow determinístico, reviews independentes
-e integração ou fechamento sempre explícitos.
+persistidos, risco recalculado, workflow derivado do estado, reviews
+independentes e integração ou fechamento sempre explícitos.
 
 ## Fluxo
 
 1. Fazer discovery read-only e fechar somente decisões materiais antes da issue.
 2. Antes de plano/código/review, validar issue de entrega/bug.
-3. Propor Complexity, resolver Workflow e recalcular risco antes do estado.
-4. Validar header/status por tabela de verdade; drift contraditório bloqueia.
+3. Propor Complexity, recalcular risco e derivar workflow pelo estado atual.
+4. Validar stages/mapeamento por tabela de verdade; múltiplos stages bloqueiam.
 5. Selecionar papéis/gates pelo maior rigor entre complexidade e hard triggers.
 6. Publicar evidência, transicionar pelo owner do evento e validar pelo orquestrador.
 7. Executar/corrigir em worktree, revisar independentemente e abrir gate de
@@ -48,10 +48,10 @@ não demonstrado sempre exigem máximo rigor.
 
 ### Workflow e source-set
 
-`Workflow: native|fallback` vive no header. Fallback válido tem exatamente um
-`stage:*`; native válido não tem stage fallback e mantém mapeamento completo.
-Contradição bloqueia. Issue legada com stage registra fallback sem invalidar
-source-set. Native inválido oferece migração explícita/compensável.
+Fallback válido tem exatamente um `stage:*`; sem stage, native é usado
+automaticamente somente com mapeamento completo. `Workflow` não é persistido.
+Header legado é compatibilidade; native legado inválido oferece migração
+explícita/compensável.
 
 Source-set vive entre marcadores. O digest usa somente o conteúdo interno em
 UTF-8, LF normalizado e um LF final. Metadata externa não altera o digest.
@@ -85,9 +85,9 @@ humano de filhas, medidas e decisões transversais.
 | 3   | hard trigger tem Complexity S             | promover ao rigor máximo                                   |
 | 4   | source-set muda após aprovação            | invalidar gates dependentes                                |
 | 5   | somente metadata muda                     | preservar digest/aprovação do source-set                   |
-| 6   | native persistido continua válido         | reutilizar escolha sem novo opt-in                         |
-| 7   | native persistido fica incompleto         | pausar e pedir migração explícita                          |
-| 8   | header e labels/status contradizem        | bloquear por drift sem escolher silenciosamente            |
+| 6   | zero stage e mapeamento nativo passa      | usar native automaticamente nesta entrada                  |
+| 7   | issue nova sem stage falha no mapeamento  | inicializar fallback equivalente                           |
+| 8   | header legado native fica incompleto      | pausar e pedir migração explícita                          |
 | 9   | issue legada possui um stage              | registrar fallback e preservar gate                        |
 | 10  | plan-writer publica snapshot              | mover a needs-plan-review sem needs-human                  |
 | 11  | executor comprova ausência de diff        | usar NO_CHANGES, review e gate de close                    |
@@ -129,16 +129,15 @@ git diff --check
 - `pnpm test`: PASS, incluindo a suíte global e as três skills com testes.
 - `pnpm build` com output/target temporários: PASS; publicação global não foi
   alterada.
-- `scripts/docs-check --emit-index`: 2 docs, 0 erros, 0 avisos.
+- `scripts/docs-check --emit-index`: 3 docs, 0 erros, 0 avisos.
 - `skill-master/scripts/quick_validate.py skills/code-flow`: skill válida.
-- `git diff --check` limitado aos arquivos desta entrega: PASS. O check global
-  encontra whitespace somente em mudanças concorrentes de `project-init`.
 - `pnpm skills-check`: `code-flow` sem órfãos, links quebrados ou ciclos; exit 1
-  apenas pelo órfão concorrente
-  `skills/project-init/templates/_base/files/scripts/lib/shared.sh`.
-- Benchmark aprovado em 2026-07-20 com `gpt-5.4-mini`, reasoning `medium`, 14
-  cenários e cinco amostras por configuração: baseline 40/70; candidato final
-  70/70. Os cenários críticos 3, 8 e 13 foram rerodados após a última correção
-  e atingiram 5/5.
-- Review humano do benchmark: **Aprovar**. Nenhum gate humano foi convertido em
-  automação.
+  apenas pelo órfão concorrente `skills/project-init/evals/run-evals.mjs`.
+- Após aprovação humana dos prompts, benchmark reduzido com
+  `gpt-5.4-mini`/`medium`: cenários críticos de workflow 7, 8 e 9, cinco
+  amostras fresh baseline/candidato por cenário. No recorte de três critérios
+  centrais por cenário, baseline atingiu 25/45 (55,6%) e candidato 45/45
+  (100%). O cenário 9 revelou ambiguidade de precedência de header legado;
+  após tornar `stage:*` explicitamente autoritativo, o rerun do candidato foi
+  5/5. A revisão completa de 14 cenários não foi rodada por decisão de
+  economia de tokens; este resultado não a substitui.

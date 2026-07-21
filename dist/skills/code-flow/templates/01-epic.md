@@ -1,69 +1,59 @@
-<!-- Tracking only: não adicionar Complexity, Workflow, stage:* ou needs-human. -->
-
-# Epic: <título da iniciativa>
-
-| Campo      | Valor                                   |
-| ---------- | --------------------------------------- |
-| **Tipo**   | Epic (tracking)                         |
-| **Owner**  | <time ou pessoa>                        |
-| **Status** | <rascunho \| em andamento \| concluído> |
-
-> **Restrição de labels:** Não adicionar labels `stage:*` ou `needs-human` a este Epic.
-> Aplicar o fluxo code-flow apenas nas issues filhas de entrega.
-
+---
+type: epic
+agent: orchestrator
+phase_scope: epic / tracking e coordenação
+sources_evidence: <filhas, dependências, métricas e decisões>
+decisions: <aceite, replanejamento ou fechamento>
+changes_validation: <checkpoint e situação das filhas>
+blockers: <blocker ou none>
+owner: <time ou pessoa>
+status: <rascunho | em andamento | concluído>
 ---
 
-## Por que agora
+> <resumo humano da iniciativa, resultado esperado e motivo para coordená-la>
 
-| Aspecto                     | Descrição                               |
-| --------------------------- | --------------------------------------- |
-| **Problema / oportunidade** | <o que motiva a iniciativa>             |
-| **Impacto**                 | <usuário, negócio ou operação afetados> |
-| **Urgência**                | <por que agora e não depois>            |
+## Resume
+
+`none`, ou, em blocker: operação, estado a retomar e responsável.
+
+## Incluído
+
+<capacidades ou resultados de entrega incluídos>
+
+## Fora de escopo
+
+<exclusões explícitas>
+
+## Restrições
+
+<tempo, compatibilidade, acesso, segurança ou produto>
 
 ## Resultado e medidas de sucesso
 
-| Campo                  | Conteúdo                                            |
-| ---------------------- | --------------------------------------------------- |
-| **Resultado**          | <resultado observável quando a iniciativa terminar> |
-| **Medidas de sucesso** | <métrica, alvo e método de medição>                 |
-
-## Escopo
-
-| Limite         | Conteúdo                                               |
-| -------------- | ------------------------------------------------------ |
-| **Dentro**     | <capacidades ou resultados de entrega incluídos>       |
-| **Fora**       | <exclusões explícitas>                                 |
-| **Restrições** | <tempo, compatibilidade, acesso, segurança ou produto> |
+| Resultado observável | Medida, alvo e método |
+| -------------------- | --------------------- |
+| `<resultado>`        | `<métrica>`           |
 
 ## Issues de entrega filhas
 
-| Filha | Resultado da entrega                                    | Owner         | Depende de   | Status        |
-| ----- | ------------------------------------------------------- | ------------- | ------------ | ------------- |
-| #<n>  | <um resultado de user-story independentemente fechável> | <time/pessoa> | <#n ou none> | <link/status> |
+| Issue  | Resultado            | Owner           | Dependências   | Situação        | Próximo marco    |
+| ------ | -------------------- | --------------- | -------------- | --------------- | ---------------- |
+| `#<n>` | `<entrega fechável>` | `<time/pessoa>` | `<#n ou none>` | `<link/resumo>` | `<gate ou data>` |
 
-**Regras das filhas**
+Cada filha usa `templates/03-issue-template.md` e percorre o fluxo completo.
+Este Epic não recebe `Complexity`, `Workflow`, `stage:*` nem `needs-human`.
 
-- Cada filha deve ser uma issue de entrega/bug, usando `templates/02-user-story.md`.
-- O GitHub pode ligá-la como subissue deste Epic.
-- Aplicar `stage:*` e os gates selecionados pelo risco **apenas nas filhas**.
-- Cada filha usa plano formal ou outline compacto conforme a matriz adaptativa;
-  implementar o escopo autorizado como uma unidade, sem task IDs nem subissues
-  de chore.
+## Plano de coordenação
 
-## Decisões e riscos transversais
+| Decisão, dependência ou risco transversal | Responsável | Desbloqueio ou ponto de review |
+| ----------------------------------------- | ----------- | ------------------------------ |
+| `<item>`                                  | `<owner>`   | `<condição ou link>`           |
 
-| Item | Decisão ou risco                | Owner         | Resolução / ponto de review |
-| ---- | ------------------------------- | ------------- | --------------------------- |
-| <id> | <decisão, dependência ou risco> | <time/pessoa> | <link, data ou condição>    |
+## Checkpoint de conclusão
 
-## Conclusão
+- [ ] Filhas in-scope fechadas ou removidas por decisão registrada.
+- [ ] Medidas de sucesso avaliadas.
+- [ ] Decisões transversais abertas resolvidas ou aceitas.
 
-O Epic está completo quando:
-
-- [ ] Toda filha in-scope estiver fechada ou removida por decisão de produto registrada
-- [ ] As medidas de sucesso forem avaliadas
-- [ ] Qualquer decisão transversal tiver registro durável
-
-Depois dessas verificações, apresente checkpoint humano; não feche o Epic
-automaticamente.
+Apresente o gate humano compartilhado com `Fechar Epic / Replanejar / Aguardar`.
+As regras de fechamento vivem nas instruções de Epic; nunca feche automaticamente.

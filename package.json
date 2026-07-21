@@ -16,7 +16,7 @@
 		"format": "pnpm format:md && pnpm format:ts",
 		"typecheck": "tsc --noEmit",
 		"knip": "knip",
-		"prepare": "if command -v husky >/dev/null 2>&1; then husky; fi",
+		"prepare": "husky",
 		"lint-staged": "lint-staged",
 		"test-staged": "test-staged",
 		"skills-check": "python3 ./scripts/skills-check"
@@ -32,6 +32,8 @@
 	},
 	"type": "module",
 	"devDependencies": {
+		"husky": "^9.1.7",
+		"lint-staged": "^17.1.0",
 		"prettier": "^3.9.5",
 		"prettier-plugin-sh": "^0.19.0",
 		"test-staged": "^1.1.11",

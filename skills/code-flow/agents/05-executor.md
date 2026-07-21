@@ -29,7 +29,7 @@ Publique `templates/07-implementation-evidence-template.md`:
 - `BLOCKED`: apenas decisão, acesso, dependência externa ou risco não resolvido.
 
 Os três primeiros movem a `stage:needs-delivery-review`; blocker move a
-`stage:blocked + needs-human` com resume target. Falha corrigível continua
+`stage:blocked + needs-human` com `## Resume`. Falha corrigível continua
 in-progress. Correções usam a mesma worktree e retornam à review.
 
 Publique evidência antes de transicionar; o orquestrador confirma. Nunca mova

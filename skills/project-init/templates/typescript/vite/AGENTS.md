@@ -1,104 +1,44 @@
-# TypeScript + Vite
-
-This is a TypeScript project using Vite as the build tool and dev server.
+# TypeScript and Vite conventions
 
 ## Runtime
 
-- Node.js (LTS)
+- Use Node.js LTS for local tooling and the browser as the client runtime.
 
 ## Build tool
 
-- Vite (latest stable, installed via CLI)
+- Use Vite for development and production builds.
 
 ## Package manager
 
-- pnpm (mandatory)
-
-## Module system
-
-- ESM (`.ts` files, `import`/`export` syntax)
+- Use pnpm.
 
 ## Env contract
 
-- In the Vite derivative, the raw environment boundary is `import.meta.env`, read from a centralized client env module rather than throughout the UI code.
-- Only expose variables intentionally prefixed for the client runtime, and validate them before the rest of the app consumes them.
+- Read `import.meta.env` only through a centralized client environment module.
+- Expose only intentionally public variables and validate them before application use.
 
 ## Entry point
 
-- `index.html` → `src/main.ts`
-
-## Test runner
-
-- Vitest (shares Vite config)
-
-## Lint & Format
-
-- Biome (linter + formatter, unified)
+- Follow the generated {{frameworkName}} entry point and keep application code under `src/`.
 
 ## Type checking
 
-- `tsc --noEmit` (or `vue-tsc` for Vue, `svelte-check` for Svelte)
-
-## Dead code
-
-- Knip
-
-## Git hooks
-
-- Husky (pre-commit: lint + typecheck; pre-push: test)
+- Run `{{typecheckCommand}}`.
 
 ## Commands
 
 ```sh
-pnpm dev          # vite
-pnpm build        # vite build
-pnpm preview      # vite preview
-pnpm test         # vitest run
-pnpm test:watch   # vitest
-pnpm lint         # biome check
-pnpm format       # biome check --write
-pnpm typecheck    # tsc --noEmit
-pnpm knip         # dead code detection
+pnpm run dev
+pnpm run build
+pnpm run preview
+pnpm run test
+pnpm run lint
+pnpm run format
+pnpm run typecheck
+pnpm run knip
 ```
 
 ## Project Structure
 
-```
-<project-name>/
-├── .agents/          # Custom skills, prompts, agents
-├── src/
-│   ├── main.ts
-│   ├── style.css
-│   └── ...
-├── public/
-│   └── ...
-├── tests/
-│   └── ...
-├── dist/             # build output (gitignored)
-├── index.html
-├── AGENTS.md
-├── REQUIREMENTS.md
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
-```
-
-## Framework init
-
-During scaffolding, the agent must ask which framework to use (vanilla-ts, react-ts, vue-ts, svelte-ts) and use the corresponding Vite template:
-
-```sh
-pnpm create vite . --template <framework>
-```
-
-Available templates: `vanilla-ts`, `react-ts`, `vue-ts`, `svelte-ts`.
-
-## Dependencies
-
-See `REQUIREMENTS.md` for the full dependency table. After the Vite CLI scaffolds the project, install additional dev tools:
-
-```sh
-pnpm add -D biome knip husky
-pnpm exec husky init
-```
+- Preserve generator-owned framework files, `index.html`, `public/`, and `src/`.
+- Apply convention files only after the Vite generator finishes.

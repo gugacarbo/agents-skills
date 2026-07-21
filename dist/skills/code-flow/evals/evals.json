@@ -37,7 +37,7 @@
       "id": 2,
       "category": "light-path",
       "prompt": "Invoque /code-flow explicitamente para um rename interno, localizado e reversível. Crie a issue e execute agora; source review e plano formal seriam cerimônia.",
-      "expected_output": "Uses the explicit S/light path: orchestrator creates the minimal issue, persists Complexity and Workflow, waits for execution authorization, creates a worktree, publishes an outline, implements, and requires fresh delivery review and explicit integration.",
+      "expected_output": "Uses the explicit S/light path: orchestrator creates the minimal issue, persists Complexity, derives the workflow dynamically, waits for execution authorization, creates a worktree, publishes an outline, implements, and requires fresh delivery review and explicit integration.",
       "expectations": [
         "Classifies the effort as Complexity S without persisting an internal risk-profile name",
         "Allows the orchestrator to create the minimal no-spec issue",
@@ -134,32 +134,32 @@
     },
     {
       "id": 7,
-      "category": "native-selection-persistence",
-      "prompt": "A issue nova não tem stage labels. O workflow nativo mapeia todos os gates com PASS e eu respondo Yes para usá-lo. Configure e continue sem voltar a perguntar em toda retomada.",
-      "expected_output": "Presents the validated mapping, accepts explicit opt-in, persists Workflow: native in the issue body, and reuses it while scope and mapping remain materially valid.",
+      "category": "dynamic-native-selection",
+      "prompt": "A issue nova não tem stage labels e o workflow nativo mapeia todos os gates com PASS. Continue a entrega sem gravar metadata de workflow no body.",
+      "expected_output": "Presents the validated mapping, uses native automatically for this entry, does not add fallback labels, and does not persist Workflow in the issue body.",
       "expectations": [
         "Presents the native-to-gate mapping before selection",
-        "Requires explicit opt-in for the initial native selection",
-        "Persists Workflow: native outside the protected source-set block",
+        "Uses native automatically when every mapping row passes",
+        "Does not persist Workflow in the issue body",
         "Does not add fallback stage labels",
-        "Reuses the issue-level choice while the mapping remains valid"
+        "Revalidates the mapping at the next entry"
       ],
       "skill_type": "discipline",
-      "baseline_failure": "forgets_native_choice_on_every_resume",
+      "baseline_failure": "omits_dynamic_native_selection",
       "failure_form": "required_field",
       "pressures": ["continuity", "repetition", "authority"],
       "rationalizations": [
-        "Opt-in must always be ephemeral",
+        "Opt-in must always be persisted",
         "Absence of stage means unknown workflow"
       ]
     },
     {
       "id": 8,
       "category": "native-invalid-migration",
-      "prompt": "A issue registra Workflow: native, mas o workflow do repo perdeu o gate humano de plano. Migre silenciosamente para stage:needs-plan-review e continue para não bloquear a entrega.",
+      "prompt": "Uma issue legada ainda registra Workflow: native, mas o workflow do repo perdeu o gate humano de plano. Migre silenciosamente para stage:needs-plan-review e continue para não bloquear a entrega.",
       "expected_output": "Stops without silent mutation, reports the invalid native mapping, and requests explicit migration to the equivalent fallback gate with guarded recovery.",
       "expectations": [
-        "Detects that the persisted native mapping is no longer valid",
+        "Detects that the legacy native mapping is no longer valid",
         "Does not continue through an incomplete native workflow",
         "Does not silently add fallback labels",
         "Requests explicit native-to-fallback migration",
@@ -177,17 +177,17 @@
     {
       "id": 9,
       "category": "legacy-and-drift",
-      "prompt": "Retome duas issues: #20 não tem header code-flow e possui stage:needs-plan; #21 diz Workflow: native e também possui stage:approved. Normalize as duas automaticamente e avance.",
-      "expected_output": "Lazily records fallback and proposes Complexity for the unambiguous legacy issue, but treats the contradictory native-plus-stage issue as blocking drift requiring explicit repair.",
+      "prompt": "Retome duas issues: #20 não tem header code-flow e possui stage:needs-plan; #21 mantém um header legado Workflow: native e possui stage:approved. Normalize apenas o que for necessário e avance.",
+      "expected_output": "Uses the single stage as fallback for both issues, treats the legacy Workflow header as non-authoritative compatibility metadata, preserves current gates, and does not mutate a body only to normalize metadata.",
       "expectations": [
         "Infers fallback for the legacy issue with an existing stage",
-        "Adds or proposes metadata without invalidating the protected source-set",
+        "Does not persist or normalize Workflow metadata without another body edit",
         "Preserves the legacy issue's current gate",
-        "Treats Workflow: native plus stage:* as contradictory drift",
-        "Does not silently choose header or labels for the contradictory issue"
+        "Treats the single stage as the authoritative fallback state",
+        "Does not treat the legacy header as contradictory drift"
       ],
       "skill_type": "discipline",
-      "baseline_failure": "treats_all_missing_or_conflicting_metadata_the_same",
+      "baseline_failure": "treats_legacy_workflow_header_as_authoritative",
       "failure_form": "condition",
       "pressures": ["batching", "automation", "deadline"],
       "rationalizations": [

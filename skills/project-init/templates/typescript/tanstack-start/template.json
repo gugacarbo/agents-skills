@@ -1,0 +1,23 @@
+{
+	"id": "typescript/tanstack-start",
+	"extends": ["typescript"],
+	"description": "A full-stack React application with TanStack Start, SSR, and file-based routing.",
+	"packageManager": "pnpm",
+	"frameworkName": "TanStack Start React",
+	"requiresFrameworkReady": true,
+	"planNotes": [
+		"TanStack Start is a full-stack React framework with server-side rendering built on Vite.",
+		"Treat src/routeTree.gen.ts as generated code: do not edit it and exclude it from dead-code enforcement."
+	],
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"commands": {
+		"framework": "pnpm dlx create-tanstack-app@latest {{targetName}} --template file-router --package-manager pnpm",
+		"frameworkCwd": ".",
+		"install": ["pnpm add -D vitest @biomejs/biome knip husky"],
+		"setup": ["pnpm exec biome init", "pnpm exec husky init"],
+		"typecheck": "tsc --noEmit"
+	}
+}

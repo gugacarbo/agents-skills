@@ -1,45 +1,23 @@
 # Integração e fechamento
 
-O orquestrador é proprietário das transições causadas pelos gates finais.
+O orquestrador é proprietário dos gates finais e registra o resultado mecânico
+com `templates/09-integration-report-template.md`.
 
-## Com diff: `stage:ready-to-merge`
+## Com diff: ready-to-merge
 
-Confirme auditoria aplicável, DoD, commits, checks e aprovação exigida do PR.
-Apresente
-[`templates/14-human-gate-merge.md`](../templates/14-human-gate-merge.md):
+Use o gate compartilhado com `Integrar / Ajustar / Aguardar`. Integrar executa
+merge, confirma o alvo, fecha issue e limpa workflow; Ajustar move a
+needs-changes; Aguardar mantém pronto. Merge nunca é automático.
 
-- `Integrar`: execute merge mecânico, verifique o alvo, feche issue e limpe
-  stage/needs-human;
-- `Ajustar`: mova a `stage:needs-changes`, limpe needs-human e devolva ao
-  executor;
-- `Aguardar`: mantenha `stage:ready-to-merge + needs-human` sem mutar PR.
+## Sem diff: ready-to-close
 
-Merge nunca é automático, mesmo com PR aprovada.
-Sempre mostre as três opções literais `Integrar / Ajustar / Aguardar`; não
-resuma o checkpoint apenas à opção recomendada.
+Use o gate compartilhado com `Fechar / Ajustar / Aguardar`. Fechar registra
+evidência, fecha issue e limpa workflow sem commit, PR ou merge; Ajustar volta
+a needs-changes; Aguardar mantém pronto.
 
-## Sem diff: `stage:ready-to-close`
+## Falha, blocker e Epic
 
-Apresente
-[`templates/17-human-gate-close.md`](../templates/17-human-gate-close.md):
-
-- `Fechar`: registre evidência, feche issue e limpe estado sem commit/PR/merge;
-- `Ajustar`: volte a `stage:needs-changes`;
-- `Aguardar`: mantenha `stage:ready-to-close + needs-human`.
-
-Sempre mostre as três opções literais `Fechar / Ajustar / Aguardar`.
-Fechamento e limpeza só ocorrem depois de `Fechar` explícito.
-
-## Falha e blocker
-
-Achado corrigível volta a changes. Dependência externa usa blocker com resume
-target. Falha transitória de merge/check mantém a issue pronta e reporta a
-causa; não invente sucesso nem feche a issue.
-
-Registre o resultado mecânico com
-[`templates/09-integration-report-template.md`](../templates/09-integration-report-template.md).
-
-## Epic
-
-Quando todas as filhas in-scope terminarem, verifique medidas de sucesso e
-decisões transversais e apresente checkpoint humano. Só então feche o Epic.
+Falha transitória preserva estado pronto e registra causa em nota isolada;
+dependência externa usa Resume e gate compartilhado quando exigir decisão. Epic
+fecha somente após checkpoint compartilhado `Fechar Epic / Replanejar /
+Aguardar`, com filhas, medidas e decisões transversais verificadas.

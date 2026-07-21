@@ -1,0 +1,19 @@
+{
+	"id": "typescript/node",
+	"extends": ["typescript"],
+	"description": "A TypeScript service or CLI targeting Node.js LTS.",
+	"packageManager": "pnpm",
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"commands": {
+		"framework": "pnpm init",
+		"frameworkCwd": "{{targetName}}",
+		"install": [
+			"pnpm add -D typescript @types/node vitest @biomejs/biome tsx knip husky"
+		],
+		"setup": ["pnpm exec biome init", "pnpm exec husky init"],
+		"typecheck": "tsc --noEmit"
+	}
+}

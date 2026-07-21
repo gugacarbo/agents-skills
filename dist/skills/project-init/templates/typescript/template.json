@@ -1,0 +1,73 @@
+{
+	"id": "typescript",
+	"extends": ["_base"],
+	"description": "Strict TypeScript conventions with Vitest, Biome, Knip, and Husky.",
+	"packageManager": "pnpm",
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"files": [
+		{ "source": "files/knip.json", "target": "knip.json" },
+		{
+			"source": "../_shared/husky/files/.husky/pre-commit",
+			"target": ".husky/pre-commit"
+		},
+		{
+			"source": "../_shared/husky/files/.husky/pre-push",
+			"target": ".husky/pre-push"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/pre-commit",
+			"target": "scripts/pre-commit"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/pre-push",
+			"target": "scripts/pre-push"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/lib/shared.sh",
+			"target": "scripts/lib/shared.sh"
+		}
+	],
+	"commands": {
+		"install": ["pnpm add -D typescript vitest @biomejs/biome knip husky"],
+		"setup": ["pnpm exec biome init", "pnpm exec husky init"],
+		"typecheck": "tsc --noEmit"
+	},
+	"optionalTools": {
+		"cspell": {
+			"description": "Spell-check code and documentation in English and Brazilian Portuguese.",
+			"commands": { "pnpm": "pnpm add -D cspell @cspell/dict-pt-br" },
+			"files": [
+				{
+					"source": "../_base/optional-tools/cspell/files/cspell.config.yaml",
+					"target": "cspell.config.yaml"
+				}
+			],
+			"notes": ["Add a spellcheck script that runs cspell ."]
+		},
+		"lint-staged": {
+			"description": "Run formatting and type checks only for staged files.",
+			"commands": { "pnpm": "pnpm add -D lint-staged prettier tsc-files" },
+			"files": [
+				{
+					"source": "optional-tools/lint-staged/files/.lintstagedrc.js",
+					"target": ".lintstagedrc.js"
+				}
+			]
+		},
+		"test-staged": {
+			"description": "Run tests related to staged files.",
+			"commands": { "pnpm": "pnpm add -D test-staged" }
+		},
+		"t3oss": {
+			"description": "Type-safe environment variable validation.",
+			"commands": { "pnpm": "pnpm add @t3-oss/env-core" }
+		},
+		"turbo": {
+			"description": "Turborepo task orchestration.",
+			"commands": { "pnpm": "pnpm add -D turbo" }
+		}
+	}
+}

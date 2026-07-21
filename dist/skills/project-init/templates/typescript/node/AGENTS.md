@@ -1,91 +1,39 @@
-# TypeScript + Node
-
-This is a TypeScript project targeting Node.js runtime.
+# TypeScript and Node conventions
 
 ## Runtime
 
-- Node.js (LTS)
+- Target the current Node.js LTS release.
 
 ## Package manager
 
-- pnpm (mandatory)
+- Use pnpm.
 
 ## Module system
 
-- ESM (`"type": "module"` in package.json, `.ts` files, `import`/`export` syntax)
+- Use ESM with `"type": "module"` in `package.json`.
 
 ## Env contract
 
-- In the Node derivative, the raw environment boundary is typically `process.env`, but it should still be read only from a centralized env module such as `src/env.ts`.
-- Validate and normalize values before exporting them to application code. Do not scatter `process.env.FOO` reads across routes, services, or utilities.
+- Read `process.env` only in a centralized module such as `src/env.ts`.
+- Validate and normalize values before exporting them to application code.
 
 ## Entry point
 
-- `src/index.ts`
-
-## Test runner
-
-- Vitest
-
-## Lint & Format
-
-- Biome (linter + formatter, unified)
-
-## Type checking
-
-- `tsc --noEmit`
-
-## Dead code
-
-- Knip
-
-## Git hooks
-
-- Husky (pre-commit: lint + typecheck; pre-push: test)
+- Use `src/index.ts` as the default application or CLI entry point.
 
 ## Commands
 
 ```sh
-pnpm dev          # tsx watch src/index.ts
-pnpm build        # tsc
-pnpm start        # node dist/index.js
-pnpm test         # vitest run
-pnpm test:watch   # vitest
-pnpm lint         # biome check
-pnpm format       # biome check --write
-pnpm typecheck    # tsc --noEmit
-pnpm knip         # dead code detection
+pnpm run dev
+pnpm run build
+pnpm run start
+pnpm run test
+pnpm run lint
+pnpm run format
+pnpm run typecheck
+pnpm run knip
 ```
 
 ## Project Structure
 
-```
-<project-name>/
-├── .agents/          # Custom skills, prompts, agents
-├── src/
-│   ├── index.ts
-│   └── ...
-├── tests/
-│   └── ...
-├── dist/             # build output (gitignored)
-├── AGENTS.md
-├── REQUIREMENTS.md
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
-## Framework init
-
-```sh
-pnpm init
-```
-
-## Dependencies
-
-See `REQUIREMENTS.md` for the full dependency table. Install all at once:
-
-```sh
-pnpm add -D typescript @types/node vitest biome tsx knip husky
-pnpm exec husky init
-```
+- Keep source under `src/`, tests under `tests/`, and compiled output under `dist/`.

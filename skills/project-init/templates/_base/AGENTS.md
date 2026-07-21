@@ -1,89 +1,39 @@
-# Project Conventions (Base)
-
-These conventions apply to every project scaffolded with `/project-init`.
-
-## Setup (first thing after scaffolding)
-
-If `casa-standard` was selected from the optional tools below, run the install step. Otherwise skip it.
+# Base project conventions
 
 ## General
 
-- **Language**: Prefer English for code, comments, and documentation.
-- **Version control**: Git with Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
-- **README**: Every project must have a `README.md` with setup instructions, usage, and contribution guidelines.
-- **License**: Include a `LICENSE` file (MIT unless specified otherwise).
+- Use English for code, comments, and durable project documentation.
+- Keep the README current with setup, usage, validation, and contribution guidance.
+- Prefer the smallest change that satisfies the project contract.
 
 ## Code Style
 
-- **Indentation**: Spaces (2 or 4, consistent per project).
-- **Line endings**: LF (`\n`).
-- **Trailing whitespace**: Trim on save.
-- **Final newline**: Every file ends with a single newline.
+- Use spaces, LF line endings, no trailing whitespace, and one final newline.
+- Follow repository-local formatter and linter configuration when present.
 
 ## Git
 
-- **Branch naming**: `feature/<name>`, `fix/<name>`, `chore/<name>`.
-- **Commit messages**: Follow Conventional Commits.
-- **No secrets**: Never commit `.env` files, API keys, or credentials.
-- **`.gitignore`**: Keep it updated with language/framework-specific ignores.
+- Use Conventional Commits.
+- Use descriptive branches such as `feature/<name>`, `fix/<name>`, and `chore/<name>`.
+- Never commit secrets or `.env` files.
 
 ## CI/CD
 
-- Prefer GitHub Actions for CI.
-- Run lint, typecheck, and tests on every PR.
-- Keep the CI pipeline fast (< 5 min when possible).
+- Run the project's lint, typecheck, test, and build scripts on pull requests when they exist.
+- Keep CI commands aligned with the package scripts used locally.
 
 ## Agent Behavior
 
-- **Ask, don't assume**: Always use a question tool (`request_user_input`, ask, question, ask user, etc.) when you need confirmation or a decision from the user. Never proceed with ambiguous or irreversible actions without explicit approval.
-
-## Optional Tools
-
-During scaffolding, the agent must use a question tool such as `request_user_input` to ask the user which of these optional tools to include. Only add the selected ones to the setup instructions.
-
-The `Install` column uses `<pm>` as a placeholder for the resolved package manager (e.g., `pnpm`, `bun`, `npm`). The agent must substitute `<pm>` with the package manager resolved from the template cascade before printing setup instructions. The `-w` flag is pnpm-specific; for other package managers, omit it or use the equivalent.
-
-Deeper template layers may override a tool from this table by reusing the same value in the `Tool` column and changing its description and/or install command. Tools omitted by deeper layers remain inherited.
-
-| Tool          | Type    | Purpose                                   | Install                                 |
-| ------------- | ------- | ----------------------------------------- | --------------------------------------- |
-| casa-standard | repo    | Docs-check, ADRs, CI gate (recommended)   | (see setup instructions)                |
-| turbo         | global  | Monorepo orchestration (Turborepo)        | `<pm> add -w -D turbo`                  |
-| lint-staged   | dev     | Run linters only on staged files          | `<pm> add -D lint-staged`               |
-| test-staged   | dev     | Run tests only on staged/changed files    | `<pm> add -D test-staged`               |
-| t3oss         | runtime | Type-safe environment variable management | `<pm> add @t3-oss/env-core`             |
-| cspell        | dev     | Spell-check code and documentation        | `<pm> add -D cspell @cspell/dict-pt-br` |
-
-When `casa-standard` is selected, include these setup instructions:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/atplus-digital/casa-standard/main/install.sh | sh -s -- . --repo-id <project-name>
-```
-
-This installs the docs-check validator, templates, AGENTS.md router, and CI gate. It is additive and idempotent — safe to re-run.
-
-To validate the repo locally:
-
-```sh
-python3 scripts/docs-check
-```
-
-When `lint-staged` is selected, add `pnpm lint-staged` before the `exec` line in `scripts/pre-commit`.
-When `test-staged` is selected, add `pnpm test-staged` before the `exec` line in `scripts/pre-commit`.
-
-When `cspell` is selected:
-
-- Copy [the default CSpell configuration](optional-tools/cspell/files/cspell.config.yaml) to `cspell.config.yaml` in the target project. It enables English and Brazilian Portuguese dictionaries, respects `.gitignore`, and includes a small allowlist of common development terms.
-- Add a `spellcheck` script to `package.json`: `cspell .`.
-- Run `pnpm spellcheck` in CI. Use the resolved package manager in the corresponding CI command when it is not pnpm.
+- Inspect existing files before changing them.
+- Request explicit approval before overwriting user-authored files or performing irreversible actions.
+- Report focused verification and any checks that could not run.
 
 ## Project Structure
 
-- **`.agents/`** — folder for custom skills, prompts, and agent definitions used by opencode.
+- Keep reusable agent skills under `.agents/skills/` when the project needs repository-scoped workflows.
+- Keep generated artifacts out of source directories and version control unless the project explicitly tracks them.
 
-## Skills (opencode)
+## Skills
 
-These are recommended skills for the project. Install them separately if not already present:
-
-- `commit-changes` — conventional commits workflow
-- `code-flow` — planning multi-step tasks
+- `commit-changes` for Conventional Commit workflows.
+- `code-flow` for multi-step repository deliveries.

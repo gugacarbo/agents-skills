@@ -1,110 +1,70 @@
-# Workflow GitHub: nativo ou fallback
+# Workflow GitHub: seleção dinâmica nativa ou fallback
 
-Plano, código, review e integração exigem issue de entrega/bug. Epic, auditoria
-avulsa e tracker genérico não recebem mutação de entrega.
+Plano, código, review e integração exigem issue de entrega/bug. Epic e tracker
+não recebem mutação de entrega.
 
-## Metadata no body
+## Estado observável
 
-O header operacional, fora dos marcadores do source-set, contém:
+`Complexity: S|M|G|X|XL` permanece no frontmatter da issue e fica fora do
+source-set. `Workflow` não é persistido.
 
-```markdown
-| Complexity | `S | M | G | X | XL` |
-| Workflow | `native | fallback` |
-```
+| Estado observado                                                      | Resultado obrigatório                                                              |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| exatamente um `stage:*`                                               | fallback ativo; retome o stage                                                     |
+| header legado + exatamente um `stage:*`                               | fallback ativo; o stage é autoritativo e o header nunca seleciona native           |
+| zero `stage:*` + mapeamento nativo `PASS`                             | native ativo automaticamente nesta entrada                                         |
+| zero `stage:*` + mapeamento nativo `FAIL` em issue nova               | declare `NATIVE_INCOMPLETE`, inicialize fallback equivalente                       |
+| múltiplos `stage:*`                                                   | `WORKFLOW_DRIFT`; pare e peça reparo                                               |
+| header legado `Workflow: fallback`                                    | ignore para controle; preserve stage e remova somente em edição legítima do body   |
+| header legado `Workflow: native` + zero `stage:*` + mapeamento `PASS` | ignore para controle; use native nesta entrada e remova somente em edição legítima |
+| header legado `Workflow: native` + mapeamento `FAIL`                  | `NATIVE_INVALID`; pause e apresente migração equivalente para decisão humana       |
 
-O orquestrador propõe `Complexity`; a primeira escolha de workflow segue o
-mapeamento de [`templates/16-native-workflow-mapping.md`](../templates/16-native-workflow-mapping.md).
+Nunca escreva `Workflow`. Com um stage, ele sempre prevalece sobre qualquer
+header legado. Header legado não entra no digest e não é normalizado por uma
+mutação sem outro motivo.
 
-## Tabela de verdade
-
-| Header           | Estado observado                                  | Resultado obrigatório                                      |
-| ---------------- | ------------------------------------------------- | ---------------------------------------------------------- |
-| `fallback`       | exatamente um `stage:*`                           | válido                                                     |
-| `native`         | zero `stage:*` e mapeamento nativo ainda `PASS`   | válido; reutilize a escolha                                |
-| `native`         | qualquer `stage:*`                                | `WORKFLOW_DRIFT`; pare e peça reparo                       |
-| `fallback`       | zero/múltiplos `stage:*` ou marcador nativo ativo | `WORKFLOW_DRIFT`; pare e peça reparo                       |
-| ausente (legado) | exatamente um `stage:*`                           | registre fallback, proponha Complexity, preserve o gate    |
-| ausente          | zero `stage:*`                                    | discovery; valide nativo e obtenha a escolha inicial       |
-| `native`         | mapeamento perdeu qualquer capacidade obrigatória | `NATIVE_INVALID`; ofereça migração explícita para fallback |
-
-Não escolha silenciosamente entre fontes contraditórias. Metadata operacional
-fica fora do digest do source-set; adicioná-la a issue legada não invalida o
-gate de fonte.
-
-Na resposta sobre legado, diga explicitamente que o stage/gate atual e o bloco
-protegido permanecem intactos: adicionar `Complexity`/`Workflow` fora dos
-marcadores não muda o digest nem invalida o source-set.
-
-## Seleção inicial
+## Avaliação nativa
 
 1. Descubra guidance, forms, labels, estados, gates, evidência e entregas
    recentes sem mutar.
-2. Recalcule risco/complexidade antes de interpretar estado.
-3. Sem metadata, preencha o mapeamento nativo. Se alguma linha falhar, declare
-   `NATIVE_INCOMPLETE`, selecione fallback e crie o stage inicial aplicável.
-4. Com todas as linhas `PASS`, declare `NATIVE_ELIGIBLE` e peça opt-in
-   explícito. `Yes` persiste `Workflow: native`; ausência/recusa persiste
-   `Workflow: fallback` e segue fallback.
-5. Em retomada válida, não peça novamente. Revalide somente após mudança
-   material de escopo, guidance ou capacidades do workflow.
+2. Recalcule risco e Complexity antes de interpretar o estado.
+3. Preencha `templates/16-native-workflow-mapping.md` com evidência por
+   capacidade.
+4. Todas as linhas PASS usam native automaticamente; qualquer FAIL em issue
+   nova seleciona fallback e cria somente o stage equivalente necessário.
 
-Não resuma a seleção apenas como “todos PASS”: antes do opt-in, apresente cada
-linha do mapeamento nativo → gate/evidência. Persista `Workflow` no header,
-explicitamente fora dos marcadores protegidos do source-set.
+## Migração legada native → fallback
 
-## Migração native → fallback
-
-Nunca migre silenciosamente. Após aceite humano:
-
-1. capture o estado original: body, estados nativos e gate equivalente;
-2. publique evidência com alvo e estratégia de compensação;
-3. atualize `Workflow: fallback` e aplique exatamente um `stage:*` equivalente;
-4. se uma metade falhar, restaure o snapshot anterior ou marque drift sem
-   avançar o gate;
-5. confirme body e labels/status finais antes de continuar.
-
-Fallback → native não é automático; `stage:*` existente exige reparo/migração
-explícita.
+Para `NATIVE_INVALID`, não migre silenciosamente. O gate humano recebe o estado original,
+fallback equivalente, estratégia de compensação e prova final para
+uma migração explícita. Após
+aceite, publique evidência, aplique um único `stage:*`, confirme labels/status
+e só então remova o header legado em atualização legítima do body.
 
 ## Stages fallback
 
 Exatamente um `stage:*` representa o próximo ator/gate enquanto a issue está
-ativa.
+ativa. `needs-human` é ortogonal e existe somente quando o próximo ator é
+humano; remova-o ao devolver trabalho a agente e limpe ambos após merge/close.
 
-| Label                         | Próxima ação                                               |
-| ----------------------------- | ---------------------------------------------------------- |
-| `stage:spec-approval`         | Review/gate de source-set conforme rigor.                  |
-| `stage:needs-issue-fix`       | Corrigir source-set.                                       |
-| `stage:needs-plan`            | Produzir plano formal.                                     |
-| `stage:needs-plan-review`     | Review independente e depois gate humano.                  |
-| `stage:needs-plan-fix`        | Novo ciclo de plano.                                       |
-| `stage:approved`              | Aguardar ordem explícita; criar worktree.                  |
-| `stage:in-progress`           | Implementar/corrigir escopo autorizado.                    |
-| `stage:needs-delivery-review` | Review independente de `DONE`, ressalvas ou `NO_CHANGES`.  |
-| `stage:needs-changes`         | Executor corrige achados.                                  |
-| `stage:ready-to-merge`        | Auditoria aplicável e gate `Integrar/Ajustar/Aguardar`.    |
-| `stage:ready-to-close`        | Gate `Fechar/Ajustar/Aguardar` para `NO_CHANGES` aprovado. |
-| `stage:blocked`               | Resolver blocker e usar o resume target publicado.         |
+| Label                         | Próxima ação                                 |
+| ----------------------------- | -------------------------------------------- |
+| `stage:spec-approval`         | Review/gate de source-set conforme rigor.    |
+| `stage:needs-issue-fix`       | Corrigir source-set.                         |
+| `stage:needs-plan`            | Produzir plano formal.                       |
+| `stage:needs-plan-review`     | Review independente e depois gate humano.    |
+| `stage:needs-plan-fix`        | Novo ciclo de plano.                         |
+| `stage:approved`              | Aguardar ordem explícita; criar worktree.    |
+| `stage:in-progress`           | Implementar/corrigir escopo autorizado.      |
+| `stage:needs-delivery-review` | Review independente da entrega.              |
+| `stage:needs-changes`         | Executor corrige achados.                    |
+| `stage:ready-to-merge`        | Auditoria aplicável e gate final.            |
+| `stage:ready-to-close`        | Gate de fechamento para NO_CHANGES aprovado. |
+| `stage:blocked`               | Resolver blocker pelo Resume publicado.      |
 
-`needs-human` é ortogonal e aparece somente quando o próximo ator é humano.
-Remova-o ao devolver trabalho a agente. Após merge/close, limpe ambos.
+## Ownership e mutação
 
-## Ownership
-
-- Agente aplica a transição causada pelo artefato/veredito que publicou.
-- Orquestrador valida precondição, evidência e estado final.
-- Orquestrador aplica transições causadas por decisão humana: source gate,
-  plan gate, unblock, merge, close e checkpoint de Epic/batch.
-- Executor entra em `stage:in-progress` somente após evidência de início e
-  validação do orquestrador.
-
-A matriz canônica completa vive em
-[`label-mutation-matrix.md`](label-mutation-matrix.md). Comentário ou texto de
-stage nunca substitui mutação.
-
-## Mutação fallback
-
-Use `scripts/transition-issue.sh` internamente com `--require-from` quando
-aplicável, publique evidência primeiro e confirme via `gh issue view`. O helper
-é idempotente, allow-listed e não decide workflow/gate. `--dry-run` não cria ou
-altera labels; `--allow-repair` exige reparo explicitamente autorizado.
+Agente aplica a transição causada pelo artefato/veredito que publicou;
+orquestrador valida precondição, evidência e estado final. Decisões humanas
+transicionam pelo orquestrador. Use `transition-issue.sh` com `--require-from`,
+dry-run e confirmação por `gh issue view` no fallback.

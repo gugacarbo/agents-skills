@@ -1,43 +1,47 @@
-## Plano formal de implementação
+---
+agent: plan-writer
+phase_scope: plan / ciclo <k>/3
+sources_evidence: <links imutáveis e base SHA>
+decisions: <aplicadas ou none>
+changes_validation: <plano e validação>
+blockers: <blocker ou none>
+---
 
-Agent: `plan-writer`
-Phase/scope: `plan / ciclo <k>/3`
-Summary: `<resultado>`
-Sources/evidence: `<links imutáveis e base SHA>`
-Decisions: `<aplicadas ou none>`
-Changes/validation: `<plano e validação>`
-Blockers: `<blocker ou none>`
-Resume operation: `<plan ou none>`
-Resume stage: `<stage:needs-plan-fix ou none>`
-Resume owner: `<plan-writer ou none>`
-Next action: `plan-reviewer revisa este snapshot`
+> <resumo claro da entrega, decisão envolvida e resultado esperado para revisão humana>
 
-Source-set aprovado: `<URL do gate + digest do bloco; digest atual confirmado>`
+## Resume
 
-### Objetivo e limites
+`none`, ou, em blocker: operação, estado a retomar e responsável.
 
-**Objetivo:** …
+## Objetivo
 
-**Fora de escopo:** …
+<resultado que o plano entrega>
 
-### Critérios e verificação adaptativa
+## Limites
 
-- [ ] …
+<fora de escopo, dependências e restrições>
 
-| Tipo de mudança                 | Evidência anterior/falha       | Ação                    | Resultado binário esperado |
+Source-set aprovado: `<URL do gate + digest atual confirmado>`
+
+## Critérios de aprovação
+
+| Critério                        | Evidência anterior/falha       | Ação                    | Resultado binário esperado |
 | ------------------------------- | ------------------------------ | ----------------------- | -------------------------- |
 | `<código/docs/config/operação>` | `<RED, antes ou estado atual>` | `<comando/walkthrough>` | `<GREEN/depois/PASS>`      |
 
-### Prova de rollback para migração
+## Casos de borda/testes, riscos e rollback
+
+| Gatilho ou teste | Resposta/mitigação | Rollback |
+| ---------------- | ------------------ | -------- |
+| `<caso>`         | `<ação>`           | `<ação>` |
+
+## Prova de rollback para migração
+
+Use apenas para migração: descreva como a reversão será exercitada e qual estado
+restaurado demonstra que o rollback é seguro.
 
 | Comando/simulação/demonstração | Resultado restaurado esperado |
 | ------------------------------ | ----------------------------- |
 | `<prova>`                      | `<critério binário>`          |
-
-### Casos de borda, riscos e rollback
-
-| Gatilho/risco | Resposta/mitigação | Rollback |
-| ------------- | ------------------ | -------- |
-| …             | …                  | …        |
 
 _Após publicação, mover para needs-plan-review sem needs-human._

@@ -13,7 +13,7 @@ decisões. Publique `templates/04-issue-review-template.md` com `APROVAR`,
   `needs-human`.
 - Ajuste, Critical, Important ou Cannot verify: mova a
   `stage:needs-issue-fix`, limpando needs-human.
-- Dependência externa/risco não resolvido: blocker com resume target de issue.
+- Dependência externa/risco não resolvido: blocker com `## Resume` de issue.
 
 Publique evidência antes da transição e deixe o orquestrador confirmar. Não
 autoaprove, escreva source-set/plano ou implemente.

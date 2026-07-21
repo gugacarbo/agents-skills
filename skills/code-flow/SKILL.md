@@ -15,7 +15,7 @@ mas não escreve plano formal, review ou código.
 Discovery, decisões de intenção e brainstorm podem ocorrer antes da issue.
 Plano formal, implementação, review e integração exigem uma issue de
 entrega/bug elegível. A classificação de risco continua efêmera; somente
-`Complexity` e `Workflow` são persistidos no header do body conforme
+`Complexity` é persistida no frontmatter do body conforme
 [`references/risk-profiles.md`](references/risk-profiles.md).
 
 ## Comandos
@@ -40,16 +40,16 @@ como comandos públicos.
 1. Faça discovery antes de perguntar fatos descobríveis ou escrever.
 2. Antes de plano/código/review, confirme issue de entrega/bug; Epic e tracker
    são inelegíveis.
-3. Proponha `Complexity: S | M | G | X | XL`, resolva
-   `Workflow: native | fallback` e recalcule o risco antes de interpretar
-   estado. Hard trigger sempre vence complexidade. Mudança de comportamento
+3. Proponha `Complexity: S | M | G | X | XL`, recalcule risco e derive o
+   workflow do estado observado antes de interpretar gates: um `stage:*` usa
+   fallback, independentemente de header legado; sem stage, native passa automaticamente quando o mapeamento
+   completo passa. Hard trigger sempre vence complexidade. Mudança de comportamento
    observável em um componente começa em `M`; `S` exige mudança interna,
    behavior-preserving e caminho já conhecido.
 4. Valide a tabela de verdade de [`references/github-flow.md`](references/github-flow.md).
-   Contradição entre header e labels/status é drift bloqueante.
-   `NATIVE_INVALID` pausa o fluxo e oferece migração native → fallback
-   explícita, preservando gate equivalente, snapshot original, evidência e
-   compensação; nunca apenas “repara e continua”.
+   Múltiplos stages são drift bloqueante. Header legado `Workflow: native` que
+   falha no mapeamento pausa e oferece migração explícita/compensável; nunca
+   apenas “repara e continua”.
 5. Carregue somente a operação ativa e despache os papéis exigidos.
 6. O agente publica evidência antes da mutação causada pelo próprio resultado;
    o orquestrador valida toda transição e executa as causadas por decisão
@@ -87,6 +87,12 @@ Antes de retomar ou mutar fallback, leia
 [`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md).
 Antes de publicar evidência ou revisar, leia
 [`templates/evidence-contract-template.md`](templates/evidence-contract-template.md).
+Para uma decisão humana, use o
+[`templates/12-human-gate-spec.md`](templates/12-human-gate-spec.md); para um
+evento isolado, use o
+[`templates/10-issue-note-template.md`](templates/10-issue-note-template.md).
+Ownership de transição e labels fica em
+[`references/label-mutation-matrix.md`](references/label-mutation-matrix.md).
 
 ## Papéis permitidos
 

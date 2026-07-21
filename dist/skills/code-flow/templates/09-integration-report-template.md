@@ -1,31 +1,41 @@
-## Auditoria final e prontidão
+---
+agent: orchestrator
+phase_scope: integração ou fechamento
+sources_evidence: <gate humano, PR/range, checks e issue>
+decisions: <decisão humana recebida>
+changes_validation: <resultado mecânico e confirmação>
+blockers: <blocker ou none>
+---
 
-Agent: `delivery-reviewer (instância fresca)`
-Phase/scope: `auditoria final aplicável`
-Summary: `<resultado>`
-Sources/evidence: `<executor, reviews, PR/range, DoD>`
-Decisions: `<veredito literal>`
-Changes/validation: `<checagens>`
-Blockers: `<blocker ou none>`
-Resume operation: `<review ou none>`
-Resume stage: `<stage:needs-changes ou none>`
-Resume owner: `<executor/humano ou none>`
-Next action: `<merge gate | correção | blocker>`
+> <resultado humano da integração ou fechamento e estado final confirmado>
 
-| Campo            | Valor         |
-| ---------------- | ------------- |
-| PR/range         | `<URL/range>` |
-| Aprovação/checks | `approved     | pending               | not applicable` |
-| Auditoria        | `APROVAR      | APROVAR COM RESSALVAS | AJUSTAR         | BLOQUEAR` |
+## Resume
 
-| Entrega           | Commit/PR | Evidência | Review | DoD | Status |
-| ----------------- | --------- | --------- | ------ | --- | ------ |
-| Escopo autorizado |           |           |        |     |        |
+`none`, ou, em blocker: operação, estado a retomar e responsável.
 
-### Rollback de migração
+## Pré-condições confirmadas
 
-| Evidência executada  | Estado restaurado | Veredito |
-| -------------------- | ----------------- | -------- |
-| `<URL/saída ou n/a>` | `<estado>`        | `PASS    | BLOCKED | n/a` |
+| Gate humano | PR/range e checks | Branch alvo | Issue   |
+| ----------- | ----------------- | ----------- | ------- |
+| `<decisão>` | `<evidência>`     | `<branch>`  | `<URL>` |
 
-_Auditoria nunca faz merge; aprovação apenas abre o gate humano._
+## Integração com diff
+
+| Base SHA | Head SHA | Merge SHA | PR      | Confirmação pós-operação |
+| -------- | -------- | --------- | ------- | ------------------------ |
+| `<sha>`  | `<sha>`  | `<sha>`   | `<URL>` | `<alvo, issue e labels>` |
+
+## Fechamento sem diff: `NO_CHANGES`
+
+| Evidência aprovada | Issue fechada | Workflow limpo                  | Confirmação |
+| ------------------ | ------------- | ------------------------------- | ----------- |
+| `<URL>`            | `<URL>`       | `<stage/needs-human removidos>` | `<prova>`   |
+
+## Falha e recuperação
+
+| Causa             | Estado preservado | Evidência | Operação de retomada |
+| ----------------- | ----------------- | --------- | -------------------- |
+| `<falha ou none>` | `<estado>`        | `<saída>` | `<operação>`         |
+
+_Auditoria e gate humano são artefatos separados. Falha transitória não registra
+sucesso nem fecha a issue._

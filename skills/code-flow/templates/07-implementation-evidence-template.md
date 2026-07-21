@@ -1,46 +1,65 @@
-## Evidência de implementação
+---
+agent: executor
+phase_scope: <plano/outline e escopo>
+sources_evidence: <plano/outline, digest, commits, PR e comandos>
+decisions: <aplicadas ou none>
+changes_validation: <arquivos, comandos e resultados>
+blockers: <blocker ou none>
+---
 
-Agent: `executor`
-Phase/scope: `<plano/outline e escopo>`
-Summary: `<DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED>`
-Sources/evidence: `<plano/outline, digest, base, branch, commits/PR>`
-Decisions: `<aplicadas ou none>`
-Changes/validation: `<arquivos/comandos/resultados ou prova NO_CHANGES>`
-Blockers: `<blocker ou none>`
-Resume operation: `<dispatch ou none>`
-Resume stage: `<stage:in-progress ou stage:needs-changes ou none>`
-Resume owner: `<executor/humano ou none>`
-Next action: `<delivery review | resolver blocker, owner>`
+> <DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED — resumo humano e conclusão esperada do reviewer>
 
-| Campo            | Valor                                                 |
-| ---------------- | ----------------------------------------------------- |
-| Plano ou outline | `<URL>`                                               |
-| Status           | `DONE \| DONE_WITH_CONCERNS \| NO_CHANGES \| BLOCKED` |
-| Base/branch      | `<SHA> / <branch>`                                    |
-| Commits/PR       | `<links ou not applicable para NO_CHANGES>`           |
+## Resume
 
-### Arquivos alterados
+`none`, ou, em blocker: operação, estado a retomar e responsável.
 
-| Arquivo          | Mudança       |
-| ---------------- | ------------- |
-| `<path ou none>` | `<descrição>` |
+## Resultado para decisão
 
-### Verificação
+<o que mudou, resultado, ressalvas e conclusão que o reviewer deve avaliar>
 
-```text
-<comando/prova> — <resultado>
-```
+## Rastreabilidade imutável
 
-### Prova NO_CHANGES
+| Base SHA | Head SHA | Range/PR              | Ambiente     |
+| -------- | -------- | --------------------- | ------------ |
+| `<sha>`  | `<sha>`  | `<base..head ou URL>` | `<ambiente>` |
 
-```text
-<consulta/teste que demonstra escopo já satisfeito ou not applicable>
-```
+## Critérios de aprovação e evidências
 
-### Rollback de migração
+| Critério     | Evidência         | Resultado             |
+| ------------ | ----------------- | --------------------- |
+| `<critério>` | `<comando/prova>` | `PASS \| FAIL \| n/a` |
 
-```text
-<prova executada e estado restaurado ou not applicable>
-```
+## Reconciliação de escopo
 
-_NO_CHANGES não cria commit/PR vazio e ainda exige review independente._
+| Planejado | Implementado | Não feito / motivo |
+| --------- | ------------ | ------------------ |
+| `<item>`  | `<item>`     | `<none ou motivo>` |
+
+## Com diff: `DONE` ou `DONE_WITH_CONCERNS`
+
+| Arquivo  | Mudança       | Validação |
+| -------- | ------------- | --------- |
+| `<path>` | `<descrição>` | `<prova>` |
+
+## Sem diff: `NO_CHANGES`
+
+<consulta objetiva que demonstra escopo já satisfeito; confirme ausência de commit e PR vazio.>
+
+## Blocked
+
+<impedimento, decisão/acesso necessário e evidência disponível ou not applicable>
+
+## Rollback de migração
+
+| Gatilho      | Prova executada   | Estado restaurado |
+| ------------ | ----------------- | ----------------- |
+| `<condição>` | `<comando/saída>` | `<estado>`        |
+
+## Problemas encontrados
+
+| Nível                                             | Problema     | Solução aplicada | Riscos pendentes | Investigação posterior                                                                                             |
+| ------------------------------------------------- | ------------ | ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `Critical \| Important \| Minor \| Cannot verify` | `<problema>` | `<solução>`      | `<risco>`        | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<titulo-url-encoded>&body=<resumo-url-encoded>)` |
+
+_Apenas o link abre um formulário pré-preenchido; não cria issue automaticamente.
+NO_CHANGES não cria commit/PR vazio e ainda exige review independente._

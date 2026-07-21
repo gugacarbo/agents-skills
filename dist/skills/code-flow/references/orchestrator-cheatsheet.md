@@ -1,38 +1,20 @@
 # Cheatsheet do orquestrador
 
-## Ordem de entrada/resume
-
-1. discovery read-only;
-2. validar elegibilidade antes de plano/código/review;
-3. ler/propor Complexity e recalcular risco;
-4. validar `Workflow` pela tabela de verdade;
-5. interpretar próximo gate sem pular estado;
-6. despachar papel independente aplicável;
-7. validar evidência → precondição → mutação → estado final.
-
-## Stage → operação
-
-| Stage fallback                | Operação  | Próximo ator                                   |
-| ----------------------------- | --------- | ---------------------------------------------- |
-| `stage:spec-approval`         | issue     | reviewer ou humano conforme rigor              |
-| `stage:needs-issue-fix`       | issue     | issue-writer                                   |
-| `stage:needs-plan`            | plan      | plan-writer                                    |
-| `stage:needs-plan-review`     | plan      | reviewer; humano só após aprovação             |
-| `stage:needs-plan-fix`        | plan      | plan-writer                                    |
-| `stage:approved`              | dispatch  | humano autoriza; executor inicia               |
-| `stage:in-progress`           | dispatch  | executor                                       |
-| `stage:needs-delivery-review` | review    | delivery-reviewer                              |
-| `stage:needs-changes`         | dispatch  | executor na mesma worktree                     |
-| `stage:ready-to-merge`        | integrate | auditor aplicável; depois humano               |
-| `stage:ready-to-close`        | integrate | humano fecha/ajusta/aguarda                    |
-| `stage:blocked`               | context   | humano resolve; orquestrador usa resume target |
+1. Faça discovery e recalcule Complexity/risco.
+2. Conte `stage:*`: um é fallback; zero exige mapeamento nativo; múltiplos são
+   drift bloqueante.
+3. Se native passar, use-o automaticamente nesta entrada; se falhar em issue
+   nova, inicie fallback equivalente; se falhar em header legado native, pause
+   para decisão humana.
+4. Valide source-set, base e autoria antes de despachar.
+5. Evidência precede mutação; agente muta o próprio resultado e orquestrador
+   muta decisão humana.
 
 ## Check rápido
 
-- Header e estado concordam? Se não, pare por drift.
+- Header legado foi tratado como compatibilidade, não como estado autoritativo?
 - Source-set digest foi calculado somente entre marcadores?
-- Hard trigger/escopo/base mudaram desde o último gate?
-- Autor do evento aplicou a transição e o orquestrador a confirmou?
+- Hard trigger, escopo ou base mudaram desde o último gate?
 - Próximo ator é humano? Só então `needs-human` pode existir.
 - `NO_CHANGES` usa close gate, nunca merge gate.
-- Em batch, cada ID continua independente; `--from` não carrega issue inelegível.
+- Em batch, cada ID permanece independente e `--from` não pula gates.

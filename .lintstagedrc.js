@@ -9,12 +9,12 @@
  * @type {import('lint-staged').Configuration}
  */
 export default {
-	"*": "pnpm format",
-	"*.{md,mdx}": (files) => {
-		const paths = files.map((file) => `"${file}"`).join(" ");
-		return `pnpm prettier --write ${paths} --log-level=warn --no-error-on-unmatched-pattern --cache`;
-	},
-	"*.sh": "pnpm format:sh",
+	"*.{json,jsonc,js,ts,jsx,tsx}": (files) =>
+		`pnpm exec biome check --write --no-errors-on-unmatched ${files.map((file) => JSON.stringify(file)).join(" ")}`,
+	"*.{md,mdx}": (files) =>
+		`pnpm prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --log-level=warn --cache`,
+	"*.sh": (files) =>
+		`pnpm exec prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --plugin=prettier-plugin-sh --log-level=warn --cache`,
 	"*.{js,ts,jsx,tsx}": [
 		// Run TypeScript compiler on staged files without emitting output
 		"tsc-files --noEmit",

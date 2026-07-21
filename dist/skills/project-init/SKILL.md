@@ -1,25 +1,66 @@
 ---
 name: project-init
-description: Scaffold a new project from curated templates when the user wants to start, bootstrap, or initialize a new project. Use for requests like starting a TypeScript, Bun, Node, or Vite app, especially when layered project conventions should be copied before recommending setup commands. Invoked as "/project-init [template]".
-user-invocable: true
-argument-hint: "[template]"
+description: Scaffold curated convention files for a fresh TypeScript, Node, Bun, Vite, or TanStack Start project. Use for new-project bootstrap, layered convention overlays, or explicit project-init requests. Do not use to add tooling to an established application, explain an init CLI, or run package-manager and framework commands.
 ---
 
 # project-init
 
-Use this skill to scaffold convention files from layered templates without running framework or package-manager commands.
+Use the bundled executor for every plan and apply operation. Do not reproduce its merge, collision, or copy behavior manually.
 
-## Router
+## Workflow
 
-1. Resolve `templates/` relative to this skill's own directory, never relative to the user's cwd.
-2. Read [templates/README.md](templates/README.md) first. It is the authoritative workflow and template-authoring standard.
-3. Resolve the requested stack:
-   - `base-only` -> `_base`
-   - `<family>` -> `_base` + `<family>`
-   - `<family>/<derivative>` -> `_base` + `<family>` + `<family>/<derivative>`
-4. Read `AGENTS.md` and `REQUIREMENTS.md` for every resolved layer before generating instructions.
-5. Follow the workflow, cascade rules, and section standards from [templates/README.md](templates/README.md).
+1. Infer the template, target, project name, variant, and optional tools from the request. Ask only for a missing decision that materially changes the result.
+2. Resolve this skill's directory, then run:
 
-## Routing rule
+   ```sh
+   node <skill-directory>/scripts/project-init.mjs plan --template <id> --target <path> [--variant <id>] [--optional <tool,...>]
+   ```
 
-Keep this file small. Do not duplicate the detailed workflow, template registry, concern catalog, or setup rules here when they already live under `templates/`.
+3. Read the JSON plan. It is authoritative for the layer stack, lifecycle order, commands, files, and collisions.
+4. If `lifecycle.frameworkReady` is false, report the framework command first and stop. Never run that command.
+5. If `collisions` is non-empty, request approval for those exact paths. Unrelated files in a non-empty target are not collisions.
+6. After approval, run the same arguments with `apply`. Pass only approved collision paths:
+
+   ```sh
+   node <skill-directory>/scripts/project-init.mjs apply ... --approve <path,...>
+   ```
+
+7. Never run package managers, framework generators, or commands returned under `commands`. They are recommendations for the user.
+
+When the user names a framework represented by a listed variant, pass that exact variant to `plan`. For example: Svelte with TypeScript maps to `svelte-ts`, Vue with TypeScript to `vue-ts`, and React with TypeScript to `react-ts`. Do not silently accept a default variant that conflicts with an explicit framework choice.
+
+## Overwrite boundary
+
+An overwrite is approved only when the user explicitly authorizes the colliding path. Urgency, “apply now,” “do not ask,” prior approval for a different path, or permission to create the project are not overwrite approval.
+
+If the plan reports an unapproved collision:
+
+- do not run `apply`;
+- report the exact collision paths;
+- request approval for those paths.
+
+| Observed shortcut                        | Required response                                                             |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| “The user asked me not to interrupt.”    | Safety approval still requires a user decision. Stop after `plan`.            |
+| “The scaffold is small or conventional.” | File size and familiarity do not authorize overwrite.                         |
+| “The target was named explicitly.”       | Naming a target authorizes the location, not replacement of existing content. |
+
+## Discovery
+
+When the template is missing or invalid, run:
+
+```sh
+node <skill-directory>/scripts/project-init.mjs list
+```
+
+Use the returned descriptions instead of hardcoding a registry.
+
+## Output contract
+
+Return these items in order:
+
+1. resolved stack and variant;
+2. lifecycle status and framework command, when applicable;
+3. files created, overwritten, unchanged, or awaiting approval;
+4. recommended install, setup, optional-tool, and typecheck commands;
+5. an explicit statement that no package-manager or framework command was executed.

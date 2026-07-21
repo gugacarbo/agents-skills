@@ -1,12 +1,16 @@
 ---
-status: accepted
+status: superseded
 date: 2026-07-17
 builds-on: []
-superseded-by: null
+superseded-by: ADR-0002
 deciders: [user]
 ---
 
 # Code-flow persiste contexto operacional sem transformar esforço em risco
+
+> VERDADE ATUAL: substituído por ADR-0002. `Complexity` continua persistida,
+> mas o workflow é derivado dinamicamente de `stage:*` e do mapeamento nativo;
+> nenhum header `Workflow` controla ou registra o fluxo.
 
 ## Contexto e problema
 

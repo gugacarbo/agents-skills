@@ -1,7 +1,7 @@
 # code-flow
 
 Coordena entregas por issue com discovery pré-issue limitado, complexidade
-persistida, risco efêmero, workflow retomável, reviews independentes e
+persistida, risco efêmero, workflow derivado do estado, reviews independentes e
 integração ou fechamento explícitos.
 
 Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
@@ -22,12 +22,10 @@ persistidos.
 
 ## Workflow do repositório
 
-- `Workflow: native|fallback` vive no header da issue e precisa concordar com o
-  estado observado.
-- A primeira seleção nativa exige mapeamento completo e opt-in humano; depois é
-  reutilizada enquanto escopo e mapeamento continuarem válidos.
-- Contradição é drift; native inválido exige migração explícita para fallback.
-- Issues legadas com `stage:*` migram preguiçosamente para fallback.
+- Um `stage:*` define fallback; sem stage, native é usado automaticamente só
+  quando o mapeamento completo passa.
+- `Workflow` não é persistido. Header legado é compatibilidade, não estado.
+- Native legado inválido pausa e exige decisão humana para migrar ao fallback.
 
 ## code-flow vs super-planning
 

@@ -1,24 +1,25 @@
-## Revisão independente do source-set
+---
+agent: issue-reviewer
+phase_scope: issue / source-set X/XL ou hard trigger
+sources_evidence: <issue, digest, proposta e fontes>
+decisions: <veredito literal>
+changes_validation: <checagens ou none>
+blockers: <blocker ou none>
+---
 
-Agent: `issue-reviewer`
-Phase/scope: `issue / source-set X/XL ou hard trigger`
-Summary: `<resultado>`
-Sources/evidence: `<issue, digest, proposta, fontes>`
-Decisions: `<veredito literal>`
-Changes/validation: `<checagens ou none>`
-Blockers: `<blocker ou none>`
-Resume operation: `<issue ou none>`
-Resume stage: `<stage:needs-issue-fix ou none>`
-Resume owner: `<issue-writer ou none>`
-Next action: `<gate humano | ajuste | blocker, owner>`
+> <resultado claro do review e consequência para o próximo gate>
+
+## Resume
+
+`none`, ou, em blocker: operação, estado a retomar e responsável.
 
 **Independência:** não escrevi nem aprovei o source-set.
 
 **Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
-| Severidade                                        | Fonte/seção    | Impacto e ação |
-| ------------------------------------------------- | -------------- | -------------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<ação>`       |
+| Severidade                                        | Fonte/seção    | Impacto     | Ação     |
+| ------------------------------------------------- | -------------- | ----------- | -------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<impacto>` | `<ação>` |
 
 _Ressalvas aprovadoras são somente Minor não bloqueantes. O veredito não
 substitui o gate humano._

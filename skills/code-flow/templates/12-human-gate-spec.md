@@ -1,11 +1,37 @@
-# Gate humano · source-set
+---
+agent: orchestrator
+phase_scope: <brainstorm | issue | plan | dispatch | review | integrate | epic>
+sources_evidence: <artefatos e evidências que fundamentam o gate>
+decisions: <decisão solicitada>
+changes_validation: <transição que será confirmada>
+blockers: <blocker ou none>
+---
 
-Apresente bloco exato, digest e review independente aplicável.
+> <resumo humano da decisão solicitada e do motivo do gate>
 
-| Resposta   | Ação do orquestrador                                                   |
-| ---------- | ---------------------------------------------------------------------- |
-| `Aprovar`  | Registrar URL + digest do bloco; ir a `stage:needs-plan`.              |
-| `Ajustar`  | Ir a `stage:needs-issue-fix`, limpar needs-human e devolver ao writer. |
-| `Bloquear` | Ir a `stage:blocked + needs-human` com resume target de issue/source.  |
+## Resume
 
-ADR/spec em arquivo só é materializado pelo executor na worktree autorizada.
+`none`, ou, em blocker: operação, estado a retomar e responsável.
+
+## Estado atual
+
+<stage/estado nativo, artefato aprovado e contexto observável>
+
+## Resumo do gate
+
+<o que a pessoa precisa decidir agora, sem substituir a instrução específica da fase>
+
+## Impactos
+
+| Opção                | Workflow/estado | Artefatos/evidências | Consequência                      |
+| -------------------- | --------------- | -------------------- | --------------------------------- |
+| `<resposta literal>` | `<transição>`   | `<registro>`         | `<autoriza, devolve ou bloqueia>` |
+
+## Decisão solicitada
+
+| Resposta                  | Ação do orquestrador   |
+| ------------------------- | ---------------------- |
+| `<opção literal da fase>` | `<ação e confirmação>` |
+
+_As opções, transições e proibições próprias de cada fase vivem nas instruções
+daquela fase. Este template apenas apresenta o gate de forma consistente._

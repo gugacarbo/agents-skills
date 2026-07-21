@@ -1,0 +1,74 @@
+{
+	"id": "bun",
+	"extends": ["_base"],
+	"description": "A Bun application using Bun as runtime, package manager, bundler, and test runner.",
+	"packageManager": "bun",
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"files": [
+		{ "source": "../typescript/files/knip.json", "target": "knip.json" },
+		{
+			"source": "../_shared/husky/files/.husky/pre-commit",
+			"target": ".husky/pre-commit"
+		},
+		{
+			"source": "../_shared/husky/files/.husky/pre-push",
+			"target": ".husky/pre-push"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/pre-commit",
+			"target": "scripts/pre-commit"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/pre-push",
+			"target": "scripts/pre-push"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/lib/shared.sh",
+			"target": "scripts/lib/shared.sh"
+		}
+	],
+	"commands": {
+		"framework": "bun init ./{{targetName}}",
+		"frameworkCwd": ".",
+		"install": ["bun add -d @biomejs/biome knip husky"],
+		"setup": ["bunx biome init", "bunx husky init"],
+		"typecheck": "bun run typecheck"
+	},
+	"optionalTools": {
+		"cspell": {
+			"description": "Spell-check code and documentation in English and Brazilian Portuguese.",
+			"commands": { "bun": "bun add -d cspell @cspell/dict-pt-br" },
+			"files": [
+				{
+					"source": "../_base/optional-tools/cspell/files/cspell.config.yaml",
+					"target": "cspell.config.yaml"
+				}
+			]
+		},
+		"lint-staged": {
+			"description": "Run formatting and type checks only for staged files.",
+			"commands": { "bun": "bun add -d lint-staged prettier tsc-files" },
+			"files": [
+				{
+					"source": "../typescript/optional-tools/lint-staged/files/.lintstagedrc.js",
+					"target": ".lintstagedrc.js"
+				}
+			]
+		},
+		"test-staged": {
+			"description": "Run tests related to staged files.",
+			"commands": { "bun": "bun add -d test-staged" }
+		},
+		"t3oss": {
+			"description": "Type-safe environment variable validation.",
+			"commands": { "bun": "bun add @t3-oss/env-core" }
+		},
+		"turbo": {
+			"description": "Turborepo task orchestration.",
+			"commands": { "bun": "bun add -d turbo" }
+		}
+	}
+}

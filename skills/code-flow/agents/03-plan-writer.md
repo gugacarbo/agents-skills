@@ -16,6 +16,6 @@ Após publicar plano novo ou corrigido, transicione de `stage:needs-plan` ou
 drift.
 
 No terceiro ciclo ainda rejeitado, abra checkpoint humano em vez de continuar
-automaticamente. Blocker externo inclui resume target de plan. Publique
+automaticamente. Blocker externo inclui `## Resume` de plan. Publique
 evidência antes de transicionar e aguarde validação do orquestrador. Não
 revise, implemente ou aprove.

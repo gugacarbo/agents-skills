@@ -1,33 +1,61 @@
-## Revisão independente da entrega
+---
+agent: delivery-reviewer
+phase_scope: <plano/outline / range ou prova NO_CHANGES>
+sources_evidence: <executor, range/PR/prova e fontes>
+decisions: <veredito literal>
+changes_validation: <checagens>
+blockers: <blocker ou none>
+---
 
-Agent: `delivery-reviewer`
-Phase/scope: `<plano/outline / range ou prova NO_CHANGES>`
-Summary: `<resultado>`
-Sources/evidence: `<executor, range/PR/prova, fontes>`
-Decisions: `<veredito literal>`
-Changes/validation: `<checagens>`
-Blockers: `<blocker ou none>`
-Resume operation: `<review/dispatch ou none>`
-Resume stage: `<stage:needs-changes ou none>`
-Resume owner: `<executor/humano ou none>`
-Next action: `<merge gate | close gate | auditoria | correção>`
+> <resumo humano da revisão: escopo, conclusão, ressalvas e próxima decisão>
 
-| Campo         | Valor                                                       |
-| ------------- | ----------------------------------------------------------- |
-| Plano/outline | `<URL>`                                                     |
-| Evidência     | `<URL>`                                                     |
-| Range/PR      | `<base..head, URL ou not applicable>`                       |
-| Independência | `Não produzi o artefato revisado nem implementei o escopo.` |
-| Veredito      | `APROVAR \| APROVAR COM RESSALVAS \| AJUSTAR \| BLOQUEAR`   |
+## Resume
 
-| Severidade                                        | Local/prova                | Impacto e ação |
-| ------------------------------------------------- | -------------------------- | -------------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<file:line ou evidência>` | `<ação>`       |
+`none`, ou, em blocker: operação, estado a retomar e responsável.
 
-- [ ] Contrato/fontes.
-- [ ] Testes/DoD ou prova NO_CHANGES.
-- [ ] Escopo/ownership.
-- [ ] Rollback de migração executado ou not applicable.
+## Resumo da revisão
+
+<o que foi revisado, o veredito e a decisão humana esperada>
+
+| Plano/outline | Evidência | Range/PR                   |
+| ------------- | --------- | -------------------------- |
+| `<URL>`       | `<URL>`   | `<base..head, URL ou n/a>` |
+
+**Independência:** não produzi plano, código nem evidência revisada.
+
+**Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
+
+## Cobertura dos critérios
+
+| Critério     | Evidência revisada | Resultado                       | Observação |
+| ------------ | ------------------ | ------------------------------- | ---------- |
+| `<critério>` | `<prova>`          | `PASS \| FAIL \| Cannot verify` | `<nota>`   |
+
+## Reconciliação de escopo
+
+| Autorizado | Entregue | Divergência/justificativa |
+| ---------- | -------- | ------------------------- |
+| `<item>`   | `<item>` | `<none ou motivo>`        |
+
+## Achados
+
+| Severidade                                        | Local/prova                | Impacto     | Ação     |
+| ------------------------------------------------- | -------------------------- | ----------- | -------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<file:line ou evidência>` | `<impacto>` | `<ação>` |
+
+## Com diff
+
+<range, testes e DoD revisados ou not applicable>
+
+## Sem diff: `NO_CHANGES`
+
+<escopo consultado, prova de ausência e confirmação de nenhum commit/PR vazio>
+
+## Decisão e transição proposta
+
+| Estado atual | Próximo gate | Efeito após decisão humana |
+| ------------ | ------------ | -------------------------- |
+| `<stage>`    | `<merge      | close                      | auditoria | correção>` | `<transição>` |
 
 _NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para
 ready-to-merge._

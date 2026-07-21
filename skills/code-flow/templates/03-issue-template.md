@@ -1,41 +1,60 @@
-# Proposta de entrega
+---
+type: <issue | bug | feature | docs>
+complexity: <S | M | G | X | XL>
+agent: <issue-writer | orchestrator>
+phase_scope: issue / source-set
+sources_evidence: <padrão local, fontes, código ou testes>
+decisions: <complexity e spec impact com racional>
+changes_validation: <body criado ou atualizado>
+blockers: <blocker ou none>
+---
 
-| Campo      | Valor                    |
-| ---------- | ------------------------ |
-| Complexity | `S \| M \| G \| X \| XL` |
-| Workflow   | `native \| fallback`     |
-| Tipo       | `delivery issue \| bug`  |
+> <resultado humano esperado, próximo gate e motivo da entrega>
 
-Agent: `issue-writer | orchestrator(S no-spec)`
-Phase/scope: `issue / source-set`
-Summary: `<resultado e próximo gate>`
-Sources/evidence: `<padrão local, fontes, código/testes>`
-Decisions: `<complexity, workflow e spec impact com racional>`
-Changes/validation: `<body criado/atualizado>`
-Blockers: `<blocker ou none>`
-Resume operation: `<issue ou none>`
-Resume stage: `<stage alvo ou none>`
-Resume owner: `<owner ou none>`
-Next action: `<gate/papel e owner>`
+## Resume
+
+`none`, ou, em blocker: operação, estado a retomar e responsável.
 
 <!-- code-flow:source-set:start -->
 
-## Objetivo e limites
+## Contexto e valor (opcional)
 
-<resultado fechável, fora de escopo e critérios de sucesso>
+Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
+Para mudança técnica, descreva o contexto e o valor sem forçar user story.
+
+## Objetivo
+
+<resultado fechável e critérios de sucesso>
+
+## Limites
+
+<fora de escopo, dependências e restrições>
 
 ## Impacto de spec
 
-| Campo                 | Valor                              |
-| --------------------- | ---------------------------------- |
-| Ação                  | `create \| update \| not required` |
-| Fonte aceita          | `<URL/path ou not applicable>`     |
-| Padrão do repositório | `<form/template/guidance>`         |
+| Campo                 | Valor                          |
+| --------------------- | ------------------------------ |
+| Ação                  | `<create                       | update | not required>` |
+| Fonte aceita          | `<URL/path ou not applicable>` |
+| Padrão do repositório | `<form/template/guidance>`     |
 
-### Proposta ou racional
+### Proposta de spec (`create`)
 
-<Proposta completa para create/update; racional concreto para not required.>
+<proposta completa ou not applicable>
+
+### Diff de spec (`update`)
+
+```diff
+- <antes>
++ <depois>
+```
+
+<racional concreto para `not required`, quando aplicável>
+
 <!-- code-flow:source-set:end -->
 
-_O digest protege somente o bloco marcado. O nome interno do perfil nunca é
-persistido._
+## Relações
+
+| Epic           | GitHub            |
+| -------------- | ----------------- |
+| `#<n> ou none` | `subissue of #<n> | standalone delivery issue` |

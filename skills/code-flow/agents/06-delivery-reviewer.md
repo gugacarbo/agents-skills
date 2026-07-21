@@ -15,7 +15,7 @@ houver diff.
 - NO_CHANGES comprovado: `stage:ready-to-close + needs-human`.
 - `AJUSTAR`, Critical, Important ou Cannot verify:
   `stage:needs-changes`, sem needs-human.
-- Decisão/acesso externo: blocker com resume target.
+- Decisão/acesso externo: blocker com `## Resume`.
 
 Ressalva aprovadora é apenas Minor não bloqueante. Migração sem prova executada
 de rollback é bloqueante.

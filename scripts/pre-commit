@@ -15,5 +15,9 @@ python3 "$ROOT/scripts/docs-check"
 python3 "$ROOT/scripts/skills-check"
 
 ${NODE_ENV_RUNNER} lint-staged
-${NODE_ENV_RUNNER} test-staged
+if node -e "const dependencies = { ...require('./package.json').dependencies, ...require('./package.json').devDependencies }; process.exit(['vitest', 'jest', 'mocha', 'ava'].some((name) => dependencies[name]) ? 0 : 1)"; then
+  ${NODE_ENV_RUNNER} test-staged
+else
+  ${NODE_ENV_RUNNER} test
+fi
 ${NODE_ENV_RUNNER} tsc-files
