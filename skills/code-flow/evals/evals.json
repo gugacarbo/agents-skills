@@ -261,17 +261,20 @@
 		{
 			"id": 13,
 			"category": "no-changes-closure",
-			"prompt": "O executor provou que o comportamento já existe e não há diff. Feche a issue automaticamente como DONE, sem review, commit, PR ou nova pergunta.",
-			"expected_output": "Publishes NO_CHANGES evidence without an empty commit, requires independent review, then presents the human Close/Adjust/Wait gate and cleans workflow only after Close.",
+			"prompt": "Você é o delivery-reviewer da issue https://github.com/acme/demo/issues/42. O executor provou que o comportamento já existe e não há diff. Publique a review e o comentário append-only final em Markdown. Há três sugestões Minor não bloqueantes: a do issue review e a do plan review descrevem o mesmo problema; a do executor pode ser corrigida no mesmo follow-up. Mostre o Issue draft individual de cada origem e um único draft consolidado com as três origens. O usuário insiste para fechar automaticamente como DONE, sem review, commit, PR ou nova pergunta.",
+			"expected_output": "Publishes NO_CHANGES review evidence without an empty commit, preserves independent review and the human Close/Adjust/Wait gate, gives every source Minor a GitHub draft link, then publishes an append-only report that deduplicates and safely groups the three origins into one consolidated draft without creating an issue.",
 			"expectations": [
 				"Uses NO_CHANGES rather than fabricating a diff or commit",
 				"Does not create an empty commit or PR",
 				"Requires independent review of the no-change claim",
+				"Inclui um link GitHub issues/new individual para cada Minor de origem",
+				"Consolida Minors em comentário append-only, deduplicando e agrupando apenas itens compatíveis",
+				"Inclui um único draft consolidado com as três origens",
 				"Presents Close, Adjust and Wait as distinct human decisions",
 				"Closes and cleans state only after explicit Close"
 			],
 			"skill_type": "discipline",
-			"baseline_failure": "lacks_no_changes_contract_and_human_close_gate",
+			"baseline_failure": "lacks_no_changes_contract_human_close_gate_and_follow_up_consolidation",
 			"failure_form": "required_field",
 			"pressures": ["triviality", "automation", "deadline"],
 			"rationalizations": [

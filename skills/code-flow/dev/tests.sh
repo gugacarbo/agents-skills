@@ -45,6 +45,8 @@ test_structure() {
   [ -f "$SKILL/templates/15-implementation-outline-template.md" ] || fail 'missing compact outline template'
   [ -f "$SKILL/templates/16-native-workflow-mapping.md" ] || fail 'missing native workflow mapping template'
   [ -f "$SKILL/templates/12-human-gate-spec.md" ] || fail 'missing shared human gate template'
+  [ -f "$SKILL/templates/11-follow-up-issues-report.md" ] || fail 'missing follow-up issue report template'
+  [ -f "$SKILL/references/follow-up-issue-drafts.md" ] || fail 'missing follow-up issue draft contract'
   [ ! -e "$SKILL/templates/02-user-story.md" ] || fail 'obsolete user-story template remains'
   for obsolete in 11-human-gate-design.md 13-human-gate-plan.md 14-human-gate-merge.md 17-human-gate-close.md; do
     [ ! -e "$SKILL/templates/$obsolete" ] || fail "obsolete gate template remains: $obsolete"
@@ -91,7 +93,7 @@ test_evidence_contract() {
   local template
   for template in 01-epic.md 03-issue-template.md 04-issue-review-template.md 05-plan-template.md 06-review-template.md \
     07-implementation-evidence-template.md 08-implementation-review-template.md 09-integration-report-template.md \
-    10-issue-note-template.md 12-human-gate-spec.md 15-implementation-outline-template.md \
+    10-issue-note-template.md 11-follow-up-issues-report.md 12-human-gate-spec.md 15-implementation-outline-template.md \
     16-native-workflow-mapping.md evidence-contract-template.md; do
     assert_envelope "$SKILL/templates/$template"
   done
@@ -116,7 +118,23 @@ test_evidence_contract() {
   assert_contains '### Diff de spec (`update`)' "$SKILL/templates/03-issue-template.md"
   assert_contains 'Cada filha usa `templates/03-issue-template.md`' "$SKILL/templates/01-epic.md"
   assert_contains 'Problemas encontrados' "$SKILL/templates/07-implementation-evidence-template.md"
-  assert_contains 'issues/new?title=' "$SKILL/templates/07-implementation-evidence-template.md"
+  for template in 04-issue-review-template.md 06-review-template.md 07-implementation-evidence-template.md 08-implementation-review-template.md; do
+    assert_contains 'Issue draft' "$SKILL/templates/$template"
+    assert_contains 'Minor não bloqueante: link; demais: n/a' "$SKILL/templates/$template"
+    assert_contains 'follow-up-issue-drafts.md' "$SKILL/templates/$template"
+  done
+  assert_contains '[Minor] <resumo curto do problema>' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_contains 'title-percent-encoded' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_contains 'nunca cria issue' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_contains 'templates/11-follow-up-issues-report.md' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_contains 'Nenhuma sugestão de issue não bloqueante encontrada' "$SKILL/templates/11-follow-up-issues-report.md"
+  assert_contains 'duplicatas semânticas' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'Não oculte os links individuais' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'nunca é `DONE`' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'liste antes do veredito' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'templates/11-follow-up-issues-report.md' "$SKILL/phases/review.md"
+  assert_contains 'A review só está completa' "$SKILL/phases/review.md"
+  assert_contains 'nunca `DONE`' "$SKILL/phases/review.md"
 }
 
 test_helpers_syntax() {
@@ -300,7 +318,10 @@ test_evals_json() {
     ([.evals[] | select((.baseline_failure | type) != "string" or (.baseline_failure | length) == 0)] | length == 0) and
     ((.evals[] | select(.id == 7) | .baseline_failure) == "omits_dynamic_native_selection") and
     ((.evals[] | select(.id == 12) | .baseline_failure) == "omits_transition_ownership_and_start_evidence") and
-    ((.evals[] | select(.id == 13) | .baseline_failure) == "lacks_no_changes_contract_and_human_close_gate") and
+    ((.evals[] | select(.id == 13) | .baseline_failure) == "lacks_no_changes_contract_human_close_gate_and_follow_up_consolidation") and
+    ((.evals[] | select(.id == 13) | .expectations | index("Consolida Minors em comentário append-only, deduplicando e agrupando apenas itens compatíveis")) != null) and
+    ((.evals[] | select(.id == 13) | .expectations | index("Inclui um link GitHub issues/new individual para cada Minor de origem")) != null) and
+    ((.evals[] | select(.id == 13) | .expectations | index("Inclui um único draft consolidado com as três origens")) != null) and
     ((.evals[] | select(.id == 14) | .baseline_failure) == "regression_guard_batch_and_merge")
   ' "$SKILL/evals/evals.json" > /dev/null || fail 'eval corpus or verification protocol incomplete'
 }
@@ -341,6 +362,7 @@ test_label_mutation() {
   assert_contains 'needs-human' "$a/06-delivery-reviewer.md"
   assert_contains 'stage:needs-changes' "$a/06-delivery-reviewer.md"
   assert_contains 'blocker' "$a/06-delivery-reviewer.md"
+  assert_contains '11-follow-up-issues-report.md' "$a/06-delivery-reviewer.md"
 
   # Canonical mutation matrix must exist and be referenced
   [ -f "$SKILL/references/label-mutation-matrix.md" ] || fail 'missing canonical label mutation matrix'

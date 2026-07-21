@@ -70,6 +70,15 @@ Plan-writer sempre entrega snapshot em `stage:needs-plan-review` sem
 needs-human. Executor entra em in-progress após evidência de início e validação.
 NO_CHANGES exige review e `stage:ready-to-close`. Blocker registra resume target.
 
+Todo Minor não bloqueante tem link de issue draft com resumo e origem, sem
+criação automática. Antes da própria transição, delivery-reviewer consolida os
+Minors de issue review, plan review, executor e review atual em comentário
+append-only: deduplica, agrupa apenas escopo/caminho compatíveis e lista drafts
+finais. Fonte ausente é Cannot verify; o comentário não altera labels, gates,
+merge ou fechamento. O agrupamento não substitui links individuais nem suas
+origens. NO_CHANGES nunca é renomeado para DONE e não permite pular review,
+consolidação ou gate de fechamento.
+
 ### Batch e Epic
 
 Batch isola trilhas, não pula gates com `--from` e consolida escolhas por IDs.
@@ -94,6 +103,7 @@ humano de filhas, medidas e decisões transversais.
 | 12  | blocker é resolvido                       | recalcular risco e usar resume target ainda válido         |
 | 13  | batch contém issue inelegível para --from | reportá-la e continuar trilhas elegíveis                   |
 | 14  | PR/checks estão aprovados                 | ainda aguardar Integrar explícito                          |
+| 15  | Minors não bloqueantes foram registrados  | gerar drafts e consolidar sugestões antes do gate final    |
 
 ## Questões em aberto
 
@@ -111,7 +121,7 @@ python3 scripts/docs-check
 git diff --check
 ```
 
-- Casos 1–14 cobertos por testes determinísticos ou evals pareados.
+- Casos 1–15 cobertos por testes determinísticos ou evals pareados.
 - Cinco amostras baseline/candidato por 14 cenários com o modelo aprovado.
 - 5/5 em hard triggers, workflow, ownership, independência e merge/close;
   mínimo 4/5 nos demais.

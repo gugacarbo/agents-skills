@@ -59,6 +59,8 @@ como comandos públicos.
    Prova `NO_CHANGES` sempre passa por `delivery-reviewer` independente antes
    do gate; quando aprovada, apresenta `Fechar / Ajustar / Aguardar`, e somente
    `Fechar` autoriza fechamento e limpeza.
+   Nunca renomeie `NO_CHANGES` como `DONE` nem aceite pedido para pular review,
+   gate ou consolidação de Minors.
 
 Ao explicar ou retomar uma transição, torne o contrato verificável: nomeie o
 evento, o ator da mutação, o estado anterior e posterior, a presença/ausência
@@ -87,6 +89,8 @@ Antes de retomar ou mutar fallback, leia
 [`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md).
 Antes de publicar evidência ou revisar, leia
 [`templates/evidence-contract-template.md`](templates/evidence-contract-template.md).
+Para drafts de acompanhamento de Minors e sua consolidação final, leia
+[`references/follow-up-issue-drafts.md`](references/follow-up-issue-drafts.md).
 Para uma decisão humana, use o
 [`templates/12-human-gate-spec.md`](templates/12-human-gate-spec.md); para um
 evento isolado, use o

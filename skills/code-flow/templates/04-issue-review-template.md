@@ -17,9 +17,10 @@ blockers: <blocker ou none>
 
 **Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
-| Severidade                                        | Fonte/seção    | Impacto     | Ação     |
-| ------------------------------------------------- | -------------- | ----------- | -------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<impacto>` | `<ação>` |
+| Severidade                                        | Fonte/seção    | Impacto     | Ação     | Issue draft                                 |
+| ------------------------------------------------- | -------------- | ----------- | -------- | ------------------------------------------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
 
 _Ressalvas aprovadoras são somente Minor não bloqueantes. O veredito não
-substitui o gate humano._
+substitui o gate humano. Para cada Minor, use
+[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md)._

@@ -57,9 +57,11 @@ blockers: <blocker ou none>
 
 ## Problemas encontrados
 
-| Nível                                             | Problema     | Solução aplicada | Riscos pendentes | Investigação posterior                                                                                             |
-| ------------------------------------------------- | ------------ | ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `Critical \| Important \| Minor \| Cannot verify` | `<problema>` | `<solução>`      | `<risco>`        | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<titulo-url-encoded>&body=<resumo-url-encoded>)` |
+| Nível                                             | Problema     | Solução aplicada | Riscos pendentes | Issue draft                                 |
+| ------------------------------------------------- | ------------ | ---------------- | ---------------- | ------------------------------------------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<problema>` | `<solução>`      | `<risco>`        | `<Minor não bloqueante: link; demais: n/a>` |
 
-_Apenas o link abre um formulário pré-preenchido; não cria issue automaticamente.
+_Para cada Minor, use
+[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
+O link abre um formulário pré-preenchido; não cria issue automaticamente.
 NO_CHANGES não cria commit/PR vazio e ainda exige review independente._

@@ -41,3 +41,8 @@ Resultados restantes são comentários append-only. O agente aplica a transiçã
 causada por seu artefato; o orquestrador confirma. Decisão humana usa o gate
 compartilhado; evento isolado usa a nota compartilhada, sem duplicar regras de
 fase.
+
+Todo `Minor` não bloqueante usa o draft canônico de
+[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
+No fim da delivery review, o reviewer publica a consolidação append-only de
+sugestões antes da transição, sem criar issues nem mutar labels/gates.

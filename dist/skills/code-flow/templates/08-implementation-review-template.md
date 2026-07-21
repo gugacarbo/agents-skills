@@ -39,9 +39,9 @@ blockers: <blocker ou none>
 
 ## Achados
 
-| Severidade                                        | Local/prova                | Impacto     | Ação     |
-| ------------------------------------------------- | -------------------------- | ----------- | -------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<file:line ou evidência>` | `<impacto>` | `<ação>` |
+| Severidade                                        | Local/prova                | Impacto     | Ação     | Issue draft                                 |
+| ------------------------------------------------- | -------------------------- | ----------- | -------- | ------------------------------------------- |
+| `Critical \| Important \| Minor \| Cannot verify` | `<file:line ou evidência>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
 
 ## Com diff
 
@@ -58,4 +58,6 @@ blockers: <blocker ou none>
 | `<stage>`    | `<merge      | close                      | auditoria | correção>` | `<transição>` |
 
 _NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para
-ready-to-merge._
+ready-to-merge. Para cada Minor, use
+[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
+NO_CHANGES nunca é DONE e não pula review, consolidação nem gate humano._

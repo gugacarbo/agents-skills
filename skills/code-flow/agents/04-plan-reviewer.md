@@ -9,6 +9,10 @@ Leia snapshot literal, source-set/digest, fontes, issue e comportamento atual.
 Verifique objetivo, limites, aceite, validação, DoD, risco e rollback. Publique
 `templates/06-review-template.md`.
 
+Para cada `Minor` não bloqueante, inclua o Issue draft canônico de
+`references/follow-up-issue-drafts.md`; Critical, Important e Cannot verify
+usam `n/a`.
+
 - `APROVAR` ou ressalvas apenas Minor: mantenha
   `stage:needs-plan-review` e aplique `needs-human`.
 - `AJUSTAR`, Critical, Important ou Cannot verify: mova a

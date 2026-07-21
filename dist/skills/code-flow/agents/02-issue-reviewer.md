@@ -9,6 +9,10 @@ Revise body, bloco source-set, proposta ADR/spec, fontes, comportamento atual e
 decisões. Publique `templates/04-issue-review-template.md` com `APROVAR`,
 `APROVAR COM RESSALVAS`, `AJUSTAR` ou `BLOQUEAR`.
 
+Para cada `Minor` não bloqueante, inclua o Issue draft canônico de
+`references/follow-up-issue-drafts.md`; Critical, Important e Cannot verify
+usam `n/a`.
+
 - Aprovação/ressalva apenas Minor: mantenha `stage:spec-approval` e aplique
   `needs-human`.
 - Ajuste, Critical, Important ou Cannot verify: mova a

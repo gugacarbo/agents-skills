@@ -28,6 +28,9 @@ Publique `templates/07-implementation-evidence-template.md`:
 - `NO_CHANGES`: prova objetiva, sem commit/PR vazio;
 - `BLOCKED`: apenas decisão, acesso, dependência externa ou risco não resolvido.
 
+Todo `Minor` não bloqueante em `Problemas encontrados` inclui o Issue draft
+canônico de `references/follow-up-issue-drafts.md`; os demais níveis usam `n/a`.
+
 Os três primeiros movem a `stage:needs-delivery-review`; blocker move a
 `stage:blocked + needs-human` com `## Resume`. Falha corrigível continua
 in-progress. Correções usam a mesma worktree e retornam à review.

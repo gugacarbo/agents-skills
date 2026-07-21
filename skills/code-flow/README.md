@@ -27,6 +27,13 @@ persistidos.
 - `Workflow` não é persistido. Header legado é compatibilidade, não estado.
 - Native legado inválido pausa e exige decisão humana para migrar ao fallback.
 
+## Ressalvas não bloqueantes
+
+Todo `Minor` não bloqueante recebe um link de issue draft, sem criação
+automática. Ao final, o delivery reviewer consolida sugestões de todas as
+etapas, remove duplicatas, agrupa apenas itens compatíveis e publica o relatório
+append-only antes do gate final.
+
 ## code-flow vs super-planning
 
 - **code-flow:** entrega governada por issue, risco adaptativo, gates e PR.
