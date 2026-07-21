@@ -1,17 +1,13 @@
----
-agent: delivery-reviewer
-phase_scope: delivery review / consolidação de sugestões
-sources_evidence: <links dos reviews, evidência do executor e achados próprios>
-decisions: <duplicatas removidas, grupos e itens independentes>
-changes_validation: <coleta completa ou Cannot verify>
-blockers: <blocker ou none>
----
-
-> <quantidade coletada, duplicatas removidas, grupos finais e consequência para o gate>
+> agent: delivery-reviewer
+> phase_scope: delivery review / consolidação de sugestões
+> sources_evidence: <links dos reviews, evidência do executor e achados próprios>
+> decisions: <duplicatas removidas, grupos e itens independentes>
+> changes_validation: <coleta completa ou Cannot verify>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<quantidade coletada, duplicatas removidas, grupos finais e consequência para o gate>
 
 ## Cobertura da coleta
 

@@ -1,24 +1,20 @@
----
-type: epic
-agent: orchestrator
-phase_scope: epic / tracking e coordenação
-sources_evidence: <filhas, dependências, métricas e decisões>
-decisions: <aceite, replanejamento ou fechamento>
-changes_validation: <checkpoint e situação das filhas>
-blockers: <blocker ou none>
-owner: <time ou pessoa>
-status: <rascunho | em andamento | concluído>
----
+> type: epic
+> agent: orchestrator
+> phase_scope: epic / tracking e coordenação
+> sources_evidence: <filhas, dependências, métricas e decisões>
+> decisions: <aceite, replanejamento ou fechamento>
+> changes_validation: <checkpoint e situação das filhas>
+> blockers: <blocker ou none>
+> owner: <time ou pessoa>
+> status: <rascunho | em andamento | concluído>
 
-> <resumo humano da iniciativa, resultado esperado e motivo para coordená-la>
+## Resumo
 
-## Resume
+<resumo humano da iniciativa, resultado esperado e motivo para coordená-la>
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+## Objetivo
 
-## Incluído
-
-<capacidades ou resultados de entrega incluídos>
+<resultados de entrega incluídos>
 
 ## Fora de escopo
 

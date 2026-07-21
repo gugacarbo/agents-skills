@@ -1,17 +1,13 @@
----
-agent: orchestrator
-phase_scope: discovery / avaliação de workflow nativo
-sources_evidence: <guidance, labels, estados, gates e entregas recentes>
-decisions: <NATIVE_ELIGIBLE | NATIVE_INCOMPLETE | NATIVE_INVALID>
-changes_validation: <mapeamento avaliado sem mutação>
-blockers: <blocker ou none>
----
-
-> <resumo humano da capacidade nativa e da consequência do resultado>
+> agent: orchestrator
+> phase_scope: discovery / avaliação de workflow nativo
+> sources_evidence: <guidance, labels, estados, gates e entregas recentes>
+> decisions: <NATIVE_ELIGIBLE | NATIVE_INCOMPLETE | NATIVE_INVALID>
+> changes_validation: <mapeamento avaliado sem mutação>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resumo humano da capacidade nativa e da consequência do resultado>
 
 ## Snapshot avaliado
 

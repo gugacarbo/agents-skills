@@ -1,30 +1,26 @@
----
-type: <issue | bug | feature | docs>
-complexity: <S | M | G | X | XL>
-agent: <issue-writer | orchestrator>
-phase_scope: issue / source-set
-sources_evidence: <padrão local, fontes, código ou testes>
-decisions: <complexity e spec impact com racional>
-changes_validation: <body criado ou atualizado>
-blockers: <blocker ou none>
----
-
-> <resultado humano esperado, próximo gate e motivo da entrega>
-
-## Resume
-
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+> type: <issue | bug | feature | docs>
+> complexity: <S | M | G | X | XL>
+> agent: <issue-writer | orchestrator>
+> phase_scope: issue / source-set
+> sources_evidence: <padrão local, fontes, código ou testes>
+> decisions: <complexity e spec impact com racional>
+> changes_validation: <body criado ou atualizado>
+> blockers: <blocker ou none>
 
 <!-- code-flow:source-set:start -->
 
-## Contexto e valor (opcional)
+## Resume
+
+<resultado humano esperado, próximo gate e motivo da entrega>
+
+## Contexto (opcional)
 
 Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
 Para mudança técnica, descreva o contexto e o valor sem forçar user story.
 
 ## Objetivo
 
-<resultado fechável e critérios de sucesso>
+<resultado observável e critérios de sucesso claros para serem avaliados por gate humano>
 
 ## Limites
 
@@ -40,7 +36,7 @@ Para mudança técnica, descreva o contexto e o valor sem forçar user story.
 
 ### Proposta de spec (`create`)
 
-<proposta completa ou not applicable>
+<proposta completa ou not applicable; usar template padrão do repositório, se existir>
 
 ### Diff de spec (`update`)
 

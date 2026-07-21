@@ -1,17 +1,13 @@
----
-agent: delivery-reviewer
-phase_scope: <plano/outline / range ou prova NO_CHANGES>
-sources_evidence: <executor, range/PR/prova e fontes>
-decisions: <veredito literal>
-changes_validation: <checagens>
-blockers: <blocker ou none>
----
-
-> <resumo humano da revisão: escopo, conclusão, ressalvas e próxima decisão>
+> agent: delivery-reviewer
+> phase_scope: <plano/outline / range ou prova NO_CHANGES>
+> sources_evidence: <executor, range/PR/prova e fontes>
+> decisions: <veredito literal>
+> changes_validation: <checagens>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resumo humano da revisão: escopo, conclusão, ressalvas e próxima decisão>
 
 ## Resumo da revisão
 

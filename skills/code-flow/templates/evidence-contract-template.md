@@ -1,15 +1,13 @@
----
-agent: <papel>
-phase_scope: <operação, ciclo ou range>
-sources_evidence: <links imutáveis, comandos e saída>
-decisions: <aplicadas, pendentes ou none>
-changes_validation: <mudanças e validação ou none>
-blockers: <blocker ou none>
----
-
-> <resumo humano do resultado>
+> agent: <papel>
+> phase_scope: <operação, ciclo ou range>
+> sources_evidence: <links imutáveis, comandos e saída>
+> decisions: <aplicadas, pendentes ou none>
+> changes_validation: <mudanças e validação ou none>
+> blockers: <blocker ou none>
 
 ## Resume
+
+<resumo humano do resultado>
 
 Fora de blocker: `none`.
 

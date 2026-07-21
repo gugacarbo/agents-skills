@@ -1,17 +1,13 @@
----
-agent: orchestrator
-phase_scope: integração ou fechamento
-sources_evidence: <gate humano, PR/range, checks e issue>
-decisions: <decisão humana recebida>
-changes_validation: <resultado mecânico e confirmação>
-blockers: <blocker ou none>
----
-
-> <resultado humano da integração ou fechamento e estado final confirmado>
+> agent: orchestrator
+> phase_scope: integração ou fechamento
+> sources_evidence: <gate humano, PR/range, checks e issue>
+> decisions: <decisão humana recebida>
+> changes_validation: <resultado mecânico e confirmação>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resultado humano da integração ou fechamento e estado final confirmado>
 
 ## Pré-condições confirmadas
 

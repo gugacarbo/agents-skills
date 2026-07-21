@@ -1,17 +1,13 @@
----
-agent: plan-writer
-phase_scope: plan / ciclo <k>/3
-sources_evidence: <links imutáveis e base SHA>
-decisions: <aplicadas ou none>
-changes_validation: <plano e validação>
-blockers: <blocker ou none>
----
-
-> <resumo claro da entrega, decisão envolvida e resultado esperado para revisão humana>
+> agent: plan-writer
+> phase_scope: plan / ciclo <k>/3
+> sources_evidence: <links imutáveis e base SHA>
+> decisions: <aplicadas ou none>
+> changes_validation: <plano e validação>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resumo claro da entrega, decisão envolvida e resultado esperado para revisão humana>
 
 ## Objetivo
 

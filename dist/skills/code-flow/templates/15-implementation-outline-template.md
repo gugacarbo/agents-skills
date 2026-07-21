@@ -1,17 +1,13 @@
----
-agent: executor
-phase_scope: execução S autorizada / início
-sources_evidence: <issue, digest, base SHA, código e testes>
-decisions: <abordagem e limites>
-changes_validation: nenhuma mudança ainda; publicar antes de in-progress
-blockers: <blocker ou none>
----
-
-> <resumo claro da mudança, motivo, resultado esperado e fora de escopo>
+> agent: executor
+> phase_scope: execução S autorizada / início
+> sources_evidence: <issue, digest, base SHA, código e testes>
+> decisions: <abordagem e limites>
+> changes_validation: nenhuma mudança ainda; publicar antes de in-progress
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resumo claro da mudança, motivo, resultado esperado e fora de escopo>
 
 ## Resumo para execução
 

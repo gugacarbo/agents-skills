@@ -1,17 +1,13 @@
----
-agent: plan-reviewer
-phase_scope: plan / ciclo <k>/3
-sources_evidence: <snapshot, digest, fontes e base SHA>
-decisions: <veredito literal>
-changes_validation: <checagens ou none>
-blockers: <blocker ou none>
----
-
-> <resumo claro do review, achados decisivos e consequência para o plano>
+> agent: plan-reviewer
+> phase_scope: plan / ciclo <k>/3
+> sources_evidence: <snapshot, digest, fontes e base SHA>
+> decisions: <veredito literal>
+> changes_validation: <checagens ou none>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resumo claro do review, achados decisivos e consequência para o plano>
 
 **Independência:** não escrevi este plano nem implementarei seu escopo.
 

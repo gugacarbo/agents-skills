@@ -1,17 +1,13 @@
----
-agent: executor
-phase_scope: <plano/outline e escopo>
-sources_evidence: <plano/outline, digest, commits, PR e comandos>
-decisions: <aplicadas ou none>
-changes_validation: <arquivos, comandos e resultados>
-blockers: <blocker ou none>
----
-
-> <DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED — resumo humano e conclusão esperada do reviewer>
+> agent: executor
+> phase_scope: <plano/outline e escopo>
+> sources_evidence: <plano/outline, digest, commits, PR e comandos>
+> decisions: <aplicadas ou none>
+> changes_validation: <arquivos, comandos e resultados>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED — resumo humano e conclusão esperada do reviewer>
 
 ## Resultado para decisão
 

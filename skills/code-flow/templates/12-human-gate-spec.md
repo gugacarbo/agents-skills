@@ -1,17 +1,13 @@
----
-agent: orchestrator
-phase_scope: <brainstorm | issue | plan | dispatch | review | integrate | epic>
-sources_evidence: <artefatos e evidências que fundamentam o gate>
-decisions: <decisão solicitada>
-changes_validation: <transição que será confirmada>
-blockers: <blocker ou none>
----
-
-> <resumo humano da decisão solicitada e do motivo do gate>
+> agent: orchestrator
+> phase_scope: <brainstorm | issue | plan | dispatch | review | integrate | epic>
+> sources_evidence: <artefatos e evidências que fundamentam o gate>
+> decisions: <decisão solicitada>
+> changes_validation: <transição que será confirmada>
+> blockers: <blocker ou none>
 
 ## Resume
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
+<resumo humano da decisão solicitada e do motivo do gate>
 
 ## Estado atual
 

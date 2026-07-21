@@ -1,15 +1,17 @@
----
-agent: issue-reviewer
-phase_scope: issue / source-set X/XL ou hard trigger
-sources_evidence: <issue, digest, proposta e fontes>
-decisions: <veredito literal>
-changes_validation: <checagens ou none>
-blockers: <blocker ou none>
----
+> agent: issue-reviewer
+> phase_scope: issue / source-set X/XL ou hard trigger
+> sources_evidence: <issue, digest, proposta e fontes>
+> decisions: <veredito literal>
+> changes_validation: <checagens ou none>
+> blockers: <blocker ou none>
 
-> <resultado claro do review e consequência para o próximo gate>
+## Status
+
+**APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR**
 
 ## Resume
+
+<resultado claro do review e consequência para o próximo gate>
 
 `none`, ou, em blocker: operação, estado a retomar e responsável.
 
