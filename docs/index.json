@@ -1,38 +1,43 @@
 [
-	{
-		"id": "ADR-0001",
-		"path": "docs/adr/0001-code-flow-persiste-contexto-operacional.md",
-		"layer": "adr",
-		"title": "Code-flow persiste contexto operacional sem transformar esforço em risco",
-		"status": "superseded",
-		"builds-on": [],
-		"superseded-by": "ADR-0002",
-		"implemented-by": []
-	},
-	{
-		"id": "ADR-0002",
-		"path": "docs/adr/0002-code-flow-deriva-workflow-do-estado.md",
-		"layer": "adr",
-		"title": "Code-flow deriva workflow do estado observado",
-		"status": "accepted",
-		"builds-on": ["ADR-0001"],
-		"superseded-by": null,
-		"implemented-by": []
-	},
-	{
-		"id": "SPEC-0001",
-		"path": "docs/specs/0001-code-flow-adaptive-governance.md",
-		"layer": "specs",
-		"title": "Code-flow governa entregas com contexto operacional retomável e rigor adaptativo",
-		"status": "implemented",
-		"builds-on": ["ADR-0001", "ADR-0002"],
-		"superseded-by": null,
-		"implemented-by": [
-			"skills/code-flow/SKILL.md",
-			"skills/code-flow/references/github-flow.md",
-			"skills/code-flow/scripts/source-set-digest.py",
-			"skills/code-flow/dev/tests.sh",
-			"dist/skills/code-flow/SKILL.md"
-		]
-	}
+  {
+    "id": "ADR-0001",
+    "path": "docs/adr/0001-code-flow-persiste-contexto-operacional.md",
+    "layer": "adr",
+    "title": "Code-flow persiste contexto operacional sem transformar esforço em risco",
+    "status": "superseded",
+    "builds-on": [],
+    "superseded-by": "ADR-0002",
+    "implemented-by": []
+  },
+  {
+    "id": "ADR-0002",
+    "path": "docs/adr/0002-code-flow-deriva-workflow-do-estado.md",
+    "layer": "adr",
+    "title": "Code-flow deriva workflow do estado observado",
+    "status": "accepted",
+    "builds-on": [
+      "ADR-0001"
+    ],
+    "superseded-by": null,
+    "implemented-by": []
+  },
+  {
+    "id": "SPEC-0001",
+    "path": "docs/specs/0001-code-flow-adaptive-governance.md",
+    "layer": "specs",
+    "title": "Code-flow governa entregas com contexto operacional retomável e rigor adaptativo",
+    "status": "implemented",
+    "builds-on": [
+      "ADR-0001",
+      "ADR-0002"
+    ],
+    "superseded-by": null,
+    "implemented-by": [
+      "skills/code-flow/SKILL.md",
+      "skills/code-flow/references/github-flow.md",
+      "skills/code-flow/scripts/source-set-digest.py",
+      "skills/code-flow/dev/tests.sh",
+      "dist/skills/code-flow/SKILL.md"
+    ]
+  }
 ]

@@ -9,8 +9,14 @@
  * @type {import('lint-staged').Configuration}
  */
 export default {
-	"*.{json,jsonc,js,ts,jsx,tsx}": (files) =>
-		`pnpm exec biome check --write --no-errors-on-unmatched ${files.map((file) => JSON.stringify(file)).join(" ")}`,
+	"*.{json,jsonc,js,ts,jsx,tsx}": (files) => {
+		const biomeFiles = files.filter(
+			(file) => !file.endsWith("/docs/index.json"),
+		);
+		return biomeFiles.length
+			? `pnpm exec biome check --write --no-errors-on-unmatched ${biomeFiles.map((file) => JSON.stringify(file)).join(" ")}`
+			: [];
+	},
 	"*.{md,mdx}": (files) =>
 		`pnpm prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --log-level=warn --cache`,
 	"*.sh": (files) =>
