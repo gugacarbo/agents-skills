@@ -38,10 +38,11 @@ publicados, transicione `stage:needs-architect` para `stage:approved`:
 O architect nunca autoriza execução, apenas entrega o relatório para a decisão
 humana quando o gate se aplica. Manter `needs-architect` seria drift.
 
-`needs-architect-fix` é usado quando o humano pede ajuste: o architect corrige
-o comentário canônico in-place e republica o resumo de alterações; o estágio
-permanece `needs-architect` (com `needs-human` removido enquanto o agente edita
-e devolvido ao fim da publicação). Se o executor ou o orquestrador identificar
+Quando o humano pede ajuste, o orquestrador devolve a
+`stage:needs-architect` sem `needs-human`. O architect corrige o comentário
+canônico in-place, publica o resumo de alterações e retorna a `stage:approved`,
+reaplicando `needs-human` somente se o gate continuar obrigatório. Se o executor
+ou o orquestrador identificar
 decisão material depois da publicação, pare, promova rigor e só retome com novo
 relatório publicado.
 

@@ -42,8 +42,8 @@ Só após aprovação:
 scripts/visual-companion/start-server.sh --open
 ```
 
-Requer Node.js e browser controlável. Se qualquer um estiver indisponível,
-siga só em texto.
+Requer Node.js, Python 3, `curl` e browser controlável. Se qualquer dependência
+estiver indisponível, siga só em texto.
 
 O comando retorna JSON com `url` (incluindo `?key=...`), `session_dir`,
 `screen_dir` e `state_dir`. Salve esses paths e compartilhe a URL completa.

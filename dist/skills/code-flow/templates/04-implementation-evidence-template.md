@@ -1,5 +1,6 @@
 > agent: executor
 > sources_evidence: <relatório de arquitetura/outline, digest, commits, PR e comandos>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 

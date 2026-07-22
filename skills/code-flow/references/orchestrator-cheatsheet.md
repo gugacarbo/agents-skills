@@ -10,6 +10,7 @@
    nova, inicie fallback equivalente; se falhar em header legado native, pause
    para decisão humana.
 4. Valide relatório de arquitetura, base e autoria antes de despachar.
+   Descubra capacidades de runtime/modelo sem escrever configuração no repo.
 5. Evidência precede mutação; agente muta o próprio resultado e orquestrador
    muta decisão humana.
 6. Em revisão de relatório de arquitetura, confirme a mesma URL/ID do comentário
@@ -28,3 +29,5 @@
   label `draft` como substituto.
 - Correção de relatório de arquitetura edita o comentário canônico; não acumule
   relatórios completos.
+- `/code-flow stop` publica handoff e só limpa labels fallback após decisão
+  humana; não fecha issue nem descarta trabalho.

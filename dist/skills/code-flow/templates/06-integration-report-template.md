@@ -1,5 +1,6 @@
 > agent: orchestrator
 > sources_evidence: <gate humano, PR/range, checks e issue>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 

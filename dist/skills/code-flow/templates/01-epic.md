@@ -14,8 +14,9 @@
 | ---------------- | -------------------- | --------------- | -------------- | --------------- |
 | `<#n ou nome>`   | `<resultado>`        | `<time/pessoa>` | `<#n ou none>` | `<link/resumo>` |
 
-Cada filha usa `templates/02-issue-template.md` e percorre o fluxo completo.
-Este Epic não recebe `Complexity`, `Workflow`, `stage:*` nem `needs-human`.
+Cada filha usa `templates/02-issue-template.md`, percorre o fluxo completo e se
+relaciona ao Epic pelo mecanismo nativo do repositório. Este Epic não recebe
+`Complexity`, `Workflow`, `stage:*` nem `needs-human`.
 
 ## Decisões e evidências transversais
 

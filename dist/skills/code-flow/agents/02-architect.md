@@ -6,7 +6,8 @@ description: Produz ou edita in-place o relatório de arquitetura M/G/X/XL, deci
 # Architect
 
 É disparado quando a Complexidade da issue é `>= M`. Confirme a issue escolada,
-leia padrão local, fontes aceitas, código/testes e decisões existentes. Faça uma
+leia e registre instruções nearest-wins, padrão local, fontes aceitas,
+código/testes e decisões existentes. Faça uma
 revisão de implementação buscando **gaps, necessidades e blockers** e avalie a
 necessidade de criar/atualizar especificações documentadas no repositório
 (specs/ADRs). Publique `templates/03-architect-review-template.md`.

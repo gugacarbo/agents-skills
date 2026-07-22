@@ -1,150 +1,102 @@
 ---
 name: code-flow
-description: "Coordinate non-trivial issue-based repository deliveries or batches with bounded pre-issue discovery, adaptive rigor, repository workflow discovery, independent reviews, human gates, isolated worktrees, and explicit merge or closure. Explicit invocations may also use the lightweight path; start from a named semantic operation only when the user requests it."
-metadata:
-  user-invocable: true
+description: "Coordinate explicitly requested, non-trivial GitHub issue deliveries or batches with repository-guidance discovery, adaptive rigor, isolated agent roles, optional host-provided model routing, independent review, human gates, and explicit merge, close, handoff, or stop. Use only when the user invokes $code-flow or /code-flow."
 ---
 
 # code-flow
 
-Coordene entregas com rigor proporcional ao risco. O orquestrador descobre
-contexto, propõe complexidade, resolve uma única máquina de estado e despacha
-somente os papéis necessários. Ele pode criar a issue mínima do caminho `S`,
-mas não escreve relatório de arquitetura, review ou código.
+Coordene somente entregas explicitamente iniciadas pelo usuário. Descubra o
+contrato do repositório, derive o workflow do estado observado e use apenas os
+papéis e gates exigidos pelo risco. Não instale configuração, agentes, estado ou
+instruções da skill no repositório-alvo.
 
-Discovery, decisões de intenção e brainstorm podem ocorrer antes da issue.
-Relatório de arquitetura, implementação, review e integração exigem uma issue de
-entrega/bug elegível. A classificação de risco continua efêmera; somente
-`Complexity` é persistida no bloco de metadata do body conforme
-[`references/risk-profiles.md`](references/risk-profiles.md).
+## Entradas
 
-## Comandos
+| Invocação                                                                  | Resultado                                                     |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `/code-flow`                                                               | Discovery read-only e próxima entrada recomendada.            |
+| `/code-flow issue create`                                                  | Fecha decisões obrigatórias e cria/preenche a issue elegível. |
+| `/code-flow <context\|issue\|plan\|dispatch\|review\|integrate> <#N\|URL>` | Retoma a operação nomeada sem pular gates anteriores.         |
+| `/code-flow issue <#N\|URL> [operação]`                                    | Recalcula risco e retoma a operação elegível.                 |
+| `/code-flow batch create --project <owner/number>`                         | Cria Draft Issues para investigação posterior.                |
+| `/code-flow batch <alvos> --from <operação>`                               | Executa trilhas isoladas a partir de um piso.                 |
+| `/code-flow brainstorm`                                                    | Resolve somente decisões materiais não descobríveis.          |
+| `/code-flow stop <#N\|URL>`                                                | Solicita saída segura sem fechar issue ou descartar trabalho. |
+| `/code-flow tool doctor [args]`                                            | Executa apenas [`scripts/doctor.sh`](scripts/doctor.sh).      |
 
-| Invocação                                                                        | Comportamento                                                           |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `/code-flow`                                                                     | Discovery read-only, resumo e próxima entrada recomendada.              |
-| `/code-flow issue create`                                                        | Fecha decisões obrigatórias e cria/preenche uma issue elegível.         |
-| `/code-flow issue <#N\|URL> [context\|issue\|plan\|dispatch\|review\|integrate]` | Recalcula risco, valida workflow e retoma a operação elegível.          |
-| `/code-flow <context\|issue\|plan\|dispatch\|review\|integrate> <#N\|URL>`       | Forma semântica com alvo explícito.                                     |
-| `/code-flow batch create --project <owner/number>`                               | Cria pré-issues como Draft Issues para posterior investigação.          |
-| `/code-flow batch <#N\|URL>... --from <operation>`                               | Executa trilhas isoladas sem pular gates; consolida decisões por issue. |
-| `/code-flow brainstorm`                                                          | Resume decisões e oferece aprofundar ou seguir ao próximo passo.        |
-| `/code-flow tool doctor [args]`                                                  | Executa somente o [diagnóstico público](scripts/doctor.sh) e para.      |
+Não interprete menção casual à skill como invocação. Uma operação nomeada é
+ponto de entrada solicitado, não permissão para ignorar precondições.
+Política de invocação: [`agents/openai.yaml`](agents/openai.yaml).
+
+## Contrato global
+
+1. Leia primeiro [`phases/context.md`](phases/context.md). Descubra instruções
+   aplicáveis, inclusive arquivos nearest-wins, forms, ADR/spec, código, testes e
+   workflow Git. Registre `project_guidance` nos artefatos; não pergunte fatos
+   descobríveis.
+2. Permita discovery, intenção e brainstorm antes da issue. Exija issue de
+   entrega/bug antes de arquitetura, código, review ou integração.
+3. Proponha `Complexity: S | M | G | X | XL`, recalcule risco e aplique
+   [`references/risk-profiles.md`](references/risk-profiles.md). Hard trigger
+   sempre vence esforço pequeno.
+4. Resolva native/fallback por
+   [`references/github-flow.md`](references/github-flow.md). Não persista
+   `Workflow`; `Complexity` é a única metadata de controle da code-flow no body.
+5. Antes de despachar, leia
+   [`references/runtime-capabilities.md`](references/runtime-capabilities.md).
+   Papéis são obrigatórios; modelos diferentes são opcionais e nunca justificam
+   configuração no repositório-alvo.
+6. Publique evidência antes da mutação causada pelo resultado. O autor do evento
+   aplica sua transição; o orquestrador valida e aplica decisões humanas.
+7. Use worktree somente para implementação/correção. Com diff, conclusão exige
+   commit, push e PR publicado. Sem diff, preserve `NO_CHANGES`, review
+   independente e gate explícito de fechamento.
+8. Nunca faça self-review, merge ou fechamento automático. Escopo/risco material
+   novo invalida somente gates insuficientes e retorna ao primeiro gate exigido.
+
+Ao retomar, declarar evento, ator, estado anterior/posterior, `needs-human` e
+evidência. Para interromper voluntariamente, aplicar a saída segura de
+[`phases/context.md`](phases/context.md); nunca simplesmente abandonar estado.
+
+## Router
+
+| Operação                       | Carregar                                                     |
+| ------------------------------ | ------------------------------------------------------------ |
+| Contexto, batch, resume e stop | [`phases/context.md`](phases/context.md)                     |
+| Issue e triagem                | [`phases/issue.md`](phases/issue.md)                         |
+| Arquitetura/autorização        | [`phases/plan.md`](phases/plan.md)                           |
+| Dispatch                       | [`phases/dispatch.md`](phases/dispatch.md)                   |
+| Review                         | [`phases/review.md`](phases/review.md)                       |
+| Integração/fechamento          | [`phases/integrate.md`](phases/integrate.md)                 |
+| Brainstorm                     | [`prompts/brainstorm.md`](prompts/brainstorm.md)             |
+| Visual opcional                | [`prompts/visual-companion.md`](prompts/visual-companion.md) |
+
+Antes de evidência/review, leia
+[`references/evidence-contract.md`](references/evidence-contract.md). Antes de
+fallback, leia
+[`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md)
+e valide [`references/workflow-states.json`](references/workflow-states.json) e
+[`references/label-mutation-matrix.md`](references/label-mutation-matrix.md).
+Use [`references/follow-up-issue-drafts.md`](references/follow-up-issue-drafts.md)
+somente para Minors não bloqueantes. Para decisões humanas, use
+[`templates/08-human-gate-spec.md`](templates/08-human-gate-spec.md); para Epic,
+use [`templates/01-epic.md`](templates/01-epic.md) somente após escolha explícita.
 
 Helpers internos: [`scripts/review-package.sh`](scripts/review-package.sh),
 [`scripts/source-set-digest.py`](scripts/source-set-digest.py) e
 [`scripts/transition-issue.sh`](scripts/transition-issue.sh). Não os exponha
 como comandos públicos.
 
-## Ordem obrigatória
+## Papéis
 
-1. Faça discovery antes de perguntar fatos descobríveis ou escrever.
-2. Antes de relatório de arquitetura/código/review, confirme issue de entrega/bug; Epic e tracker
-   são inelegíveis.
-3. Proponha `Complexity: S | M | G | X | XL`, recalcule risco e derive o
-   workflow do estado observado antes de interpretar gates: um `stage:*` usa
-   fallback, independentemente de header legado; sem stage, native passa automaticamente quando o mapeamento
-   completo passa. Hard trigger sempre vence complexidade. Mudança de comportamento
-   observável em um componente começa em `M`; `S` exige mudança interna,
-   behavior-preserving e caminho já conhecido.
-4. Valide a tabela de verdade de [`references/github-flow.md`](references/github-flow.md).
-   Múltiplos stages são drift bloqueante. Header legado `Workflow: native` que
-   falha no mapeamento pausa e oferece migração explícita/compensável; nunca
-   apenas “repara e continua”.
-5. Carregue somente a operação ativa e despache os papéis exigidos.
-6. O agente publica evidência antes da mutação causada pelo próprio resultado;
-   o orquestrador valida toda transição e executa as causadas por decisão
-   humana.
-   O relatório de arquitetura vive em um único comentário canônico: na primeira
-   publicação o `architect` o cria; em toda correção, edita esse mesmo
-   comentário e só então adiciona um comentário append-only com um resumo breve
-   das alterações. Nunca publique outra cópia integral do relatório para
-   representar uma revisão.
-   O executor só conclui uma implementação com diff depois de commit, push e
-   PR publicado; a evidência deve incluir a URL remota. `NO_CHANGES` é a única
-   saída sem PR e nunca cria commit ou PR vazio.
-7. Use worktree isolada somente para implementação e correções de código.
-   Merge e fechamento sem diff continuam decisões humanas explícitas.
-   Prova `NO_CHANGES` sempre passa por `reviewer` independente antes
-   do gate; quando aprovada, apresenta `Fechar / Ajustar / Aguardar`, e somente
-   `Fechar` autoriza fechamento e limpeza.
-   Nunca renomeie `NO_CHANGES` como `DONE` nem aceite pedido para pular review,
-   gate ou consolidação de Minors.
+| Papel                                       | Limite                                                     |
+| ------------------------------------------- | ---------------------------------------------------------- |
+| [`issue-writer`](agents/01-issue-writer.md) | Escreve issue M+ e Complexity; não decide spec.            |
+| [`architect`](agents/02-architect.md)       | Decide spec/ADR e publica relatório M+; não implementa.    |
+| [`executor`](agents/03-executor.md)         | Outline S, código, spec no PR e correções.                 |
+| [`reviewer`](agents/04-reviewer.md)         | Revisa PR/NO_CHANGES e audita quando exigido; não corrige. |
 
-Ao explicar ou retomar uma transição, torne o contrato verificável: nomeie o
-evento, o ator da mutação, o estado anterior e posterior, a presença/ausência
-de `needs-human` e a evidência exigida antes de avançar. Não reduza uma cadeia
-de gates a “aprovado, pode executar”.
-
-Se risco ou escopo material novo surgir, pare antes de nova mutação, registre a
-promoção, invalide apenas gates insuficientes e retome no primeiro gate agora
-obrigatório. Urgência, preferência, autoridade ou tamanho pequeno nunca
-rebaixam hard trigger.
-
-## Operações
-
-| Operação               | Carregar                                                     |
-| ---------------------- | ------------------------------------------------------------ |
-| Contexto e resume      | [`phases/context.md`](phases/context.md)                     |
-| Issue e triagem        | [`phases/issue.md`](phases/issue.md)                         |
-| Arquitetura            | [`phases/plan.md`](phases/plan.md)                           |
-| Dispatch               | [`phases/dispatch.md`](phases/dispatch.md)                   |
-| Review                 | [`phases/review.md`](phases/review.md)                       |
-| Integração/fechamento  | [`phases/integrate.md`](phases/integrate.md)                 |
-| Brainstorm condicional | [`prompts/brainstorm.md`](prompts/brainstorm.md)             |
-| Companheiro visual     | [`prompts/visual-companion.md`](prompts/visual-companion.md) |
-
-Antes de retomar ou mutar fallback, leia
-[`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md).
-Antes de publicar evidência ou revisar, leia
-[`references/evidence-contract.md`](references/evidence-contract.md).
-Para drafts de acompanhamento de Minors e sua consolidação final, leia
-[`references/follow-up-issue-drafts.md`](references/follow-up-issue-drafts.md).
-Para uma decisão humana, use o
-[`templates/08-human-gate-spec.md`](templates/08-human-gate-spec.md); para um
-evento isolado, use o
-[`templates/07-workflow-note-template.md`](templates/07-workflow-note-template.md).
-Ownership de transição e labels fica em
-[`references/label-mutation-matrix.md`](references/label-mutation-matrix.md).
-
-## Papéis permitidos
-
-| Papel                                       | Responsabilidade                                                                                           |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [`issue-writer`](agents/01-issue-writer.md) | Issue escolada com triagem de Complexity para M/G/X/XL; não decide spec/ADR.                               |
-| [`architect`](agents/02-architect.md)       | Relatório de arquitetura (gaps, blockers, decisão de spec/ADR) quando Complexity >= M; sem plano completo. |
-| [`executor`](agents/03-executor.md)         | Outline S, implementação, materialização de spec/ADR no PR, PR publicado e correções na mesma worktree.    |
-| [`reviewer`](agents/04-reviewer.md)         | Review da PR publicada, conferência de DoD e casos de borda, e auditoria final quando aplicável.           |
-
-Esses são os únicos papéis publicados, não uma lista de invocações
-obrigatórias. Ninguém revisa, aprova ou audita trabalho próprio. Reuso de
-reviewer segue a matriz adaptativa; não crie registry paralelo ou estado local
-de workflow.
-
-Toda resposta que atribuir/reutilizar reviewer declara o contrato completo:
-M/G permite reuso somente sem autoria de relatório de arquitetura/código; X/XL
-ou hard trigger exige instância separada por fase; renomear papel, trocar sessão
-ou delegar a si mesmo não apaga autoria nem torna self-review independente. O
-relatório de arquitetura não tem reviewer autônomo: o architect publica o
-snapshot canônico e o humano decide autorizar a execução, ajustá-la ou bloqueá-la
-quando o gate se aplica.
-
-Uma iniciativa com múltiplos resultados independentes usa
-[`templates/01-epic.md`](templates/01-epic.md) somente após escolha explícita.
-O Epic é tracking, não recebe metadata/stage da entrega, e seu fechamento exige
-checkpoint humano; cada filha percorre este fluxo como entrega própria.
-
-## Batch
-
-Um pedido para criar várias issues futuras usa Project V2 Draft Issues, nunca
-repository issues abertas provisoriamente. Cada pré-issue permanece
-`DRAFT_ISSUE` enquanto o `issue-writer` investiga a codebase e completa
-`templates/02-issue-template.md`. Somente `issue-writer` ou orquestrador pode
-converter o draft em issue, depois de validar body completo e repositório alvo.
-Sem Project V2 inequívoco e gravável, pare sem criar fallback público.
-
-`--from` é piso: issue anterior é inelegível; issue no piso ou já adiante
-continua sem pular nem retroceder gates. Estado, falhas e worktrees permanecem
-isolados por issue. Checkpoint consolidado mostra opções concretas por ID (por
-exemplo `#30`, `#32`) e “todas as listadas”; decisão global sem esse escopo
-explícito é inválida. Review/PR aprovado nunca autoriza merge automático.
+Esses são papéis, não modelos fixos. Preserve autoria e independência conforme
+[`references/risk-profiles.md`](references/risk-profiles.md). Epic é somente
+tracking; cada filha percorre o fluxo próprio e relações usam mecanismos nativos
+do repositório, não metadata de controle no body.

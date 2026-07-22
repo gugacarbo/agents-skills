@@ -1,5 +1,6 @@
 > agent: <papel que publica a nota>
 > sources_evidence: <links, comandos ou fontes>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 > note_type: <general | architect-change>
 
 ## Resume

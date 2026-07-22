@@ -1,14 +1,17 @@
 # Contrato de evidência
 
-Todo template de comentário começa com `agent`, `sources_evidence` e uma seção
-`## Resume` contendo resultado humano, veredito quando aplicável e próximo gate.
+Todo template de comentário começa com `agent`, `sources_evidence`,
+`project_guidance` e uma seção `## Resume` contendo resultado humano, veredito
+quando aplicável e próximo gate.
 
 Antes de uma mutação de workflow, o comentário que a fundamenta identifica:
 
 1. `agent`, quando autoria ou independência importam;
 2. `sources_evidence`, com as fontes imutáveis usadas;
-3. resultado, veredito ou decisão no corpo;
-4. em blocker, operação, estado a retomar, responsável e impedimento.
+3. `project_guidance`, com paths nearest-wins e comandos aplicáveis ou a busca
+   que justificou `none found`;
+4. resultado, veredito ou decisão no corpo;
+5. em blocker, operação, estado a retomar, responsável e impedimento.
 
 ## Blocker e retomada — somente se aplicável
 

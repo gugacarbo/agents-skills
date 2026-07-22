@@ -1,5 +1,6 @@
 > agent: reviewer
-> sources_evidence: <issue review, executor, PR publicada/prova e fontes>
+> sources_evidence: <issue, executor, PR publicada/prova e fontes>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
@@ -55,7 +56,6 @@
 
 | Fonte                   | Evidência               | Minors coletados | Resultado               |
 | ----------------------- | ----------------------- | ---------------- | ----------------------- |
-| `<issue review>`        | `<URL ou n/a>`          | `<n>`            | `PASS \| Cannot verify` |
 | `<executor>`            | `<URL ou n/a>`          | `<n>`            | `PASS \| Cannot verify` |
 | `achados desta revisão` | `<seção Achados acima>` | `<n>`            | `PASS`                  |
 

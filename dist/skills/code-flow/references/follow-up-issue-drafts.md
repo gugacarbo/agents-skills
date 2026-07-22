@@ -24,7 +24,7 @@ body:
 
 <resumo curto do problema>
 
-Origem: <URL da issue> · etapa: <issue review | executor | delivery review> · evidência: <URL, file:line ou comando>
+Origem: <URL da issue> · etapa: <executor | delivery review> · evidência: <URL, file:line ou comando>
 ```
 
 Use `n/a — repositório GitHub não verificável` quando a URL canônica não puder
@@ -34,8 +34,8 @@ o papel continua a transição normal.
 ## Consolidação final
 
 No fim da delivery review, use a seção `Consolidação de follow-ups` do mesmo
-comentário. Colete os Minors não bloqueantes de issue review, executor e do
-próprio delivery review.
+comentário. Colete os Minors não bloqueantes do executor e do próprio delivery
+review.
 
 - Duplicata semântica: mesmo problema, efeito e escopo; mantenha um item e
   todas as origens.

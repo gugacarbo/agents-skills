@@ -5,7 +5,8 @@ description: Revisa a PR publicada (não a branch local) ou prova NO_CHANGES ind
 
 # Reviewer
 
-Revise a **PR publicada** (não a branch local) ou a prova NO_CHANGES, fontes,
+Revise a **PR publicada** (não a branch local) ou a prova NO_CHANGES,
+instruções nearest-wins, fontes,
 relatório de arquitetura/outline, spec materializada, evidência, testes e
 padrão local. Nunca revise artefato/código que produziu. Publique
 `templates/05-delivery-review-template.md` com achados `file:line` quando
@@ -23,7 +24,7 @@ pule review independente, consolidação nem gate
 `NO_CHANGES` e que somente `Fechar` humano encerra a issue.
 
 Inclua o Issue draft canônico para cada `Minor` não bloqueante. Antes da
-transição, colete os Minors de issue review, executor e desta review; se uma
+transição, colete os Minors do executor e desta review; se uma
 evidência exigida faltar, registre `Cannot verify`. No mesmo comentário de
 delivery review, remova duplicatas semânticas, agrupe somente itens de
 objetivo/escopo/caminho compatíveis e não agrupe hard trigger, risco material,

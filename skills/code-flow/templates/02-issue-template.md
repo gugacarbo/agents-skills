@@ -2,8 +2,7 @@
 
 > type: <issue | bug | feature | docs>
 > Complexity: <S | M | G | X | XL>
-> Epic: <#n | URL | none>
-> Parent: <#n | URL | none>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Contexto e objetivo
 
@@ -27,6 +26,5 @@ comportamento observável sem forçar uma user story.
 | -------------------- | --------------------- |
 | `<resultado>`        | `<métrica ou prova>`  |
 
-## Relações opcionais
-
-- Sub-issues: `<links ou none>`
+_Epic, Parent e sub-issues usam relações nativas do repositório e não são
+metadata de controle deste body._

@@ -1,7 +1,10 @@
 # Contexto, discovery e retomada
 
-Discovery sem issue é read-only: leia guidance, forms, ADR/spec, código/testes,
-labels, comentários, PRs e entregas antes de perguntar fatos descobríveis.
+Discovery sem issue é read-only. Resolva primeiro as instruções aplicáveis do
+repositório e do diretório em escopo, respeitando nearest-wins; depois leia
+forms, ADR/spec, código/testes, labels, comentários, PRs e entregas. Registre em
+`project_guidance` os paths consultados, os comandos de validação e `none found`
+somente após busca explícita. Não pergunte fatos descobríveis.
 
 Antes de operar issue, confirme entrega/bug, proponha Complexity, recalcule
 risco e aplique a tabela de `references/github-flow.md`: um stage é fallback;
@@ -32,3 +35,19 @@ repositório e tipo `ISSUE` antes de iniciar o fluxo normal de `phases/issue.md`
 `--from` é piso: issue anterior é inelegível; issue no piso ou adiante continua
 do próprio gate sem pular ou retroceder. Estado, worktree, falha e gate ficam
 isolados por issue.
+
+## Saída segura
+
+`/code-flow stop <issue>` nunca significa abandonar silenciosamente o estado.
+Faça discovery, mostre issue/PR/worktree, estado atual e trabalho não integrado,
+e apresente `Encerrar code-flow / Manter ativo`.
+
+- Antes de qualquer mutação da skill, `Encerrar code-flow` apenas encerra a
+  sessão read-only.
+- Em fallback, após confirmação, publique uma nota de handoff, remova somente
+  `stage:*` e `needs-human` e confirme o estado. Não feche issue/PR, não apague
+  branch/worktree e não reverta código sem autorização separada.
+- Em native, publique o handoff e pare de orquestrar; não altere estados nativos
+  apenas para marcar a saída da skill.
+- `Manter ativo` preserva tudo. Falha de cleanup mantém o estado anterior e
+  registra retomada; não declare encerramento parcial como sucesso.

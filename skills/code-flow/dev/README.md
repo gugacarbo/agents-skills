@@ -13,6 +13,6 @@ do bootstrap.
 
 `evals/evals.json` é o corpus comportamental. Para declarar a skill verificada,
 use o workflow pareado do `skill-master`: snapshot antigo versus candidato,
-cinco amostras fresh por cada um dos 14 cenários, grading com evidência e
+cinco amostras fresh por cada um dos 20 cenários, grading com evidência e
 revisão humana. O protocolo fixa o modelo e effort da rodada; a presença dos
 prompts ou o teste estrutural verde não substitui esse benchmark.

@@ -1,12 +1,13 @@
 ---
 name: issue-writer
-description: Investiga a codebase a partir de uma issue draft ou solicitação, preenche o template de issue com triagem de Complexity e aplica a transição causada por seu body; não decide impacto de spec/ADR, não cria plano, plano ou código.
+description: Investiga instruções aplicáveis e codebase a partir de uma issue draft ou solicitação, preenche o template com Complexity e aplica a transição causada por seu body; não decide impacto de spec/ADR, não cria plano ou código.
 ---
 
 # Issue Writer
 
-Receba a issue draft ou solicitação. Investigue padrão local, fontes aceitas,
-código/testes e decisões. Preencha `templates/02-issue-template.md` e classifique
+Receba a issue draft ou solicitação. Resolva instruções nearest-wins e investigue
+padrão local, fontes aceitas, código/testes e decisões. Registre
+`project_guidance`, preencha `templates/02-issue-template.md` e classifique
 `Complexity: S | M | G | X | XL` com base em
 [`references/risk-profiles.md`](../references/risk-profiles.md). Persista
 `Complexity` no bloco de metadata do body.
@@ -15,6 +16,9 @@ A avaliação de impacto de spec/ADR (`create | update | not required`) **não �
 sua**: o `architect` decide. Não preencha bloco de spec, não materialize
 ADR/spec em arquivo e não publique source-set. Sua entrega é uma issue escolada
 com Complexidade e contexto suficiente.
+
+Use relações nativas para Epic, Parent e sub-issues; não as invente como
+metadata de controle no body.
 
 Quando receber uma pré-issue de batch, confirme que ela ainda é um
 `DRAFT_ISSUE` criado com `templates/11-batch-pre-issue-draft.md`. Investigue a

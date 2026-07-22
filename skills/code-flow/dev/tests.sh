@@ -16,6 +16,7 @@ assert_comment_contract() {
   local file="$1"
   rg -q '^> agent:' "$file" || fail "missing agent ownership in $file"
   rg -q '^> sources_evidence:' "$file" || fail "missing immutable source evidence in $file"
+  rg -q '^> project_guidance:' "$file" || fail "missing project guidance evidence in $file"
   rg -q '^## Resume$' "$file" || fail "missing Resume section in $file"
   assert_not_contains '> phase_scope:' "$file"
   assert_not_contains '> decisions:' "$file"
@@ -38,8 +39,12 @@ test_structure() {
   [ "$actual" = "$expected" ] || fail "unexpected semantic operations: $actual"
 
   [ -f "$SKILL/prompts/brainstorm.md" ] || fail 'missing conditional brainstorm prompt'
+  [ -f "$SKILL/agents/openai.yaml" ] || fail 'missing Codex invocation policy'
+  [ ! -e "$SKILL/README.md" ] || fail 'published README duplicates the skill router'
   [ ! -e "$SKILL/scripts/bootstrap.sh" ] || fail 'bootstrap helper still exists'
   [ -f "$SKILL/references/risk-profiles.md" ] || fail 'missing risk profiles reference'
+  [ -f "$SKILL/references/runtime-capabilities.md" ] || fail 'missing runtime/model routing contract'
+  [ -f "$SKILL/references/workflow-states.json" ] || fail 'missing canonical workflow state registry'
   actual=$(find "$SKILL/templates" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
   expected=$(printf '%s\n' \
     01-epic.md \
@@ -59,8 +64,12 @@ test_structure() {
   [ -f "$SKILL/scripts/source-set-digest.py" ] || fail 'missing deterministic source-set digest helper'
 
   ! rg -n --glob '*.md' 'phases/[0-9][0-9]-|Fase [0-9]|/code-flow tool <[^>]*bootstrap|\.code-flow|/code-flow create-issue' \
-    "$SKILL/SKILL.md" "$SKILL/README.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/prompts" "$SKILL/references" "$SKILL/templates" \
+    "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/prompts" "$SKILL/references" "$SKILL/templates" \
     || fail 'obsolete numbered/bootstrap/local-install contract remains active'
+
+  ! rg -n 'stage:(needs-plan|needs-plan-review|needs-issue-fix|spec-approval|needs-architect-fix)' \
+    "$SKILL" --glob '!**/dev/**' \
+    || fail 'obsolete workflow stage remains active'
 }
 
 test_adaptive_contract() {
@@ -71,13 +80,13 @@ test_adaptive_contract() {
   assert_contains '`X/XL → assured`' "$SKILL/references/risk-profiles.md"
   assert_contains 'WORKFLOW_DRIFT' "$SKILL/references/github-flow.md"
   assert_contains 'NATIVE_INVALID' "$SKILL/references/github-flow.md"
-  assert_contains 'um `stage:*` usa' "$SKILL/SKILL.md"
+  assert_contains 'Resolva native/fallback' "$SKILL/SKILL.md"
   assert_contains '`Workflow` não é persistido' "$SKILL/references/github-flow.md"
   assert_contains 'native ativo automaticamente' "$SKILL/references/github-flow.md"
   assert_contains 'stage:ready-to-close' "$SKILL/phases/review.md"
   assert_contains 'NO_CHANGES' "$SKILL/phases/dispatch.md"
   assert_contains 'stage:needs-architect' "$SKILL/phases/issue.md"
-  assert_contains 'Mudança de comportamento' "$SKILL/SKILL.md"
+  assert_contains 'observável em um componente' "$SKILL/references/risk-profiles.md"
   assert_contains 'auditor fresco' "$SKILL/phases/review.md"
   assert_contains 'nunca autoriza execução' "$SKILL/phases/plan.md"
   assert_contains 'ordem explícita de execução' "$SKILL/phases/plan.md"
@@ -86,12 +95,18 @@ test_adaptive_contract() {
   assert_contains 'Merge nunca é automático' "$SKILL/phases/integrate.md"
   assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
   assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
-  assert_contains 'Prova `NO_CHANGES` sempre passa por `reviewer` independente' "$SKILL/SKILL.md"
-  assert_contains 'renomear papel, trocar sessão' "$SKILL/SKILL.md"
-  assert_contains 'Project V2 Draft Issues' "$SKILL/SKILL.md"
+  assert_contains 'independente' "$SKILL/SKILL.md"
+  assert_contains 'Trocar o nome do papel' "$SKILL/references/risk-profiles.md"
+  assert_contains 'Project V2' "$SKILL/phases/context.md"
   assert_contains 'DRAFT_ISSUE' "$SKILL/phases/context.md"
   assert_contains 'issue-writer ou orquestrador' "$SKILL/phases/context.md"
   assert_contains 'não crie repository issues' "$SKILL/phases/context.md"
+  assert_contains 'Encerrar code-flow / Manter ativo' "$SKILL/phases/context.md"
+  assert_contains 'allow_implicit_invocation: false' "$SKILL/agents/openai.yaml"
+  assert_contains 'modelos diferentes são opcionais' "$SKILL/SKILL.md"
+  assert_contains 'modelo herdado' "$SKILL/references/runtime-capabilities.md"
+  assert_contains 'não simule independência' "$SKILL/references/runtime-capabilities.md"
+  assert_contains 'Não instale configuração' "$SKILL/SKILL.md"
 
   if rg -n -i '\b(light|standard|assured)\b' "$SKILL/templates"; then
     fail 'profile name persisted in a template'
@@ -125,6 +140,9 @@ test_evidence_contract() {
   assert_contains 'estado dinâmico' "$SKILL/phases/dispatch.md"
   assert_contains '> type: <issue | bug | feature | docs>' "$SKILL/templates/02-issue-template.md"
   assert_contains '> Complexity: <S | M | G | X | XL>' "$SKILL/templates/02-issue-template.md"
+  assert_contains '> project_guidance:' "$SKILL/templates/02-issue-template.md"
+  assert_not_contains '> Epic:' "$SKILL/templates/02-issue-template.md"
+  assert_not_contains '> Parent:' "$SKILL/templates/02-issue-template.md"
   assert_contains '### Proposta de spec (`create`)' "$SKILL/templates/03-architect-review-template.md"
   assert_contains '### Diff de spec (`update`)' "$SKILL/templates/03-architect-review-template.md"
   assert_contains '### Racional (`not required`)' "$SKILL/templates/03-architect-review-template.md"
@@ -135,6 +153,7 @@ test_evidence_contract() {
   assert_contains '> target_repository: <owner/repo>' "$SKILL/templates/11-batch-pre-issue-draft.md"
   assert_not_contains '#NNNN' "$SKILL/templates/11-batch-pre-issue-draft.md"
   assert_not_contains 'Complexity:' "$SKILL/templates/11-batch-pre-issue-draft.md"
+  assert_not_contains 'impacto de spec' "$SKILL/templates/11-batch-pre-issue-draft.md"
   assert_contains '## Decisão de spec/ADR' "$SKILL/templates/03-architect-review-template.md"
   assert_contains 'Base SHA:' "$SKILL/templates/03-architect-review-template.md"
   assert_contains '## Gaps, necessidades e blockers' "$SKILL/templates/03-architect-review-template.md"
@@ -144,6 +163,7 @@ test_evidence_contract() {
   assert_contains 'Aprovar / Ajustar / Bloquear' "$SKILL/templates/08-human-gate-spec.md"
   assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/templates/08-human-gate-spec.md"
   assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/templates/08-human-gate-spec.md"
+  assert_contains 'Encerrar code-flow / Manter ativo' "$SKILL/templates/08-human-gate-spec.md"
   assert_not_contains '**Sim | Não | Ajustar**' "$SKILL/templates/08-human-gate-spec.md"
   assert_contains 'Problemas encontrados' "$SKILL/templates/04-implementation-evidence-template.md"
   assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-architect-review-template.md"
@@ -161,6 +181,8 @@ test_evidence_contract() {
   assert_contains 'title-percent-encoded' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'nunca cria issue' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'Consolidação de follow-ups' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_not_contains 'issue review' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_not_contains 'plan review' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'Nenhuma sugestão de issue não bloqueante encontrada' "$SKILL/templates/05-delivery-review-template.md"
   assert_contains 'duplicatas semânticas' "$SKILL/agents/04-reviewer.md"
   assert_contains 'Não oculte os links individuais' "$SKILL/agents/04-reviewer.md"
@@ -179,6 +201,7 @@ test_helpers_syntax() {
   bash -n "$SKILL/scripts/visual-companion/stop-server.sh"
   node --check "$SKILL/scripts/visual-companion/server.cjs"
   python3 -m py_compile "$SKILL/scripts/source-set-digest.py"
+  jq -e '.stages | length == 8' "$SKILL/references/workflow-states.json" > /dev/null
   assert_not_contains '--target-dir' "$SKILL/scripts/doctor.sh"
   assert_contains 'fallback label' "$SKILL/scripts/transition-issue.sh"
   assert_contains 'gh label create' "$SKILL/scripts/transition-issue.sh"
@@ -256,7 +279,7 @@ EOF
 }
 
 test_transition_labels() {
-  local tmp fake state labels log out rc
+  local tmp fake state labels log out rc canonical_stage obsolete_stage
   tmp=$(mktemp -d)
   fake="$tmp/bin"
   state="$tmp/state.json"
@@ -266,6 +289,16 @@ test_transition_labels() {
   printf '%s\n' 'stage:approved' 'delivery' > "$labels"
   : > "$log"
   make_fake_gh "$fake" "$state" "$labels" "$log"
+
+  while IFS= read -r canonical_stage; do
+    PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to "$canonical_stage" --dry-run > /dev/null \
+      || fail "canonical stage rejected by helper: $canonical_stage"
+  done < <(jq -r '.stages[].label' "$SKILL/references/workflow-states.json")
+  for obsolete_stage in stage:needs-plan stage:needs-plan-review stage:needs-issue-fix stage:spec-approval stage:needs-architect-fix; do
+    if PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to "$obsolete_stage" --dry-run > /dev/null 2>&1; then
+      fail "obsolete stage accepted by helper: $obsolete_stage"
+    fi
+  done
 
   out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:approved --to stage:in-progress --dry-run)
   printf '%s\n' "$out" | jq -e '.dry_run == true and .to == "stage:in-progress"' > /dev/null || fail 'invalid dry-run output'
@@ -346,20 +379,23 @@ test_evals_json() {
     .skill_name == "code-flow" and
     .evaluation_protocol.samples_per_scenario == 5 and
     (.evaluation_protocol.non_critical_threshold | contains("every non-critical scenario")) and
-    .evaluation_protocol.baseline_sha == "bac28e2" and
-    (.evals | length == 17) and
-    ([.evals[].id] | unique | length == 17) and
+    .evaluation_protocol.baseline_sha == "f6c7948" and
+    (.evals | length == 20) and
+    ([.evals[].id] | unique | length == 20) and
     ([.evals[] | select((.baseline_failure | type) != "string" or (.baseline_failure | length) == 0)] | length == 0) and
     ((.evals[] | select(.id == 7) | .baseline_failure) == "omits_dynamic_native_selection") and
     ((.evals[] | select(.id == 12) | .baseline_failure) == "omits_transition_ownership_and_start_evidence") and
     ((.evals[] | select(.id == 13) | .baseline_failure) == "lacks_no_changes_contract_human_close_gate_and_follow_up_consolidation") and
-    ((.evals[] | select(.id == 13) | .expectations | index("Consolida Minors em comentário append-only, deduplicando e agrupando apenas itens compatíveis")) != null) and
+    ((.evals[] | select(.id == 13) | .expectations | index("Consolida Minors na delivery review, deduplicando e agrupando apenas itens compatíveis")) != null) and
     ((.evals[] | select(.id == 13) | .expectations | index("Inclui um link GitHub issues/new individual para cada Minor de origem")) != null) and
     ((.evals[] | select(.id == 13) | .expectations | index("Inclui um único draft consolidado com as três origens")) != null) and
     ((.evals[] | select(.id == 14) | .baseline_failure) == "regression_guard_batch_and_merge") and
     ((.evals[] | select(.id == 15) | .baseline_failure) == "allows_executor_to_finish_diff_without_published_pr") and
     ((.evals[] | select(.id == 16) | .baseline_failure) == "publishes_batch_pre_issues_before_codebase_review") and
-    ((.evals[] | select(.id == 17) | .baseline_failure) == "appends_full_review_copies_instead_of_editing_canonical_comment")
+    ((.evals[] | select(.id == 17) | .baseline_failure) == "appends_full_review_copies_instead_of_editing_canonical_comment") and
+    ((.evals[] | select(.id == 18) | .baseline_failure) == "activates_on_casual_mention") and
+    ((.evals[] | select(.id == 19) | .baseline_failure) == "conflates_roles_models_and_independence") and
+    ((.evals[] | select(.id == 20) | .baseline_failure) == "destructive_or_silent_workflow_abandonment")
   ' "$SKILL/evals/evals.json" > /dev/null || fail 'eval corpus or verification protocol incomplete'
 }
 
@@ -417,7 +453,7 @@ test_label_mutation() {
 }
 
 test_workflow_truth_table() {
-  local flow="$SKILL/references/github-flow.md"
+  local flow="$SKILL/references/github-flow.md" registry_stages documented_stages
   assert_contains 'exatamente um `stage:*`' "$flow"
   assert_contains 'zero `stage:*`' "$flow"
   assert_contains 'native ativo automaticamente' "$flow"
@@ -426,6 +462,12 @@ test_workflow_truth_table() {
   assert_contains 'migração explícita' "$flow"
   assert_contains 'estado original' "$flow"
   assert_contains 'compensação' "$flow"
+  assert_contains 'workflow-states.json' "$flow"
+
+  registry_stages=$(jq -r '.stages[].label' "$SKILL/references/workflow-states.json" | sort)
+  documented_stages=$(sed -n '/| Label/,/^$/p' "$flow" | rg -o 'stage:[a-z-]+' | sort -u)
+  [ "$registry_stages" = "$documented_stages" ] \
+    || fail "workflow state registry differs from github-flow table"
 }
 
 test_structure

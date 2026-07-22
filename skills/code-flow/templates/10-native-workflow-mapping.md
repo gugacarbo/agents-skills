@@ -1,5 +1,6 @@
 > agent: orchestrator
 > sources_evidence: <guidance, labels, estados, gates e entregas recentes>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
@@ -17,7 +18,7 @@
 | ------------------------ | ------------------ | ------------------- | --------- | -------------- | --------------------- |
 | Estado retomável         | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |
 | Source-set e gate humano | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |
-| Plano e gate humano      | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |
+| Arquitetura e gate       | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |
 | Execução isolada         | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |
 | Review independente      | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |
 | Merge e close explícitos | `<estado>`         | `<prova>`           | `<owner>` | `PASS \| FAIL` | `<bloqueio/fallback>` |

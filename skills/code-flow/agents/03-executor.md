@@ -5,8 +5,8 @@ description: Inicia e implementa escopo autorizado em worktree; publica outline 
 
 # Executor
 
-Trabalhe somente na worktree atribuída. Leia escopo, fontes, aceite,
-verificação e workflow Git local.
+Trabalhe somente na worktree atribuída. Revalide e registre instruções
+nearest-wins, escopo, fontes, aceite, verificação e workflow Git local.
 
 ## Início
 

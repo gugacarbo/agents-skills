@@ -16,19 +16,8 @@ set -eu
 # Does not select native vs fallback, post comments, or choose the next stage.
 
 USAGE='Usage: transition-issue.sh <N|URL> [--to stage:…] [--needs-human|--clear-needs-human] [--clear-stage] [--require-from stage:…] [--dry-run] [--allow-repair]'
-
-VALID_STAGES='
-stage:spec-approval
-stage:needs-issue-fix
-stage:needs-plan
-stage:approved
-stage:in-progress
-stage:needs-delivery-review
-stage:needs-changes
-stage:ready-to-merge
-stage:ready-to-close
-stage:blocked
-'
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+STATES_FILE="$SCRIPT_DIR/../references/workflow-states.json"
 
 ISSUE=""
 TO=""
@@ -39,10 +28,13 @@ CLEAR_STAGE=0
 DRY_RUN=0
 ALLOW_REPAIR=0
 
-die() { printf '%s\n' "$1" >&2; exit 1; }
+die() {
+  printf '%s\n' "$1" >&2
+  exit 1
+}
 
 is_valid_stage() {
-  printf '%s' "$VALID_STAGES" | grep -Fxq -- "$1"
+  jq -e --arg label "$1" '.stages | map(.label) | index($label) != null' "$STATES_FILE" > /dev/null
 }
 
 json_escape() {
@@ -61,12 +53,30 @@ while [ "$#" -gt 0 ]; do
       REQUIRE_FROM="$2"
       shift 2
       ;;
-    --needs-human) NEEDS_HUMAN=1; shift ;;
-    --clear-needs-human) CLEAR_NEEDS_HUMAN=1; shift ;;
-    --clear-stage) CLEAR_STAGE=1; shift ;;
-    --dry-run) DRY_RUN=1; shift ;;
-    --allow-repair) ALLOW_REPAIR=1; shift ;;
-    --help|-h) printf '%s\n' "$USAGE"; exit 0 ;;
+    --needs-human)
+      NEEDS_HUMAN=1
+      shift
+      ;;
+    --clear-needs-human)
+      CLEAR_NEEDS_HUMAN=1
+      shift
+      ;;
+    --clear-stage)
+      CLEAR_STAGE=1
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    --allow-repair)
+      ALLOW_REPAIR=1
+      shift
+      ;;
+    --help | -h)
+      printf '%s\n' "$USAGE"
+      exit 0
+      ;;
     -*)
       die "Unknown flag: $1
 $USAGE"
@@ -89,8 +99,15 @@ if [ "$CLEAR_STAGE" -eq 1 ]; then
   [ "$CLEAR_NEEDS_HUMAN" -eq 1 ] || die "Error: --clear-stage requires --clear-needs-human"
 fi
 
-command -v gh >/dev/null 2>&1 || die "Error: gh is required"
-command -v jq >/dev/null 2>&1 || die "Error: jq is required"
+command -v gh > /dev/null 2>&1 || die "Error: gh is required"
+command -v jq > /dev/null 2>&1 || die "Error: jq is required"
+[ -f "$STATES_FILE" ] || die "Error: missing canonical workflow states: $STATES_FILE"
+jq -e '
+  (.stages | type) == "array" and
+  (.stages | length) > 0 and
+  ([.stages[].label] | length) == ([.stages[].label] | unique | length) and
+  all(.stages[]; (.label | test("^stage:[a-z-]+$")) and (.next | type == "string"))
+' "$STATES_FILE" > /dev/null || die "Error: invalid canonical workflow states: $STATES_FILE"
 
 if [ -n "$TO" ]; then
   is_valid_stage "$TO" || die "Error: invalid stage '$TO'"
@@ -122,7 +139,7 @@ if [ "$ALLOW_REPAIR" -eq 0 ]; then
 fi
 
 label_exists() {
-  gh label view "$1" --repo "$ISSUE_REPO" >/dev/null 2>&1
+  gh label view "$1" --repo "$ISSUE_REPO" > /dev/null 2>&1
 }
 
 REMOVE_STAGES="$CURRENT_STAGES"
@@ -148,7 +165,7 @@ ensure_label() {
   label_color="$2"
   label_description="$3"
   label_exists "$label_name" && return 0
-  gh label create "$label_name" --repo "$ISSUE_REPO" --color "$label_color" --description "$label_description" >/dev/null \
+  gh label create "$label_name" --repo "$ISSUE_REPO" --color "$label_color" --description "$label_description" > /dev/null \
     || die "Error: failed to create fallback label '$label_name'"
 }
 
@@ -163,7 +180,7 @@ fi
 if [ -n "$REMOVE_STAGES" ]; then
   printf '%s\n' "$REMOVE_STAGES" | while IFS= read -r stage_label; do
     [ -n "$stage_label" ] || continue
-    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$stage_label" >/dev/null
+    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$stage_label" > /dev/null
   done
 fi
 
@@ -180,17 +197,17 @@ if [ -n "$REMOVE_STAGES" ] || [ -n "$TO" ]; then
 fi
 
 if [ -n "$TO" ]; then
-  gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$TO" >/dev/null \
+  gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$TO" > /dev/null \
     || die "Error: failed to add '$TO' after removing prior stage:* — issue may have zero stage:*; repair with --allow-repair --to $TO"
 fi
 
 if [ -n "$NEEDS_HUMAN" ]; then
   if [ "$HAS_NEEDS_HUMAN" -eq 0 ]; then
-    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "needs-human" >/dev/null
+    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "needs-human" > /dev/null
   fi
 elif [ "$CLEAR_NEEDS_HUMAN" -eq 1 ]; then
   if [ "$HAS_NEEDS_HUMAN" -gt 0 ]; then
-    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "needs-human" >/dev/null
+    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "needs-human" > /dev/null
   fi
 fi
 
@@ -202,7 +219,7 @@ ALL_LABELS=$(printf '%s' "$CONFIRM" | jq -c '[.labels[].name]')
 
 if [ -n "$TO" ]; then
   [ "$CONFIRM_STAGE_COUNT" -eq 1 ] || die "Error: after mutation expected exactly one stage:*; got $CONFIRM_STAGE_COUNT ($CONFIRM_STAGES)"
-  printf '%s' "$CONFIRM" | jq -e --arg to "$TO" '[.labels[].name] | index($to) != null' >/dev/null \
+  printf '%s' "$CONFIRM" | jq -e --arg to "$TO" '[.labels[].name] | index($to) != null' > /dev/null \
     || die "Error: after mutation missing expected label $TO"
 elif [ "$CLEAR_STAGE" -eq 1 ]; then
   [ "$CONFIRM_STAGE_COUNT" -eq 0 ] || die "Error: after --clear-stage expected zero stage:*; got $CONFIRM_STAGE_COUNT"

@@ -98,7 +98,6 @@ const URL_HOST =
 const SESSION_DIR = process.env.SESSION_DIR || "/tmp/brainstorm";
 const CONTENT_DIR = path.join(SESSION_DIR, "content");
 const STATE_DIR = path.join(SESSION_DIR, "state");
-const SUPERPOWERS_VERSION = readSuperpowersVersion();
 let ownerPid = process.env.SESSION_OWNER_PID
 	? Number(process.env.SESSION_OWNER_PID)
 	: null;
@@ -200,25 +199,6 @@ const helperInjection = `<script>\n${helperScript}\n</script>`;
 
 // ========== Helper Functions ==========
 
-function readSuperpowersVersion() {
-	const root = path.join(__dirname, "../../..");
-	const manifests = [
-		path.join(root, "package.json"),
-		path.join(root, ".codex-plugin/plugin.json"),
-	];
-
-	for (const manifest of manifests) {
-		try {
-			const data = JSON.parse(fs.readFileSync(manifest, "utf-8"));
-			if (data.version) return String(data.version);
-		} catch (_e) {
-			// Packaged Codex plugins omit package.json; try the next manifest.
-		}
-	}
-
-	return "unknown";
-}
-
 function escapeHtmlText(value) {
 	return String(value)
 		.replace(/&/g, "&amp;")
@@ -228,8 +208,7 @@ function escapeHtmlText(value) {
 }
 
 function brandMarkup() {
-	const version = escapeHtmlText(SUPERPOWERS_VERSION);
-	const text = `code-flow visual companion v${version}`;
+	const text = "code-flow visual companion";
 
 	return (
 		'<div class="brand"><span class="brand-copy">' +

@@ -51,11 +51,12 @@ e só então remova o header legado em atualização legítima do body.
 Exatamente um `stage:*` representa o próximo ator/gate enquanto a issue está
 ativa. `needs-human` é ortogonal e existe somente quando o próximo ator é
 humano; remova-o ao devolver trabalho a agente e limpe ambos após merge/close.
+[`workflow-states.json`](workflow-states.json) é o registro operacional
+canônico; a tabela abaixo deve espelhá-lo exatamente.
 
 | Label                         | Próxima ação                                          |
 | ----------------------------- | ----------------------------------------------------- |
 | `stage:needs-architect`       | Produzir relatório de arquitetura e decidir spec/ADR. |
-| `stage:needs-architect-fix`   | Corrigir relatório de arquitetura.                    |
 | `stage:approved`              | Aguardar ordem explícita de execução; criar worktree. |
 | `stage:in-progress`           | Implementar/corrigir escopo autorizado.               |
 | `stage:needs-delivery-review` | Review independente da entrega.                       |
@@ -70,3 +71,7 @@ Agente aplica a transição causada pelo artefato/veredito que publicou;
 orquestrador valida precondição, evidência e estado final. Decisões humanas
 transicionam pelo orquestrador. Use `transition-issue.sh` com `--require-from`,
 dry-run e confirmação por `gh issue view` no fallback.
+
+Saída voluntária usa o gate definido no router. Somente após `Encerrar
+code-flow` o orquestrador limpa labels fallback sem fechar a issue ou descartar
+branch, PR, worktree ou código.

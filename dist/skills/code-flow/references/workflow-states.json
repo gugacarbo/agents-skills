@@ -1,0 +1,12 @@
+{
+  "stages": [
+    { "label": "stage:needs-architect", "next": "architect" },
+    { "label": "stage:approved", "next": "explicit-execution-order" },
+    { "label": "stage:in-progress", "next": "executor" },
+    { "label": "stage:needs-delivery-review", "next": "reviewer" },
+    { "label": "stage:needs-changes", "next": "executor" },
+    { "label": "stage:ready-to-merge", "next": "human-merge-gate" },
+    { "label": "stage:ready-to-close", "next": "human-close-gate" },
+    { "label": "stage:blocked", "next": "resume-owner" }
+  ]
+}

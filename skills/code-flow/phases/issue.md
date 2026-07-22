@@ -1,9 +1,10 @@
 # Issue e triagem de complexidade
 
-Use `templates/02-issue-template.md`. O `issue-writer` investiga a codebase,
-preenche o body com contexto e objetivo e persiste `Complexity: S | M | G | X | XL`
-no bloco de metadata. `Workflow` não é gravado. Relação com Epic fica fora do
-body; toda filha usa este mesmo template.
+Use `templates/02-issue-template.md`. O `issue-writer` investiga instruções
+aplicáveis e codebase, preenche contexto/objetivo e persiste
+`Complexity: S | M | G | X | XL`. `Workflow` não é gravado. Relações com Epic,
+Parent e sub-issues usam mecanismos nativos do repositório e ficam fora do body;
+toda filha usa o mesmo template.
 
 O `issue-writer` **não** decide impacto de spec/ADR, **não** preenche bloco de
 spec e **não** materializa ADR/spec: essa triagem é do `architect`.

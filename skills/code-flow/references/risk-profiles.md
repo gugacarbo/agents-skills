@@ -72,6 +72,11 @@ será revisado; X/XL e hard trigger exigem separação por fase entre entrega e
 auditoria. Trocar o nome do papel ou abrir outra sessão não apaga autoria e
 nunca torna self-review independente.
 
+Papéis e modelos são dimensões diferentes. Aplique
+[`runtime-capabilities.md`](runtime-capabilities.md): use modelos distintos
+quando o host permitir, mas nunca troque independência de instância por mera
+troca de nome/modelo e nunca escreva configuração no repositório-alvo.
+
 ## Promoção e drift de base
 
 Ao surgir risco novo ou mudança material no branch alvo:

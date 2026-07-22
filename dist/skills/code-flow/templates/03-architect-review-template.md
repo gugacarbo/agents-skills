@@ -2,6 +2,7 @@
 
 > agent: architect
 > sources_evidence: <issue, padrão local, fontes aceitas, código/testes, base SHA>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 <!-- code-flow:architect-review:start -->
 
@@ -42,9 +43,9 @@ Base SHA: `<sha>`
 
 ## Gaps, necessidades e blockers
 
-| Item         | Tipo  | Detalhe | Recomendação |
-| ------------ | ----- | ------- | ------------ |
-| `<gap/need>` | `<gap | need    | blocker>`    | `<descrição>` | `<ação>` |
+| Item         | Tipo                     | Detalhe       | Recomendação |
+| ------------ | ------------------------ | ------------- | ------------ |
+| `<gap/need>` | `<gap, need ou blocker>` | `<descrição>` | `<ação>`     |
 
 ## Casos de borda e riscos
 
@@ -60,7 +61,7 @@ Base SHA: `<sha>`
 
 ## Blocker e retomada — somente se aplicável
 
-- Operação: `architecture`
+- Operação: `plan`
 - Estado a retomar: `<stage:* ou estado nativo>`
 - Responsável: `<papel | humano | orquestrador>`
 - Impedimento: `<fato e evidência>`

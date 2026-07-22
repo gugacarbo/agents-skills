@@ -1,5 +1,6 @@
 > agent: executor
 > sources_evidence: <issue, digest, base SHA, código e testes>
+> project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
