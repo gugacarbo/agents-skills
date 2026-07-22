@@ -16,15 +16,30 @@ verificação e workflow Git local.
   `needs-human` e aguarde confirmação do orquestrador antes do código.
 
 Se outline/código revelar decisão material, risco novo ou drift material da
-base, pare e promova; não decida silenciosamente. Crie commits e draft PR
-quando o repo usar PR.
+base, pare e promova; não decida silenciosamente.
+
+## Publicação obrigatória
+
+Antes de encerrar qualquer execução com diff como `DONE` ou
+`DONE_WITH_CONCERNS`, complete commit, push e PR publicado. Abra ou atualize o
+PR da branch atribuída e registre a URL do PR na evidência. O estado draft ou
+ready segue o workflow Git do repositório, mas branch apenas local, commit sem
+push ou link de comparação não substituem um PR remoto acessível.
+
+Em uma correção, use a mesma branch e o mesmo PR, faça push dos novos commits e
+atualize a evidência. Se uma falha ao publicar for corrigível, permaneça
+`stage:in-progress`; se depender de acesso, decisão ou serviço externo, reporte
+`BLOCKED`. Nunca declare um dos resultados de conclusão enquanto o PR estiver
+ausente. Somente `NO_CHANGES` termina sem commit ou PR e nunca fabrica artefato
+vazio.
 
 ## Resultado
 
 Publique `templates/07-implementation-evidence-template.md`:
 
-- `DONE`: mudança e validação completas;
-- `DONE_WITH_CONCERNS`: somente ressalvas não bloqueantes;
+- `DONE`: mudança, validação e PR completos;
+- `DONE_WITH_CONCERNS`: mudança, validação e PR completos, somente com
+  ressalvas não bloqueantes;
 - `NO_CHANGES`: prova objetiva, sem commit/PR vazio;
 - `BLOCKED`: apenas decisão, acesso, dependência externa ou risco não resolvido.
 

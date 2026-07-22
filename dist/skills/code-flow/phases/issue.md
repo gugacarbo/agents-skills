@@ -4,6 +4,12 @@ Use `templates/03-issue-template.md`. Complexity fica no frontmatter; Workflow
 não é gravado. Relação com Epic fica fora do source-set; toda filha usa este
 mesmo template.
 
+Para pré-issue de batch, o issue-writer primeiro investiga fontes e codebase e
+substitui o body mínimo do Draft Issue pelo template completo, ainda sem
+labels/stage. Publique evidência do body e do repositório alvo; então o próprio
+issue-writer ou o orquestrador pode converter o item de `DRAFT_ISSUE` para
+`ISSUE`. Somente após confirmar a conversão aplique a regra de transição abaixo.
+
 - S interna + `not required`: orquestrador cria issue mínima em
   `stage:approved + needs-human`.
 - M/G no-spec: issue-writer publica issue e vai a `stage:needs-plan`.

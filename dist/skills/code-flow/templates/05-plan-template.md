@@ -5,6 +5,8 @@
 > changes_validation: <plano e validação>
 > blockers: <blocker ou none>
 
+<!-- code-flow:canonical-plan:start -->
+
 ## Resume
 
 <resumo claro da entrega, decisão envolvida e resultado esperado para revisão humana>
@@ -40,4 +42,7 @@ restaurado demonstra que o rollback é seguro.
 | ------------------------------ | ----------------------------- |
 | `<prova>`                      | `<critério binário>`          |
 
-_Após publicação, mover para needs-plan-review sem needs-human._
+_Este é o único comentário canônico do plano. Em revisões, edite-o in-place e
+publique separadamente apenas o resumo breve das alterações._
+
+<!-- code-flow:canonical-plan:end -->

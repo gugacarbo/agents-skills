@@ -4,6 +4,11 @@ Coordena entregas por issue com discovery pré-issue limitado, complexidade
 persistida, risco efêmero, workflow derivado do estado, reviews independentes e
 integração ou fechamento explícitos.
 
+Na criação em batch para investigação posterior, cada pré-issue nasce como
+Draft Issue de Project V2. O issue-writer revisa a codebase e completa o body
+antes de o próprio issue-writer ou o orquestrador convertê-la em repository
+issue.
+
 Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
 [references/risk-profiles.md](references/risk-profiles.md). Estado e retomada:
 [references/github-flow.md](references/github-flow.md).
@@ -26,6 +31,12 @@ persistidos.
   quando o mapeamento completo passa.
 - `Workflow` não é persistido. Header legado é compatibilidade, não estado.
 - Native legado inválido pausa e exige decisão humana para migrar ao fallback.
+
+## Histórico do plano
+
+O plano formal ocupa um único comentário canônico. Quando precisa mudar, o
+plan-writer edita esse comentário e adiciona apenas um comentário append-only
+com o resumo breve da revisão; não republica o plano completo.
 
 ## Ressalvas não bloqueantes
 

@@ -26,6 +26,7 @@ entrega/bug elegível. A classificação de risco continua efêmera; somente
 | `/code-flow issue create`                                                        | Fecha decisões obrigatórias e cria/preenche uma issue elegível.         |
 | `/code-flow issue <#N\|URL> [context\|issue\|plan\|dispatch\|review\|integrate]` | Recalcula risco, valida workflow e retoma a operação elegível.          |
 | `/code-flow <context\|issue\|plan\|dispatch\|review\|integrate> <#N\|URL>`       | Forma semântica com alvo explícito.                                     |
+| `/code-flow batch create --project <owner/number>`                              | Cria pré-issues como Draft Issues para posterior investigação.          |
 | `/code-flow batch <#N\|URL>... --from <operation>`                               | Executa trilhas isoladas sem pular gates; consolida decisões por issue. |
 | `/code-flow brainstorm`                                                          | Resume decisões e oferece aprofundar ou seguir ao próximo passo.        |
 | `/code-flow tool doctor [args]`                                                  | Executa somente o [diagnóstico público](scripts/doctor.sh) e para.      |
@@ -54,6 +55,13 @@ como comandos públicos.
 6. O agente publica evidência antes da mutação causada pelo próprio resultado;
    o orquestrador valida toda transição e executa as causadas por decisão
    humana.
+   O plano formal vive em um único comentário canônico: na primeira publicação
+   o `plan-writer` o cria; em toda correção, edita esse mesmo comentário e só
+   então adiciona um comentário append-only com um resumo breve das alterações.
+   Nunca publique outra cópia integral do plano para representar uma revisão.
+   O executor só conclui uma implementação com diff depois de commit, push e
+   PR publicado; a evidência deve incluir a URL remota. `NO_CHANGES` é a única
+   saída sem PR e nunca cria commit ou PR vazio.
 7. Use worktree isolada somente para implementação e correções de código.
    Merge e fechamento sem diff continuam decisões humanas explícitas.
    Prova `NO_CHANGES` sempre passa por `delivery-reviewer` independente antes
@@ -106,7 +114,7 @@ Ownership de transição e labels fica em
 | [`issue-reviewer`](agents/02-issue-reviewer.md)       | Review independente do source-set em X/XL ou hard trigger.         |
 | [`plan-writer`](agents/03-plan-writer.md)             | Plano formal quando S/outline não se aplica.                       |
 | [`plan-reviewer`](agents/04-plan-reviewer.md)         | Review independente do plano.                                      |
-| [`executor`](agents/05-executor.md)                   | Outline S, implementação autorizada e correções na mesma worktree. |
+| [`executor`](agents/05-executor.md)                   | Outline S, implementação, PR publicado e correções na mesma worktree. |
 | [`delivery-reviewer`](agents/06-delivery-reviewer.md) | Review da entrega e auditoria final quando aplicável.              |
 
 Esses são os únicos papéis publicados, não uma lista de invocações
@@ -125,6 +133,13 @@ O Epic é tracking, não recebe metadata/stage da entrega, e seu fechamento exig
 checkpoint humano; cada filha percorre este fluxo como entrega própria.
 
 ## Batch
+
+Um pedido para criar várias issues futuras usa Project V2 Draft Issues, nunca
+repository issues abertas provisoriamente. Cada pré-issue permanece
+`DRAFT_ISSUE` enquanto o `issue-writer` investiga a codebase e completa
+`templates/03-issue-template.md`. Somente `issue-writer` ou orquestrador pode
+converter o draft em issue, depois de validar body completo e repositório alvo.
+Sem Project V2 inequívoco e gravável, pare sem criar fallback público.
 
 `--from` é piso: issue anterior é inelegível; issue no piso ou já adiante
 continua sem pular nem retroceder gates. Estado, falhas e worktrees permanecem

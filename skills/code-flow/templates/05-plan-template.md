@@ -1,43 +1,48 @@
-> agent: plan-writer
-> phase_scope: plan / ciclo <k>/3
-> sources_evidence: <links imutáveis e base SHA>
-> decisions: <aplicadas ou none>
-> changes_validation: <plano e validação>
-> blockers: <blocker ou none>
+# Issue #NNNN - <Issue Name> - PR #NNNN Plano (N/3) <!-- Numero da tentativa de criar o plano  / Máximo 3 tentativas de aprovar o plano antes de bloquear com needs-human -->
+<!-- _Este é o único comentário canônico do plano. Em revisões, edite-o in-place e
+publique separadamente apenas o resumo breve das alterações feitas._ -->
 
-## Resume
+> sources_evidence: <base SHA>
 
-<resumo claro da entrega, decisão envolvida e resultado esperado para revisão humana>
+<!-- code-flow:canonical-plan:start -->
+
+## Blockers (opcional)
+
+ <!-- (opcional, somente se houver blockers) -->
 
 ## Objetivo
 
-<resultado que o plano entrega>
+<objetivo da epic em texto humano, descrição|problema e resultado final esperado e motivo para coordená-la, considerando os resultados de entrega incluídos>
 
-## Limites
+## Decisões (opcional, somente se houver decisões)
 
-<fora de escopo, dependências e restrições>
+- **Problema:** `<descrição do problema ou risco transversal>`
+  - **Decisão:** `<decisão tomada>`
+  - **Desbloqueio ou ponto de review:** `<condição ou link>`
+  - **Opções avaliadas:**
+    - `<alternativas consideradas>`
 
-Source-set aprovado: `<URL do gate + digest atual confirmado>`
+### Fora de escopo
 
-## Critérios de aprovação
+<exclusões explícitas, restrições de tempo, compatibilidade, acesso, segurança ou decisão produto>
 
-| Critério                        | Evidência anterior/falha       | Ação                    | Resultado binário esperado |
-| ------------------------------- | ------------------------------ | ----------------------- | -------------------------- |
-| `<código/docs/config/operação>` | `<RED, antes ou estado atual>` | `<comando/walkthrough>` | `<GREEN/depois/PASS>`      |
+## Definição de pronto (DoD)
 
-## Casos de borda/testes, riscos e rollback
+| Critério                        | Evidência anterior/falha  | Resultado Esperado       |
+| ------------------------------- | ------------------------- | ------------------------ |
+| `<código/docs/config/operação>` | `<antes ou estado atual>` | `evidência da conclusão` |
 
-| Gatilho ou teste | Resposta/mitigação | Rollback |
-| ---------------- | ------------------ | -------- |
-| `<caso>`         | `<ação>`           | `<ação>` |
+## Casos de borda/testes
 
-## Prova de rollback para migração
+| Gatilho ou teste | Resposta/mitigação |
+| ---------------- | ------------------ |
+| `<caso>`         | `<ação>`           |
 
-Use apenas para migração: descreva como a reversão será exercitada e qual estado
-restaurado demonstra que o rollback é seguro.
 
-| Comando/simulação/demonstração | Resultado restaurado esperado |
-| ------------------------------ | ----------------------------- |
-| `<prova>`                      | `<critério binário>`          |
 
-_Após publicação, mover para needs-plan-review sem needs-human._
+<!-- checklist de revisão usado na criação do plano -->
+## Checklist de revisão
+- [ ] **Revisão de código:** `<link para PR ou commit>` <!-- link para revisão de código -->
+- [ ] **Revisão de documentação:** `<link para PR ou commit>` <!-- link para revisão de documentação -->
+
+<!-- code-flow:canonical-plan:end -->

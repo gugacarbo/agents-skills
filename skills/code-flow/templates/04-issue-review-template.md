@@ -1,28 +1,42 @@
-> agent: issue-reviewer
-> phase_scope: issue / source-set X/XL ou hard trigger
-> sources_evidence: <issue, digest, proposta e fontes>
-> decisions: <veredito literal>
-> changes_validation: <checagens ou none>
-> blockers: <blocker ou none>
+<!-- Numero da tentativa de review  / Máximo 3 tentativas de aprovar a issue antes de bloquear com needs-human -->
+# Issue #NNNN - <Issue Name> - PR #NNNN Review (N/3)
 
 ## Status
 
-**APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR**
+**APROVADO | APROVADO COM RESSALVAS | AJUSTAR | BLOQUEADO**
 
-## Resume
+## Blockers (opcional)
+
+ <!-- (opcional, somente se houver blockers) -->
+
+## Evidências
+
+- **Evidências:**
+  - `<links, issues, documentos, decisões, etc.>`
+
+## Resultado
+
+**Veredito:** `APROVADO | APROVADO COM RESSALVAS | AJUSTAR | BLOQUEADO`
 
 <resultado claro do review e consequência para o próximo gate>
 
-`none`, ou, em blocker: operação, estado a retomar e responsável.
-
 **Independência:** não escrevi nem aprovei o source-set.
 
-**Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
+<!-- checklist de revisão usado na avaliação da issue, com links para PRs ou commits -->
+## Checklist de revisão
+- [ ] **Revisão de código:** `<link para PR ou commit>`
+- [ ] **Revisão de documentação:** `<link para PR ou commit>`
 
-| Severidade                                        | Fonte/seção    | Impacto     | Ação     | Issue draft                                 |
-| ------------------------------------------------- | -------------- | ----------- | -------- | ------------------------------------------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<referência>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
+<!-- opcional, somente se houver ressalvas para correção futura -->
+## Ressalvas
 
-_Ressalvas aprovadoras são somente Minor não bloqueantes. O veredito não
+| Severidade                            | Fonte/seção    | Impacto     | Ação     | Issue draft                                 |
+| ------------------------------------- | -------------- | ----------- | -------- | ------------------------------------------- |
+| `Important \| Minor \| Cannot verify` | `<referência>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
+
+<!--
+ _Ressalvas aprovadoras são somente Minor não bloqueantes. O veredito não
 substitui o gate humano. Para cada Minor, use
 [`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md)._
+-->
+

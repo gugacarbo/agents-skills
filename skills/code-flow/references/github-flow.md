@@ -3,6 +3,11 @@
 Plano, código, review e integração exigem issue de entrega/bug. Epic e tracker
 não recebem mutação de entrega.
 
+Pré-issue de batch é `DRAFT_ISSUE` dentro de Project V2, não uma issue de
+entrega. Ela não participa da seleção native/fallback e não recebe label ou
+`stage:*`. O fluxo abaixo começa somente após conversão autorizada e confirmação
+do tipo `ISSUE` no repositório alvo.
+
 ## Estado observável
 
 `Complexity: S|M|G|X|XL` permanece no frontmatter da issue e fica fora do

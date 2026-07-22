@@ -44,6 +44,8 @@ test_structure() {
   [ -f "$SKILL/references/risk-profiles.md" ] || fail 'missing risk profiles reference'
   [ -f "$SKILL/templates/15-implementation-outline-template.md" ] || fail 'missing compact outline template'
   [ -f "$SKILL/templates/16-native-workflow-mapping.md" ] || fail 'missing native workflow mapping template'
+  [ -f "$SKILL/templates/17-batch-pre-issue-draft.md" ] || fail 'missing batch pre-issue draft template'
+  [ -f "$SKILL/templates/18-plan-change-summary.md" ] || fail 'missing plan change summary template'
   [ -f "$SKILL/templates/12-human-gate-spec.md" ] || fail 'missing shared human gate template'
   [ -f "$SKILL/templates/11-follow-up-issues-report.md" ] || fail 'missing follow-up issue report template'
   [ -f "$SKILL/references/follow-up-issue-drafts.md" ] || fail 'missing follow-up issue draft contract'
@@ -83,6 +85,10 @@ test_adaptive_contract() {
   assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
   assert_contains 'Prova `NO_CHANGES` sempre passa por `delivery-reviewer` independente' "$SKILL/SKILL.md"
   assert_contains 'renomear papel, trocar sessão' "$SKILL/SKILL.md"
+  assert_contains 'Project V2 Draft Issues' "$SKILL/SKILL.md"
+  assert_contains 'DRAFT_ISSUE' "$SKILL/phases/context.md"
+  assert_contains 'issue-writer ou orquestrador' "$SKILL/phases/context.md"
+  assert_contains 'não crie repository issues' "$SKILL/phases/context.md"
 
   if rg -n -i '\b(light|standard|assured)\b' "$SKILL/templates"; then
     fail 'profile name persisted in a template'
@@ -91,10 +97,10 @@ test_adaptive_contract() {
 
 test_evidence_contract() {
   local template
-  for template in 01-epic.md 03-issue-template.md 04-issue-review-template.md 05-plan-template.md 06-review-template.md \
+  for template in 01-epic.md 03-issue-template.md 04-issue-review-template.md 05-plan-template.md 06-plan-review-template.md \
     07-implementation-evidence-template.md 08-implementation-review-template.md 09-integration-report-template.md \
     10-issue-note-template.md 11-follow-up-issues-report.md 12-human-gate-spec.md 15-implementation-outline-template.md \
-    16-native-workflow-mapping.md evidence-contract-template.md; do
+    16-native-workflow-mapping.md 18-plan-change-summary.md evidence-contract-template.md; do
     assert_envelope "$SKILL/templates/$template"
   done
   assert_contains 'Estado a retomar' "$SKILL/templates/evidence-contract-template.md"
@@ -103,14 +109,15 @@ test_evidence_contract() {
   assert_contains 'CRLF normalizado para LF' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'exatamente um LF final' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'templates/15-implementation-outline-template.md' "$SKILL/agents/05-executor.md"
+  assert_contains 'templates/17-batch-pre-issue-draft.md' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'Mudança posterior no' "$SKILL/phases/issue.md"
   assert_contains 'Sem diff: `NO_CHANGES`' "$SKILL/templates/07-implementation-evidence-template.md"
   assert_contains 'NO_CHANGES aprovado segue para ready-to-close' "$SKILL/templates/08-implementation-review-template.md"
   assert_contains 'sem commit, PR ou merge' "$SKILL/phases/integrate.md"
   assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/04-issue-review-template.md"
-  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/06-review-template.md"
+  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/06-plan-review-template.md"
   assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"
-  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/06-review-template.md"
+  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/06-plan-review-template.md"
   assert_contains 'não há Workflow persistido' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'estado dinâmico' "$SKILL/phases/dispatch.md"
   assert_contains 'type: <issue | bug | feature | docs>' "$SKILL/templates/03-issue-template.md"
@@ -118,7 +125,12 @@ test_evidence_contract() {
   assert_contains '### Diff de spec (`update`)' "$SKILL/templates/03-issue-template.md"
   assert_contains 'Cada filha usa `templates/03-issue-template.md`' "$SKILL/templates/01-epic.md"
   assert_contains 'Problemas encontrados' "$SKILL/templates/07-implementation-evidence-template.md"
-  for template in 04-issue-review-template.md 06-review-template.md 07-implementation-evidence-template.md 08-implementation-review-template.md; do
+  assert_contains '<!-- code-flow:canonical-plan:start -->' "$SKILL/templates/05-plan-template.md"
+  assert_contains '<!-- code-flow:canonical-plan:end -->' "$SKILL/templates/05-plan-template.md"
+  assert_contains 'edita o mesmo comentário in-place' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'resumo breve' "$SKILL/templates/18-plan-change-summary.md"
+  assert_contains 'não substitui nem duplica o plano' "$SKILL/agents/03-plan-writer.md"
+  for template in 04-issue-review-template.md 06-plan-review-template.md 07-implementation-evidence-template.md 08-implementation-review-template.md; do
     assert_contains 'Issue draft' "$SKILL/templates/$template"
     assert_contains 'Minor não bloqueante: link; demais: n/a' "$SKILL/templates/$template"
     assert_contains 'follow-up-issue-drafts.md' "$SKILL/templates/$template"
@@ -313,8 +325,8 @@ test_evals_json() {
     .evaluation_protocol.samples_per_scenario == 5 and
     (.evaluation_protocol.non_critical_threshold | contains("every non-critical scenario")) and
     .evaluation_protocol.baseline_sha == "272a74b32775c7ea687c2f5be9cc94b232d371cf" and
-    (.evals | length == 14) and
-    ([.evals[].id] | unique | length == 14) and
+    (.evals | length == 17) and
+    ([.evals[].id] | unique | length == 17) and
     ([.evals[] | select((.baseline_failure | type) != "string" or (.baseline_failure | length) == 0)] | length == 0) and
     ((.evals[] | select(.id == 7) | .baseline_failure) == "omits_dynamic_native_selection") and
     ((.evals[] | select(.id == 12) | .baseline_failure) == "omits_transition_ownership_and_start_evidence") and
@@ -322,7 +334,10 @@ test_evals_json() {
     ((.evals[] | select(.id == 13) | .expectations | index("Consolida Minors em comentário append-only, deduplicando e agrupando apenas itens compatíveis")) != null) and
     ((.evals[] | select(.id == 13) | .expectations | index("Inclui um link GitHub issues/new individual para cada Minor de origem")) != null) and
     ((.evals[] | select(.id == 13) | .expectations | index("Inclui um único draft consolidado com as três origens")) != null) and
-    ((.evals[] | select(.id == 14) | .baseline_failure) == "regression_guard_batch_and_merge")
+    ((.evals[] | select(.id == 14) | .baseline_failure) == "regression_guard_batch_and_merge") and
+    ((.evals[] | select(.id == 15) | .baseline_failure) == "allows_executor_to_finish_diff_without_published_pr") and
+    ((.evals[] | select(.id == 16) | .baseline_failure) == "publishes_batch_pre_issues_before_codebase_review") and
+    ((.evals[] | select(.id == 17) | .baseline_failure) == "appends_full_plan_copies_instead_of_editing_canonical_comment")
   ' "$SKILL/evals/evals.json" > /dev/null || fail 'eval corpus or verification protocol incomplete'
 }
 
@@ -344,6 +359,10 @@ test_label_mutation() {
   assert_contains 'stage:needs-plan-review' "$a/03-plan-writer.md"
   assert_contains 'sem' "$a/03-plan-writer.md"
   assert_contains '`needs-human`' "$a/03-plan-writer.md"
+  assert_contains 'edite-o in-place' "$a/03-plan-writer.md"
+  assert_contains 'templates/18-plan-change-summary.md' "$a/03-plan-writer.md"
+  assert_contains 'não publique uma nova cópia integral' "$a/03-plan-writer.md"
+  assert_contains 'URL/ID' "$a/04-plan-reviewer.md"
 
   # 04-plan-reviewer: applies needs-human after APROVO.
   assert_contains 'needs-human' "$a/04-plan-reviewer.md"
@@ -355,6 +374,17 @@ test_label_mutation() {
   assert_contains 'stage:needs-delivery-review' "$a/05-executor.md"
   assert_contains 'stage:blocked + needs-human' "$a/05-executor.md"
   assert_contains 'limpe' "$a/05-executor.md"
+  assert_contains 'commit, push e PR publicado' "$a/05-executor.md"
+  assert_contains 'URL do PR' "$a/05-executor.md"
+  assert_contains 'draft ou ready' "$a/05-executor.md"
+  assert_contains 'falha ao publicar' "$a/05-executor.md"
+  assert_contains 'commit, push e PR publicado' "$SKILL/phases/dispatch.md"
+  assert_contains 'URL do PR publicado' "$SKILL/templates/07-implementation-evidence-template.md"
+
+  # Batch pre-issues remain Project V2 drafts until an authorized promotion.
+  assert_contains 'DRAFT_ISSUE' "$a/01-issue-writer.md"
+  assert_contains 'issue-writer ou orquestrador' "$SKILL/references/label-mutation-matrix.md"
+  assert_contains 'nenhum `stage:*`' "$SKILL/references/label-mutation-matrix.md"
 
   # 06-delivery-reviewer: separates merge and no-diff close gates.
   assert_contains 'stage:ready-to-merge' "$a/06-delivery-reviewer.md"

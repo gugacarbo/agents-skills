@@ -35,10 +35,15 @@ relação com Epic ficam fora do bloco; não há Workflow persistido. Gate regis
 URL e digest; mudança do bloco invalida aprovação, mudança apenas de metadata
 não.
 
-Resultados restantes são comentários append-only. O agente aplica a transição
-causada por seu artefato; o orquestrador confirma. Decisão humana usa o gate
-compartilhado; evento isolado usa a nota compartilhada, sem duplicar regras de
-fase.
+Resultados restantes são comentários append-only, exceto o plano formal. O
+plano vive em exatamente um comentário entre os marcadores
+`code-flow:canonical-plan:start` e `code-flow:canonical-plan:end`; o
+`plan-writer` cria esse comentário uma vez e edita o mesmo comentário in-place
+em toda revisão. Cada edição gera depois um comentário append-only separado com
+o resumo breve de `templates/18-plan-change-summary.md`, nunca outra cópia do
+plano. O agente aplica a transição causada por seu artefato; o orquestrador
+confirma. Decisão humana usa o gate compartilhado; evento isolado usa a nota
+compartilhada, sem duplicar regras de fase.
 
 Todo `Minor` não bloqueante usa o draft canônico de
 [`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).

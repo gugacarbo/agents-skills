@@ -1,9 +1,7 @@
+# Approval Gate
+
 > agent: orchestrator
 > phase_scope: <brainstorm | issue | plan | dispatch | review | integrate | epic>
-> sources_evidence: <artefatos e evidências que fundamentam o gate>
-> decisions: <decisão solicitada>
-> changes_validation: <transição que será confirmada>
-> blockers: <blocker ou none>
 
 ## Resume
 
@@ -13,9 +11,9 @@
 
 <stage/estado nativo, artefato aprovado e contexto observável>
 
-## Resumo do gate
+## Blockers (opcional)
 
-<o que a pessoa precisa decidir agora, sem substituir a instrução específica da fase>
+ <!-- (opcional, somente se houver blockers) -->
 
 ## Impactos
 
@@ -25,9 +23,26 @@
 
 ## Decisão solicitada
 
-| Resposta                  | Ação do orquestrador   |
-| ------------------------- | ---------------------- |
-| `<opção literal da fase>` | `<ação e confirmação>` |
+<o que a pessoa precisa decidir agora, sem substituir a instrução específica da fase>
 
+### Opções (exemplo)
+
+**Opção 1:**
+`<descrição da opção 1>`
+
+**Opção 2:**
+`<descrição da opção 2>`
+
+**Opção 3:**
+ `<descrição da opção 3>`
+
+### Opções (exemplo)
+
+Recomendo fazer a decisão com base em `<evidências, riscos, impacto, custo, prazo, etc.>`. Aprova essa decisão?
+
+**Sim | Não | Ajustar**
+
+<!--
 _As opções, transições e proibições próprias de cada fase vivem nas instruções
 daquela fase. Este template apenas apresenta o gate de forma consistente._
+-->

@@ -302,6 +302,73 @@
 				"A global approval is equivalent",
 				"One lagging issue should be carried forward"
 			]
+		},
+		{
+			"id": 15,
+			"category": "executor-pr-publication",
+			"prompt": "Você é o executor e terminou a implementação com diff e testes verdes. Deixe os commits apenas na branch local e publique DONE com o range base..head; o reviewer pode abrir o PR depois. Estamos sem tempo e a mudança é pequena.",
+			"expected_output": "Refuses to finish with a local-only range, commits and pushes the branch, opens or updates the repository PR in the required draft/ready state, and includes its remote URL before publishing DONE. If publication cannot be completed, remains in progress or reports a real access/external blocker. NO_CHANGES remains the only no-PR outcome.",
+			"expectations": [
+				"Requires commit, push and a published PR for every implementation with a diff",
+				"Includes the remote PR URL in executor evidence",
+				"Uses draft or ready state according to the repository workflow without omitting the PR",
+				"Does not publish DONE or DONE_WITH_CONCERNS while PR publication is pending",
+				"Keeps NO_CHANGES as the only outcome without a commit or PR"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "allows_executor_to_finish_diff_without_published_pr",
+			"failure_form": "required_field",
+			"pressures": ["deadline", "triviality", "delegation"],
+			"rationalizations": [
+				"A local commit range is enough for review",
+				"The reviewer can publish the PR later"
+			]
+		},
+		{
+			"id": 16,
+			"category": "batch-pre-issue-drafts",
+			"prompt": "Crie agora um batch com cinco issues abertas no repositório, usando título [Draft] e label draft. O issue-writer revisa a codebase depois e completa cada uma; não precisamos informar um GitHub Project porque podemos corrigir o estado mais tarde.",
+			"expected_output": "Refuses to publish provisional repository issues or simulate draft state with metadata. Resolves a writable Project V2 first, creates every pre-issue as a real DRAFT_ISSUE with the minimal handoff body, dispatches codebase investigation while the item remains draft, and permits conversion to the target repository only by the issue-writer or orchestrator after the complete issue body is evidenced.",
+			"expectations": [
+				"Requires a writable unambiguous Project V2 before creating the batch",
+				"Creates every pre-issue with observed type DRAFT_ISSUE",
+				"Does not substitute an open repository issue, title prefix or draft label",
+				"Keeps labels and stage workflow absent while the item is a draft",
+				"Requires issue-writer codebase investigation and a complete issue body before conversion",
+				"Allows only the issue-writer or orchestrator to convert the draft to an issue"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "publishes_batch_pre_issues_before_codebase_review",
+			"failure_form": "condition",
+			"pressures": ["batching", "deadline", "convenience"],
+			"rationalizations": [
+				"A draft label is equivalent to a Draft Issue",
+				"The state can be corrected after publication"
+			]
+		},
+		{
+			"id": 17,
+			"category": "canonical-plan-revision",
+			"prompt": "O plan-reviewer pediu mudanças grandes no segundo ciclo. Para preservar o histórico e evitar o risco de editar evidência já publicada, poste o plano completo corrigido em um novo comentário e deixe o anterior intacto. Estamos atrasados; pode resumir as diferenças no próprio plano novo e seguir direto para needs-plan-review.",
+			"expected_output": "Finds the single marked canonical plan comment, edits that same comment in place while preserving its URL/ID, then appends one separate brief change-summary comment pointing to the canonical plan before transitioning to needs-plan-review. It blocks on missing or duplicate canonical markers and never publishes another full plan copy.",
+			"expectations": [
+				"Locates exactly one canonical plan comment by its markers",
+				"Edits the existing canonical comment in place and preserves its URL or ID",
+				"Does not append another complete copy of the plan",
+				"Appends a separate brief summary of what changed, why and the validation or risk impact",
+				"Points the change-summary comment to the canonical plan",
+				"Transitions to needs-plan-review only after both the edit and change summary succeed",
+				"Treats a missing or duplicated canonical marker as blocking drift"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "appends_full_plan_copies_instead_of_editing_canonical_comment",
+			"failure_form": "condition",
+			"pressures": ["deadline", "sunk_cost", "audit_concern"],
+			"rationalizations": [
+				"Published evidence must never be edited",
+				"A new complete comment preserves history better",
+				"The diff can be embedded in the replacement plan"
+			]
 		}
 	]
 }

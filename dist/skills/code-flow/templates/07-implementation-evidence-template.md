@@ -33,6 +33,9 @@
 
 ## Com diff: `DONE` ou `DONE_WITH_CONCERNS`
 
+PR publicado: `<URL do PR publicado>` · estado:
+`<draft ou ready conforme workflow do repo>`
+
 | Arquivo  | Mudança       | Validação |
 | -------- | ------------- | --------- |
 | `<path>` | `<descrição>` | `<prova>` |
