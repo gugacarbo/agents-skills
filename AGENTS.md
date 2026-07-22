@@ -20,6 +20,14 @@ As skills publicadas são pastas com `SKILL.md` e runtime; algumas têm tooling 
 O workspace usa pnpm para descobrir e executar os packages privados em `skills/*`.
 Scripts de build/teste usam Bash, Python e Node conforme a skill.
 
+## Artefatos publicados
+
+- `dist/` e um artefato gerado, versionado para que o instalador remoto tenha
+  skills prontas. Nao o leia, pesquise, edite ou use como fonte, salvo pedido
+  explicito do usuario.
+- A fonte de verdade e `skills/*`. Gere `dist/` somente por `pnpm build`; o
+  hook de pre-push versiona automaticamente o resultado gerado.
+
 ## Infra & ambientes
 
 <!-- Onde roda; o que é self-hosted. ⚠️ Liste ferramentas que NUNCA usar

@@ -1,0 +1,10 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"ignore": [
+		"skills/code-flow/scripts/visual-companion/helper.js",
+		"skills/code-flow/scripts/visual-companion/server.cjs",
+		"skills/project-init/evals/run-evals.mjs",
+		"skills/project-init/templates/typescript/optional-tools/lint-staged/files/.lintstagedrc.js"
+	],
+	"ignoreDependencies": ["prettier-plugin-sh"]
+}

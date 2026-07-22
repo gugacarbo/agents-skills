@@ -12,6 +12,8 @@ build/
 out/
 .next/
 .nuxt/
+# Published build artifact. It remains versioned through `git add -f dist/`.
+dist/
 
 # IDE
 .idea/

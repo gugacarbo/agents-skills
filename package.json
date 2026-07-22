@@ -16,6 +16,7 @@
 		"format": "pnpm format:md && pnpm format:ts",
 		"typecheck": "tsc --noEmit",
 		"knip": "knip",
+		"verify": "bash scripts/verify",
 		"prepare": "husky",
 		"lint-staged": "lint-staged",
 		"test-staged": "test-staged",
@@ -27,7 +28,9 @@
 	"packageManager": "pnpm@11.9.0",
 	"type": "module",
 	"devDependencies": {
+		"@biomejs/biome": "^2.5.5",
 		"husky": "^9.1.7",
+		"knip": "^6.27.0",
 		"lint-staged": "^17.1.0",
 		"prettier": "^3.9.5",
 		"prettier-plugin-sh": "^0.19.0",
