@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Calculate the canonical SHA-256 digest of a code-flow source-set block."""
+"""Calculate the canonical SHA-256 digest of a code-flow architect review block."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ import hashlib
 import sys
 from pathlib import Path
 
-START = "<!-- code-flow:source-set:start -->"
-END = "<!-- code-flow:source-set:end -->"
+START = "<!-- code-flow:architect-review:start -->"
+END = "<!-- code-flow:architect-review:end -->"
 
 
 def canonical_source_set(raw: bytes) -> bytes:
@@ -23,9 +23,9 @@ def canonical_source_set(raw: bytes) -> bytes:
     starts = [index for index, line in enumerate(lines) if line.strip() == START]
     ends = [index for index, line in enumerate(lines) if line.strip() == END]
     if len(starts) != 1 or len(ends) != 1:
-        raise ValueError("body must contain exactly one source-set start and end marker")
+        raise ValueError("body must contain exactly one architect-review start and end marker")
     if starts[0] >= ends[0]:
-        raise ValueError("source-set markers are out of order")
+        raise ValueError("architect-review markers are out of order")
 
     payload = "\n".join(lines[starts[0] + 1 : ends[0]]).rstrip("\n") + "\n"
     return payload.encode("utf-8")

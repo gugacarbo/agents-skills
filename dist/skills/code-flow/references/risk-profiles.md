@@ -51,24 +51,26 @@ genérico de risco não removem hard trigger.
 
 ## Matriz de papéis e gates
 
-| Capacidade   | S sem hard trigger                            | M/G sem hard trigger                                                           | X/XL ou hard trigger                                            |
-| ------------ | --------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Issue/source | orquestrador na issue mínima; sem source gate | `issue-writer`; `not required` vai direto ao plano, gate só em `create/update` | `issue-writer` + `issue-reviewer` + gate humano                 |
-| Plano        | outline do `executor`; sem gate próprio       | `plan-writer` + reviewer + gate humano                                         | writer/reviewer separados + gate humano                         |
-| Execução     | ordem explícita + worktree                    | ordem explícita + worktree                                                     | ordem explícita + worktree                                      |
-| Review       | `delivery-reviewer` fresco                    | review independente; auditoria condicional                                     | delivery review + auditoria final por instância fresca distinta |
-| Merge/close  | explícito                                     | explícito                                                                      | explícito                                                       |
+| Capacidade  | S sem hard trigger           | M/G sem hard trigger                                                                                     | X/XL ou hard trigger                                            |
+| ----------- | ---------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Issue       | orquestrador na issue mínima | `issue-writer`; issue escolada sem spec                                                                  | `issue-writer`; issue escolada sem spec                         |
+| Arquitetura | não se aplica                | `architect` + relatório de arquitetura; gate humano só em `create/update` de spec ou Complexidade `>= G` | `architect` + relatório + gate humano obrigatório               |
+| Execução    | ordem explícita + worktree   | ordem explícita + worktree                                                                               | ordem explícita + worktree                                      |
+| Review      | `reviewer` fresco            | review independente; auditoria condicional                                                               | delivery review + auditoria final por instância fresca distinta |
+| Merge/close | explícito                    | explícito                                                                                                | explícito                                                       |
 
-Em M/G, o mesmo reviewer pode revisar plano e entrega se não escreveu plano
-nem código. Em X/XL/hard trigger, source reviewer, plan reviewer, delivery
-reviewer e auditor final são instâncias separadas. Migração exige rollback
-executável e evidência de teste, simulação ou demonstração equivalente.
+Em M/G, o mesmo reviewer pode revisar a entrega se não escreveu
+relatório de arquitetura/código. Em X/XL/hard trigger, reviewer e auditor final
+são instâncias separadas. Migração exige rollback executável e evidência de
+teste, simulação ou demonstração equivalente. O relatório de arquitetura
+publicado vai direto à autorização humana de execução quando o gate se aplica,
+sem reviewer exclusivo de arquitetura.
 
 Sempre que reuso de reviewer for proposto, declare também essa fronteira:
 reuso controlado vale somente para M/G e nunca permite corrigir o artefato que
-será revisado; X/XL e hard trigger exigem separação por fase. Trocar o nome do
-papel ou abrir outra sessão não apaga autoria e nunca torna self-review
-independente.
+será revisado; X/XL e hard trigger exigem separação por fase entre entrega e
+auditoria. Trocar o nome do papel ou abrir outra sessão não apaga autoria e
+nunca torna self-review independente.
 
 ## Promoção e drift de base
 
@@ -77,8 +79,8 @@ Ao surgir risco novo ou mudança material no branch alvo:
 1. pare antes de nova mutação;
 2. registre o fato e o primeiro gate agora obrigatório;
 3. descarte somente aprovações que não cobrem o novo escopo;
-4. retome no source gate para `create/update` ou hard trigger; caso contrário,
-   no gate de plano;
+4. retome no relatório de arquitetura para `create/update` de spec ou hard trigger; caso contrário,
+   na publicação do relatório e autorização de execução;
 5. nunca continue porque stage/base anterior dizia `approved`.
 
 Drift de base não material atualiza o base SHA e repete a validação planejada.

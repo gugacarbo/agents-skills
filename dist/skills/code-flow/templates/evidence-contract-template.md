@@ -25,11 +25,11 @@ Não replique metadata inferível como `phase_scope`, `decisions`,
 `changes_validation` ou `blockers`. Issues, Epics e Draft Issues usam somente a
 metadata própria definida em seus templates. Comentário não muda estado.
 
-O source-set do issue-writer vive no body entre os marcadores canônicos:
+O relatório de arquitetura do architect vive no body entre os marcadores canônicos:
 
 ```text
-<!-- code-flow:source-set:start -->
-<!-- code-flow:source-set:end -->
+<!-- code-flow:architect-review:start -->
+<!-- code-flow:architect-review:end -->
 ```
 
 `scripts/source-set-digest.py` calcula SHA-256 somente do conteúdo interno em
@@ -38,13 +38,13 @@ relação com Epic ficam fora do bloco; não há `Workflow` persistido. O gate
 registra URL e digest; mudança do bloco invalida aprovação, mudança apenas de
 metadata não.
 
-Resultados restantes são comentários append-only, exceto o plano formal. O
-plano vive em exatamente um comentário entre os marcadores
-`code-flow:canonical-plan:start` e `code-flow:canonical-plan:end`; o
-`plan-writer` cria esse comentário uma vez e edita o mesmo comentário in-place
+Resultados restantes são comentários append-only, exceto o relatório de
+arquitetura. O relatório vive em exatamente um comentário entre os marcadores
+`code-flow:architect-review:start` e `code-flow:architect-review:end`; o
+`architect` cria esse comentário uma vez e edita o mesmo comentário in-place
 em toda revisão. Cada edição gera depois um comentário append-only separado com
-o resumo breve de `templates/18-plan-change-summary.md`, nunca outra cópia do
-plano.
+o resumo breve de `templates/19-architect-change-summary.md`, nunca outra cópia
+do relatório.
 
 Todo `Minor` não bloqueante usa o draft canônico de
 [`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).

@@ -5,8 +5,6 @@
 > Epic: <#n | URL | none>
 > Parent: <#n | URL | none>
 
-<!-- code-flow:source-set:start -->
-
 ## Contexto e objetivo
 
 Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
@@ -19,8 +17,8 @@ comportamento observável sem forçar uma user story.
 
 ## Decisões e evidências
 
-| Decisão ou fato | Racional | Evidência      |
-| --------------- | -------- | -------------- |
+| Decisão ou fato | Racional   | Evidência       |
+| --------------- | ---------- | --------------- |
 | `<item>`        | `<motivo>` | `<link ou n/a>` |
 
 ## Definição de pronto
@@ -28,29 +26,6 @@ comportamento observável sem forçar uma user story.
 | Resultado observável | Medida, alvo e método |
 | -------------------- | --------------------- |
 | `<resultado>`        | `<métrica ou prova>`  |
-
-## Impacto de spec
-
-- **Ação:** `<create | update | not required>`
-- **Fonte aceita:** `<URL/path ou not applicable>`
-- **Padrão do repositório:** `<form/template/guidance ou none>`
-
-### Proposta de spec (`create`)
-
-<proposta completa ou not applicable; use o template do repositório quando existir>
-
-### Diff de spec (`update`)
-
-```diff
-- <antes>
-+ <depois>
-```
-
-### Racional (`not required`)
-
-<por que nenhuma especificação documentada precisa mudar>
-
-<!-- code-flow:source-set:end -->
 
 ## Relações opcionais
 

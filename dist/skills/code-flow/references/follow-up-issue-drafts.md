@@ -24,7 +24,7 @@ body:
 
 <resumo curto do problema>
 
-Origem: <URL da issue> · etapa: <issue review | plan review | executor | delivery review> · evidência: <URL, file:line ou comando>
+Origem: <URL da issue> · etapa: <issue review | executor | delivery review> · evidência: <URL, file:line ou comando>
 ```
 
 Use `n/a — repositório GitHub não verificável` quando a URL canônica não puder
@@ -35,7 +35,7 @@ o papel continua a transição normal.
 
 No fim da delivery review, use
 [`templates/11-follow-up-issues-report.md`](../templates/11-follow-up-issues-report.md).
-Colete os Minors não bloqueantes de issue review, plan review, executor e do
+Colete os Minors não bloqueantes de issue review, executor e do
 próprio delivery review.
 
 - Duplicata semântica: mesmo problema, efeito e escopo; mantenha um item e

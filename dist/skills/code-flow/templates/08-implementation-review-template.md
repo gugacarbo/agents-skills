@@ -1,5 +1,5 @@
-> agent: delivery-reviewer
-> sources_evidence: <executor, range/PR/prova e fontes>
+> agent: reviewer
+> sources_evidence: <executor, PR publicada/prova e fontes>
 
 ## Resume
 
@@ -9,11 +9,11 @@
 
 <o que foi revisado, o veredito e a decisão humana esperada>
 
-| Plano/outline | Evidência | Range/PR                   |
-| ------------- | --------- | -------------------------- |
-| `<URL>`       | `<URL>`   | `<base..head, URL ou n/a>` |
+| Relatório/outline | Evidência | PR                         |
+| ----------------- | --------- | -------------------------- |
+| `<URL>`           | `<URL>`   | `<base..head, URL ou n/a>` |
 
-**Independência:** não produzi plano, código nem evidência revisada.
+**Independência:** não produzi relatório de arquitetura, código nem evidência revisada.
 
 **Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
@@ -45,8 +45,8 @@
 
 ## Decisão e transição proposta
 
-| Estado atual | Próximo gate                            | Efeito após decisão humana |
-| ------------ | --------------------------------------- | -------------------------- |
+| Estado atual | Próximo gate                                | Efeito após decisão humana |
+| ------------ | ------------------------------------------- | -------------------------- |
 | `<stage>`    | `<merge \| close \| auditoria \| correção>` | `<transição>`              |
 
 _NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para

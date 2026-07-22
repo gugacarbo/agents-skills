@@ -15,11 +15,11 @@ Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
 
 ## Caminhos de entrega
 
-| Complexidade/risco   | Caminho mínimo                                                                                                                |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| S sem hard trigger   | issue mínima no-spec → autorização → outline + execução → review independente → integração/fechamento explícito               |
-| M/G sem hard trigger | source gate se aplicável → plano/review/aprovação → execução → delivery review → auditoria condicional → integração explícita |
-| X/XL ou hard trigger | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → integração explícita       |
+| Complexidade/risco   | Caminho mínimo                                                                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S sem hard trigger   | issue mínima no-spec → autorização → outline + execução → review independente → integração/fechamento explícito                                     |
+| M/G sem hard trigger | issue escolada → relatório de arquitetura (+ gate humano se spec ou G+) → execução → delivery review → auditoria condicional → integração explícita |
+| X/XL ou hard trigger | issue escolada → relatório de arquitetura + gate humano → execução → delivery review → auditoria fresca → integração explícita                      |
 
 `Complexity` representa esforço/coordenação; o rigor é recalculado e hard
 trigger sempre prevalece. Os nomes internos da classificação não são
@@ -32,11 +32,11 @@ persistidos.
 - `Workflow` não é persistido. Header legado é compatibilidade, não estado.
 - Native legado inválido pausa e exige decisão humana para migrar ao fallback.
 
-## Histórico do plano
+## Histórico do relatório de arquitetura
 
-O plano formal ocupa um único comentário canônico. Quando precisa mudar, o
-plan-writer edita esse comentário e adiciona apenas um comentário append-only
-com o resumo breve da revisão; não republica o plano completo.
+O relatório de arquitetura ocupa um único comentário canônico. Quando precisa
+mudar, o architect edita esse comentário e adiciona apenas um comentário
+append-only com o resumo breve da revisão; não republica o relatório completo.
 
 ## Ressalvas não bloqueantes
 

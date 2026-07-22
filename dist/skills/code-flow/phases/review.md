@@ -1,13 +1,18 @@
 # Review da entrega
 
-Em needs-delivery-review, despache delivery-reviewer independente com range/PR
-ou prova NO_CHANGES e as evidências de issue review, plan review e executor.
+Em needs-delivery-review, despache reviewer independente com a **PR publicada**
+(não a branch local) ou prova NO_CHANGES e as evidências de issue e executor.
 Use `templates/08-implementation-review-template.md` e publique sempre a
 consolidação append-only de `templates/11-follow-up-issues-report.md` antes da
 transição. Fonte exigida ausente é Cannot verify; a consolidação não muda
 labels, gates, merge ou fechamento. A review só está completa quando cada
 Minor original expõe seu Issue draft (ou `n/a — repositório GitHub não
 verificável`) e o grupo final preserva as origens.
+
+O reviewer confere que todos os DoD da issue e os casos de borda definidos no
+relatório de arquitetura foram cumpridos. Quando houver spec/ADR materializada
+no PR, verifica que o conteúdo commitado corresponde ao aprovado no relatório
+canônico e que a spec cobre a decisão de `create`/`update` declarada.
 
 Para NO_CHANGES, o reviewer mantém esse nome — nunca `DONE` — e rejeita pedido
 de pular review, consolidação ou `Fechar / Ajustar / Aguardar`.

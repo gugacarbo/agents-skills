@@ -52,20 +52,17 @@ Exatamente um `stage:*` representa o próximo ator/gate enquanto a issue está
 ativa. `needs-human` é ortogonal e existe somente quando o próximo ator é
 humano; remova-o ao devolver trabalho a agente e limpe ambos após merge/close.
 
-| Label                         | Próxima ação                                 |
-| ----------------------------- | -------------------------------------------- |
-| `stage:spec-approval`         | Review/gate de source-set conforme rigor.    |
-| `stage:needs-issue-fix`       | Corrigir source-set.                         |
-| `stage:needs-plan`            | Produzir plano formal.                       |
-| `stage:needs-plan-review`     | Review independente e depois gate humano.    |
-| `stage:needs-plan-fix`        | Novo ciclo de plano.                         |
-| `stage:approved`              | Aguardar ordem explícita; criar worktree.    |
-| `stage:in-progress`           | Implementar/corrigir escopo autorizado.      |
-| `stage:needs-delivery-review` | Review independente da entrega.              |
-| `stage:needs-changes`         | Executor corrige achados.                    |
-| `stage:ready-to-merge`        | Auditoria aplicável e gate final.            |
-| `stage:ready-to-close`        | Gate de fechamento para NO_CHANGES aprovado. |
-| `stage:blocked`               | Resolver blocker pelo Resume publicado.      |
+| Label                         | Próxima ação                                          |
+| ----------------------------- | ----------------------------------------------------- |
+| `stage:needs-architect`       | Produzir relatório de arquitetura e decidir spec/ADR. |
+| `stage:needs-architect-fix`   | Corrigir relatório de arquitetura.                    |
+| `stage:approved`              | Aguardar ordem explícita de execução; criar worktree. |
+| `stage:in-progress`           | Implementar/corrigir escopo autorizado.               |
+| `stage:needs-delivery-review` | Review independente da entrega.                       |
+| `stage:needs-changes`         | Executor corrige achados.                             |
+| `stage:ready-to-merge`        | Auditoria aplicável e gate final.                     |
+| `stage:ready-to-close`        | Gate de fechamento para NO_CHANGES aprovado.          |
+| `stage:blocked`               | Resolver blocker pelo Resume publicado.               |
 
 ## Ownership e mutação
 
