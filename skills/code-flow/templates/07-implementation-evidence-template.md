@@ -1,5 +1,5 @@
 > agent: executor
-> sources_evidence: <plano/outline, digest, commits, PR e comandos>
+> sources_evidence: <relatório de arquitetura/outline, digest, commits, PR e comandos>
 
 ## Resume
 

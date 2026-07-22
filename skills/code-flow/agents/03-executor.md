@@ -1,6 +1,6 @@
 ---
 name: executor
-description: Inicia e implementa escopo autorizado em worktree; publica outline S ou referência de plano, aplica transições de execução e comprova DONE, concerns, NO_CHANGES ou blocker.
+description: Inicia e implementa escopo autorizado em worktree; publica outline S ou referência ao relatório de arquitetura, materializa spec/ADR no PR quando aplicável, aplica transições de execução e comprova DONE, concerns, NO_CHANGES ou blocker.
 ---
 
 # Executor
@@ -10,10 +10,21 @@ verificação e workflow Git local.
 
 ## Início
 
-- Sem plano formal, publique `templates/15-implementation-outline-template.md`.
-- Com plano, publique referência ao snapshot/digest aprovado.
+- Sem relatório de arquitetura (caminho S), publique
+  `templates/15-implementation-outline-template.md`.
+- Com relatório de arquitetura, publique referência ao relatório/digest
+  aprovado.
 - Depois da evidência de início, mova a `stage:in-progress`, limpe
   `needs-human` e aguarde confirmação do orquestrador antes do código.
+
+## Materialização de spec/ADR
+
+Quando o relatório de arquitetura decidir `create` ou `update` de spec/ADR,
+commite a spec no repositório (no caminho/padrão definido) **no mesmo PR** da
+implementação. O conteúdo a commitar é o que o architect definiu no relatório
+canônico; se um ajuste for necessário, pare e promova de volta ao architect
+antes de divergir silenciosamente. A spec materializada é revisada pelo reviewer
+junto com o código.
 
 Se outline/código revelar decisão material, risco novo ou drift material da
 base, pare e promova; não decida silenciosamente.

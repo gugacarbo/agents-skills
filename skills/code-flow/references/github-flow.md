@@ -54,9 +54,8 @@ humano; remova-o ao devolver trabalho a agente e limpe ambos após merge/close.
 
 | Label                         | Próxima ação                                          |
 | ----------------------------- | ----------------------------------------------------- |
-| `stage:spec-approval`         | Gate humano de source-set conforme rigor.             |
-| `stage:needs-issue-fix`       | Corrigir source-set.                                  |
-| `stage:needs-plan`            | Produzir plano formal.                                |
+| `stage:needs-architect`       | Produzir relatório de arquitetura e decidir spec/ADR. |
+| `stage:needs-architect-fix`   | Corrigir relatório de arquitetura.                    |
 | `stage:approved`              | Aguardar ordem explícita de execução; criar worktree. |
 | `stage:in-progress`           | Implementar/corrigir escopo autorizado.               |
 | `stage:needs-delivery-review` | Review independente da entrega.                       |

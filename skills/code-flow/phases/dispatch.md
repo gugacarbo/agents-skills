@@ -1,9 +1,10 @@
 # Dispatch e execução
 
-Antes da ordem, recalcule risco, valide estado dinâmico, digest, plano/outline
-e base SHA. Ordem explícita autoriza dispatch; orquestrador cria worktree
-isolada. Em S, executor publica outline; nos demais caminhos referencia plano
-aprovado. Evidência de início precede `stage:in-progress`.
+Antes da ordem, recalcule risco, valide estado dinâmico, digest,
+relatório de arquitetura/outline e base SHA. Ordem explícita autoriza dispatch;
+orquestrador cria worktree isolada. Em S, executor publica outline; nos demais
+caminhos referencia relatório de arquitetura aprovado. Evidência de início
+precede `stage:in-progress`.
 
 Drift material, contrato público, risco novo ou comportamento inesperado
 interrompe código e retorna ao primeiro gate aplicável. Falha corrigível fica

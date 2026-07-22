@@ -1,5 +1,5 @@
 > agent: reviewer
-> sources_evidence: <executor, range/PR/prova e fontes>
+> sources_evidence: <executor, PR publicada/prova e fontes>
 
 ## Resume
 
@@ -9,11 +9,11 @@
 
 <o que foi revisado, o veredito e a decisão humana esperada>
 
-| Plano/outline | Evidência | Range/PR                   |
-| ------------- | --------- | -------------------------- |
-| `<URL>`       | `<URL>`   | `<base..head, URL ou n/a>` |
+| Relatório/outline | Evidência | PR                         |
+| ----------------- | --------- | -------------------------- |
+| `<URL>`           | `<URL>`   | `<base..head, URL ou n/a>` |
 
-**Independência:** não produzi plano, código nem evidência revisada.
+**Independência:** não produzi relatório de arquitetura, código nem evidência revisada.
 
 **Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
