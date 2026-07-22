@@ -1,4 +1,4 @@
-> agent: plan-writer
+> agent: architect
 > sources_evidence: <URL/ID do comentário canônico e base SHA>
 
 ## Resume

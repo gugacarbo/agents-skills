@@ -1,4 +1,4 @@
-> agent: delivery-reviewer
+> agent: reviewer
 > sources_evidence: <links dos reviews, evidência do executor e achados próprios>
 
 ## Resume
@@ -7,17 +7,16 @@
 
 ## Cobertura da coleta
 
-| Fonte               | Evidência      | Minors coletados | Resultado |
-| ------------------- | -------------- | ---------------- | --------- |
+| Fonte               | Evidência      | Minors coletados | Resultado               |
+| ------------------- | -------------- | ---------------- | ----------------------- |
 | `<issue review>`    | `<URL ou n/a>` | `<n>`            | `PASS \| Cannot verify` |
-| `<plan review>`     | `<URL ou n/a>` | `<n>`            | `PASS \| Cannot verify` |
 | `<executor>`        | `<URL ou n/a>` | `<n>`            | `PASS \| Cannot verify` |
 | `<delivery review>` | `<URL>`        | `<n>`            | `PASS`                  |
 
 ## Lista final de issues sugeridas
 
-| Grupo                          | Sugestões e origens             | Justificativa        | Issue draft            |
-| ------------------------------ | ------------------------------- | -------------------- | ---------------------- |
+| Grupo                          | Sugestões e origens             | Justificativa                                                  | Issue draft                                                                                                             |
+| ------------------------------ | ------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `<grupo ou item independente>` | `<resumos e links das origens>` | `<duplicata removida, agrupamento compatível ou independente>` | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<title-percent-encoded>&body=<body-percent-encoded>)` |
 
 Sem itens, publique literalmente: `Nenhuma sugestão de issue não bloqueante encontrada`.

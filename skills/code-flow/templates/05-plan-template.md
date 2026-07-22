@@ -1,6 +1,6 @@
 # Plano da issue `<#n>` — ciclo `<k>/3`
 
-> agent: plan-writer
+> agent: architect
 > sources_evidence: <issue, URL do gate, digest aprovado e base SHA>
 
 <!-- code-flow:canonical-plan:start -->
@@ -23,8 +23,8 @@ Base SHA: `<sha>`
 
 ## Abordagem de implementação
 
-| Área ou arquivo | Mudança planejada | Motivo | Dependências |
-| --------------- | ----------------- | ------ | ------------ |
+| Área ou arquivo | Mudança planejada | Motivo      | Dependências     |
+| --------------- | ----------------- | ----------- | ---------------- |
 | `<área>`        | `<ação>`          | `<por quê>` | `<item ou none>` |
 
 ## Critérios e validação
@@ -42,8 +42,8 @@ Base SHA: `<sha>`
 ## Prova de rollback para migração — somente quando aplicável
 
 | Comando, simulação ou demonstração | Estado restaurado esperado |
-| ---------------------------------- | --------------------------- |
-| `<prova executável>`               | `<critério binário>`        |
+| ---------------------------------- | -------------------------- |
+| `<prova executável>`               | `<critério binário>`       |
 
 ## Blocker e retomada — somente se aplicável
 

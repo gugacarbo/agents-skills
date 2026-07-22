@@ -26,7 +26,7 @@ entrega/bug elegível. A classificação de risco continua efêmera; somente
 | `/code-flow issue create`                                                        | Fecha decisões obrigatórias e cria/preenche uma issue elegível.         |
 | `/code-flow issue <#N\|URL> [context\|issue\|plan\|dispatch\|review\|integrate]` | Recalcula risco, valida workflow e retoma a operação elegível.          |
 | `/code-flow <context\|issue\|plan\|dispatch\|review\|integrate> <#N\|URL>`       | Forma semântica com alvo explícito.                                     |
-| `/code-flow batch create --project <owner/number>`                              | Cria pré-issues como Draft Issues para posterior investigação.          |
+| `/code-flow batch create --project <owner/number>`                               | Cria pré-issues como Draft Issues para posterior investigação.          |
 | `/code-flow batch <#N\|URL>... --from <operation>`                               | Executa trilhas isoladas sem pular gates; consolida decisões por issue. |
 | `/code-flow brainstorm`                                                          | Resume decisões e oferece aprofundar ou seguir ao próximo passo.        |
 | `/code-flow tool doctor [args]`                                                  | Executa somente o [diagnóstico público](scripts/doctor.sh) e para.      |
@@ -56,7 +56,7 @@ como comandos públicos.
    o orquestrador valida toda transição e executa as causadas por decisão
    humana.
    O plano formal vive em um único comentário canônico: na primeira publicação
-   o `plan-writer` o cria; em toda correção, edita esse mesmo comentário e só
+   o `architect` o cria; em toda correção, edita esse mesmo comentário e só
    então adiciona um comentário append-only com um resumo breve das alterações.
    Nunca publique outra cópia integral do plano para representar uma revisão.
    O executor só conclui uma implementação com diff depois de commit, push e
@@ -64,7 +64,7 @@ como comandos públicos.
    saída sem PR e nunca cria commit ou PR vazio.
 7. Use worktree isolada somente para implementação e correções de código.
    Merge e fechamento sem diff continuam decisões humanas explícitas.
-   Prova `NO_CHANGES` sempre passa por `delivery-reviewer` independente antes
+   Prova `NO_CHANGES` sempre passa por `reviewer` independente antes
    do gate; quando aprovada, apresenta `Fechar / Ajustar / Aguardar`, e somente
    `Fechar` autoriza fechamento e limpeza.
    Nunca renomeie `NO_CHANGES` como `DONE` nem aceite pedido para pular review,
@@ -108,14 +108,12 @@ Ownership de transição e labels fica em
 
 ## Papéis permitidos
 
-| Papel                                                 | Responsabilidade                                                   |
-| ----------------------------------------------------- | ------------------------------------------------------------------ |
-| [`issue-writer`](agents/01-issue-writer.md)           | Issue e source-set para M/G/X/XL ou qualquer impacto de spec.      |
-| [`issue-reviewer`](agents/02-issue-reviewer.md)       | Review independente do source-set em X/XL ou hard trigger.         |
-| [`plan-writer`](agents/03-plan-writer.md)             | Plano formal quando S/outline não se aplica.                       |
-| [`plan-reviewer`](agents/04-plan-reviewer.md)         | Review independente do plano.                                      |
-| [`executor`](agents/05-executor.md)                   | Outline S, implementação, PR publicado e correções na mesma worktree. |
-| [`delivery-reviewer`](agents/06-delivery-reviewer.md) | Review da entrega e auditoria final quando aplicável.              |
+| Papel                                       | Responsabilidade                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`issue-writer`](agents/01-issue-writer.md) | Issue e source-set para M/G/X/XL ou qualquer impacto de spec.                               |
+| [`architect`](agents/02-architect.md)       | Plano formal quando S/outline não se aplica; publica e aguarda ordem explícita de execução. |
+| [`executor`](agents/03-executor.md)         | Outline S, implementação, PR publicado e correções na mesma worktree.                       |
+| [`reviewer`](agents/04-reviewer.md)         | Review da entrega e auditoria final quando aplicável.                                       |
 
 Esses são os únicos papéis publicados, não uma lista de invocações
 obrigatórias. Ninguém revisa, aprova ou audita trabalho próprio. Reuso de
@@ -125,7 +123,11 @@ de workflow.
 Toda resposta que atribuir/reutilizar reviewer declara o contrato completo:
 M/G permite reuso somente sem autoria de plano/código; X/XL ou hard trigger
 exige instância separada por fase; renomear papel, trocar sessão ou delegar a si
-mesmo não apaga autoria nem torna self-review independente.
+mesmo não apaga autoria nem torna self-review independente. O source-set não tem
+review independente dedicada; em X/XL ou hard trigger o issue-writer publica o
+source-set e o gate humano decide aprová-lo, ajustá-lo ou bloqueá-lo. O plano
+formal também não tem reviewer autônomo: o architect publica o snapshot
+canônico e o humano decide autorizar a execução, ajustá-la ou bloqueá-la.
 
 Uma iniciativa com múltiplos resultados independentes usa
 [`templates/01-epic.md`](templates/01-epic.md) somente após escolha explícita.

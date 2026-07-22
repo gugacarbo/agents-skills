@@ -15,8 +15,9 @@ issue-writer ou o orquestrador pode converter o item de `DRAFT_ISSUE` para
 - M/G no-spec: issue-writer publica issue e vai a `stage:needs-plan`.
 - M/G `create/update`: issue-writer publica source-set e vai a
   `stage:spec-approval + needs-human`.
-- X/XL/hard trigger: issue-writer vai a `stage:spec-approval` sem
-  needs-human até review independente.
+- X/XL/hard trigger: issue-writer publica source-set e vai a
+  `stage:spec-approval + needs-human`, seguindo direto ao gate humano de
+  source-set (sem review independente dedicada).
 
 `create` contém proposta de spec; `update` contém diff antes/depois;
 `not required` explica o racional. Mudança posterior no bloco invalida o gate;
@@ -27,4 +28,6 @@ metadata externa não.
 Apresente o gate compartilhado com `Aprovar / Ajustar / Bloquear` e os efeitos
 literais: aprovar registra URL+digest e move a needs-plan; ajustar volta a
 needs-issue-fix; bloquear vai a blocked+needs-human com Resume. Brainstorm
-aprovado entra no source-set, nunca em documento paralelo.
+aprovado entra no source-set, nunca em documento paralelo. Em X/XL/hard
+trigger, este gate é obrigatório e sempre humano; não existe reviewer
+autônomo intermediário do source-set.

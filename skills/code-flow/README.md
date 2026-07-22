@@ -15,11 +15,11 @@ Comandos e regras canônicas: [SKILL.md](SKILL.md). Classificação:
 
 ## Caminhos de entrega
 
-| Complexidade/risco   | Caminho mínimo                                                                                                                |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| S sem hard trigger   | issue mínima no-spec → autorização → outline + execução → review independente → integração/fechamento explícito               |
-| M/G sem hard trigger | source gate se aplicável → plano/review/aprovação → execução → delivery review → auditoria condicional → integração explícita |
-| X/XL ou hard trigger | source review/aprovação → plano/review/aprovação → execução → delivery review → auditoria fresca → integração explícita       |
+| Complexidade/risco   | Caminho mínimo                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| S sem hard trigger   | issue mínima no-spec → autorização → outline + execução → review independente → integração/fechamento explícito                        |
+| M/G sem hard trigger | source gate se aplicável → plano + autorização de execução → execução → delivery review → auditoria condicional → integração explícita |
+| X/XL ou hard trigger | source-set + gate humano → plano + autorização de execução → execução → delivery review → auditoria fresca → integração explícita      |
 
 `Complexity` representa esforço/coordenação; o rigor é recalculado e hard
 trigger sempre prevalece. Os nomes internos da classificação não são
@@ -35,7 +35,7 @@ persistidos.
 ## Histórico do plano
 
 O plano formal ocupa um único comentário canônico. Quando precisa mudar, o
-plan-writer edita esse comentário e adiciona apenas um comentário append-only
+architect edita esse comentário e adiciona apenas um comentário append-only
 com o resumo breve da revisão; não republica o plano completo.
 
 ## Ressalvas não bloqueantes

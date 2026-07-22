@@ -30,7 +30,7 @@ assert_comment_contract() {
 test_structure() {
   local actual expected
   actual=$(find "$SKILL/agents" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
-  expected=$(printf '%s\n' 01-issue-writer.md 02-issue-reviewer.md 03-plan-writer.md 04-plan-reviewer.md 05-executor.md 06-delivery-reviewer.md)
+  expected=$(printf '%s\n' 01-issue-writer.md 02-architect.md 03-executor.md 04-reviewer.md)
   [ "$actual" = "$expected" ] || fail "unexpected agents: $actual"
 
   actual=$(find "$SKILL/phases" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
@@ -44,8 +44,6 @@ test_structure() {
   [ -f "$SKILL/templates/16-native-workflow-mapping.md" ] || fail 'missing native workflow mapping template'
   [ -f "$SKILL/templates/17-batch-pre-issue-draft.md" ] || fail 'missing batch pre-issue draft template'
   [ -f "$SKILL/templates/18-plan-change-summary.md" ] || fail 'missing plan change summary template'
-  [ -f "$SKILL/templates/06-plan-review-template.md" ] || fail 'missing plan review template'
-  [ ! -e "$SKILL/templates/06-review-template.md" ] || fail 'obsolete plan review template remains'
   [ -f "$SKILL/templates/12-human-gate-spec.md" ] || fail 'missing shared human gate template'
   [ -f "$SKILL/templates/11-follow-up-issues-report.md" ] || fail 'missing follow-up issue report template'
   [ -f "$SKILL/references/follow-up-issue-drafts.md" ] || fail 'missing follow-up issue draft contract'
@@ -77,13 +75,13 @@ test_adaptive_contract() {
   assert_contains 'Mudança de comportamento' "$SKILL/SKILL.md"
   assert_contains 'auditor fresco' "$SKILL/phases/review.md"
   assert_contains 'nunca autoriza execução' "$SKILL/phases/plan.md"
-  assert_contains 'Terceiro ciclo' "$SKILL/phases/plan.md"
+  assert_contains 'ordem explícita de execução' "$SKILL/phases/plan.md"
   assert_contains '`--from` é piso' "$SKILL/phases/context.md"
   assert_contains 'do próprio gate' "$SKILL/phases/context.md"
   assert_contains 'Merge nunca é automático' "$SKILL/phases/integrate.md"
   assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
   assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
-  assert_contains 'Prova `NO_CHANGES` sempre passa por `delivery-reviewer` independente' "$SKILL/SKILL.md"
+  assert_contains 'Prova `NO_CHANGES` sempre passa por `reviewer` independente' "$SKILL/SKILL.md"
   assert_contains 'renomear papel, trocar sessão' "$SKILL/SKILL.md"
   assert_contains 'Project V2 Draft Issues' "$SKILL/SKILL.md"
   assert_contains 'DRAFT_ISSUE' "$SKILL/phases/context.md"
@@ -97,7 +95,7 @@ test_adaptive_contract() {
 
 test_evidence_contract() {
   local template
-  for template in 04-issue-review-template.md 05-plan-template.md 06-plan-review-template.md \
+  for template in 05-plan-template.md \
     07-implementation-evidence-template.md 08-implementation-review-template.md 09-integration-report-template.md \
     10-issue-note-template.md 11-follow-up-issues-report.md 12-human-gate-spec.md 15-implementation-outline-template.md \
     16-native-workflow-mapping.md 18-plan-change-summary.md evidence-contract-template.md; do
@@ -110,16 +108,14 @@ test_evidence_contract() {
   assert_contains '<!-- code-flow:source-set:end -->' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'CRLF normalizado para LF' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'exatamente um LF final' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains 'templates/15-implementation-outline-template.md' "$SKILL/agents/05-executor.md"
+  assert_contains 'templates/15-implementation-outline-template.md' "$SKILL/agents/03-executor.md"
   assert_contains 'templates/17-batch-pre-issue-draft.md' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'Mudança posterior no' "$SKILL/phases/issue.md"
   assert_contains 'Sem diff: `NO_CHANGES`' "$SKILL/templates/07-implementation-evidence-template.md"
   assert_contains 'NO_CHANGES aprovado segue para ready-to-close' "$SKILL/templates/08-implementation-review-template.md"
   assert_contains 'sem commit, PR ou merge' "$SKILL/phases/integrate.md"
-  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/04-issue-review-template.md"
-  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/06-plan-review-template.md"
-  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"
-  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/06-plan-review-template.md"
+  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/08-implementation-review-template.md"
+  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/08-implementation-review-template.md"
   assert_contains 'não há `Workflow` persistido' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'estado dinâmico' "$SKILL/phases/dispatch.md"
   assert_contains '> type: <issue | bug | feature | docs>' "$SKILL/templates/03-issue-template.md"
@@ -139,7 +135,6 @@ test_evidence_contract() {
   assert_contains '## Abordagem de implementação' "$SKILL/templates/05-plan-template.md"
   assert_contains 'Ação de validação' "$SKILL/templates/05-plan-template.md"
   assert_contains 'Prova de rollback para migração' "$SKILL/templates/05-plan-template.md"
-  assert_not_contains 'PR #NNNN' "$SKILL/templates/04-issue-review-template.md"
   assert_not_contains 'PR #NNNN' "$SKILL/templates/05-plan-template.md"
   assert_contains 'Aprovar / Ajustar / Bloquear' "$SKILL/templates/12-human-gate-spec.md"
   assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/templates/12-human-gate-spec.md"
@@ -150,8 +145,8 @@ test_evidence_contract() {
   assert_contains '<!-- code-flow:canonical-plan:end -->' "$SKILL/templates/05-plan-template.md"
   assert_contains 'edita o mesmo comentário in-place' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'resumo breve' "$SKILL/templates/18-plan-change-summary.md"
-  assert_contains 'não substitui nem duplica o plano' "$SKILL/agents/03-plan-writer.md"
-  for template in 04-issue-review-template.md 06-plan-review-template.md 07-implementation-evidence-template.md 08-implementation-review-template.md; do
+  assert_contains 'não substitui nem duplica o plano' "$SKILL/agents/02-architect.md"
+  for template in 07-implementation-evidence-template.md 08-implementation-review-template.md; do
     assert_contains 'Issue draft' "$SKILL/templates/$template"
     assert_contains 'Minor não bloqueante: link; demais: n/a' "$SKILL/templates/$template"
     assert_contains 'follow-up-issue-drafts.md' "$SKILL/templates/$template"
@@ -161,10 +156,10 @@ test_evidence_contract() {
   assert_contains 'nunca cria issue' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'templates/11-follow-up-issues-report.md' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'Nenhuma sugestão de issue não bloqueante encontrada' "$SKILL/templates/11-follow-up-issues-report.md"
-  assert_contains 'duplicatas semânticas' "$SKILL/agents/06-delivery-reviewer.md"
-  assert_contains 'Não oculte os links individuais' "$SKILL/agents/06-delivery-reviewer.md"
-  assert_contains 'nunca é `DONE`' "$SKILL/agents/06-delivery-reviewer.md"
-  assert_contains 'liste antes do veredito' "$SKILL/agents/06-delivery-reviewer.md"
+  assert_contains 'duplicatas semânticas' "$SKILL/agents/04-reviewer.md"
+  assert_contains 'Não oculte os links individuais' "$SKILL/agents/04-reviewer.md"
+  assert_contains 'nunca é `DONE`' "$SKILL/agents/04-reviewer.md"
+  assert_contains 'liste antes do veredito' "$SKILL/agents/04-reviewer.md"
   assert_contains 'templates/11-follow-up-issues-report.md' "$SKILL/phases/review.md"
   assert_contains 'A review só está completa' "$SKILL/phases/review.md"
   assert_contains 'nunca `DONE`' "$SKILL/phases/review.md"
@@ -371,35 +366,23 @@ test_label_mutation() {
   assert_contains 'stage:spec-approval' "$a/01-issue-writer.md"
   assert_contains 'stage:needs-plan' "$a/01-issue-writer.md"
 
-  # 02-issue-reviewer: applies needs-human on approval, fix/blocked otherwise.
-  assert_contains 'needs-human' "$a/02-issue-reviewer.md"
-  assert_contains 'stage:needs-issue-fix' "$a/02-issue-reviewer.md"
-  assert_contains 'blocker' "$a/02-issue-reviewer.md"
+  # 02-architect: publishes the plan and waits for explicit execution authorization.
+  assert_contains 'stage:approved + needs-human' "$a/02-architect.md"
+  assert_contains 'ordem explícita de execução' "$a/02-architect.md"
+  assert_contains 'edite-o in-place' "$a/02-architect.md"
+  assert_contains 'templates/18-plan-change-summary.md' "$a/02-architect.md"
+  assert_contains 'publique uma nova cópia integral' "$a/02-architect.md"
 
-  # 03-plan-writer: always sends a published plan to independent review.
-  assert_contains 'stage:needs-plan-review' "$a/03-plan-writer.md"
-  assert_contains 'sem' "$a/03-plan-writer.md"
-  assert_contains '`needs-human`' "$a/03-plan-writer.md"
-  assert_contains 'edite-o in-place' "$a/03-plan-writer.md"
-  assert_contains 'templates/18-plan-change-summary.md' "$a/03-plan-writer.md"
-  assert_contains 'não publique uma nova cópia integral' "$a/03-plan-writer.md"
-  assert_contains 'URL/ID' "$a/04-plan-reviewer.md"
-
-  # 04-plan-reviewer: applies needs-human after APROVO.
-  assert_contains 'needs-human' "$a/04-plan-reviewer.md"
-  assert_contains 'stage:needs-plan-review' "$a/04-plan-reviewer.md"
-  assert_contains 'stage:needs-plan-fix' "$a/04-plan-reviewer.md"
-
-  # 05-executor: mutates stage per evidence result
-  assert_contains 'stage:in-progress' "$a/05-executor.md"
-  assert_contains 'stage:needs-delivery-review' "$a/05-executor.md"
-  assert_contains 'stage:blocked + needs-human' "$a/05-executor.md"
-  assert_contains 'limpe' "$a/05-executor.md"
-  assert_contains 'commit, push e PR publicado' "$a/05-executor.md"
-  assert_contains 'URL do PR' "$a/05-executor.md"
-  assert_contains 'estado draft ou' "$a/05-executor.md"
-  assert_contains 'ready segue' "$a/05-executor.md"
-  assert_contains 'falha ao publicar' "$a/05-executor.md"
+  # 03-executor: mutates stage per evidence result
+  assert_contains 'stage:in-progress' "$a/03-executor.md"
+  assert_contains 'stage:needs-delivery-review' "$a/03-executor.md"
+  assert_contains 'stage:blocked + needs-human' "$a/03-executor.md"
+  assert_contains 'limpe' "$a/03-executor.md"
+  assert_contains 'commit, push e PR publicado' "$a/03-executor.md"
+  assert_contains 'URL do PR' "$a/03-executor.md"
+  assert_contains 'estado draft ou' "$a/03-executor.md"
+  assert_contains 'ready segue' "$a/03-executor.md"
+  assert_contains 'falha ao publicar' "$a/03-executor.md"
   assert_contains 'commit, push e PR publicado' "$SKILL/phases/dispatch.md"
   assert_contains 'URL do PR publicado' "$SKILL/templates/07-implementation-evidence-template.md"
 
@@ -408,18 +391,18 @@ test_label_mutation() {
   assert_contains 'issue-writer ou orquestrador' "$SKILL/references/label-mutation-matrix.md"
   assert_contains 'nenhum `stage:*`' "$SKILL/references/label-mutation-matrix.md"
 
-  # 06-delivery-reviewer: separates merge and no-diff close gates.
-  assert_contains 'stage:ready-to-merge' "$a/06-delivery-reviewer.md"
-  assert_contains 'stage:ready-to-close' "$a/06-delivery-reviewer.md"
-  assert_contains 'needs-human' "$a/06-delivery-reviewer.md"
-  assert_contains 'stage:needs-changes' "$a/06-delivery-reviewer.md"
-  assert_contains 'blocker' "$a/06-delivery-reviewer.md"
-  assert_contains '11-follow-up-issues-report.md' "$a/06-delivery-reviewer.md"
+  # 04-reviewer: separates merge and no-diff close gates.
+  assert_contains 'stage:ready-to-merge' "$a/04-reviewer.md"
+  assert_contains 'stage:ready-to-close' "$a/04-reviewer.md"
+  assert_contains 'needs-human' "$a/04-reviewer.md"
+  assert_contains 'stage:needs-changes' "$a/04-reviewer.md"
+  assert_contains 'blocker' "$a/04-reviewer.md"
+  assert_contains '11-follow-up-issues-report.md' "$a/04-reviewer.md"
 
   # Canonical mutation matrix must exist and be referenced
   [ -f "$SKILL/references/label-mutation-matrix.md" ] || fail 'missing canonical label mutation matrix'
   assert_contains 'transition-issue.sh' "$SKILL/references/github-flow.md"
-  assert_contains 'gate plano aprova/ajusta/bloqueia' "$SKILL/references/label-mutation-matrix.md"
+  assert_contains 'autorização execução autoriza/ajusta/bloqueia' "$SKILL/references/label-mutation-matrix.md"
   assert_contains 'gate integração/fechamento' "$SKILL/references/label-mutation-matrix.md"
 
   # Evidence precedes label mutation and never substitutes it.

@@ -1,4 +1,4 @@
-> agent: delivery-reviewer
+> agent: reviewer
 > sources_evidence: <executor, range/PR/prova e fontes>
 
 ## Resume
@@ -45,8 +45,8 @@
 
 ## Decisão e transição proposta
 
-| Estado atual | Próximo gate                            | Efeito após decisão humana |
-| ------------ | --------------------------------------- | -------------------------- |
+| Estado atual | Próximo gate                                | Efeito após decisão humana |
+| ------------ | ------------------------------------------- | -------------------------- |
 | `<stage>`    | `<merge \| close \| auditoria \| correção>` | `<transição>`              |
 
 _NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para

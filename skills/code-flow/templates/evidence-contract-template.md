@@ -41,7 +41,7 @@ metadata não.
 Resultados restantes são comentários append-only, exceto o plano formal. O
 plano vive em exatamente um comentário entre os marcadores
 `code-flow:canonical-plan:start` e `code-flow:canonical-plan:end`; o
-`plan-writer` cria esse comentário uma vez e edita o mesmo comentário in-place
+`architect` cria esse comentário uma vez e edita o mesmo comentário in-place
 em toda revisão. Cada edição gera depois um comentário append-only separado com
 o resumo breve de `templates/18-plan-change-summary.md`, nunca outra cópia do
 plano.

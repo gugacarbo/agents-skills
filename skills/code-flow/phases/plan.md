@@ -1,22 +1,34 @@
-# Plano e review
+# Plano e autorização de execução
 
-S sem hard trigger usa outline após ordem explícita. M/G/X/XL usam
-plan-writer, review independente e gate humano. Plano formal usa
-`templates/05-plan-template.md`; review usa `templates/06-plan-review-template.md`.
+S sem hard trigger usa outline após ordem explícita. M/G/X/XL usam architect
+e, depois, ordem humana explícita de execução. Plano formal usa
+`templates/05-plan-template.md`. Não há reviewer autônomo nem gate formal de
+plano: o snapshot publicado é a entrada para a autorização humana de execução.
 
-Plan-writer publica o primeiro snapshot em um único comentário canônico marcado
+Architect publica o primeiro snapshot em um único comentário canônico marcado
 e registra sua URL/ID. Em correções, edita esse comentário in-place e publica
 somente um comentário append-only com resumo breve das alterações, usando
 `templates/18-plan-change-summary.md`; não adiciona outra cópia integral do
-plano. Marcador ausente ou duplicado bloqueia a revisão até resolver o drift.
+plano. Marcador ausente ou duplicado bloqueia a entrega até resolver o drift.
 Somente após o plano canônico e, quando aplicável, seu changelog estarem
-publicados, move a needs-plan-review sem needs-human.
-Plan-reviewer aprovador mantém o stage e adiciona needs-human; ajuste/Critical,
-Important ou Cannot verify volta a needs-plan-fix. Terceiro ciclo rejeitado
-abre checkpoint humano, também pelo gate compartilhado.
+publicados, transicione `stage:needs-plan` para
+`stage:approved + needs-human` e aguarde ordem explícita de execução.
+O architect nunca autoriza execução, apenas entrega o snapshot para a decisão
+humana. Manter `needs-plan` seria drift.
 
-## Gate humano de plano
+`needs-plan-fix` não é mais um estado usado: o architect corrige o comentário
+canônico in-place e republica o resumo de alterações; caso o humano peça novo
+ciclo, o estágio permanece `needs-plan` (com `needs-human` removido enquanto o
+agente edita e devolvido ao fim da publicação). Se o executor ou o orquestrador
+identificar decisão material depois da publicação, pare, promova rigor e só
+retome com novo snapshot publicado.
 
-Apresente o template compartilhado com `Aprovar / Ajustar / Bloquear`:
-aprovar move a approved+needs-human, mas nunca autoriza execução; ajustar abre
-novo ciclo; bloquear preserva Resume. O gate não se aplica ao outline S.
+## Autorização humana de execução
+
+Apresente o checkpoint compartilhado com `Autorizar / Ajustar / Bloquear`:
+autorizar move a `stage:in-progress` (depois da evidência de início do
+executor) e consome a autorização; ajustar devolve a `needs-plan` ao
+plan-writer para editar o canônico e republicar o resumo; bloquear preserva
+`Resume`. Aprovação do plano e autorização de execução são a mesma decisão
+humana: nunca inicie código sem ordem explícita e worktree isolada. O
+checkpoint não se aplica ao outline S, que já depende de ordem explícita.

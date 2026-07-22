@@ -1,7 +1,7 @@
 # Review da entrega
 
-Em needs-delivery-review, despache delivery-reviewer independente com range/PR
-ou prova NO_CHANGES e as evidências de issue review, plan review e executor.
+Em needs-delivery-review, despache reviewer independente com range/PR
+ou prova NO_CHANGES e as evidências de issue review e executor.
 Use `templates/08-implementation-review-template.md` e publique sempre a
 consolidação append-only de `templates/11-follow-up-issues-report.md` antes da
 transição. Fonte exigida ausente é Cannot verify; a consolidação não muda
