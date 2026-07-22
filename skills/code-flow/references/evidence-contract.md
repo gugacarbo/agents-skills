@@ -1,11 +1,7 @@
-> agent: <papel que produziu o resultado>
-> sources_evidence: <links imutáveis, comandos e saída>
+# Contrato de evidência
 
-## Resume
-
-<resultado humano, veredito quando aplicável e próximo gate>
-
-# Contrato mínimo de evidência
+Todo template de comentário começa com `agent`, `sources_evidence` e uma seção
+`## Resume` contendo resultado humano, veredito quando aplicável e próximo gate.
 
 Antes de uma mutação de workflow, o comentário que a fundamenta identifica:
 
@@ -43,10 +39,12 @@ arquitetura. O relatório vive em exatamente um comentário entre os marcadores
 `code-flow:architect-review:start` e `code-flow:architect-review:end`; o
 `architect` cria esse comentário uma vez e edita o mesmo comentário in-place
 em toda revisão. Cada edição gera depois um comentário append-only separado com
-o resumo breve de `templates/19-architect-change-summary.md`, nunca outra cópia
+uma nota `architect-change` de
+[`templates/07-workflow-note-template.md`](../templates/07-workflow-note-template.md),
+nunca outra cópia
 do relatório.
 
 Todo `Minor` não bloqueante usa o draft canônico de
-[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
-No fim da delivery review, o reviewer publica a consolidação append-only de
-sugestões antes da transição, sem criar issues nem mutar labels ou gates.
+[`references/follow-up-issue-drafts.md`](follow-up-issue-drafts.md).
+No fim da delivery review, o reviewer inclui a consolidação de sugestões no
+mesmo comentário antes da transição, sem criar issues nem mutar labels ou gates.

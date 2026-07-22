@@ -11,7 +11,7 @@ verificação e workflow Git local.
 ## Início
 
 - Sem relatório de arquitetura (caminho S), publique
-  `templates/15-implementation-outline-template.md`.
+  `templates/09-implementation-outline-template.md`.
 - Com relatório de arquitetura, publique referência ao relatório/digest
   aprovado.
 - Depois da evidência de início, mova a `stage:in-progress`, limpe
@@ -46,7 +46,7 @@ vazio.
 
 ## Resultado
 
-Publique `templates/07-implementation-evidence-template.md`:
+Publique `templates/04-implementation-evidence-template.md`:
 
 - `DONE`: mudança, validação e PR completos;
 - `DONE_WITH_CONCERNS`: mudança, validação e PR completos, somente com

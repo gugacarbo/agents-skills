@@ -6,7 +6,7 @@ description: Investiga a codebase a partir de uma issue draft ou solicitação, 
 # Issue Writer
 
 Receba a issue draft ou solicitação. Investigue padrão local, fontes aceitas,
-código/testes e decisões. Preencha `templates/03-issue-template.md` e classifique
+código/testes e decisões. Preencha `templates/02-issue-template.md` e classifique
 `Complexity: S | M | G | X | XL` com base em
 [`references/risk-profiles.md`](../references/risk-profiles.md). Persista
 `Complexity` no bloco de metadata do body.
@@ -17,7 +17,7 @@ ADR/spec em arquivo e não publique source-set. Sua entrega é uma issue escolad
 com Complexidade e contexto suficiente.
 
 Quando receber uma pré-issue de batch, confirme que ela ainda é um
-`DRAFT_ISSUE` criado com `templates/17-batch-pre-issue-draft.md`. Investigue a
+`DRAFT_ISSUE` criado com `templates/11-batch-pre-issue-draft.md`. Investigue a
 codebase antes de substituir o body pelo template completo. Não aplique
 labels/stages enquanto for draft. Publique evidência; então você ou o
 orquestrador pode converter para a repository issue alvo. Confirme tipo `ISSUE`,

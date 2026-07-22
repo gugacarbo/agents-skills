@@ -2,9 +2,9 @@
 
 Em needs-delivery-review, despache reviewer independente com a **PR publicada**
 (não a branch local) ou prova NO_CHANGES e as evidências de issue e executor.
-Use `templates/08-implementation-review-template.md` e publique sempre a
-consolidação append-only de `templates/11-follow-up-issues-report.md` antes da
-transição. Fonte exigida ausente é Cannot verify; a consolidação não muda
+Use `templates/05-delivery-review-template.md` e inclua sempre sua consolidação
+de follow-ups no mesmo comentário antes da transição. Fonte exigida ausente é
+Cannot verify; a consolidação não muda
 labels, gates, merge ou fechamento. A review só está completa quando cada
 Minor original expõe seu Issue draft (ou `n/a — repositório GitHub não
 verificável`) e o grupo final preserva as origens.

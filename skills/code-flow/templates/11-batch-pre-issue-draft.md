@@ -17,7 +17,7 @@
 
 O issue-writer revisa guidance, codebase, testes e fontes aceitas; propõe
 Complexity e impacto de spec; e substitui este body por
-`templates/03-issue-template.md` completo antes da conversão.
+`templates/02-issue-template.md` completo antes da conversão.
 
 <!-- code-flow:batch-pre-issue-draft:end -->
 

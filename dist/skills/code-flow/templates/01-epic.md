@@ -14,13 +14,13 @@
 | ---------------- | -------------------- | --------------- | -------------- | --------------- |
 | `<#n ou nome>`   | `<resultado>`        | `<time/pessoa>` | `<#n ou none>` | `<link/resumo>` |
 
-Cada filha usa `templates/03-issue-template.md` e percorre o fluxo completo.
+Cada filha usa `templates/02-issue-template.md` e percorre o fluxo completo.
 Este Epic não recebe `Complexity`, `Workflow`, `stage:*` nem `needs-human`.
 
 ## Decisões e evidências transversais
 
-| Decisão, dependência ou risco | Responsável     | Evidência      | Próximo marco       |
-| ----------------------------- | --------------- | -------------- | ------------------- |
+| Decisão, dependência ou risco | Responsável     | Evidência       | Próximo marco        |
+| ----------------------------- | --------------- | --------------- | -------------------- |
 | `<item>`                      | `<time/pessoa>` | `<link ou n/a>` | `<gate ou condição>` |
 
 ## Definição de pronto

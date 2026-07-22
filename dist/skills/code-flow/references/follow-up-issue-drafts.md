@@ -33,9 +33,8 @@ o papel continua a transição normal.
 
 ## Consolidação final
 
-No fim da delivery review, use
-[`templates/11-follow-up-issues-report.md`](../templates/11-follow-up-issues-report.md).
-Colete os Minors não bloqueantes de issue review, executor e do
+No fim da delivery review, use a seção `Consolidação de follow-ups` do mesmo
+comentário. Colete os Minors não bloqueantes de issue review, executor e do
 próprio delivery review.
 
 - Duplicata semântica: mesmo problema, efeito e escopo; mantenha um item e

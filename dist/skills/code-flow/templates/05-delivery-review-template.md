@@ -1,5 +1,5 @@
 > agent: reviewer
-> sources_evidence: <executor, PR publicada/prova e fontes>
+> sources_evidence: <issue review, executor, PR publicada/prova e fontes>
 
 ## Resume
 
@@ -49,7 +49,27 @@
 | ------------ | ------------------------------------------- | -------------------------- |
 | `<stage>`    | `<merge \| close \| auditoria \| correção>` | `<transição>`              |
 
+## Consolidação de follow-ups
+
+### Cobertura da coleta
+
+| Fonte                   | Evidência               | Minors coletados | Resultado               |
+| ----------------------- | ----------------------- | ---------------- | ----------------------- |
+| `<issue review>`        | `<URL ou n/a>`          | `<n>`            | `PASS \| Cannot verify` |
+| `<executor>`            | `<URL ou n/a>`          | `<n>`            | `PASS \| Cannot verify` |
+| `achados desta revisão` | `<seção Achados acima>` | `<n>`            | `PASS`                  |
+
+### Lista final de issues sugeridas
+
+| Grupo                          | Sugestões e origens             | Justificativa                                                  | Issue draft                                                                                                             |
+| ------------------------------ | ------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `<grupo ou item independente>` | `<resumos e links das origens>` | `<duplicata removida, agrupamento compatível ou independente>` | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<title-percent-encoded>&body=<body-percent-encoded>)` |
+
+Sem itens, publique literalmente: `Nenhuma sugestão de issue não bloqueante encontrada`.
+
 _NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para
 ready-to-merge. Para cada Minor, use
 [`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
-NO_CHANGES nunca é DONE e não pula review, consolidação nem gate humano._
+Use `n/a — repositório GitHub não verificável` sem inventar URL. A consolidação
+não cria issue automaticamente nem muda o veredito. NO_CHANGES nunca é DONE e
+não pula review, consolidação nem gate humano._

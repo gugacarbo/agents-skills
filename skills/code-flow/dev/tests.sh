@@ -40,20 +40,22 @@ test_structure() {
   [ -f "$SKILL/prompts/brainstorm.md" ] || fail 'missing conditional brainstorm prompt'
   [ ! -e "$SKILL/scripts/bootstrap.sh" ] || fail 'bootstrap helper still exists'
   [ -f "$SKILL/references/risk-profiles.md" ] || fail 'missing risk profiles reference'
-  [ -f "$SKILL/templates/15-implementation-outline-template.md" ] || fail 'missing compact outline template'
-  [ -f "$SKILL/templates/16-native-workflow-mapping.md" ] || fail 'missing native workflow mapping template'
-  [ -f "$SKILL/templates/17-batch-pre-issue-draft.md" ] || fail 'missing batch pre-issue draft template'
-  [ -f "$SKILL/templates/06-architect-review-template.md" ] || fail 'missing architect review template'
-  [ -f "$SKILL/templates/19-architect-change-summary.md" ] || fail 'missing architect change summary template'
-  [ ! -e "$SKILL/templates/05-plan-template.md" ] || fail 'obsolete plan template remains'
-  [ ! -e "$SKILL/templates/18-plan-change-summary.md" ] || fail 'obsolete plan change summary remains'
-  [ -f "$SKILL/templates/12-human-gate-spec.md" ] || fail 'missing shared human gate template'
-  [ -f "$SKILL/templates/11-follow-up-issues-report.md" ] || fail 'missing follow-up issue report template'
+  actual=$(find "$SKILL/templates" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
+  expected=$(printf '%s\n' \
+    01-epic.md \
+    02-issue-template.md \
+    03-architect-review-template.md \
+    04-implementation-evidence-template.md \
+    05-delivery-review-template.md \
+    06-integration-report-template.md \
+    07-workflow-note-template.md \
+    08-human-gate-spec.md \
+    09-implementation-outline-template.md \
+    10-native-workflow-mapping.md \
+    11-batch-pre-issue-draft.md)
+  [ "$actual" = "$expected" ] || fail "unexpected templates: $actual"
+
   [ -f "$SKILL/references/follow-up-issue-drafts.md" ] || fail 'missing follow-up issue draft contract'
-  [ ! -e "$SKILL/templates/02-user-story.md" ] || fail 'obsolete user-story template remains'
-  for obsolete in 11-human-gate-design.md 13-human-gate-plan.md 14-human-gate-merge.md 17-human-gate-close.md; do
-    [ ! -e "$SKILL/templates/$obsolete" ] || fail "obsolete gate template remains: $obsolete"
-  done
   [ -f "$SKILL/scripts/source-set-digest.py" ] || fail 'missing deterministic source-set digest helper'
 
   ! rg -n --glob '*.md' 'phases/[0-9][0-9]-|Fase [0-9]|/code-flow tool <[^>]*bootstrap|\.code-flow|/code-flow create-issue' \
@@ -98,58 +100,59 @@ test_adaptive_contract() {
 
 test_evidence_contract() {
   local template
-  for template in 06-architect-review-template.md \
-    07-implementation-evidence-template.md 08-implementation-review-template.md 09-integration-report-template.md \
-    10-issue-note-template.md 11-follow-up-issues-report.md 12-human-gate-spec.md 15-implementation-outline-template.md \
-    16-native-workflow-mapping.md 19-architect-change-summary.md evidence-contract-template.md; do
+  for template in 03-architect-review-template.md \
+    04-implementation-evidence-template.md 05-delivery-review-template.md 06-integration-report-template.md \
+    07-workflow-note-template.md 08-human-gate-spec.md 09-implementation-outline-template.md \
+    10-native-workflow-mapping.md; do
     assert_comment_contract "$SKILL/templates/$template"
   done
   ! rg -n '^> (phase_scope|decisions|changes_validation|blockers):' "$SKILL/templates" \
     || fail 'unused generic metadata remains in templates'
-  assert_contains 'Estado a retomar' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains 'CRLF normalizado para LF' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains 'exatamente um LF final' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains 'templates/15-implementation-outline-template.md' "$SKILL/agents/03-executor.md"
-  assert_contains 'templates/17-batch-pre-issue-draft.md' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'Estado a retomar' "$SKILL/references/evidence-contract.md"
+  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/references/evidence-contract.md"
+  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/references/evidence-contract.md"
+  assert_contains 'CRLF normalizado para LF' "$SKILL/references/evidence-contract.md"
+  assert_contains 'exatamente um LF final' "$SKILL/references/evidence-contract.md"
+  assert_contains 'templates/09-implementation-outline-template.md' "$SKILL/agents/03-executor.md"
+  assert_contains 'templates/11-batch-pre-issue-draft.md' "$SKILL/agents/01-issue-writer.md"
   assert_contains 'Mudança posterior no' "$SKILL/phases/issue.md"
-  assert_contains 'Sem diff: `NO_CHANGES`' "$SKILL/templates/07-implementation-evidence-template.md"
-  assert_contains 'NO_CHANGES aprovado segue para ready-to-close' "$SKILL/templates/08-implementation-review-template.md"
+  assert_contains 'Sem diff: `NO_CHANGES`' "$SKILL/templates/04-implementation-evidence-template.md"
+  assert_contains 'NO_CHANGES aprovado segue para ready-to-close' "$SKILL/templates/05-delivery-review-template.md"
   assert_contains 'sem commit, PR ou merge' "$SKILL/phases/integrate.md"
-  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/08-implementation-review-template.md"
-  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/08-implementation-review-template.md"
-  assert_contains 'não há `Workflow` persistido' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/05-delivery-review-template.md"
+  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/05-delivery-review-template.md"
+  assert_contains 'não há `Workflow` persistido' "$SKILL/references/evidence-contract.md"
   assert_contains 'estado dinâmico' "$SKILL/phases/dispatch.md"
-  assert_contains '> type: <issue | bug | feature | docs>' "$SKILL/templates/03-issue-template.md"
-  assert_contains '> Complexity: <S | M | G | X | XL>' "$SKILL/templates/03-issue-template.md"
-  assert_contains '### Proposta de spec (`create`)' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains '### Diff de spec (`update`)' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains '### Racional (`not required`)' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains 'Cada filha usa `templates/03-issue-template.md`' "$SKILL/templates/01-epic.md"
+  assert_contains '> type: <issue | bug | feature | docs>' "$SKILL/templates/02-issue-template.md"
+  assert_contains '> Complexity: <S | M | G | X | XL>' "$SKILL/templates/02-issue-template.md"
+  assert_contains '### Proposta de spec (`create`)' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains '### Diff de spec (`update`)' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains '### Racional (`not required`)' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains 'Cada filha usa `templates/02-issue-template.md`' "$SKILL/templates/01-epic.md"
   assert_not_contains '**status:**' "$SKILL/templates/01-epic.md"
-  assert_not_contains '**status:**' "$SKILL/templates/03-issue-template.md"
-  assert_contains '> state: DRAFT_ISSUE' "$SKILL/templates/17-batch-pre-issue-draft.md"
-  assert_contains '> target_repository: <owner/repo>' "$SKILL/templates/17-batch-pre-issue-draft.md"
-  assert_not_contains '#NNNN' "$SKILL/templates/17-batch-pre-issue-draft.md"
-  assert_not_contains 'Complexity:' "$SKILL/templates/17-batch-pre-issue-draft.md"
-  assert_contains '## Decisão de spec/ADR' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains 'Base SHA:' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains '## Gaps, necessidades e blockers' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains '## Casos de borda e riscos' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains 'Prova de rollback para migração' "$SKILL/templates/06-architect-review-template.md"
-  assert_not_contains 'PR #NNNN' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains 'Aprovar / Ajustar / Bloquear' "$SKILL/templates/12-human-gate-spec.md"
-  assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/templates/12-human-gate-spec.md"
-  assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/templates/12-human-gate-spec.md"
-  assert_not_contains '**Sim | Não | Ajustar**' "$SKILL/templates/12-human-gate-spec.md"
-  assert_contains 'Problemas encontrados' "$SKILL/templates/07-implementation-evidence-template.md"
-  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/06-architect-review-template.md"
-  assert_contains 'edita o mesmo comentário in-place' "$SKILL/templates/evidence-contract-template.md"
-  assert_contains 'resumo breve' "$SKILL/templates/19-architect-change-summary.md"
+  assert_not_contains '**status:**' "$SKILL/templates/02-issue-template.md"
+  assert_contains '> state: DRAFT_ISSUE' "$SKILL/templates/11-batch-pre-issue-draft.md"
+  assert_contains '> target_repository: <owner/repo>' "$SKILL/templates/11-batch-pre-issue-draft.md"
+  assert_not_contains '#NNNN' "$SKILL/templates/11-batch-pre-issue-draft.md"
+  assert_not_contains 'Complexity:' "$SKILL/templates/11-batch-pre-issue-draft.md"
+  assert_contains '## Decisão de spec/ADR' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains 'Base SHA:' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains '## Gaps, necessidades e blockers' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains '## Casos de borda e riscos' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains 'Prova de rollback para migração' "$SKILL/templates/03-architect-review-template.md"
+  assert_not_contains 'PR #NNNN' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains 'Aprovar / Ajustar / Bloquear' "$SKILL/templates/08-human-gate-spec.md"
+  assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/templates/08-human-gate-spec.md"
+  assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/templates/08-human-gate-spec.md"
+  assert_not_contains '**Sim | Não | Ajustar**' "$SKILL/templates/08-human-gate-spec.md"
+  assert_contains 'Problemas encontrados' "$SKILL/templates/04-implementation-evidence-template.md"
+  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains 'edita o mesmo comentário in-place' "$SKILL/references/evidence-contract.md"
+  assert_contains '> note_type: <general | architect-change>' "$SKILL/templates/07-workflow-note-template.md"
+  assert_contains 'note_type: architect-change' "$SKILL/agents/02-architect.md"
   assert_contains 'não substitui nem duplica o relatório' "$SKILL/agents/02-architect.md"
-  for template in 07-implementation-evidence-template.md 08-implementation-review-template.md; do
+  for template in 04-implementation-evidence-template.md 05-delivery-review-template.md; do
     assert_contains 'Issue draft' "$SKILL/templates/$template"
     assert_contains 'Minor não bloqueante: link; demais: n/a' "$SKILL/templates/$template"
     assert_contains 'follow-up-issue-drafts.md' "$SKILL/templates/$template"
@@ -157,13 +160,13 @@ test_evidence_contract() {
   assert_contains '[Minor] <resumo curto do problema>' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'title-percent-encoded' "$SKILL/references/follow-up-issue-drafts.md"
   assert_contains 'nunca cria issue' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_contains 'templates/11-follow-up-issues-report.md' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_contains 'Nenhuma sugestão de issue não bloqueante encontrada' "$SKILL/templates/11-follow-up-issues-report.md"
+  assert_contains 'Consolidação de follow-ups' "$SKILL/references/follow-up-issue-drafts.md"
+  assert_contains 'Nenhuma sugestão de issue não bloqueante encontrada' "$SKILL/templates/05-delivery-review-template.md"
   assert_contains 'duplicatas semânticas' "$SKILL/agents/04-reviewer.md"
   assert_contains 'Não oculte os links individuais' "$SKILL/agents/04-reviewer.md"
   assert_contains 'nunca é `DONE`' "$SKILL/agents/04-reviewer.md"
   assert_contains 'liste antes do veredito' "$SKILL/agents/04-reviewer.md"
-  assert_contains 'templates/11-follow-up-issues-report.md' "$SKILL/phases/review.md"
+  assert_contains 'templates/05-delivery-review-template.md' "$SKILL/phases/review.md"
   assert_contains 'A review só está completa' "$SKILL/phases/review.md"
   assert_contains 'nunca `DONE`' "$SKILL/phases/review.md"
 }
@@ -373,7 +376,7 @@ test_label_mutation() {
   assert_contains 'stage:approved + needs-human' "$a/02-architect.md"
   assert_contains 'ordem explícita de execução' "$a/02-architect.md"
   assert_contains 'edite-o in-place' "$a/02-architect.md"
-  assert_contains 'templates/19-architect-change-summary.md' "$a/02-architect.md"
+  assert_contains 'templates/07-workflow-note-template.md' "$a/02-architect.md"
   assert_contains 'publique uma nova cópia integral' "$a/02-architect.md"
 
   # 03-executor: mutates stage per evidence result
@@ -387,7 +390,7 @@ test_label_mutation() {
   assert_contains 'ready segue' "$a/03-executor.md"
   assert_contains 'falha ao publicar' "$a/03-executor.md"
   assert_contains 'commit, push e PR publicado' "$SKILL/phases/dispatch.md"
-  assert_contains 'URL do PR publicado' "$SKILL/templates/07-implementation-evidence-template.md"
+  assert_contains 'URL do PR publicado' "$SKILL/templates/04-implementation-evidence-template.md"
 
   # Batch pre-issues remain Project V2 drafts until an authorized promotion.
   assert_contains 'DRAFT_ISSUE' "$a/01-issue-writer.md"
@@ -400,7 +403,7 @@ test_label_mutation() {
   assert_contains 'needs-human' "$a/04-reviewer.md"
   assert_contains 'stage:needs-changes' "$a/04-reviewer.md"
   assert_contains 'blocker' "$a/04-reviewer.md"
-  assert_contains '11-follow-up-issues-report.md' "$a/04-reviewer.md"
+  assert_contains '05-delivery-review-template.md' "$a/04-reviewer.md"
 
   # Canonical mutation matrix must exist and be referenced
   [ -f "$SKILL/references/label-mutation-matrix.md" ] || fail 'missing canonical label mutation matrix'

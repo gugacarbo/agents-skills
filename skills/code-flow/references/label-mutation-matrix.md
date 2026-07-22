@@ -2,7 +2,7 @@
 
 Evidência precede mutação. O autor do evento aplica a transição; o
 orquestrador valida resultado. Decisão humana sempre transiciona pelo
-orquestrador e é apresentada com `templates/12-human-gate-spec.md`.
+orquestrador e é apresentada com `templates/08-human-gate-spec.md`.
 
 | Evento                                        | Ator da mutação              | Próximo estado                                                                                                |
 | --------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |

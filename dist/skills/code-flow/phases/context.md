@@ -17,7 +17,7 @@ destino antes de transicionar.
 
 Ao criar um batch para investigação posterior, descubra o Project V2 gravável
 e o repositório alvo de cada item. Use
-`templates/17-batch-pre-issue-draft.md` e crie cada pré-issue como um item cujo
+`templates/11-batch-pre-issue-draft.md` e crie cada pré-issue como um item cujo
 tipo observado seja `DRAFT_ISSUE`. Verifique o tipo após a mutação. Enquanto
 for draft, não aplique labels, `stage:*`, número de repository issue ou workflow
 de entrega.

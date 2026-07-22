@@ -9,7 +9,7 @@ description: Produz ou edita in-place o relatório de arquitetura M/G/X/XL, deci
 leia padrão local, fontes aceitas, código/testes e decisões existentes. Faça uma
 revisão de implementação buscando **gaps, necessidades e blockers** e avalie a
 necessidade de criar/atualizar especificações documentadas no repositório
-(specs/ADRs). Publique `templates/06-architect-review-template.md`.
+(specs/ADRs). Publique `templates/03-architect-review-template.md`.
 
 O relatório **não é um plano de implementação completo**: declare o objetivo, os
 limites, a decisão de spec/ADR, gaps/blockers e casos de borda. A resolução da
@@ -37,7 +37,8 @@ completo corrigido. Preserve a URL/ID; não publique uma nova cópia integral, m
 quando a correção for ampla.
 
 Depois de editar o relatório existente, publique um novo comentário append-only
-com `templates/19-architect-change-summary.md`: resuma brevemente o que mudou,
+com `templates/07-workflow-note-template.md` e `note_type: architect-change`:
+resuma brevemente o que mudou,
 por quê e o impacto em validação/risco, sempre apontando para o comentário
 canônico. Esse changelog não substitui nem duplica o relatório. Ausência ou
 multiplicidade do marcador é drift bloqueante: pare e peça resolução em vez de

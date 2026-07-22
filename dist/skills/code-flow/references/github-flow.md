@@ -33,7 +33,7 @@ mutação sem outro motivo.
 1. Descubra guidance, forms, labels, estados, gates, evidência e entregas
    recentes sem mutar.
 2. Recalcule risco e Complexity antes de interpretar o estado.
-3. Preencha `templates/16-native-workflow-mapping.md` com evidência por
+3. Preencha `templates/10-native-workflow-mapping.md` com evidência por
    capacidade.
 4. Todas as linhas PASS usam native automaticamente; qualquer FAIL em issue
    nova seleciona fallback e cria somente o stage equivalente necessário.

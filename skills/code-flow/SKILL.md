@@ -97,13 +97,13 @@ rebaixam hard trigger.
 Antes de retomar ou mutar fallback, leia
 [`references/orchestrator-cheatsheet.md`](references/orchestrator-cheatsheet.md).
 Antes de publicar evidência ou revisar, leia
-[`templates/evidence-contract-template.md`](templates/evidence-contract-template.md).
+[`references/evidence-contract.md`](references/evidence-contract.md).
 Para drafts de acompanhamento de Minors e sua consolidação final, leia
 [`references/follow-up-issue-drafts.md`](references/follow-up-issue-drafts.md).
 Para uma decisão humana, use o
-[`templates/12-human-gate-spec.md`](templates/12-human-gate-spec.md); para um
+[`templates/08-human-gate-spec.md`](templates/08-human-gate-spec.md); para um
 evento isolado, use o
-[`templates/10-issue-note-template.md`](templates/10-issue-note-template.md).
+[`templates/07-workflow-note-template.md`](templates/07-workflow-note-template.md).
 Ownership de transição e labels fica em
 [`references/label-mutation-matrix.md`](references/label-mutation-matrix.md).
 
@@ -139,7 +139,7 @@ checkpoint humano; cada filha percorre este fluxo como entrega própria.
 Um pedido para criar várias issues futuras usa Project V2 Draft Issues, nunca
 repository issues abertas provisoriamente. Cada pré-issue permanece
 `DRAFT_ISSUE` enquanto o `issue-writer` investiga a codebase e completa
-`templates/03-issue-template.md`. Somente `issue-writer` ou orquestrador pode
+`templates/02-issue-template.md`. Somente `issue-writer` ou orquestrador pode
 converter o draft em issue, depois de validar body completo e repositório alvo.
 Sem Project V2 inequívoco e gravável, pare sem criar fallback público.
 

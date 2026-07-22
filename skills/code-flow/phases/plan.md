@@ -4,7 +4,7 @@ S sem hard trigger usa outline após ordem explícita. M/G/X/XL disparam o
 `architect`, que publica um **relatório de arquitetura** (não um plano de
 implementação completo), decide impacto de spec/ADR e, depois, ordem humana de
 execução quando o gate se aplica. O relatório usa
-`templates/06-architect-review-template.md`. Não há reviewer autônomo nem gate
+`templates/03-architect-review-template.md`. Não há reviewer autônomo nem gate
 formal de plano: o relatório publicado é a entrada para a decisão humana de
 execução quando ela se aplica.
 
@@ -12,7 +12,8 @@ Architect publica o primeiro relatório em um único comentário canônico marca
 (`code-flow:architect-review:start`/`end`) e registra sua URL/ID. Em correções,
 edita esse comentário in-place e publica somente um comentário append-only com
 resumo breve das alterações, usando
-`templates/19-architect-change-summary.md`; não adiciona outra cópia integral
+`templates/07-workflow-note-template.md` com `note_type: architect-change`; não
+adiciona outra cópia integral
 do relatório. Marcador ausente ou duplicado bloqueia a entrega até resolver o
 drift. `scripts/source-set-digest.py` hasheia o bloco do relatório entre os
 marcadores; o gate registra URL+digest e a edição invalida a autorização.

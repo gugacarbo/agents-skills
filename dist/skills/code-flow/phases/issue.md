@@ -1,6 +1,6 @@
 # Issue e triagem de complexidade
 
-Use `templates/03-issue-template.md`. O `issue-writer` investiga a codebase,
+Use `templates/02-issue-template.md`. O `issue-writer` investiga a codebase,
 preenche o body com contexto e objetivo e persiste `Complexity: S | M | G | X | XL`
 no bloco de metadata. `Workflow` não é gravado. Relação com Epic fica fora do
 body; toda filha usa este mesmo template.

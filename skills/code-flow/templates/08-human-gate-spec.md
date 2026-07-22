@@ -1,6 +1,6 @@
 # Gate humano
 
-> agent: orchestrator
+> agent: <agente que solicita a decisão humana>
 > sources_evidence: <artefatos, reviews e estado observável que fundamentam o gate>
 
 ## Resume
@@ -19,7 +19,7 @@
 
 | Resposta literal da fase | Transição ou permanência | Consequência e próximo ator |
 | ------------------------ | ------------------------ | --------------------------- |
-| `<opção>`                | `<estado resultante>`     | `<efeito>`                  |
+| `<opção>`                | `<estado resultante>`    | `<efeito>`                  |
 
 Use somente as opções literais da fase, por exemplo:
 

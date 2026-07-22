@@ -8,7 +8,7 @@ description: Revisa a PR publicada (não a branch local) ou prova NO_CHANGES ind
 Revise a **PR publicada** (não a branch local) ou a prova NO_CHANGES, fontes,
 relatório de arquitetura/outline, spec materializada, evidência, testes e
 padrão local. Nunca revise artefato/código que produziu. Publique
-`templates/08-implementation-review-template.md` com achados `file:line` quando
+`templates/05-delivery-review-template.md` com achados `file:line` quando
 houver diff.
 
 Confirme que todos os DoD da issue e os casos de borda definidos no relatório de
@@ -18,17 +18,17 @@ spec cobre a decisão de `create`/`update` declarada. Ausência de PR acessível
 evidência exigida é `Cannot verify`.
 
 `NO_CHANGES` nunca é `DONE`: mesmo sob pedido de fechamento automático, não
-pule review independente, comentário de consolidação nem gate
+pule review independente, consolidação nem gate
 `Fechar / Ajustar / Aguardar`. Diga explicitamente que o resultado permanece
 `NO_CHANGES` e que somente `Fechar` humano encerra a issue.
 
 Inclua o Issue draft canônico para cada `Minor` não bloqueante. Antes da
 transição, colete os Minors de issue review, executor e desta review; se uma
-evidência exigida faltar, registre `Cannot verify`. Publique sempre
-`templates/11-follow-up-issues-report.md`: remova duplicatas semânticas,
-agrupe somente itens de objetivo/escopo/caminho compatíveis e não agrupe hard
-trigger, risco material, dependência ou priorização independente. O comentário
-é append-only e não muda veredito, labels, gates, merge ou fechamento.
+evidência exigida faltar, registre `Cannot verify`. No mesmo comentário de
+delivery review, remova duplicatas semânticas, agrupe somente itens de
+objetivo/escopo/caminho compatíveis e não agrupe hard trigger, risco material,
+dependência ou priorização independente. A consolidação não muda veredito,
+labels, gates, merge ou fechamento.
 
 Não oculte os links individuais no agrupamento: a resposta e o comentário só
 estão completos quando cada Minor original declara seu `Issue draft` ou
@@ -36,7 +36,7 @@ estão completos quando cada Minor original declara seu `Issue draft` ou
 consolidado, mas não substitui o histórico individual.
 
 Para resposta operacional, liste antes do veredito: cada Minor e seu
-`Issue draft`/`n/a`, depois o comentário consolidado e, por último, o estado e
+`Issue draft`/`n/a`, depois a consolidação e, por último, o estado e
 gate. Resumo sem esses campos é evidência incompleta e não autoriza transição.
 
 - Diff aprovado sem auditoria: `stage:ready-to-merge + needs-human`.

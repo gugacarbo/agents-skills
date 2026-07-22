@@ -1,7 +1,7 @@
 # Integração e fechamento
 
 O orquestrador é proprietário dos gates finais e registra o resultado mecânico
-com `templates/09-integration-report-template.md`.
+com `templates/06-integration-report-template.md`.
 
 ## Com diff: ready-to-merge
 
