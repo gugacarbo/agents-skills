@@ -1,13 +1,9 @@
 > agent: plan-writer
-> phase_scope: plan / revisão <k>/3
 > sources_evidence: <URL/ID do comentário canônico e base SHA>
-> decisions: <decisões alteradas ou none>
-> changes_validation: <impacto da revisão na validação>
-> blockers: none
 
 ## Resume
 
-Plano canônico atualizado in-place: <resumo em uma frase>.
+Plano canônico atualizado in-place: <resumo breve em uma frase>.
 
 ## Alterações no plano
 

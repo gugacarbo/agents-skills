@@ -2,7 +2,7 @@
 
 S sem hard trigger usa outline após ordem explícita. M/G/X/XL usam
 plan-writer, review independente e gate humano. Plano formal usa
-`templates/05-plan-template.md`; review usa `templates/06-review-template.md`.
+`templates/05-plan-template.md`; review usa `templates/06-plan-review-template.md`.
 
 Plan-writer publica o primeiro snapshot em um único comentário canônico marcado
 e registra sua URL/ID. Em correções, edita esse comentário in-place e publica

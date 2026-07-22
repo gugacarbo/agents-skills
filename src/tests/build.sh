@@ -98,6 +98,10 @@ test_build_copies_skills_and_removes_stale_output() {
   assert_exists "$target/commit-changes/SKILL.md"
   mkdir -p "$target/code-toolbox"
   printf 'legacy\n' >"$target/code-toolbox/SKILL.md"
+  mkdir -p "$target/code-flow/templates"
+  printf 'stale\n' >"$target/code-flow/templates/obsolete-template.md"
+  mkdir -p "$target/external-skill"
+  printf 'external\n' >"$target/external-skill/SKILL.md"
 
   AGENTS_SKILLS_BUILD_OUTPUT="$output" \
     AGENTS_SKILLS_BUILD_TARGET="$target" \
@@ -105,6 +109,8 @@ test_build_copies_skills_and_removes_stale_output() {
 
   assert_exists "$target/code-flow/SKILL.md"
   assert_not_exists "$target/code-toolbox"
+  assert_not_exists "$target/code-flow/templates/obsolete-template.md"
+  assert_exists "$target/external-skill/SKILL.md"
   assert_not_exists "$target/skill-master/dev"
   assert_not_exists "$target/code-flow/dev"
   assert_not_exists "$target/task-completion-notifier/tests"

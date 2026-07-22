@@ -1,9 +1,5 @@
 > agent: delivery-reviewer
-> phase_scope: <plano/outline / range ou prova NO_CHANGES>
 > sources_evidence: <executor, range/PR/prova e fontes>
-> decisions: <veredito literal>
-> changes_validation: <checagens>
-> blockers: <blocker ou none>
 
 ## Resume
 
@@ -49,9 +45,9 @@
 
 ## Decisão e transição proposta
 
-| Estado atual | Próximo gate | Efeito após decisão humana |
-| ------------ | ------------ | -------------------------- |
-| `<stage>`    | `<merge      | close                      | auditoria | correção>` | `<transição>` |
+| Estado atual | Próximo gate                            | Efeito após decisão humana |
+| ------------ | --------------------------------------- | -------------------------- |
+| `<stage>`    | `<merge \| close \| auditoria \| correção>` | `<transição>`              |
 
 _NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para
 ready-to-merge. Para cada Minor, use

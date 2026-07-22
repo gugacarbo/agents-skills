@@ -1,6 +1,6 @@
 # Issue e source-set
 
-Use `templates/03-issue-template.md`. Complexity fica no frontmatter; Workflow
+Use `templates/03-issue-template.md`. Complexity fica no bloco de metadata; Workflow
 não é gravado. Relação com Epic fica fora do source-set; toda filha usa este
 mesmo template.
 

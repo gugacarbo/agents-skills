@@ -1,9 +1,5 @@
 > agent: orchestrator
-> phase_scope: integração ou fechamento
 > sources_evidence: <gate humano, PR/range, checks e issue>
-> decisions: <decisão humana recebida>
-> changes_validation: <resultado mecânico e confirmação>
-> blockers: <blocker ou none>
 
 ## Resume
 

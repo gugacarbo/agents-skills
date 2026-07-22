@@ -1,54 +1,33 @@
-# Epic: `<nome da epic>`
+# Epic: `<nome da iniciativa>`
 
-**status:** `<rascunho | em andamento | em revisão | blocked | concluída>`
+## Contexto e objetivo
 
-<!-- (opcional, somente se houver blockers) -->
-## Blockers
+<problema, resultado final esperado e motivo para coordenar múltiplas entregas>
 
-## Contexto
+## Fora de escopo
 
-<resumo da epic em texto humano, descrição|problema e resultado final esperado e motivo para coordená-la, considerando os resultados de entrega incluídos>
+<exclusões e restrições transversais>
 
-## Objetivo
+## Entregas coordenadas
 
-<objetivo da epic em texto humano, descrição|problema e resultado final esperado e motivo para coordená-la, considerando os resultados de entrega incluídos>
+| Issue ou entrega | Resultado observável | Owner           | Dependências   | Situação        |
+| ---------------- | -------------------- | --------------- | -------------- | --------------- |
+| `<#n ou nome>`   | `<resultado>`        | `<time/pessoa>` | `<#n ou none>` | `<link/resumo>` |
 
-## Decisões e Evidências
+Cada filha usa `templates/03-issue-template.md` e percorre o fluxo completo.
+Este Epic não recebe `Complexity`, `Workflow`, `stage:*` nem `needs-human`.
 
-- **Problema:** `<descrição do problema ou risco transversal>`
-  - **Responsável:** `<owner> : <data e hora>`
-  - **Desbloqueio ou ponto de review:** `<condição ou link>`
-  - **Opções avaliadas:**
-    - `<alternativas consideradas>`
+## Decisões e evidências transversais
 
-- **Evidências:**
-  - `<links, issues, documentos, decisões, etc.>`
+| Decisão, dependência ou risco | Responsável     | Evidência      | Próximo marco       |
+| ----------------------------- | --------------- | -------------- | ------------------- |
+| `<item>`                      | `<time/pessoa>` | `<link ou n/a>` | `<gate ou condição>` |
 
-## Definição de pronto (DoD)
-
-| Resultado observável | Medida, alvo e método |
-| -------------------- | --------------------- |
-| `<resultado>`        | `<métrica>`           |
-
-### Fora de escopo
-
-<exclusões explícitas, restrições de tempo, compatibilidade, acesso, segurança ou decisão produto>
-
-## User Stories e Issues
-
-- [ ] `<status>` `<link ou nome previsto da issue | user story>`
-  - [ ] `<status>` `<link ou nome previsto da issue | sub-issue>`
-
-<!-- ! Cada filha usa `templates/03-issue-template.md` e percorre o fluxo completo. -->
-<!-- ! Este Epic não recebe `Complexity`, `Workflow`, `stage:*` nem `needs-human`. -->
-
-## Checklist de Conclusão
+## Definição de pronto
 
 - [ ] Filhas in-scope fechadas ou removidas por decisão registrada.
 - [ ] Medidas de sucesso avaliadas.
-- [ ] Decisões transversais abertas resolvidas ou aceitas.
-- [ ] Checks e CI/CD de entrega concluídos.
-- [ ] Aprovação humana do gate de fechamento da Epic.
+- [ ] Dependências e decisões transversais resolvidas ou aceitas.
+- [ ] Gate humano `Fechar Epic / Replanejar / Aguardar` concluído.
 
-<!-- ! Apresente o gate humano compartilhado com `Fechar Epic / Replanejar / Aguardar`. -->
-<!-- ! As regras de fechamento vivem nas instruções de Epic; nunca feche automaticamente. -->
+_Epic é tracking; nunca feche automaticamente._

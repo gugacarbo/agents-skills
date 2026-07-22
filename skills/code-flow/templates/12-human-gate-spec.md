@@ -1,48 +1,31 @@
-# Approval Gate
+# Gate humano
 
 > agent: orchestrator
-> phase_scope: <brainstorm | issue | plan | dispatch | review | integrate | epic>
+> sources_evidence: <artefatos, reviews e estado observável que fundamentam o gate>
 
 ## Resume
 
-<resumo humano da decisão solicitada e do motivo do gate>
+<decisão solicitada e motivo do gate>
 
 ## Estado atual
 
-<stage/estado nativo, artefato aprovado e contexto observável>
-
-## Blockers (opcional)
-
- <!-- (opcional, somente se houver blockers) -->
-
-## Impactos
-
-| Opção                | Workflow/estado | Artefatos/evidências | Consequência                      |
-| -------------------- | --------------- | -------------------- | --------------------------------- |
-| `<resposta literal>` | `<transição>`   | `<registro>`         | `<autoriza, devolve ou bloqueia>` |
+<stage ou estado nativo, presença de needs-human e artefato aprovado>
 
 ## Decisão solicitada
 
-<o que a pessoa precisa decidir agora, sem substituir a instrução específica da fase>
+<o que a pessoa precisa decidir agora>
 
-### Opções (exemplo)
+## Opções e consequências
 
-**Opção 1:**
-`<descrição da opção 1>`
+| Resposta literal da fase | Transição ou permanência | Consequência e próximo ator |
+| ------------------------ | ------------------------ | --------------------------- |
+| `<opção>`                | `<estado resultante>`     | `<efeito>`                  |
 
-**Opção 2:**
-`<descrição da opção 2>`
+Use somente as opções literais da fase, por exemplo:
 
-**Opção 3:**
- `<descrição da opção 3>`
+- source/plan: `Aprovar / Ajustar / Bloquear`;
+- integração: `Integrar / Ajustar / Aguardar`;
+- NO_CHANGES: `Fechar / Ajustar / Aguardar`;
+- Epic: `Fechar Epic / Replanejar / Aguardar`.
 
-### Opções (exemplo)
-
-Recomendo fazer a decisão com base em `<evidências, riscos, impacto, custo, prazo, etc.>`. Aprova essa decisão?
-
-**Sim | Não | Ajustar**
-
-<!--
-_As opções, transições e proibições próprias de cada fase vivem nas instruções
-daquela fase. Este template apenas apresenta o gate de forma consistente._
--->
+_O orquestrador aplica e confirma a transição causada pela decisão humana._

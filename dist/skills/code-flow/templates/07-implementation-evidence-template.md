@@ -1,9 +1,5 @@
 > agent: executor
-> phase_scope: <plano/outline e escopo>
 > sources_evidence: <plano/outline, digest, commits, PR e comandos>
-> decisions: <aplicadas ou none>
-> changes_validation: <arquivos, comandos e resultados>
-> blockers: <blocker ou none>
 
 ## Resume
 

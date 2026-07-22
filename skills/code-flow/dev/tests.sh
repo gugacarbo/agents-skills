@@ -12,21 +12,19 @@ fail() {
 assert_contains() { rg -Fq -- "$1" "$2" || fail "expected $2 to contain: $1"; }
 assert_not_contains() { ! rg -Fq -- "$1" "$2" || fail "expected $2 not to contain: $1"; }
 
-assert_envelope() {
-  local file="$1" first_section field
-  [ "$(sed -n '1p' "$file")" = '---' ] || fail "missing frontmatter in $file"
-  rg -q '^---$' "$file" || fail "missing frontmatter terminator in $file"
-  for field in agent phase_scope sources_evidence decisions changes_validation blockers; do
-    rg -q "^${field}:" "$file" || fail "missing envelope metadata ${field} in $file"
-  done
-  rg -q '^> ' "$file" || fail "missing human summary in $file"
+assert_comment_contract() {
+  local file="$1"
+  rg -q '^> agent:' "$file" || fail "missing agent ownership in $file"
+  rg -q '^> sources_evidence:' "$file" || fail "missing immutable source evidence in $file"
   rg -q '^## Resume$' "$file" || fail "missing Resume section in $file"
+  assert_not_contains '> phase_scope:' "$file"
+  assert_not_contains '> decisions:' "$file"
+  assert_not_contains '> changes_validation:' "$file"
+  assert_not_contains '> blockers:' "$file"
   assert_not_contains 'Resume stage:' "$file"
   assert_not_contains 'Resume owner:' "$file"
   assert_not_contains 'Next action:' "$file"
   ! rg -q '^Workflow:' "$file" || fail "persisted Workflow header remains in $file"
-  first_section=$(awk '/^> / { summary = 1; next } summary && /^## / { print; exit }' "$file")
-  [ "$first_section" = '## Resume' ] || fail "Resume is not the first section in $file"
 }
 
 test_structure() {
@@ -46,6 +44,8 @@ test_structure() {
   [ -f "$SKILL/templates/16-native-workflow-mapping.md" ] || fail 'missing native workflow mapping template'
   [ -f "$SKILL/templates/17-batch-pre-issue-draft.md" ] || fail 'missing batch pre-issue draft template'
   [ -f "$SKILL/templates/18-plan-change-summary.md" ] || fail 'missing plan change summary template'
+  [ -f "$SKILL/templates/06-plan-review-template.md" ] || fail 'missing plan review template'
+  [ ! -e "$SKILL/templates/06-review-template.md" ] || fail 'obsolete plan review template remains'
   [ -f "$SKILL/templates/12-human-gate-spec.md" ] || fail 'missing shared human gate template'
   [ -f "$SKILL/templates/11-follow-up-issues-report.md" ] || fail 'missing follow-up issue report template'
   [ -f "$SKILL/references/follow-up-issue-drafts.md" ] || fail 'missing follow-up issue draft contract'
@@ -97,12 +97,14 @@ test_adaptive_contract() {
 
 test_evidence_contract() {
   local template
-  for template in 01-epic.md 03-issue-template.md 04-issue-review-template.md 05-plan-template.md 06-plan-review-template.md \
+  for template in 04-issue-review-template.md 05-plan-template.md 06-plan-review-template.md \
     07-implementation-evidence-template.md 08-implementation-review-template.md 09-integration-report-template.md \
     10-issue-note-template.md 11-follow-up-issues-report.md 12-human-gate-spec.md 15-implementation-outline-template.md \
     16-native-workflow-mapping.md 18-plan-change-summary.md evidence-contract-template.md; do
-    assert_envelope "$SKILL/templates/$template"
+    assert_comment_contract "$SKILL/templates/$template"
   done
+  ! rg -n '^> (phase_scope|decisions|changes_validation|blockers):' "$SKILL/templates" \
+    || fail 'unused generic metadata remains in templates'
   assert_contains 'Estado a retomar' "$SKILL/templates/evidence-contract-template.md"
   assert_contains '<!-- code-flow:source-set:start -->' "$SKILL/templates/evidence-contract-template.md"
   assert_contains '<!-- code-flow:source-set:end -->' "$SKILL/templates/evidence-contract-template.md"
@@ -118,12 +120,31 @@ test_evidence_contract() {
   assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/06-plan-review-template.md"
   assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/04-issue-review-template.md"
   assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/06-plan-review-template.md"
-  assert_contains 'não há Workflow persistido' "$SKILL/templates/evidence-contract-template.md"
+  assert_contains 'não há `Workflow` persistido' "$SKILL/templates/evidence-contract-template.md"
   assert_contains 'estado dinâmico' "$SKILL/phases/dispatch.md"
-  assert_contains 'type: <issue | bug | feature | docs>' "$SKILL/templates/03-issue-template.md"
+  assert_contains '> type: <issue | bug | feature | docs>' "$SKILL/templates/03-issue-template.md"
+  assert_contains '> Complexity: <S | M | G | X | XL>' "$SKILL/templates/03-issue-template.md"
   assert_contains '### Proposta de spec (`create`)' "$SKILL/templates/03-issue-template.md"
   assert_contains '### Diff de spec (`update`)' "$SKILL/templates/03-issue-template.md"
+  assert_contains '### Racional (`not required`)' "$SKILL/templates/03-issue-template.md"
   assert_contains 'Cada filha usa `templates/03-issue-template.md`' "$SKILL/templates/01-epic.md"
+  assert_not_contains '**status:**' "$SKILL/templates/01-epic.md"
+  assert_not_contains '**status:**' "$SKILL/templates/03-issue-template.md"
+  assert_contains '> state: DRAFT_ISSUE' "$SKILL/templates/17-batch-pre-issue-draft.md"
+  assert_contains '> target_repository: <owner/repo>' "$SKILL/templates/17-batch-pre-issue-draft.md"
+  assert_not_contains '#NNNN' "$SKILL/templates/17-batch-pre-issue-draft.md"
+  assert_not_contains 'Complexity:' "$SKILL/templates/17-batch-pre-issue-draft.md"
+  assert_contains 'Source-set aprovado:' "$SKILL/templates/05-plan-template.md"
+  assert_contains 'Base SHA:' "$SKILL/templates/05-plan-template.md"
+  assert_contains '## Abordagem de implementação' "$SKILL/templates/05-plan-template.md"
+  assert_contains 'Ação de validação' "$SKILL/templates/05-plan-template.md"
+  assert_contains 'Prova de rollback para migração' "$SKILL/templates/05-plan-template.md"
+  assert_not_contains 'PR #NNNN' "$SKILL/templates/04-issue-review-template.md"
+  assert_not_contains 'PR #NNNN' "$SKILL/templates/05-plan-template.md"
+  assert_contains 'Aprovar / Ajustar / Bloquear' "$SKILL/templates/12-human-gate-spec.md"
+  assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/templates/12-human-gate-spec.md"
+  assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/templates/12-human-gate-spec.md"
+  assert_not_contains '**Sim | Não | Ajustar**' "$SKILL/templates/12-human-gate-spec.md"
   assert_contains 'Problemas encontrados' "$SKILL/templates/07-implementation-evidence-template.md"
   assert_contains '<!-- code-flow:canonical-plan:start -->' "$SKILL/templates/05-plan-template.md"
   assert_contains '<!-- code-flow:canonical-plan:end -->' "$SKILL/templates/05-plan-template.md"
@@ -376,7 +397,8 @@ test_label_mutation() {
   assert_contains 'limpe' "$a/05-executor.md"
   assert_contains 'commit, push e PR publicado' "$a/05-executor.md"
   assert_contains 'URL do PR' "$a/05-executor.md"
-  assert_contains 'draft ou ready' "$a/05-executor.md"
+  assert_contains 'estado draft ou' "$a/05-executor.md"
+  assert_contains 'ready segue' "$a/05-executor.md"
   assert_contains 'falha ao publicar' "$a/05-executor.md"
   assert_contains 'commit, push e PR publicado' "$SKILL/phases/dispatch.md"
   assert_contains 'URL do PR publicado' "$SKILL/templates/07-implementation-evidence-template.md"

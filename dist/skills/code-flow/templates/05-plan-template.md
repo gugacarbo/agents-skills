@@ -1,19 +1,17 @@
+# Plano da issue `<#n>` — ciclo `<k>/3`
+
 > agent: plan-writer
-> phase_scope: plan / ciclo <k>/3
-> sources_evidence: <links imutáveis e base SHA>
-> decisions: <aplicadas ou none>
-> changes_validation: <plano e validação>
-> blockers: <blocker ou none>
+> sources_evidence: <issue, URL do gate, digest aprovado e base SHA>
 
 <!-- code-flow:canonical-plan:start -->
 
 ## Resume
 
-<resumo claro da entrega, decisão envolvida e resultado esperado para revisão humana>
+<resultado esperado, abordagem e próximo gate>
 
 ## Objetivo
 
-<resultado que o plano entrega>
+<resultado que esta entrega deve produzir>
 
 ## Limites
 
@@ -21,26 +19,38 @@
 
 Source-set aprovado: `<URL do gate + digest atual confirmado>`
 
-## Critérios de aprovação
+Base SHA: `<sha>`
 
-| Critério                        | Evidência anterior/falha       | Ação                    | Resultado binário esperado |
+## Abordagem de implementação
+
+| Área ou arquivo | Mudança planejada | Motivo | Dependências |
+| --------------- | ----------------- | ------ | ------------ |
+| `<área>`        | `<ação>`          | `<por quê>` | `<item ou none>` |
+
+## Critérios e validação
+
+| Critério                        | Evidência anterior/falha       | Ação de validação       | Resultado binário esperado |
 | ------------------------------- | ------------------------------ | ----------------------- | -------------------------- |
 | `<código/docs/config/operação>` | `<RED, antes ou estado atual>` | `<comando/walkthrough>` | `<GREEN/depois/PASS>`      |
 
-## Casos de borda/testes, riscos e rollback
+## Casos de borda, riscos e rollback
 
-| Gatilho ou teste | Resposta/mitigação | Rollback |
-| ---------------- | ------------------ | -------- |
-| `<caso>`         | `<ação>`           | `<ação>` |
+| Gatilho, teste ou risco | Resposta/mitigação | Rollback ou `n/a` |
+| ----------------------- | ------------------ | ----------------- |
+| `<caso>`                | `<ação>`           | `<ação>`          |
 
-## Prova de rollback para migração
+## Prova de rollback para migração — somente quando aplicável
 
-Use apenas para migração: descreva como a reversão será exercitada e qual estado
-restaurado demonstra que o rollback é seguro.
+| Comando, simulação ou demonstração | Estado restaurado esperado |
+| ---------------------------------- | --------------------------- |
+| `<prova executável>`               | `<critério binário>`        |
 
-| Comando/simulação/demonstração | Resultado restaurado esperado |
-| ------------------------------ | ----------------------------- |
-| `<prova>`                      | `<critério binário>`          |
+## Blocker e retomada — somente se aplicável
+
+- Operação: `plan`
+- Estado a retomar: `<stage:* ou estado nativo>`
+- Responsável: `<papel | humano | orquestrador>`
+- Impedimento: `<fato e evidência>`
 
 _Este é o único comentário canônico do plano. Em revisões, edite-o in-place e
 publique separadamente apenas o resumo breve das alterações._

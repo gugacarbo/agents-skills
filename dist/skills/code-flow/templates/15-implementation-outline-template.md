@@ -1,9 +1,5 @@
 > agent: executor
-> phase_scope: execução S autorizada / início
 > sources_evidence: <issue, digest, base SHA, código e testes>
-> decisions: <abordagem e limites>
-> changes_validation: nenhuma mudança ainda; publicar antes de in-progress
-> blockers: <blocker ou none>
 
 ## Resume
 

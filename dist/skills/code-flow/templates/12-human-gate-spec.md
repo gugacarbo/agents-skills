@@ -1,33 +1,31 @@
+# Gate humano
+
 > agent: orchestrator
-> phase_scope: <brainstorm | issue | plan | dispatch | review | integrate | epic>
-> sources_evidence: <artefatos e evidências que fundamentam o gate>
-> decisions: <decisão solicitada>
-> changes_validation: <transição que será confirmada>
-> blockers: <blocker ou none>
+> sources_evidence: <artefatos, reviews e estado observável que fundamentam o gate>
 
 ## Resume
 
-<resumo humano da decisão solicitada e do motivo do gate>
+<decisão solicitada e motivo do gate>
 
 ## Estado atual
 
-<stage/estado nativo, artefato aprovado e contexto observável>
-
-## Resumo do gate
-
-<o que a pessoa precisa decidir agora, sem substituir a instrução específica da fase>
-
-## Impactos
-
-| Opção                | Workflow/estado | Artefatos/evidências | Consequência                      |
-| -------------------- | --------------- | -------------------- | --------------------------------- |
-| `<resposta literal>` | `<transição>`   | `<registro>`         | `<autoriza, devolve ou bloqueia>` |
+<stage ou estado nativo, presença de needs-human e artefato aprovado>
 
 ## Decisão solicitada
 
-| Resposta                  | Ação do orquestrador   |
-| ------------------------- | ---------------------- |
-| `<opção literal da fase>` | `<ação e confirmação>` |
+<o que a pessoa precisa decidir agora>
 
-_As opções, transições e proibições próprias de cada fase vivem nas instruções
-daquela fase. Este template apenas apresenta o gate de forma consistente._
+## Opções e consequências
+
+| Resposta literal da fase | Transição ou permanência | Consequência e próximo ator |
+| ------------------------ | ------------------------ | --------------------------- |
+| `<opção>`                | `<estado resultante>`     | `<efeito>`                  |
+
+Use somente as opções literais da fase, por exemplo:
+
+- source/plan: `Aprovar / Ajustar / Bloquear`;
+- integração: `Integrar / Ajustar / Aguardar`;
+- NO_CHANGES: `Fechar / Ajustar / Aguardar`;
+- Epic: `Fechar Epic / Replanejar / Aguardar`.
+
+_O orquestrador aplica e confirma a transição causada pela decisão humana._

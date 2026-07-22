@@ -1,11 +1,9 @@
-<!-- code-flow:batch-pre-issue-draft:start -->
+# <Título provisório>
 
-> type: pre-issue
 > state: DRAFT_ISSUE
-> project: <owner/number>
 > target_repository: <owner/repo>
-> batch_origin: <pedido/checkpoint>
-> promotion_actors: issue-writer | orchestrator
+
+<!-- code-flow:batch-pre-issue-draft:start -->
 
 ## Intenção
 
@@ -13,12 +11,14 @@
 
 ## Contexto fornecido
 
-<fatos, restrições e referências recebidas do usuário>
+<fatos, problemas, erros, restrições e referências recebidas do usuário>
 
 ## Handoff para investigação
 
-O issue-writer deve revisar guidance, codebase, testes e fontes aceitas; propor
-Complexity e Spec impact; e substituir este body por
+O issue-writer revisa guidance, codebase, testes e fontes aceitas; propõe
+Complexity e impacto de spec; e substitui este body por
 `templates/03-issue-template.md` completo antes da conversão.
 
 <!-- code-flow:batch-pre-issue-draft:end -->
+
+_Enquanto for draft, não atribua número de repository issue, labels ou stage._

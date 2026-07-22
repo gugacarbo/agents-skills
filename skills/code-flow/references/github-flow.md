@@ -10,7 +10,7 @@ do tipo `ISSUE` no repositório alvo.
 
 ## Estado observável
 
-`Complexity: S|M|G|X|XL` permanece no frontmatter da issue e fica fora do
+`Complexity: S|M|G|X|XL` permanece no bloco de metadata da issue e fica fora do
 source-set. `Workflow` não é persistido.
 
 | Estado observado                                                      | Resultado obrigatório                                                              |

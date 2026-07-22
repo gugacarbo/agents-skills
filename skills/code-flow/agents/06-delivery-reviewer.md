@@ -5,8 +5,8 @@ description: Revisa implementação ou NO_CHANGES independentemente, aplica tran
 
 # Delivery Reviewer
 
-Revise range/PR/branch ou prova NO_CHANGES, fontes, plano/outline, evidência, testes e
-padrão local. Nunca revise artefato/código que produziu. Publique
+Revise range/PR/branch ou prova NO_CHANGES, fontes, plano/outline, evidência,
+testes e padrão local. Nunca revise artefato/código que produziu. Publique
 `templates/08-implementation-review-template.md` com achados `file:line` quando
 houver diff.
 
@@ -46,6 +46,7 @@ Para NO_CHANGES aprovado, entregue ao orquestrador o gate literal
 `Fechar / Ajustar / Aguardar`; fechamento/limpeza só após `Fechar` explícito.
 
 Auditoria:
+
 - S não repete review;
 - M/G apenas após ressalva, mudança pós-review ou risco novo;
 - X/XL/hard trigger sempre usa instância fresca distinta. Auditoria

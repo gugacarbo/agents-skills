@@ -1,42 +1,43 @@
+# <Título da issue>
+
 > type: <issue | bug | feature | docs>
-> complexity: <S | M | G | X | XL>
-> agent: <issue-writer | orchestrator>
-> phase_scope: issue / source-set
-> sources_evidence: <padrão local, fontes, código ou testes>
-> decisions: <complexity e spec impact com racional>
-> changes_validation: <body criado ou atualizado>
-> blockers: <blocker ou none>
+> Complexity: <S | M | G | X | XL>
+> Epic: <#n | URL | none>
+> Parent: <#n | URL | none>
 
 <!-- code-flow:source-set:start -->
 
-## Resume
-
-<resultado humano esperado, próximo gate e motivo da entrega>
-
-## Contexto (opcional)
+## Contexto e objetivo
 
 Como `<usuário ou papel>`, quero `<capacidade>` para `<valor observável>`.
-Para mudança técnica, descreva o contexto e o valor sem forçar user story.
-
-## Objetivo
-
-<resultado observável e critérios de sucesso claros para serem avaliados por gate humano>
+Para mudança técnica, descreva diretamente problema, resultado esperado e
+comportamento observável sem forçar uma user story.
 
 ## Limites
 
 <fora de escopo, dependências e restrições>
 
+## Decisões e evidências
+
+| Decisão ou fato | Racional | Evidência      |
+| --------------- | -------- | -------------- |
+| `<item>`        | `<motivo>` | `<link ou n/a>` |
+
+## Definição de pronto
+
+| Resultado observável | Medida, alvo e método |
+| -------------------- | --------------------- |
+| `<resultado>`        | `<métrica ou prova>`  |
+
 ## Impacto de spec
 
-| Campo                 | Valor                          |
-| --------------------- | ------------------------------ |
-| Ação                  | `<create                       | update | not required>` |
-| Fonte aceita          | `<URL/path ou not applicable>` |
-| Padrão do repositório | `<form/template/guidance>`     |
+- **Ação:** `<create | update | not required>`
+- **Fonte aceita:** `<URL/path ou not applicable>`
+- **Padrão do repositório:** `<form/template/guidance ou none>`
 
 ### Proposta de spec (`create`)
 
-<proposta completa ou not applicable; usar template padrão do repositório, se existir>
+<proposta completa ou not applicable; use o template do repositório quando existir>
 
 ### Diff de spec (`update`)
 
@@ -45,12 +46,12 @@ Para mudança técnica, descreva o contexto e o valor sem forçar user story.
 + <depois>
 ```
 
-<racional concreto para `not required`, quando aplicável>
+### Racional (`not required`)
+
+<por que nenhuma especificação documentada precisa mudar>
 
 <!-- code-flow:source-set:end -->
 
-## Relações
+## Relações opcionais
 
-| Epic           | GitHub            |
-| -------------- | ----------------- |
-| `#<n> ou none` | `subissue of #<n> | standalone delivery issue` |
+- Sub-issues: `<links ou none>`

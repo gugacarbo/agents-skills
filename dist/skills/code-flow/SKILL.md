@@ -15,7 +15,7 @@ mas não escreve plano formal, review ou código.
 Discovery, decisões de intenção e brainstorm podem ocorrer antes da issue.
 Plano formal, implementação, review e integração exigem uma issue de
 entrega/bug elegível. A classificação de risco continua efêmera; somente
-`Complexity` é persistida no frontmatter do body conforme
+`Complexity` é persistida no bloco de metadata do body conforme
 [`references/risk-profiles.md`](references/risk-profiles.md).
 
 ## Comandos

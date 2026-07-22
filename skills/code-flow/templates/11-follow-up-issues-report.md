@@ -1,9 +1,5 @@
 > agent: delivery-reviewer
-> phase_scope: delivery review / consolidação de sugestões
 > sources_evidence: <links dos reviews, evidência do executor e achados próprios>
-> decisions: <duplicatas removidas, grupos e itens independentes>
-> changes_validation: <coleta completa ou Cannot verify>
-> blockers: <blocker ou none>
 
 ## Resume
 
@@ -13,16 +9,16 @@
 
 | Fonte               | Evidência      | Minors coletados | Resultado |
 | ------------------- | -------------- | ---------------- | --------- |
-| `<issue review>`    | `<URL ou n/a>` | `<n>`            | `PASS     | Cannot verify` |
-| `<plan review>`     | `<URL ou n/a>` | `<n>`            | `PASS     | Cannot verify` |
-| `<executor>`        | `<URL ou n/a>` | `<n>`            | `PASS     | Cannot verify` |
-| `<delivery review>` | `<URL>`        | `<n>`            | `PASS`    |
+| `<issue review>`    | `<URL ou n/a>` | `<n>`            | `PASS \| Cannot verify` |
+| `<plan review>`     | `<URL ou n/a>` | `<n>`            | `PASS \| Cannot verify` |
+| `<executor>`        | `<URL ou n/a>` | `<n>`            | `PASS \| Cannot verify` |
+| `<delivery review>` | `<URL>`        | `<n>`            | `PASS`                  |
 
 ## Lista final de issues sugeridas
 
 | Grupo                          | Sugestões e origens             | Justificativa        | Issue draft            |
 | ------------------------------ | ------------------------------- | -------------------- | ---------------------- |
-| `<grupo ou item independente>` | `<resumos e links das origens>` | `<duplicata removida | agrupamento compatível | independente>` | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<title-percent-encoded>&body=<body-percent-encoded>)` |
+| `<grupo ou item independente>` | `<resumos e links das origens>` | `<duplicata removida, agrupamento compatível ou independente>` | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<title-percent-encoded>&body=<body-percent-encoded>)` |
 
 Sem itens, publique literalmente: `Nenhuma sugestão de issue não bloqueante encontrada`.
 

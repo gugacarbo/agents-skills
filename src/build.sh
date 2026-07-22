@@ -101,7 +101,15 @@ mkdir -p "$BUILD_TARGET_DIR"
 # Migration cleanup: publishing code-flow must not leave the renamed skill
 # discoverable under its former name.
 rm -rf "$BUILD_TARGET_DIR/code-toolbox"
-cp -R "$BUILD_OUTPUT_DIR/." "$BUILD_TARGET_DIR/"
+
+# Replace only skills owned by this repository so removed files do not survive
+# publication while unrelated installed skills remain untouched.
+for published_skill_dir in "$BUILD_OUTPUT_DIR"/*; do
+  [ -d "$published_skill_dir" ] || continue
+  skill_name=${published_skill_dir##*/}
+  rm -rf "$BUILD_TARGET_DIR/$skill_name"
+  cp -R "$published_skill_dir" "$BUILD_TARGET_DIR/"
+done
 
 printf '[OK] Build concluido com %s skill(s) em %s\n' "$copied_count" "$BUILD_OUTPUT_DIR"
 printf '[OK] Skills copiadas para %s\n' "$BUILD_TARGET_DIR"

@@ -1,9 +1,5 @@
 > agent: <papel que publica a nota>
-> phase_scope: <operação e evento isolado>
 > sources_evidence: <links, comandos ou fontes>
-> decisions: <decisão ou none>
-> changes_validation: <fato e validação>
-> blockers: <blocker ou none>
 
 ## Resume
 

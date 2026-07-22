@@ -1,9 +1,5 @@
 > agent: orchestrator
-> phase_scope: discovery / avaliação de workflow nativo
 > sources_evidence: <guidance, labels, estados, gates e entregas recentes>
-> decisions: <NATIVE_ELIGIBLE | NATIVE_INCOMPLETE | NATIVE_INVALID>
-> changes_validation: <mapeamento avaliado sem mutação>
-> blockers: <blocker ou none>
 
 ## Resume
 

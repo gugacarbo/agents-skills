@@ -25,7 +25,7 @@ marcador é drift bloqueante: pare e peça resolução em vez de escolher ou cri
 outro comentário.
 
 Após publicar o plano inicial, ou após editar o plano e publicar seu resumo de
-alterações, transacione de `stage:needs-plan` ou
+alterações, transicione de `stage:needs-plan` ou
 `stage:needs-plan-fix` para `stage:needs-plan-review`, sempre sem
 `needs-human`. Isso entrega o snapshot ao reviewer; manter needs-plan seria
 drift.

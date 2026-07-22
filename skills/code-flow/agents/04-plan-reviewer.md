@@ -24,5 +24,6 @@ usam `n/a`.
 
 Veredito não autoriza plano pelo humano nem execução. Publique evidência antes
 de transicionar e aguarde validação do orquestrador.
-- Em M/G, pode revisar a entrega depois somente se não escreveu plano/código
+
+- Em M/G, pode revisar a entrega depois somente se não escreveu plano/código.
 - Em X/XL/hard trigger, use instâncias separadas.
