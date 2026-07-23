@@ -7,7 +7,7 @@ evidência revisada.
 
 Revise a PR publicada — nunca apenas branch local — ou a prova NO_CHANGES,
 guidance, relatório/outline, spec materializada, evidência, testes, DoD e casos
-de borda. Publique `templates/03-review-template.md` (seção Delivery review) com achados e
+de borda. Publique `templates/02-review-template.md` (seção Delivery review) com achados e
 consolidação de Minors. Ausência de fonte exigida é Cannot verify.
 
 Existe exatamente uma delivery review para qualquer complexidade; não há

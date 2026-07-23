@@ -30,7 +30,7 @@ comportamento observável sem forçar uma user story.
 | `<#n ou nome>`   | `<resultado>`        | `<time/pessoa>` | `<#n ou none>` | `<link/resumo>` |
 
 <!--
-Cada filha usa `templates/02-issue-template.md`, percorre o fluxo completo e se
+Cada filha usa `templates/01-issue-template.md`, percorre o fluxo completo e se
 relaciona ao Epic pelo mecanismo nativo do repositório. Este Epic não recebe
 `Complexity`, `Workflow`, `stage:*` nem `needs-human`.
 -->

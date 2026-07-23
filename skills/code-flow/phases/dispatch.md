@@ -5,7 +5,7 @@ Crie/reuse sua própria worktree isolada, publique início com `run_id`, Base/He
 branch e resultado esperado e adicione `stage:in-progress` sem remover o estado
 principal. Se o overlay já existir, recuse salvo `--resume` válido.
 
-Publique `templates/04-implementation-evidence-template.md` com a seção
+Publique `templates/03-implementation-evidence-template.md` com a seção
 `## Planejamento` preenchida antes de executar. Em complexidade S, o
 planejamento pode ser inline; nos demais, referencie o relatório/digest
 autorizado. Revalide guidance, escopo, base,
@@ -19,7 +19,7 @@ Com diff, DONE e DONE_WITH_CONCERNS exigem commit, push e PR publicada. Correç�
 usa a mesma branch/PR. Branch local, commit sem push ou compare link não bastam.
 Somente NO_CHANGES termina sem commit/PR vazio.
 
-Complete `templates/04-implementation-evidence-template.md` com as seções
+Complete `templates/03-implementation-evidence-template.md` com as seções
 de evidência antes da transição:
 
 - DONE ou DONE_WITH_CONCERNS → `stage:needs-delivery-review`;

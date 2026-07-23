@@ -4,7 +4,7 @@ O `issue-writer` consome `stage:needs-triage`. Antes de investigar, publique
 evidência de início com `run_id` e adicione `stage:in-progress`, preservando
 `stage:needs-triage`.
 
-Use `templates/02-issue-template.md`. Descubra guidance e codebase, preencha
+Use `templates/01-issue-template.md`. Descubra guidance e codebase, preencha
 contexto, objetivo e DoD e persista `Complexity: XS | S | M | L | XL`. Não grave
 `Workflow`. Relações com Epic, Parent e sub-issues usam mecanismos nativos.
 

@@ -14,7 +14,7 @@ Com NO_CHANGES, confirme a review aprovada e ausência de diff, commit e PR vazi
 feche sem gate humano adicional. Evidência ambígua ou contraditória bloqueia.
 
 Após merge, confirme Merge SHA, PR e issue. Se o vínculo não fechar a issue,
-feche-a explicitamente. Publique `templates/06-integration-report-template.md`
+feche-a explicitamente. Publique `templates/05-integration-report-template.md`
 e remova `code-flow:active`, estado principal, overlay e `needs-human`.
 
 Falha transitória remove o overlay e preserva `stage:integration-authorized`.

@@ -13,8 +13,8 @@ inputs:
   - PR ou NO_CHANGES proof
   - implementation-evidence
 outputs:
-  - delivery-review (templates/03-review-template.md)
-  - activity-start (templates/07-note-template.md)
+  - delivery-review (templates/02-review-template.md)
+  - activity-start (templates/06-note-template.md)
   - follow-up issue drafts
 next_label:
   - when: diff aprovado
@@ -34,14 +34,14 @@ Consuma somente `code-flow:active + stage:needs-delivery-review` sem
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/review.md`](../phases/review.md).
 
-Publique `templates/07-note-template.md` com `run_id`, estado, fontes, guidance e artefatos revisados;
+Publique `templates/06-note-template.md` com `run_id`, estado, fontes, guidance e artefatos revisados;
 adicione `stage:in-progress` preservando o estado principal. Verifique que não
 produziu issue, relatório, código ou evidência revisada. Trocar nome/modelo não
 apaga autoria.
 
 Revise PR remota ou prova NO_CHANGES, DoD, casos de borda, spec, testes e
 evidências. Publique
-`templates/03-review-template.md` (seção Delivery review). Inclua os drafts
+`templates/02-review-template.md` (seção Delivery review). Inclua os drafts
 individuais de cada Minor e a consolidação no mesmo comentário. Não existe
 auditoria adicional em nenhum nível de complexidade.
 

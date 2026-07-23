@@ -89,7 +89,7 @@ para a verificação operacional curta e
 canônica de estados, atores e transições.
 Use `scripts/transition-issue.sh` para mutações determinísticas e
 `scripts/source-set-digest.py` para o relatório canônico.
-Use [`templates/01-epic.md`](templates/01-epic.md) somente quando o usuário
+Use [`templates/01-issue-template.md`](templates/01-issue-template.md) somente quando o usuário
 escolher explicitamente tracking por Epic.
 
 ## Papéis
