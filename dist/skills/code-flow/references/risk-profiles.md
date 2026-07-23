@@ -3,13 +3,13 @@
 Issue-writer propõe e persiste Complexity; risco decide gates e permanece
 efêmero. Recalcule em criação, retomada, gates e mudança de base/escopo.
 
-| Valor | Critério |
-| --- | --- |
-| S | Interna, localizada, reversível, caminho conhecido, uma área. |
-| M | Um componente, poucas alterações acopladas, validação rotineira. |
-| G | Vários componentes ou coordenação relevante em um repo. |
-| X | Mudança ampla/transversal ou incerteza significativa. |
-| XL | Múltiplos resultados/dependências; recomende decomposição/Epic. |
+| Valor | Critério                                                         |
+| ----- | ---------------------------------------------------------------- |
+| S     | Interna, localizada, reversível, caminho conhecido, uma área.    |
+| M     | Um componente, poucas alterações acopladas, validação rotineira. |
+| G     | Vários componentes ou coordenação relevante em um repo.          |
+| X     | Mudança ampla/transversal ou incerteza significativa.            |
+| XL    | Múltiplos resultados/dependências; recomende decomposição/Epic.  |
 
 Mapeamento: `S → light`, `M/G → standard`, `X/XL → assured`. O nome interno
 nunca é persistido. Comportamento observável em um componente começa em M até

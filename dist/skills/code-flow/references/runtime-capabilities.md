@@ -3,13 +3,13 @@
 Papéis são contratos independentes; modelos são escolha efêmera do host. Não
 crie `.codex/agents`, altere `config.toml` ou instale configuração no repo alvo.
 
-| Papel | Capacidade preferida |
-| --- | --- |
-| issue-writer | Exploração e síntese rápidas. |
-| architect | Maior capacidade de raciocínio disponível. |
-| executor | Edição, testes e ferramentas. |
-| reviewer | Revisão/raciocínio em instância sem autoria. |
-| integrator | Git, validação, rebase e recuperação segura. |
+| Papel        | Capacidade preferida                         |
+| ------------ | -------------------------------------------- |
+| issue-writer | Exploração e síntese rápidas.                |
+| architect    | Maior capacidade de raciocínio disponível.   |
+| executor     | Edição, testes e ferramentas.                |
+| reviewer     | Revisão/raciocínio em instância sem autoria. |
+| integrator   | Git, validação, rebase e recuperação segura. |
 
 Configuração explícita do usuário vence preferências. Sem roteamento, use o
 modelo herdado e preserve papéis por instâncias independentes. Sem paralelismo,

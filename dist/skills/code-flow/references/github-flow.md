@@ -4,18 +4,18 @@
 principal de `workflow-states.json` identifica o próximo responsável. O overlay
 `stage:in-progress` pode coexistir com esse estado durante uma execução.
 
-| Label | Próximo responsável | Exige `needs-human` |
-| --- | --- | --- |
-| `stage:needs-triage` | issue-writer | não |
-| `stage:awaiting-triage-approval` | humano | sim |
-| `stage:needs-architect` | architect | não |
-| `stage:awaiting-execution-approval` | humano | sim |
-| `stage:ready-for-execution` | executor | não |
-| `stage:needs-changes` | executor | não |
-| `stage:needs-delivery-review` | reviewer | não |
-| `stage:ready-to-merge` | humano | sim |
-| `stage:integration-authorized` | integrator | não |
-| `stage:blocked` | responsável do Resume | sim |
+| Label                               | Próximo responsável   | Exige `needs-human` |
+| ----------------------------------- | --------------------- | ------------------- |
+| `stage:needs-triage`                | issue-writer          | não                 |
+| `stage:awaiting-triage-approval`    | humano                | sim                 |
+| `stage:needs-architect`             | architect             | não                 |
+| `stage:awaiting-execution-approval` | humano                | sim                 |
+| `stage:ready-for-execution`         | executor              | não                 |
+| `stage:needs-changes`               | executor              | não                 |
+| `stage:needs-delivery-review`       | reviewer              | não                 |
+| `stage:ready-to-merge`              | humano                | sim                 |
+| `stage:integration-authorized`      | integrator            | não                 |
+| `stage:blocked`                     | responsável do Resume | sim                 |
 
 ## Invariantes
 
@@ -36,16 +36,16 @@ somente o overlay. `--finish-to` substitui o estado principal e remove overlay.
 Issue sem `code-flow:active` nunca é adotada automaticamente. Se houver labels
 legadas, publique primeiro a proposta:
 
-| Legado | Destino após confirmação |
-| --- | --- |
-| `stage:needs-architect` | mesmo estado |
-| `stage:approved` | `stage:awaiting-execution-approval + needs-human` |
-| `stage:needs-delivery-review` | mesmo estado |
-| `stage:needs-changes` | mesmo estado |
-| `stage:ready-to-merge` | mesmo estado + `needs-human` |
-| `stage:ready-to-close` | `stage:integration-authorized` |
-| `stage:blocked` | mesmo estado + `needs-human` |
-| `stage:in-progress` sozinho | ambíguo; reconstruir por evidência e pedir escolha |
+| Legado                        | Destino após confirmação                           |
+| ----------------------------- | -------------------------------------------------- |
+| `stage:needs-architect`       | mesmo estado                                       |
+| `stage:approved`              | `stage:awaiting-execution-approval + needs-human`  |
+| `stage:needs-delivery-review` | mesmo estado                                       |
+| `stage:needs-changes`         | mesmo estado                                       |
+| `stage:ready-to-merge`        | mesmo estado + `needs-human`                       |
+| `stage:ready-to-close`        | `stage:integration-authorized`                     |
+| `stage:blocked`               | mesmo estado + `needs-human`                       |
+| `stage:in-progress` sozinho   | ambíguo; reconstruir por evidência e pedir escolha |
 
 Não escreva `Workflow` no body. A skill continua lendo branch protection,
 forms, comandos e método de merge do repositório; somente seu estado de entrega

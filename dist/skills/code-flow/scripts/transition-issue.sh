@@ -16,7 +16,10 @@ REQUIRE_FROM=""
 DRY_RUN=0
 ALLOW_REPAIR=0
 
-die() { printf '%s\n' "$1" >&2; exit 1; }
+die() {
+  printf '%s\n' "$1" >&2
+  exit 1
+}
 
 set_op() {
   [ -z "$OP" ] || die "Error: choose exactly one operation\n$USAGE"
@@ -25,20 +28,68 @@ set_op() {
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --activate) set_op activate; shift ;;
-    --start-work) set_op start; shift ;;
-    --finish-to) [ "$#" -ge 2 ] || die "$USAGE"; set_op finish; TARGET="$2"; shift 2 ;;
-    --gate-to) [ "$#" -ge 2 ] || die "$USAGE"; set_op gate; TARGET="$2"; shift 2 ;;
-    --reset-activity) set_op reset; shift ;;
-    --complete) set_op complete; shift ;;
-    --migrate-to) [ "$#" -ge 2 ] || die "$USAGE"; set_op migrate; TARGET="$2"; shift 2 ;;
-    --role) [ "$#" -ge 2 ] || die "$USAGE"; ROLE="$2"; shift 2 ;;
-    --require-from) [ "$#" -ge 2 ] || die "$USAGE"; REQUIRE_FROM="$2"; shift 2 ;;
-    --dry-run) DRY_RUN=1; shift ;;
-    --allow-repair) ALLOW_REPAIR=1; shift ;;
-    --help|-h) printf '%s\n' "$USAGE"; exit 0 ;;
+    --activate)
+      set_op activate
+      shift
+      ;;
+    --start-work)
+      set_op start
+      shift
+      ;;
+    --finish-to)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      set_op finish
+      TARGET="$2"
+      shift 2
+      ;;
+    --gate-to)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      set_op gate
+      TARGET="$2"
+      shift 2
+      ;;
+    --reset-activity)
+      set_op reset
+      shift
+      ;;
+    --complete)
+      set_op complete
+      shift
+      ;;
+    --migrate-to)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      set_op migrate
+      TARGET="$2"
+      shift 2
+      ;;
+    --role)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      ROLE="$2"
+      shift 2
+      ;;
+    --require-from)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      REQUIRE_FROM="$2"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    --allow-repair)
+      ALLOW_REPAIR=1
+      shift
+      ;;
+    --help | -h)
+      printf '%s\n' "$USAGE"
+      exit 0
+      ;;
     -*) die "Unknown flag: $1\n$USAGE" ;;
-    *) [ -z "$ISSUE" ] || die "$USAGE"; ISSUE="$1"; shift ;;
+    *)
+      [ -z "$ISSUE" ] || die "$USAGE"
+      ISSUE="$1"
+      shift
+      ;;
   esac
 done
 
@@ -46,8 +97,8 @@ done
 [ "$OP" = start ] || [ -z "$ROLE" ] || die 'Error: --role is only valid with --start-work'
 [ "$OP" != start ] || [ -n "$ROLE" ] || die 'Error: --start-work requires --role'
 
-command -v gh >/dev/null 2>&1 || die 'Error: gh is required'
-command -v jq >/dev/null 2>&1 || die 'Error: jq is required'
+command -v gh > /dev/null 2>&1 || die 'Error: gh is required'
+command -v jq > /dev/null 2>&1 || die 'Error: jq is required'
 [ -f "$STATES_FILE" ] || die "Error: missing workflow registry: $STATES_FILE"
 jq -e '
   .schema_version == 2 and
@@ -58,16 +109,16 @@ jq -e '
   all(.states[]; (.label | test("^stage:[a-z-]+$")) and
     (.actor | type == "string") and (.kind == "agent" or .kind == "human") and
     (.next | type == "array"))
-' "$STATES_FILE" >/dev/null || die "Error: invalid workflow registry: $STATES_FILE"
+' "$STATES_FILE" > /dev/null || die "Error: invalid workflow registry: $STATES_FILE"
 
 ACTIVATION=$(jq -r '.activation_label' "$STATES_FILE")
 ACTIVITY=$(jq -r '.activity_label' "$STATES_FILE")
 
-is_primary() { jq -e --arg label "$1" '.states | map(.label) | index($label) != null' "$STATES_FILE" >/dev/null; }
+is_primary() { jq -e --arg label "$1" '.states | map(.label) | index($label) != null' "$STATES_FILE" > /dev/null; }
 target_kind() { jq -r --arg label "$1" '.states[] | select(.label == $label) | .kind' "$STATES_FILE"; }
 target_actor() { jq -r --arg label "$1" '.states[] | select(.label == $label) | .actor' "$STATES_FILE"; }
 transition_allowed() {
-  jq -e --arg from "$1" --arg to "$2" '.states[] | select(.label == $from) | .next | index($to) != null' "$STATES_FILE" >/dev/null
+  jq -e --arg from "$1" --arg to "$2" '.states[] | select(.label == $from) | .next | index($to) != null' "$STATES_FILE" > /dev/null
 }
 
 [ -z "$TARGET" ] || is_primary "$TARGET" || die "Error: invalid target state '$TARGET'"
@@ -153,13 +204,15 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-label_exists() { gh label view "$1" --repo "$ISSUE_REPO" >/dev/null 2>&1; }
+label_exists() { gh label view "$1" --repo "$ISSUE_REPO" > /dev/null 2>&1; }
 ensure_label() {
-  name="$1"; color="$2"; description="$3"
-  label_exists "$name" || gh label create "$name" --repo "$ISSUE_REPO" --color "$color" --description "$description" >/dev/null
+  name="$1"
+  color="$2"
+  description="$3"
+  label_exists "$name" || gh label create "$name" --repo "$ISSUE_REPO" --color "$color" --description "$description" > /dev/null
 }
-add_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$1" >/dev/null; }
-remove_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$1" >/dev/null; }
+add_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$1" > /dev/null; }
+remove_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$1" > /dev/null; }
 
 ensure_label "$ACTIVATION" '5319E7' 'code-flow workflow active'
 ensure_label "$ACTIVITY" 'FBCA04' 'code-flow agent activity in progress'
@@ -168,10 +221,13 @@ ensure_label 'needs-human' 'D93F0B' 'human decision required'
 
 case "$OP" in
   activate)
-    add_label "$ACTIVATION"; add_label "$TARGET"
+    add_label "$ACTIVATION"
+    add_label "$TARGET"
     ;;
   migrate)
-    remove_label "$LEGACY"; add_label "$ACTIVATION"; add_label "$TARGET"
+    remove_label "$LEGACY"
+    add_label "$ACTIVATION"
+    add_label "$TARGET"
     if [ "$(target_kind "$TARGET")" = human ]; then
       add_label 'needs-human'
     elif [ "$HAS_HUMAN" = true ]; then
@@ -182,11 +238,16 @@ case "$OP" in
     add_label "$ACTIVITY"
     ;;
   finish)
-    remove_label "$CURRENT"; remove_label "$ACTIVITY"; add_label "$TARGET"
+    remove_label "$CURRENT"
+    remove_label "$ACTIVITY"
+    add_label "$TARGET"
     if [ "$(target_kind "$TARGET")" = human ]; then add_label 'needs-human'; else [ "$HAS_HUMAN" = false ] || remove_label 'needs-human'; fi
     ;;
   gate)
-    [ "$TARGET" = "$CURRENT" ] || { remove_label "$CURRENT"; add_label "$TARGET"; }
+    [ "$TARGET" = "$CURRENT" ] || {
+      remove_label "$CURRENT"
+      add_label "$TARGET"
+    }
     if [ "$(target_kind "$TARGET")" = human ]; then add_label 'needs-human'; else remove_label 'needs-human'; fi
     ;;
   reset)

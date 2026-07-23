@@ -16,21 +16,21 @@
 
 ## Cobertura dos critérios
 
-| Critério | Evidência revisada | Resultado | Observação |
-| --- | --- | --- | --- |
-| `<critério>` | `<prova>` | `PASS | FAIL | Cannot verify` | `<nota>` |
+| Critério     | Evidência revisada | Resultado | Observação |
+| ------------ | ------------------ | --------- | ---------- |
+| `<critério>` | `<prova>`          | `PASS     | FAIL       | Cannot verify` | `<nota>` |
 
 ## Reconciliação de escopo
 
-| Autorizado | Entregue | Divergência |
-| --- | --- | --- |
-| `<item>` | `<item>` | `<none ou justificativa>` |
+| Autorizado | Entregue | Divergência               |
+| ---------- | -------- | ------------------------- |
+| `<item>`   | `<item>` | `<none ou justificativa>` |
 
 ## Achados
 
-| Severidade | Local/prova | Impacto | Ação | Issue draft |
-| --- | --- | --- | --- | --- |
-| `Critical | Important | Minor | Cannot verify` | `<file:line/prova>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
+| Severidade | Local/prova | Impacto | Ação           | Issue draft         |
+| ---------- | ----------- | ------- | -------------- | ------------------- |
+| `Critical  | Important   | Minor   | Cannot verify` | `<file:line/prova>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
 
 ## NO_CHANGES
 
@@ -38,9 +38,9 @@
 
 ## Consolidação de follow-ups
 
-| Grupo | Sugestões/origens | Justificativa | Issue draft |
-| --- | --- | --- | --- |
-| `<grupo>` | `<itens e links>` | `<deduplicação/compatibilidade>` | `<URL>` |
+| Grupo     | Sugestões/origens | Justificativa                    | Issue draft |
+| --------- | ----------------- | -------------------------------- | ----------- |
+| `<grupo>` | `<itens e links>` | `<deduplicação/compatibilidade>` | `<URL>`     |
 
 Sem itens, publique: `Nenhuma sugestão de issue não bloqueante encontrada`.
 

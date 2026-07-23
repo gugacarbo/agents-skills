@@ -12,13 +12,13 @@
 
 ## Contorno
 
-| Escopo | Arquivos/áreas | Validação |
-| --- | --- | --- |
-| `<item>` | `<paths>` | `<comandos>` |
+| Escopo   | Arquivos/áreas | Validação    |
+| -------- | -------------- | ------------ |
+| `<item>` | `<paths>`      | `<comandos>` |
 
 | Worktree/branch | Base SHA | Rollback |
-| --- | --- | --- |
-| `<valor>` | `<sha>` | `<ação>` |
+| --------------- | -------- | -------- |
+| `<valor>`       | `<sha>`  | `<ação>` |
 
 Pare para nova arquitetura diante de contrato público, hard trigger, decisão
 material ou drift não coberto.

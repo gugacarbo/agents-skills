@@ -43,15 +43,15 @@ Base SHA: `<sha>`
 
 ## Gaps, necessidades e blockers
 
-| Item | Tipo | Detalhe | Recomendação |
-| --- | --- | --- | --- |
-| `<item>` | `<gap | need | blocker>` | `<descrição>` | `<ação>` |
+| Item     | Tipo  | Detalhe | Recomendação |
+| -------- | ----- | ------- | ------------ |
+| `<item>` | `<gap | need    | blocker>`    | `<descrição>` | `<ação>` |
 
 ## Casos de borda e riscos
 
 | Caso/risco | Mitigação | Rollback ou n/a |
-| --- | --- | --- |
-| `<caso>` | `<ação>` | `<prova>` |
+| ---------- | --------- | --------------- |
+| `<caso>`   | `<ação>`  | `<prova>`       |
 
 ## Prova de rollback para migração
 

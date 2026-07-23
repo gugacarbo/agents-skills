@@ -12,28 +12,28 @@
 
 ## Rastreabilidade imutável
 
-| Base SHA | Head SHA | Range/PR | Branch/worktree |
-| --- | --- | --- | --- |
-| `<sha>` | `<sha>` | `<URL ou n/a>` | `<valor>` |
+| Base SHA | Head SHA | Range/PR       | Branch/worktree |
+| -------- | -------- | -------------- | --------------- |
+| `<sha>`  | `<sha>`  | `<URL ou n/a>` | `<valor>`       |
 
 ## Critérios e evidências
 
-| Critério | Evidência | Resultado |
-| --- | --- | --- |
-| `<critério>` | `<comando/prova>` | `PASS | FAIL | n/a` |
+| Critério     | Evidência         | Resultado |
+| ------------ | ----------------- | --------- |
+| `<critério>` | `<comando/prova>` | `PASS     | FAIL | n/a` |
 
 ## Reconciliação de escopo
 
-| Planejado | Implementado | Não feito/motivo |
-| --- | --- | --- |
-| `<item>` | `<item>` | `<none ou motivo>` |
+| Planejado | Implementado | Não feito/motivo   |
+| --------- | ------------ | ------------------ |
+| `<item>`  | `<item>`     | `<none ou motivo>` |
 
 ## Com diff
 
 PR publicado: `<URL>` · estado: `<draft ou ready>`
 
-| Arquivo | Mudança | Validação |
-| --- | --- | --- |
+| Arquivo  | Mudança       | Validação |
+| -------- | ------------- | --------- |
 | `<path>` | `<descrição>` | `<prova>` |
 
 ## Sem diff: `NO_CHANGES`
@@ -42,8 +42,8 @@ PR publicado: `<URL>` · estado: `<draft ou ready>`
 
 ## Problemas encontrados
 
-| Nível | Problema | Solução aplicada | Risco pendente | Issue draft |
-| --- | --- | --- | --- | --- |
-| `Critical | Important | Minor | Cannot verify` | `<problema>` | `<ação>` | `<risco>` | `<Minor não bloqueante: link; demais: n/a>` |
+| Nível     | Problema  | Solução aplicada | Risco pendente | Issue draft  |
+| --------- | --------- | ---------------- | -------------- | ------------ |
+| `Critical | Important | Minor            | Cannot verify` | `<problema>` | `<ação>` | `<risco>` | `<Minor não bloqueante: link; demais: n/a>` |
 
 _Para Minor, use `references/follow-up-issue-drafts.md`._

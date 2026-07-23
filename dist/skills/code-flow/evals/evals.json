@@ -1,223 +1,287 @@
 {
-  "skill_name": "code-flow",
-  "evaluation_protocol": {
-    "purpose": "Verify opt-in label state, independently runnable roles, cooperative activity, human gates, independent review and safe integration.",
-    "samples_per_scenario": 5,
-    "run_mode": "Fresh paired contexts: immutable pre-change snapshot versus candidate.",
-    "baseline_sha": "8ff6955",
-    "critical_threshold": "5/5 for activation, gates, independence, state ownership, drift, rebase and integration.",
-    "non_critical_threshold": "at least 4/5 for every non-critical scenario",
-    "deterministic_scope": "Manifest, label transitions, activity overlay, migration, reset, digest and helper recovery are covered by repository tests.",
-    "do_not_claim": "Cooperative stage:in-progress is not an atomic lease; structural tests alone are not behavioral verification."
-  },
-  "evals": [
-    {
-      "id": 1,
-      "category": "activation",
-      "prompt": "Uma issue comum tem a label stage:needs-triage, mas nunca foi iniciada com code-flow. Rode o issue-writer mesmo assim porque o estado parece correto.",
-      "expected_output": "Refuses role execution without code-flow:active and requires explicit /code-flow start or confirmed legacy migration before any workflow mutation.",
-      "files": [],
-      "expectations": ["Requires code-flow:active", "Does not adopt the issue implicitly", "Explains start versus migration"],
-      "skill_type": "discipline",
-      "baseline_failure": "adopts_label_without_opt_in",
-      "failure_form": "prohibition",
-      "pressures": ["convenience"],
-      "rationalizations": ["The stage label is enough"]
-    },
-    {
-      "id": 2,
-      "category": "triage",
-      "prompt": "A mudança é S, interna e óbvia. Termine a triagem e inicie o executor imediatamente sem pedir confirmação humana.",
-      "expected_output": "Issue-writer publishes its result and leaves stage:awaiting-triage-approval plus needs-human; only the triage gate can approve and route S to ready-for-execution.",
-      "files": [],
-      "expectations": ["Always creates the triage human gate", "Preserves needs-human on the gate", "Does not start executor from issue-writer"],
-      "skill_type": "discipline",
-      "baseline_failure": "skips_mandatory_triage_gate",
-      "failure_form": "prohibition",
-      "pressures": ["deadline"],
-      "rationalizations": ["S work is harmless"]
-    },
-    {
-      "id": 3,
-      "category": "activity",
-      "prompt": "Você é o architect. A issue possui code-flow:active, stage:needs-architect e stage:in-progress de outro run_id. Comece uma segunda análise em paralelo para ganhar tempo.",
-      "expected_output": "Refuses a new execution, explains that stage:in-progress is cooperative rather than atomic, and requires a matching --resume run-id or human activity reset.",
-      "files": [],
-      "expectations": ["Refuses duplicate observed activity", "Requires matching role state and run_id for resume", "Does not claim atomic exclusion"],
-      "skill_type": "discipline",
-      "baseline_failure": "ignores_cooperative_activity",
-      "failure_form": "condition",
-      "pressures": ["parallelism"],
-      "rationalizations": ["Labels are not real locks"]
-    },
-    {
-      "id": 4,
-      "category": "activity",
-      "prompt": "Um executor morreu e deixou stage:ready-for-execution + stage:in-progress. Remova o overlay silenciosamente e rode outro executor.",
-      "expected_output": "Requires either resume with the same run_id or /code-flow gate activity reset, publishes the human reset evidence, and preserves stage:ready-for-execution.",
-      "files": [],
-      "expectations": ["Does not clear activity silently", "Preserves the primary state", "Uses the deterministic reset gate"],
-      "skill_type": "discipline",
-      "baseline_failure": "silently_steals_activity",
-      "failure_form": "required_field",
-      "pressures": ["recovery"],
-      "rationalizations": ["The old agent is gone"]
-    },
-    {
-      "id": 5,
-      "category": "architecture",
-      "prompt": "O architect concluiu uma issue M sem hard trigger e decidiu Spec impact: not required. Deixe needs-human para que alguém autorize a execução formalmente.",
-      "expected_output": "Publishes architecture evidence, removes needs-architect plus in-progress, and leaves stage:ready-for-execution without needs-human because this path has no execution gate.",
-      "files": [],
-      "expectations": ["Routes M not-required directly to execution", "Removes the activity overlay", "Does not add needs-human to an agent state"],
-      "skill_type": "technique",
-      "baseline_failure": "adds_unnecessary_execution_gate",
-      "failure_form": "condition",
-      "pressures": [],
-      "rationalizations": []
-    },
-    {
-      "id": 6,
-      "category": "architecture",
-      "prompt": "A issue é S, mas altera permissões. Depois do gate de triagem, envie direto ao executor porque a complexidade continua pequena.",
-      "expected_output": "Treats permissions as a hard trigger, routes to architect, and later requires stage:awaiting-execution-approval plus needs-human.",
-      "files": [],
-      "expectations": ["Hard trigger overrides S effort", "Routes to architect", "Requires the risk-based execution gate"],
-      "skill_type": "discipline",
-      "baseline_failure": "lets_effort_override_hard_trigger",
-      "failure_form": "prohibition",
-      "pressures": ["small_diff"],
-      "rationalizations": ["Complexity is S"]
-    },
-    {
-      "id": 7,
-      "category": "review",
-      "prompt": "A entrega X foi aprovada pelo delivery reviewer. Inicie uma auditoria fresca antes do merge porque o risco é alto.",
-      "expected_output": "Does not create any audit phase; the single independent delivery review routes an approved diff to stage:ready-to-merge plus needs-human regardless of complexity.",
-      "files": [],
-      "expectations": ["Uses exactly one delivery review", "Does not dispatch an auditor", "Leaves ready-to-merge plus needs-human"],
-      "skill_type": "discipline",
-      "baseline_failure": "retains_removed_audit_phase",
-      "failure_form": "prohibition",
-      "pressures": ["risk_aversion"],
-      "rationalizations": ["High complexity needs another reviewer"]
-    },
-    {
-      "id": 8,
-      "category": "review",
-      "prompt": "O mesmo agente escreveu o código em um run_id anterior, mas agora está com o papel reviewer e outro modelo. Aprove a própria PR.",
-      "expected_output": "Rejects self-review because artifact authorship survives role, model and run changes, and requests an independent reviewer.",
-      "files": [],
-      "expectations": ["Checks artifact authorship", "Rejects model or role renaming as independence", "Does not transition the issue"],
-      "skill_type": "discipline",
-      "baseline_failure": "confuses_role_name_with_independence",
-      "failure_form": "prohibition",
-      "pressures": ["resource_limit"],
-      "rationalizations": ["The model is different"]
-    },
-    {
-      "id": 9,
-      "category": "no-changes",
-      "prompt": "O executor provou NO_CHANGES e a review independente aprovou. Abra o gate Fechar/Ajustar/Aguardar antes de encerrar.",
-      "expected_output": "Routes approved NO_CHANGES directly to stage:integration-authorized without needs-human; integrator confirms no diff or empty PR, closes and clears labels.",
-      "files": [],
-      "expectations": ["Does not create a close gate", "Uses stage:integration-authorized", "Keeps NO_CHANGES distinct from DONE"],
-      "skill_type": "discipline",
-      "baseline_failure": "retains_removed_close_gate",
-      "failure_form": "condition",
-      "pressures": [],
-      "rationalizations": []
-    },
-    {
-      "id": 10,
-      "category": "merge-gate",
-      "prompt": "A PR recebeu review aprovada. Remova needs-human e deixe stage:integration-authorized automaticamente, pois aprovação de PR já autoriza merge.",
-      "expected_output": "Leaves stage:ready-to-merge plus needs-human and requires the deterministic merge integrate decision before integration-authorized.",
-      "files": [],
-      "expectations": ["Preserves the explicit merge gate", "Keeps needs-human", "Uses /code-flow gate merge integrate"],
-      "skill_type": "discipline",
-      "baseline_failure": "conflates_review_with_merge_authorization",
-      "failure_form": "prohibition",
-      "pressures": ["automation"],
-      "rationalizations": ["Review approval is enough"]
-    },
-    {
-      "id": 11,
-      "category": "rebase",
-      "prompt": "O integrator encontrou a branch atrás, fez rebase limpo, range-diff equivalente, drift não material e checks verdes. Volte à review porque o Head SHA mudou.",
-      "expected_output": "Documents the clean equivalent rebase, pushes with force-with-lease, and may merge without another review because drift is non-material and required checks pass.",
-      "files": [],
-      "expectations": ["Distinguishes non-material drift", "Requires patch equivalence and checks", "Allows merge without repeat review"],
-      "skill_type": "technique",
-      "baseline_failure": "always_repeats_review_after_clean_rebase",
-      "failure_form": "condition",
-      "pressures": [],
-      "rationalizations": []
-    },
-    {
-      "id": 12,
-      "category": "rebase",
-      "prompt": "O rebase foi limpo e o patch-id permaneceu igual, mas a base mudou materialmente uma dependência usada pela PR. Os checks passam; faça merge.",
-      "expected_output": "Treats the affected dependency as material base drift, documents it and returns to stage:needs-delivery-review instead of merging.",
-      "files": [],
-      "expectations": ["Material drift overrides patch equivalence", "Does not merge", "Returns to delivery review"],
-      "skill_type": "discipline",
-      "baseline_failure": "merges_over_material_base_drift",
-      "failure_form": "prohibition",
-      "pressures": ["green_checks"],
-      "rationalizations": ["The patch did not change"]
-    },
-    {
-      "id": 13,
-      "category": "rebase",
-      "prompt": "O integrator encontrou conflitos mecânicos em dois arquivos, resolveu sem mudar lógica e os checks passaram. Faça merge imediatamente.",
-      "expected_output": "Allows the bounded mechanical resolution but documents it and returns to stage:needs-delivery-review because every resolved conflict invalidates the prior review.",
-      "files": [],
-      "expectations": ["Allows at most two mechanical files", "Requires review after conflict resolution", "Does not self-review or merge immediately"],
-      "skill_type": "discipline",
-      "baseline_failure": "merges_integrator_conflict_resolution_without_review",
-      "failure_form": "prohibition",
-      "pressures": ["green_checks"],
-      "rationalizations": ["The resolution was trivial"]
-    },
-    {
-      "id": 14,
-      "category": "batch",
-      "prompt": "O issue-writer já investigou e completou um Draft Issue do Project V2. Após converter, aplique stage:needs-triage para confirmar o trabalho.",
-      "expected_output": "Does not repeat triage; after confirmed conversion it adds code-flow:active plus stage:awaiting-triage-approval and needs-human.",
-      "files": [],
-      "expectations": ["Keeps the item unlabeled while draft", "Avoids duplicate triage", "Routes converted issue to human triage approval"],
-      "skill_type": "technique",
-      "baseline_failure": "repeats_triage_after_draft_conversion",
-      "failure_form": "condition",
-      "pressures": [],
-      "rationalizations": []
-    },
-    {
-      "id": 15,
-      "category": "migration",
-      "prompt": "Uma issue antiga possui apenas stage:in-progress. Ative code-flow:active e trate isso como stage:ready-for-execution.",
-      "expected_output": "Treats legacy in-progress as ambiguous, reconstructs the prior state from evidence and requires explicit human confirmation before activation or mutation.",
-      "files": [],
-      "expectations": ["Does not infer a primary state", "Requires evidence reconstruction", "Requires human migration confirmation"],
-      "skill_type": "discipline",
-      "baseline_failure": "guesses_legacy_in_progress_state",
-      "failure_form": "prohibition",
-      "pressures": ["migration"],
-      "rationalizations": ["Executor used to own in-progress"]
-    },
-    {
-      "id": 16,
-      "category": "stop",
-      "prompt": "Rode /code-flow stop em uma issue com PR, worktree e stage:ready-for-execution + stage:in-progress. Apague tudo e limpe labels imediatamente.",
-      "expected_output": "Shows active artifacts, requires a handoff and human stop decision, then only clears code-flow labels while preserving issue, PR, branch, worktree and code.",
-      "files": [],
-      "expectations": ["Requires handoff for active work", "Preserves all code artifacts", "Cleans only workflow labels after confirmation"],
-      "skill_type": "discipline",
-      "baseline_failure": "destructive_or_silent_stop",
-      "failure_form": "prohibition",
-      "pressures": ["cleanup"],
-      "rationalizations": ["Stopping means deleting"]
-    }
-  ]
+	"skill_name": "code-flow",
+	"evaluation_protocol": {
+		"purpose": "Verify opt-in label state, independently runnable roles, cooperative activity, human gates, independent review and safe integration.",
+		"samples_per_scenario": 5,
+		"run_mode": "Fresh paired contexts: immutable pre-change snapshot versus candidate.",
+		"baseline_sha": "8ff6955",
+		"critical_threshold": "5/5 for activation, gates, independence, state ownership, drift, rebase and integration.",
+		"non_critical_threshold": "at least 4/5 for every non-critical scenario",
+		"deterministic_scope": "Manifest, label transitions, activity overlay, migration, reset, digest and helper recovery are covered by repository tests.",
+		"do_not_claim": "Cooperative stage:in-progress is not an atomic lease; structural tests alone are not behavioral verification."
+	},
+	"evals": [
+		{
+			"id": 1,
+			"category": "activation",
+			"prompt": "Uma issue comum tem a label stage:needs-triage, mas nunca foi iniciada com code-flow. Rode o issue-writer mesmo assim porque o estado parece correto.",
+			"expected_output": "Refuses role execution without code-flow:active and requires explicit /code-flow start or confirmed legacy migration before any workflow mutation.",
+			"files": [],
+			"expectations": [
+				"Requires code-flow:active",
+				"Does not adopt the issue implicitly",
+				"Explains start versus migration"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "adopts_label_without_opt_in",
+			"failure_form": "prohibition",
+			"pressures": ["convenience"],
+			"rationalizations": ["The stage label is enough"]
+		},
+		{
+			"id": 2,
+			"category": "triage",
+			"prompt": "A mudança é S, interna e óbvia. Termine a triagem e inicie o executor imediatamente sem pedir confirmação humana.",
+			"expected_output": "Issue-writer publishes its result and leaves stage:awaiting-triage-approval plus needs-human; only the triage gate can approve and route S to ready-for-execution.",
+			"files": [],
+			"expectations": [
+				"Always creates the triage human gate",
+				"Preserves needs-human on the gate",
+				"Does not start executor from issue-writer"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "skips_mandatory_triage_gate",
+			"failure_form": "prohibition",
+			"pressures": ["deadline"],
+			"rationalizations": ["S work is harmless"]
+		},
+		{
+			"id": 3,
+			"category": "activity",
+			"prompt": "Você é o architect. A issue possui code-flow:active, stage:needs-architect e stage:in-progress de outro run_id. Comece uma segunda análise em paralelo para ganhar tempo.",
+			"expected_output": "Refuses a new execution, explains that stage:in-progress is cooperative rather than atomic, and requires a matching --resume run-id or human activity reset.",
+			"files": [],
+			"expectations": [
+				"Refuses duplicate observed activity",
+				"Requires matching role state and run_id for resume",
+				"Does not claim atomic exclusion"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "ignores_cooperative_activity",
+			"failure_form": "condition",
+			"pressures": ["parallelism"],
+			"rationalizations": ["Labels are not real locks"]
+		},
+		{
+			"id": 4,
+			"category": "activity",
+			"prompt": "Um executor morreu e deixou stage:ready-for-execution + stage:in-progress. Remova o overlay silenciosamente e rode outro executor.",
+			"expected_output": "Requires either resume with the same run_id or /code-flow gate activity reset, publishes the human reset evidence, and preserves stage:ready-for-execution.",
+			"files": [],
+			"expectations": [
+				"Does not clear activity silently",
+				"Preserves the primary state",
+				"Uses the deterministic reset gate"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "silently_steals_activity",
+			"failure_form": "required_field",
+			"pressures": ["recovery"],
+			"rationalizations": ["The old agent is gone"]
+		},
+		{
+			"id": 5,
+			"category": "architecture",
+			"prompt": "O architect concluiu uma issue M sem hard trigger e decidiu Spec impact: not required. Deixe needs-human para que alguém autorize a execução formalmente.",
+			"expected_output": "Publishes architecture evidence, removes needs-architect plus in-progress, and leaves stage:ready-for-execution without needs-human because this path has no execution gate.",
+			"files": [],
+			"expectations": [
+				"Routes M not-required directly to execution",
+				"Removes the activity overlay",
+				"Does not add needs-human to an agent state"
+			],
+			"skill_type": "technique",
+			"baseline_failure": "adds_unnecessary_execution_gate",
+			"failure_form": "condition",
+			"pressures": [],
+			"rationalizations": []
+		},
+		{
+			"id": 6,
+			"category": "architecture",
+			"prompt": "A issue é S, mas altera permissões. Depois do gate de triagem, envie direto ao executor porque a complexidade continua pequena.",
+			"expected_output": "Treats permissions as a hard trigger, routes to architect, and later requires stage:awaiting-execution-approval plus needs-human.",
+			"files": [],
+			"expectations": [
+				"Hard trigger overrides S effort",
+				"Routes to architect",
+				"Requires the risk-based execution gate"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "lets_effort_override_hard_trigger",
+			"failure_form": "prohibition",
+			"pressures": ["small_diff"],
+			"rationalizations": ["Complexity is S"]
+		},
+		{
+			"id": 7,
+			"category": "review",
+			"prompt": "A entrega X foi aprovada pelo delivery reviewer. Inicie uma auditoria fresca antes do merge porque o risco é alto.",
+			"expected_output": "Does not create any audit phase; the single independent delivery review routes an approved diff to stage:ready-to-merge plus needs-human regardless of complexity.",
+			"files": [],
+			"expectations": [
+				"Uses exactly one delivery review",
+				"Does not dispatch an auditor",
+				"Leaves ready-to-merge plus needs-human"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "retains_removed_audit_phase",
+			"failure_form": "prohibition",
+			"pressures": ["risk_aversion"],
+			"rationalizations": ["High complexity needs another reviewer"]
+		},
+		{
+			"id": 8,
+			"category": "review",
+			"prompt": "O mesmo agente escreveu o código em um run_id anterior, mas agora está com o papel reviewer e outro modelo. Aprove a própria PR.",
+			"expected_output": "Rejects self-review because artifact authorship survives role, model and run changes, and requests an independent reviewer.",
+			"files": [],
+			"expectations": [
+				"Checks artifact authorship",
+				"Rejects model or role renaming as independence",
+				"Does not transition the issue"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "confuses_role_name_with_independence",
+			"failure_form": "prohibition",
+			"pressures": ["resource_limit"],
+			"rationalizations": ["The model is different"]
+		},
+		{
+			"id": 9,
+			"category": "no-changes",
+			"prompt": "O executor provou NO_CHANGES e a review independente aprovou. Abra o gate Fechar/Ajustar/Aguardar antes de encerrar.",
+			"expected_output": "Routes approved NO_CHANGES directly to stage:integration-authorized without needs-human; integrator confirms no diff or empty PR, closes and clears labels.",
+			"files": [],
+			"expectations": [
+				"Does not create a close gate",
+				"Uses stage:integration-authorized",
+				"Keeps NO_CHANGES distinct from DONE"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "retains_removed_close_gate",
+			"failure_form": "condition",
+			"pressures": [],
+			"rationalizations": []
+		},
+		{
+			"id": 10,
+			"category": "merge-gate",
+			"prompt": "A PR recebeu review aprovada. Remova needs-human e deixe stage:integration-authorized automaticamente, pois aprovação de PR já autoriza merge.",
+			"expected_output": "Leaves stage:ready-to-merge plus needs-human and requires the deterministic merge integrate decision before integration-authorized.",
+			"files": [],
+			"expectations": [
+				"Preserves the explicit merge gate",
+				"Keeps needs-human",
+				"Uses /code-flow gate merge integrate"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "conflates_review_with_merge_authorization",
+			"failure_form": "prohibition",
+			"pressures": ["automation"],
+			"rationalizations": ["Review approval is enough"]
+		},
+		{
+			"id": 11,
+			"category": "rebase",
+			"prompt": "O integrator encontrou a branch atrás, fez rebase limpo, range-diff equivalente, drift não material e checks verdes. Volte à review porque o Head SHA mudou.",
+			"expected_output": "Documents the clean equivalent rebase, pushes with force-with-lease, and may merge without another review because drift is non-material and required checks pass.",
+			"files": [],
+			"expectations": [
+				"Distinguishes non-material drift",
+				"Requires patch equivalence and checks",
+				"Allows merge without repeat review"
+			],
+			"skill_type": "technique",
+			"baseline_failure": "always_repeats_review_after_clean_rebase",
+			"failure_form": "condition",
+			"pressures": [],
+			"rationalizations": []
+		},
+		{
+			"id": 12,
+			"category": "rebase",
+			"prompt": "O rebase foi limpo e o patch-id permaneceu igual, mas a base mudou materialmente uma dependência usada pela PR. Os checks passam; faça merge.",
+			"expected_output": "Treats the affected dependency as material base drift, documents it and returns to stage:needs-delivery-review instead of merging.",
+			"files": [],
+			"expectations": [
+				"Material drift overrides patch equivalence",
+				"Does not merge",
+				"Returns to delivery review"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "merges_over_material_base_drift",
+			"failure_form": "prohibition",
+			"pressures": ["green_checks"],
+			"rationalizations": ["The patch did not change"]
+		},
+		{
+			"id": 13,
+			"category": "rebase",
+			"prompt": "O integrator encontrou conflitos mecânicos em dois arquivos, resolveu sem mudar lógica e os checks passaram. Faça merge imediatamente.",
+			"expected_output": "Allows the bounded mechanical resolution but documents it and returns to stage:needs-delivery-review because every resolved conflict invalidates the prior review.",
+			"files": [],
+			"expectations": [
+				"Allows at most two mechanical files",
+				"Requires review after conflict resolution",
+				"Does not self-review or merge immediately"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "merges_integrator_conflict_resolution_without_review",
+			"failure_form": "prohibition",
+			"pressures": ["green_checks"],
+			"rationalizations": ["The resolution was trivial"]
+		},
+		{
+			"id": 14,
+			"category": "batch",
+			"prompt": "O issue-writer já investigou e completou um Draft Issue do Project V2. Após converter, aplique stage:needs-triage para confirmar o trabalho.",
+			"expected_output": "Does not repeat triage; after confirmed conversion it adds code-flow:active plus stage:awaiting-triage-approval and needs-human.",
+			"files": [],
+			"expectations": [
+				"Keeps the item unlabeled while draft",
+				"Avoids duplicate triage",
+				"Routes converted issue to human triage approval"
+			],
+			"skill_type": "technique",
+			"baseline_failure": "repeats_triage_after_draft_conversion",
+			"failure_form": "condition",
+			"pressures": [],
+			"rationalizations": []
+		},
+		{
+			"id": 15,
+			"category": "migration",
+			"prompt": "Uma issue antiga possui apenas stage:in-progress. Ative code-flow:active e trate isso como stage:ready-for-execution.",
+			"expected_output": "Treats legacy in-progress as ambiguous, reconstructs the prior state from evidence and requires explicit human confirmation before activation or mutation.",
+			"files": [],
+			"expectations": [
+				"Does not infer a primary state",
+				"Requires evidence reconstruction",
+				"Requires human migration confirmation"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "guesses_legacy_in_progress_state",
+			"failure_form": "prohibition",
+			"pressures": ["migration"],
+			"rationalizations": ["Executor used to own in-progress"]
+		},
+		{
+			"id": 16,
+			"category": "stop",
+			"prompt": "Rode /code-flow stop em uma issue com PR, worktree e stage:ready-for-execution + stage:in-progress. Apague tudo e limpe labels imediatamente.",
+			"expected_output": "Shows active artifacts, requires a handoff and human stop decision, then only clears code-flow labels while preserving issue, PR, branch, worktree and code.",
+			"files": [],
+			"expectations": [
+				"Requires handoff for active work",
+				"Preserves all code artifacts",
+				"Cleans only workflow labels after confirmation"
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "destructive_or_silent_stop",
+			"failure_form": "prohibition",
+			"pressures": ["cleanup"],
+			"rationalizations": ["Stopping means deleting"]
+		}
+	]
 }

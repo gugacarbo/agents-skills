@@ -14,13 +14,13 @@
 
 ## Decisão
 
-| Gate | Opções aceitas |
-| --- | --- |
-| triage | `approve | adjust | block` |
-| execution | `authorize | adjust | block` |
-| merge | `integrate | adjust | wait` |
-| resume | `<stage registrado no Resume>` |
-| activity | `reset` |
+| Gate      | Opções aceitas                 |
+| --------- | ------------------------------ |
+| triage    | `approve                       | adjust | block` |
+| execution | `authorize                     | adjust | block` |
+| merge     | `integrate                     | adjust | wait`  |
+| resume    | `<stage registrado no Resume>` |
+| activity  | `reset`                        |
 
 Valide estado, `needs-human`, ausência de overlay, evidência e opção. Publique
 esta decisão antes de mutar e confirme labels depois. `activity reset` é a única

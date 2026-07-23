@@ -12,9 +12,9 @@
 
 ## Evidência e impacto
 
-| Fato | Evidência | Impacto | Próximo passo |
-| --- | --- | --- | --- |
-| `<fato>` | `<link/saída>` | `<impacto>` | `<ação>` |
+| Fato     | Evidência      | Impacto     | Próximo passo |
+| -------- | -------------- | ----------- | ------------- |
+| `<fato>` | `<link/saída>` | `<impacto>` | `<ação>`      |
 
 ## Alterações do architect
 
