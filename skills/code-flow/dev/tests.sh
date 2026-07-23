@@ -28,9 +28,9 @@ test_structure() {
 
   actual=$(find "$SKILL/templates" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
   expected=$(printf '%s\n' 01-epic.md 02-issue-template.md \
-    03-review-template.md 04-implementation-outline-template.md \
-    05-implementation-evidence-template.md 06-integration-report-template.md \
-    07-human-gate-spec.md 08-note-template.md)
+    03-review-template.md \
+    04-implementation-evidence-template.md 05-integration-report-template.md \
+    06-human-gate-spec.md 07-note-template.md)
   [ "$actual" = "$expected" ] || fail "unexpected templates: $actual"
 
   [ -f "$SKILL/references/workflow-cheatsheet.md" ] || fail 'missing neutral workflow cheatsheet'
@@ -82,16 +82,16 @@ test_router_and_roles() {
 
 test_templates() {
   local template
-  for template in 03-review-template.md 05-implementation-evidence-template.md \
-    06-integration-report-template.md 07-human-gate-spec.md \
-    08-note-template.md; do
+  for template in 03-review-template.md 04-implementation-evidence-template.md \
+    05-integration-report-template.md 06-human-gate-spec.md \
+    07-note-template.md; do
     assert_comment_contract "$SKILL/templates/$template"
   done
   assert_contains 'run_id' "$SKILL/references/evidence-contract.md"
-  assert_contains 'stage:in-progress' "$SKILL/templates/08-note-template.md"
+  assert_contains 'stage:in-progress' "$SKILL/templates/07-note-template.md"
   assert_contains 'NO_CHANGES nunca é' "$SKILL/templates/03-review-template.md"
-  assert_contains 'Verificação de rebase' "$SKILL/templates/06-integration-report-template.md"
-  assert_contains 'activity reset' "$SKILL/templates/07-human-gate-spec.md"
+  assert_contains 'Verificação de rebase' "$SKILL/templates/05-integration-report-template.md"
+  assert_contains 'activity reset' "$SKILL/templates/06-human-gate-spec.md"
   assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-review-template.md"
   assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/03-review-template.md"
 }

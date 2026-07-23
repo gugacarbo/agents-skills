@@ -14,8 +14,8 @@ inputs:
   - PR ou NO_CHANGES proof
   - Base/Head
 outputs:
-  - integration-report (templates/06-integration-report-template.md)
-  - activity-start (templates/08-note-template.md)
+  - integration-report (templates/05-integration-report-template.md)
+  - activity-start (templates/07-note-template.md)
   - merge/close confirmation
 next_label:
   - when: merge/close confirmado
@@ -35,7 +35,7 @@ Consuma somente `code-flow:active + stage:integration-authorized` sem
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/integrate.md`](../phases/integrate.md).
 
-Publique `templates/08-note-template.md` com `run_id`, estado, review aprovada, PR ou prova NO_CHANGES,
+Publique `templates/07-note-template.md` com `run_id`, estado, review aprovada, PR ou prova NO_CHANGES,
 Base/Head e guidance; adicione `stage:in-progress`, preservando o estado.
 
 ## Decidir operação
@@ -72,7 +72,7 @@ deixe apenas o destino.
 
 Siga o método de merge do projeto. Confirme Merge SHA, PR e fechamento da issue;
 feche explicitamente quando o vínculo não o fizer. Em NO_CHANGES, feche sem
-commit/PR vazio. Publique `templates/06-integration-report-template.md` e limpe
+commit/PR vazio. Publique `templates/05-integration-report-template.md` e limpe
 `code-flow:active`, estado principal, overlay e `needs-human`.
 
 Falha transitória remove somente overlay. Bloqueio externo remove overlay e

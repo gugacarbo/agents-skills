@@ -15,8 +15,8 @@ inputs:
   - architect-review
   - Base/Head
 outputs:
-  - implementation-evidence (templates/05-implementation-evidence-template.md)
-  - activity-start (templates/08-note-template.md)
+  - implementation-evidence (templates/04-implementation-evidence-template.md)
+  - activity-start (templates/07-note-template.md)
   - PR ou NO_CHANGES proof
 next_label:
   - when: DONE, DONE_WITH_CONCERNS ou NO_CHANGES
@@ -32,7 +32,7 @@ Consuma `code-flow:active + stage:ready-for-execution` ou
 salvo resume válido. Leia [`../phases/context.md`](../phases/context.md) e
 [`../phases/dispatch.md`](../phases/dispatch.md).
 
-Crie ou reutilize a worktree isolada da issue. Publique `templates/08-note-template.md` com `run_id`,
+Crie ou reutilize a worktree isolada da issue. Publique `templates/07-note-template.md` com `run_id`,
 estado principal, Base/Head, branch/worktree, fontes, guidance e resultado
 esperado; adicione `stage:in-progress`, preservando o estado principal.
 
@@ -41,7 +41,7 @@ spec/ADR aprovada no mesmo PR. Pare diante de decisão material ou drift não
 coberto. Com diff, conclua somente após commit, push e PR publicada; em correção,
 atualize a mesma PR. NO_CHANGES nunca cria artefato vazio.
 
-Publique `templates/05-implementation-evidence-template.md`. DONE,
+Publique `templates/04-implementation-evidence-template.md`. DONE,
 DONE_WITH_CONCERNS e NO_CHANGES removem estado anterior + overlay e deixam
 `stage:needs-delivery-review`. BLOCKED deixa `stage:blocked + needs-human` com
 retorno ao estado de entrada. Confirme labels. Não revise nem integre.
