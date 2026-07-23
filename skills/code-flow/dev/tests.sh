@@ -9,15 +9,15 @@ fail() {
   printf 'FAIL: %s\n' "$1" >&2
   exit 1
 }
-assert_contains() { rg -Fq -- "$1" "$2" || fail "expected $2 to contain: $1"; }
-assert_not_contains() { ! rg -Fq -- "$1" "$2" || fail "expected $2 not to contain: $1"; }
+assert_contains() { grep -Fq -- "$1" "$2" || fail "expected $2 to contain: $1"; }
+assert_not_contains() { ! grep -Fq -- "$1" "$2" || fail "expected $2 not to contain: $1"; }
 
 assert_comment_contract() {
   local file="$1"
   for field in agent run_id event state_before state_after sources_evidence project_guidance; do
-    rg -q "^> $field:" "$file" || fail "missing $field in $file"
+    grep -Eq "^> $field:" "$file" || fail "missing $field in $file"
   done
-  rg -q '^## Resume$' "$file" || fail "missing Resume in $file"
+  grep -Eq '^## Resume$' "$file" || fail "missing Resume in $file"
 }
 
 test_structure() {
@@ -60,10 +60,10 @@ test_router_and_roles() {
   assert_contains 'range-diff/patch-id' "$SKILL/agents/05-integrator.md"
   assert_contains 'Drift material' "$SKILL/agents/05-integrator.md"
 
-  ! rg -n -i 'auditor fresco|auditoria final|stage:needs-audit|agent: auditor|name: auditor' \
+  ! grep -rn -iE 'auditor fresco|auditoria final|stage:needs-audit|agent: auditor|name: auditor' \
     "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/references" "$SKILL/templates" \
     || fail 'audit phase remains'
-  ! rg -n 'stage:(approved|ready-to-close|merge-authorized|close-authorized)' \
+  ! grep -rn -E 'stage:(approved|ready-to-close|merge-authorized|close-authorized)' \
     "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/templates" \
     || fail 'removed stage remains active outside migration docs'
 }
@@ -103,7 +103,7 @@ test_registry() {
   ' "$SKILL/references/workflow-states.json" > /dev/null || fail 'invalid workflow registry'
 
   registry=$(jq -r '.states[].label' "$SKILL/references/workflow-states.json" | sort)
-  documented=$(sed -n '/| Label |/,/^$/p' "$SKILL/references/github-flow.md" | rg -o 'stage:[a-z-]+' | sort -u)
+  documented=$(awk '/^\| Label/{f=1} f&&/^$/{exit} f{print}' "$SKILL/references/github-flow.md" | grep -oE 'stage:[a-z-]+' | sort -u)
   [ "$registry" = "$documented" ] || fail 'registry and protocol table differ'
 }
 
@@ -260,17 +260,17 @@ test_doctor() {
   set_state "$state" "$labels" code-flow:active stage:needs-triage stage:in-progress needs-human
   rc=0
   out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1) || rc=$?
-  [ "$rc" -ne 0 ] && printf '%s' "$out" | rg -q 'in-progress with needs-human' || fail 'doctor missed overlay/human drift'
+  [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -Fq 'in-progress with needs-human' || fail 'doctor missed overlay/human drift'
 
   set_state "$state" "$labels" code-flow:active stage:needs-triage stage:needs-architect
   rc=0
   out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1) || rc=$?
-  [ "$rc" -ne 0 ] && printf '%s' "$out" | rg -q 'exactly one primary' || fail 'doctor missed multiple primary states'
+  [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -Fq 'exactly one primary' || fail 'doctor missed multiple primary states'
 
   set_state "$state" "$labels" code-flow:active stage:needs-triage stage:unknown
   rc=0
   out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1) || rc=$?
-  [ "$rc" -ne 0 ] && printf '%s' "$out" | rg -q 'unknown stage labels' || fail 'doctor missed unknown stage label'
+  [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -Fq 'unknown stage labels' || fail 'doctor missed unknown stage label'
 }
 
 test_evals() {
@@ -290,7 +290,6 @@ test_evals() {
 test_syntax() {
   sh -n "$SKILL/scripts/doctor.sh"
   sh -n "$SKILL/scripts/transition-issue.sh"
-  bash -n "$SKILL/scripts/review-package.sh"
   python3 -m py_compile "$SKILL/scripts/source-set-digest.py"
   node --check "$SKILL/scripts/visual-companion/server.cjs"
 }

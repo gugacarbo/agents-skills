@@ -5,15 +5,15 @@ efêmero. Recalcule em criação, retomada, gates e mudança de base/escopo.
 
 | Valor | Critério                                                         |
 | ----- | ---------------------------------------------------------------- |
-| S     | Interna, localizada, reversível, caminho conhecido, uma área.    |
-| M     | Um componente, poucas alterações acopladas, validação rotineira. |
-| G     | Vários componentes ou coordenação relevante em um repo.          |
-| X     | Mudança ampla/transversal ou incerteza significativa.            |
+| XS    | Interna, localizada, reversível, caminho conhecido, uma área.    |
+| S     | Um componente, poucas alterações acopladas, validação rotineira. |
+| M     | Vários componentes ou coordenação relevante em um repo.          |
+| L     | Mudança ampla/transversal ou incerteza significativa.            |
 | XL    | Múltiplos resultados/dependências; recomende decomposição/Epic.  |
 
-Mapeamento: `S → light`, `M/G → standard`, `X/XL → assured`. O nome interno
-nunca é persistido. Comportamento observável em um componente começa em M até
-discovery provar todos os critérios de S.
+Mapeamento: `XS → light`, `S/M → standard`, `L/XL → secured`. O nome interno
+nunca é persistido. Comportamento observável em um componente começa em S até
+discovery provar todos os critérios de XS.
 
 ## Hard triggers
 
@@ -29,9 +29,9 @@ hard trigger.
 ## Papéis e gates
 
 - Toda triagem exige gate humano.
-- S sem hard trigger não exige arquitetura.
-- M sem hard trigger usa architect, mas `not required` segue direto à execução.
-- G+, hard trigger ou spec create/update exige gate humano de execução.
+- XS sem hard trigger não exige arquitetura.
+- S sem hard trigger usa architect, mas `not required` segue direto à execução.
+- M+, hard trigger ou spec create/update exige gate humano de execução.
 - Toda entrega exige uma única delivery review independente; não há auditoria.
 - Diff aprovado exige gate humano de merge; NO_CHANGES não exige close gate.
 

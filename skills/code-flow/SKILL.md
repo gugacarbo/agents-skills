@@ -12,6 +12,8 @@ memória do orquestrador e sempre redescobrir o guidance nearest-wins do projeto
 
 ## Entradas públicas
 
+### Centrais
+
 | Invocação                                                      | Resultado                                                    |
 | -------------------------------------------------------------- | ------------------------------------------------------------ |
 | `/code-flow`                                                   | Discovery read-only e próxima ação recomendada.              |
@@ -24,16 +26,19 @@ memória do orquestrador e sempre redescobrir o guidance nearest-wins do projeto
 | `/code-flow gate <issue> resume <stage>`                       | Restaura o estado comprovado no `Resume` de um blocker.      |
 | `/code-flow gate <issue> activity reset`                       | Libera atividade abandonada, preservando o estado principal. |
 | `/code-flow issue create`                                      | Cria e tria uma issue pelo mesmo protocolo.                  |
-| `/code-flow batch create --project <owner/number>`             | Cria Draft Issues para triagem interativa.                   |
-| `/code-flow batch <alvos> --from <operação>`                   | Processa trilhas isoladas a partir de um piso.               |
-| `/code-flow brainstorm`                                        | Resolve somente decisões materiais não descobríveis.         |
 | `/code-flow stop <issue>`                                      | Solicita saída segura sem descartar trabalho.                |
-| `/code-flow tool doctor [args]`                                | Executa apenas `scripts/doctor.sh`.                          |
+
+### Secundárias
+
+| Invocação                                          | Resultado e fase                                               |
+| -------------------------------------------------- | -------------------------------------------------------------- |
+| `/code-flow batch create --project <owner/number>` | Cria Draft Issues para triagem interativa — `context.md`.      |
+| `/code-flow batch <alvos> --from <operação>`       | Processa trilhas isoladas a partir de um piso — `context.md`.  |
+| `/code-flow brainstorm`                            | Resolve decisões materiais não descobríveis — `brainstorm.md`. |
+| `/code-flow tool doctor [args]`                    | Executa apenas `scripts/doctor.sh`.                            |
 
 Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
-`integrator`. As entradas antigas `issue|plan|dispatch|review|integrate` são
-adaptadores para esses contratos; nunca dão ao orquestrador ownership exclusivo.
-Não interprete menção casual como invocação. Política:
+`integrator`. Não interprete menção casual como invocação. Política:
 [`agents/openai.yaml`](agents/openai.yaml).
 
 ## Contrato global
@@ -46,7 +51,7 @@ Não interprete menção casual como invocação. Política:
    atômico e nunca substitui o estado principal.
 4. Publique evidência antes de mutar labels. Cada papel inicia, conclui e
    confirma sua própria transição; decisões humanas usam o comando `gate`.
-5. Proponha `Complexity: S | M | G | X | XL`, recalcule risco e aplique
+5. Proponha `Complexity: XS | S | M | L | XL`, recalcule risco e aplique
    [`references/risk-profiles.md`](references/risk-profiles.md). Hard trigger
    sempre vence esforço pequeno.
 6. Use worktree somente para implementação, correção ou integração. Com diff,

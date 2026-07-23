@@ -82,11 +82,11 @@
 		{
 			"id": 5,
 			"category": "architecture",
-			"prompt": "O architect concluiu uma issue M sem hard trigger e decidiu Spec impact: not required. Deixe needs-human para que alguém autorize a execução formalmente.",
+			"prompt": "O architect concluiu uma issue S sem hard trigger e decidiu Spec impact: not required. Deixe needs-human para que alguém autorize a execução formalmente.",
 			"expected_output": "Publishes architecture evidence, removes needs-architect plus in-progress, and leaves stage:ready-for-execution without needs-human because this path has no execution gate.",
 			"files": [],
 			"expectations": [
-				"Routes M not-required directly to execution",
+				"Routes S not-required directly to execution",
 				"Removes the activity overlay",
 				"Does not add needs-human to an agent state"
 			],
@@ -99,11 +99,11 @@
 		{
 			"id": 6,
 			"category": "architecture",
-			"prompt": "A issue é S, mas altera permissões. Depois do gate de triagem, envie direto ao executor porque a complexidade continua pequena.",
+			"prompt": "A issue é XS, mas altera permissões. Depois do gate de triagem, envie direto ao executor porque a complexidade continua pequena.",
 			"expected_output": "Treats permissions as a hard trigger, routes to architect, and later requires stage:awaiting-execution-approval plus needs-human.",
 			"files": [],
 			"expectations": [
-				"Hard trigger overrides S effort",
+				"Hard trigger overrides XS effort",
 				"Routes to architect",
 				"Requires the risk-based execution gate"
 			],
@@ -111,7 +111,7 @@
 			"baseline_failure": "lets_effort_override_hard_trigger",
 			"failure_form": "prohibition",
 			"pressures": ["small_diff"],
-			"rationalizations": ["Complexity is S"]
+			"rationalizations": ["Complexity is XS"]
 		},
 		{
 			"id": 7,

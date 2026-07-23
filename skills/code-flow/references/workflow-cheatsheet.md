@@ -10,3 +10,11 @@
 8. Integrator distingue PR de NO_CHANGES e verifica rebase antes de fechar.
 9. Falha parcial não é sucesso; registre reparo/Resume.
 10. Stop limpa labels somente após handoff e preserva artefatos.
+
+## Saindo de `stage:blocked`
+
+Somente o gate `resume <stage>` sai de `stage:blocked`. O destino é o estado
+comprovado no comentário `Resume`, não uma escolha livre — `transition-issue.sh`
+valida contra o `next[]` do registry. Nunca infira estado de evidência
+ambígua; sem `Resume` legível, reconstrua por evidência e peça confirmação
+humana antes de mutar.

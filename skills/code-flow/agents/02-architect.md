@@ -23,8 +23,8 @@ digest somente depois da publicação completa.
 
 Após evidência, remova estado anterior e overlay:
 
-- M, not required, sem hard trigger → `stage:ready-for-execution`;
-- G+, hard trigger ou create/update →
+- S, not required, sem hard trigger → `stage:ready-for-execution`;
+- M+, hard trigger ou create/update →
   `stage:awaiting-execution-approval + needs-human`.
 
 Confirme labels. Blocker deixa `stage:blocked + needs-human` com retorno a

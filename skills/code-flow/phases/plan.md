@@ -15,8 +15,8 @@ marcador bloqueia. O gate registra URL e digest do bloco canônico.
 
 Depois da evidência final, remova `stage:needs-architect + stage:in-progress`:
 
-- M, `not required` e sem hard trigger → `stage:ready-for-execution`;
-- Complexity >= G, hard trigger ou spec `create/update` →
+- S, `not required` e sem hard trigger → `stage:ready-for-execution`;
+- Complexity >= M, hard trigger ou spec `create/update` →
   `stage:awaiting-execution-approval + needs-human`.
 
 O gate execution aplica:

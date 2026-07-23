@@ -16,8 +16,7 @@ produziu issue, relatório, código ou evidência revisada. Trocar nome/modelo n
 apaga autoria.
 
 Revise PR remota ou prova NO_CHANGES, DoD, casos de borda, spec, testes e
-evidências. Quando precisar de um pacote local determinístico, use
-[`../scripts/review-package.sh`](../scripts/review-package.sh). Publique
+evidências. Publique
 `templates/05-delivery-review-template.md`. Inclua os drafts
 individuais de cada Minor e a consolidação no mesmo comentário. Não existe
 auditoria adicional em nenhum nível de complexidade.
