@@ -16,29 +16,18 @@ memória do orquestrador e sempre redescobrir o guidance nearest-wins do projeto
 
 | Invocação                                                      | Resultado                                                    |
 | -------------------------------------------------------------- | ------------------------------------------------------------ |
-| `/code-flow`                                                   | Discovery read-only e próxima ação recomendada.              |
-| `/code-flow start <issue>`                                     | Ativa a issue em `code-flow:active + stage:needs-triage`.    |
-| `/code-flow role <papel> <issue>`                              | Executa um papel elegível isoladamente.                      |
-| `/code-flow role <papel> <issue> --resume <run-id>`            | Retoma a mesma atividade comprovada.                         |
-| `/code-flow gate <issue> triage <approve\|adjust\|block>`      | Aplica a decisão humana de triagem.                          |
-| `/code-flow gate <issue> execution <authorize\|adjust\|block>` | Aplica a decisão humana de execução.                         |
-| `/code-flow gate <issue> merge <integrate\|adjust\|wait>`      | Aplica a decisão humana de integração.                       |
-| `/code-flow gate <issue> resume <stage>`                       | Restaura o estado comprovado no `Resume` de um blocker.      |
-| `/code-flow gate <issue> activity reset`                       | Libera atividade abandonada, preservando o estado principal. |
-| `/code-flow issue create`                                      | Cria e tria uma issue pelo mesmo protocolo.                  |
-| `/code-flow stop <issue>`                                      | Solicita saída segura sem descartar trabalho.                |
+| `/code-flow`                                                   | Discovery read-only e próxima ação recomendada.                                        |
+| `/code-flow role <papel> <issue>`                              | Executa um papel elegível isoladamente; retoma atividade comprovada quando há overlay. |
+| `/code-flow gate <issue> <decisão-humana>`                    | Aplica decisão humana ao estado atual.                                                 |
+| `/code-flow stop <issue>`                                     | Solicita saída segura sem descartar trabalho.                                          |
 
 ### Secundárias
 
-| Invocação                                          | Resultado e fase                                               |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| `/code-flow batch create --project <owner/number>` | Cria Draft Issues para triagem interativa — `context.md`.      |
-| `/code-flow batch <alvos> --from <operação>`       | Processa trilhas isoladas a partir de um piso — `context.md`.  |
-| `/code-flow tool doctor [args]`                    | Executa apenas `scripts/doctor.sh`.                            |
-
-Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
-`integrator`. Não interprete menção casual como invocação. Política:
-[`agents/openai.yaml`](agents/openai.yaml).
+| Invocação                                          | Resultado e fase                                              |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| `/code-flow batch create --project <owner/number>` | Cria Draft Issues para triagem interativa — `context.md`.     |
+| `/code-flow batch <alvos> --from <operação>`       | Processa trilhas isoladas a partir de um piso — `context.md`. |
+| `/code-flow tool doctor [args]`                    | Executa apenas `scripts/doctor.sh`.                           |
 
 ## Contrato global
 
@@ -53,7 +42,7 @@ Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
 5. Proponha `Complexity: XS | S | M | L | XL`, recalcule risco e aplique
    [`references/runtime.md`](references/runtime.md). Hard trigger
    sempre vence esforço pequeno.
-6. Use worktree somente para implementação, correção ou integração. Com diff,
+6. Sempre use worktree para implementação, correção ou integração. Com diff,
    o executor termina somente com commit, push e PR publicado.
 7. Exija uma delivery review independente para qualquer complexidade. Nunca
    faça self-review; não existe auditoria adicional.
@@ -61,19 +50,21 @@ Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
    `integrate`. `NO_CHANGES` aprovado não exige gate de fechamento.
 
 Ao iniciar atividade, declare `run_id`, papel, estado principal, fontes, Base e
-Head quando aplicáveis e resultado esperado. Ao retomar, valide o mesmo papel,
-estado e `run_id`. Para sair, aplique a saída segura de `phases/context.md`.
+Head quando aplicáveis e resultado esperado. Ao encontrar overlay existente,
+retome a atividade comprovada pela última evidência publicada, validando o
+mesmo papel, estado e `run_id` antes de continuar; não inicie nova atividade
+sobre overlay alheio. Para sair, aplique a saída segura de `phases/context.md`.
 
 ## Router
 
-| Operação                                    | Carregar                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)                           |
-| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)                               |
-| Arquitetura/autorização                     | [`phases/plan.md`](phases/plan.md)                                 |
-| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)                         |
-| Review                                      | [`phases/review.md`](phases/review.md)                             |
-| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md)                       |
+| Operação                                    | Carregar                                     |
+| ------------------------------------------- | -------------------------------------------- |
+| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)     |
+| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)         |
+| Arquitetura/autorização                     | [`phases/architecture.md`](phases/architecture.md) |
+| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)   |
+| Review                                      | [`phases/review.md`](phases/review.md)       |
+| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md) |
 
 Antes de operar labels, leia
 [`references/runtime.md`](references/runtime.md) e
@@ -82,18 +73,18 @@ Antes de operar labels, leia
 canônica de estados, atores e transições.
 Use `scripts/transition-issue.sh` para mutações determinísticas e
 `scripts/source-set-digest.py` para o relatório canônico.
-Use [`templates/01-issue-template.md`](templates/01-issue-template.md) para issues e epics.
+Use [`templates/01-issue-template.md`](templates/01-issue-template.md) para issues e epics,
+[`templates/02-review-template.md`](templates/02-review-template.md) para arquitetura e delivery review,
+[`templates/03-implementation-evidence-template.md`](templates/03-implementation-evidence-template.md) para evidência de execução,
+[`templates/04-integration-report-template.md`](templates/04-integration-report-template.md) para integração e
+[`templates/06-note-template.md`](templates/06-note-template.md) para notas operacionais.
 A seção `## Entregas coordenadas` diferencia Epics de issues simples.
 
-## Papéis
-
-| Papel                                       | Limite                                                           |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| [`issue-writer`](agents/01-issue-writer.md) | Investiga, escreve a issue e classifica risco; não decide spec.  |
-| [`architect`](agents/02-architect.md)       | Decide spec/ADR e publica relatório; não implementa.             |
-| [`executor`](agents/03-executor.md)         | Implementa, corrige, valida e publica PR/NO_CHANGES.             |
-| [`reviewer`](agents/04-reviewer.md)         | Faz a única review independente; não corrige nem integra.        |
-| [`integrator`](agents/05-integrator.md)     | Revalida, rebasa quando necessário, integra ou fecha NO_CHANGES. |
-
-Esses são papéis, não modelos fixos. O modo interativo pode sequenciá-los, mas
-nenhum papel depende da memória, confirmação ou autoria de um orquestrador.
+Papéis, responsáveis por label e regras de independência estão em
+[`references/runtime.md`](references/runtime.md). Os agentes especializados são
+[`issue-writer`](agents/01-issue-writer.md),
+[`architect`](agents/02-architect.md),
+[`executor`](agents/03-executor.md),
+[`reviewer`](agents/04-reviewer.md) e
+[`integrator`](agents/05-integrator.md); a política de invocação está em
+[`agents/openai.yaml`](agents/openai.yaml).

@@ -42,7 +42,7 @@ test_structure() {
 }
 
 test_router_and_roles() {
-  for entry in '/code-flow start <issue>' '/code-flow role <papel> <issue>' '/code-flow gate <issue>' '/code-flow gate <issue> resume <stage>' '/code-flow stop <issue>'; do
+  for entry in '/code-flow role <papel> <issue>' '/code-flow gate <issue> <decisão-humana>' '/code-flow stop <issue>'; do
     assert_contains "$entry" "$SKILL/SKILL.md"
   done
   assert_contains 'code-flow:active' "$SKILL/SKILL.md"

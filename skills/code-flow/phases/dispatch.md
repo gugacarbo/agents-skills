@@ -3,7 +3,9 @@
 O `executor` consome `stage:ready-for-execution` ou `stage:needs-changes`.
 Crie/reuse sua própria worktree isolada, publique início com `run_id`, Base/Head,
 branch e resultado esperado e adicione `stage:in-progress` sem remover o estado
-principal. Se o overlay já existir, recuse salvo `--resume` válido.
+principal. Se o overlay já existir, retome a atividade comprovada pela última
+evidência publicada, validando o mesmo `run_id`, papel e estado antes de
+continuar; não inicie nova atividade sobre overlay alheio.
 
 Publique `templates/03-implementation-evidence-template.md` com a seção
 `## Planejamento` preenchida antes de executar. Em complexidade S, o

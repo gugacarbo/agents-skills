@@ -7,8 +7,8 @@ descobríveis.
 
 ## Ativação
 
-`/code-flow start <issue>` exige uma repository issue elegível, publica a
-evidência de ativação e adiciona `code-flow:active + stage:needs-triage`. Recuse
+Ativação implícita: ao interagir com uma repository issue elegível, publique a
+evidência de ativação e adicione `code-flow:active + stage:needs-triage`. Recuse
 ativação quando houver outro `stage:*`, labels legadas ou issue tracker/Epic.
 Labels legadas usam a migração segura de `references/runtime.md`.
 
@@ -31,15 +31,18 @@ digest/base obsoletos ou opção não permitida.
 
 ## Retomada
 
-Uma atividade iniciada contém `run_id`, papel e estado principal. A entrada
-`--resume <run-id>` exige correspondência exata com a última evidência de início
-ou `Resume`; não troca papel, estado ou escopo. Sem correspondência, use o gate
-humano `activity reset` antes de iniciar outra execução.
+Uma atividade iniciada contém `run_id`, papel e estado principal. Ao encontrar
+`stage:in-progress` existente, o mesmo papel deve retomar a atividade comprovada
+pela última evidência de início ou `Resume` publicada: valide correspondência
+exata de papel, estado principal e `run_id` antes de continuar; não troca papel,
+estado ou escopo. Sem correspondência, use o gate humano `activity reset` antes
+de iniciar outra execução.
 
 Blocker deixa `stage:blocked + needs-human`, sem overlay, e registra no `Resume`
 o estado principal a restaurar, papel, impedimento e evidência. A retomada
-recalcula risco e valida o destino antes de `/code-flow gate <issue> resume
-<stage>` remover `needs-human` quando o destino for de agente.
+recalcula risco e valida o destino antes do gate humano genérico
+`/code-flow gate <issue> <decisão-humana>` restaurar o estado registrado e
+remover `needs-human` quando o destino for de agente.
 
 ## Batch
 

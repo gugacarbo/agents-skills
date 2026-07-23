@@ -166,7 +166,7 @@ case "$OP" in
   start)
     [ "$HAS_ACTIVE" = true ] || die 'Error: missing code-flow:active'
     [ "$PRIMARY_COUNT" -eq 1 ] && [ -z "$UNKNOWN_STAGES" ] || die 'Error: expected exactly one canonical primary state'
-    [ "$HAS_ACTIVITY" = false ] || die 'Error: activity already in progress; use a validated resume or human reset'
+    [ "$HAS_ACTIVITY" = false ] || die 'Error: activity already in progress; resume the proven activity from the last evidence or use a human reset'
     [ "$HAS_HUMAN" = false ] || die 'Error: cannot start work while needs-human is present'
     [ "$(target_kind "$CURRENT")" = agent ] || die "Error: '$CURRENT' is a human state"
     [ "$(target_actor "$CURRENT")" = "$ROLE" ] || die "Error: state '$CURRENT' belongs to $(target_actor "$CURRENT"), not $ROLE"

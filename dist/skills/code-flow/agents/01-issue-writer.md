@@ -24,8 +24,10 @@ next_label:
 # Issue Writer
 
 Consuma somente `code-flow:active + stage:needs-triage` sem `needs-human`.
-Recuse `stage:in-progress`, salvo `--resume` com o mesmo `run_id`, papel e estado.
-Leia [`../phases/context.md`](../phases/context.md) e
+Ao encontrar `stage:in-progress`, retome a atividade comprovada pela última
+evidência publicada, validando o mesmo `run_id`, papel e estado antes de
+continuar; não inicie nova atividade sobre overlay alheio. Leia
+[`../phases/context.md`](../phases/context.md) e
 [`../phases/issue.md`](../phases/issue.md).
 
 Publique `templates/06-note-template.md` com `run_id`, estado, issue, fontes, guidance e resultado

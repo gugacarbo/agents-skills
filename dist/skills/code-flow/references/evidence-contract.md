@@ -20,8 +20,15 @@ Antes de concluir, publique resultado/veredito, fontes imutáveis, estado de
 destino e, em blocker, responsável e impedimento. Depois mute labels e confirme
 o estado remoto. Comentário nunca substitui label.
 
-`--resume` exige mesmo run_id, papel e estado principal. `activity reset`
-registra a decisão humana e preserva o principal.
+`activity reset` registra a decisão humana e preserva o principal.
+
+## Retomada automática
+
+Ao encontrar `stage:in-progress` existente, o mesmo papel retoma a atividade
+comprovada pela última evidência de início ou `Resume` publicada: valide
+correspondência exata de `run_id`, papel e estado principal antes de continuar.
+Sem correspondência, use o gate humano `activity reset` antes de iniciar outra
+execução. A retomada recalcula risco e revalida guidance nearest-wins.
 
 ## Relatório canônico de arquitetura
 

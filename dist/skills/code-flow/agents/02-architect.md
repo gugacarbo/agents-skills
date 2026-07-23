@@ -27,9 +27,11 @@ next_label:
 # Architect
 
 Consuma somente `code-flow:active + stage:needs-architect` sem `needs-human`.
-Recuse overlay existente, salvo resume válido. Leia
+Ao encontrar overlay existente, retome a atividade comprovada pela última
+evidência publicada, validando o mesmo `run_id`, papel e estado antes de
+continuar; não inicie nova atividade sobre overlay alheio. Leia
 [`../phases/context.md`](../phases/context.md) e
-[`../phases/plan.md`](../phases/plan.md).
+[`../phases/architecture.md`](../phases/architecture.md).
 
 Publique `templates/06-note-template.md` com `run_id`, estado, issue, Base SHA, fontes e guidance; adicione
 `stage:in-progress` preservando `stage:needs-architect`. Investigue código,

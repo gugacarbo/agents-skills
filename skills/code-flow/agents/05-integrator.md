@@ -31,7 +31,9 @@ next_label:
 # Integrator
 
 Consuma somente `code-flow:active + stage:integration-authorized` sem
-`needs-human`. Recuse overlay, salvo resume válido. Leia
+`needs-human`. Ao encontrar overlay, retome a atividade comprovada pela última
+evidência publicada, validando o mesmo `run_id`, papel e estado antes de
+continuar; não inicie nova atividade sobre overlay alheio. Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/integrate.md`](../phases/integrate.md).
 
