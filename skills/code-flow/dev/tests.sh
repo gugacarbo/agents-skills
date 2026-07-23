@@ -27,20 +27,18 @@ test_structure() {
   [ "$actual" = "$expected" ] || fail "unexpected agents: $actual"
 
   actual=$(find "$SKILL/templates" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
-  expected=$(printf '%s\n' 01-epic.md 02-issue-template.md \
-    03-review-template.md \
-    04-implementation-evidence-template.md 05-integration-report-template.md \
-    06-human-gate-spec.md 07-note-template.md)
+  expected=$(printf '%s\n' 01-issue-template.md \
+    02-review-template.md \
+    03-implementation-evidence-template.md 04-integration-report-template.md \
+    05-human-gate-spec.md 06-note-template.md)
   [ "$actual" = "$expected" ] || fail "unexpected templates: $actual"
 
-  [ -f "$SKILL/references/workflow-cheatsheet.md" ] || fail 'missing neutral workflow cheatsheet'
+  [ -f "$SKILL/references/runtime.md" ] || fail 'missing runtime reference'
   [ ! -e "$SKILL/references/orchestrator-cheatsheet.md" ] || fail 'orchestrator cheatsheet remains'
   [ ! -e "$SKILL/templates/10-native-workflow-mapping.md" ] || fail 'native mapping template remains'
   [ ! -e "$SKILL/references/label-mutation-matrix.md" ] || fail 'label mutation matrix remains (use workflow-states.json)'
   [ ! -e "$SKILL/prompts" ] || fail 'prompts/ dir remains (moved to references/)'
-  [ ! -e "$SKILL/templates/02-batch-pre-issue-draft.md" ] || fail '02-batch-pre-issue-draft.md remains (merged into 02-issue-template)'
-  [ -f "$SKILL/references/brainstorm.md" ] || fail 'missing references/brainstorm.md'
-  [ -f "$SKILL/references/visual-companion.md" ] || fail 'missing references/visual-companion.md'
+  [ ! -e "$SKILL/templates/02-batch-pre-issue-draft.md" ] || fail '02-batch-pre-issue-draft.md remains (merged into 01-issue-template)'
 }
 
 test_router_and_roles() {
@@ -82,18 +80,18 @@ test_router_and_roles() {
 
 test_templates() {
   local template
-  for template in 03-review-template.md 04-implementation-evidence-template.md \
-    05-integration-report-template.md 06-human-gate-spec.md \
-    07-note-template.md; do
+  for template in 02-review-template.md 03-implementation-evidence-template.md \
+    04-integration-report-template.md 05-human-gate-spec.md \
+    06-note-template.md; do
     assert_comment_contract "$SKILL/templates/$template"
   done
   assert_contains 'run_id' "$SKILL/references/evidence-contract.md"
-  assert_contains 'stage:in-progress' "$SKILL/templates/07-note-template.md"
-  assert_contains 'NO_CHANGES nunca é' "$SKILL/templates/03-review-template.md"
-  assert_contains 'Verificação de rebase' "$SKILL/templates/05-integration-report-template.md"
-  assert_contains 'activity reset' "$SKILL/templates/06-human-gate-spec.md"
-  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-review-template.md"
-  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/03-review-template.md"
+  assert_contains 'stage:in-progress' "$SKILL/templates/06-note-template.md"
+  assert_contains 'NO_CHANGES nunca é' "$SKILL/templates/02-review-template.md"
+  assert_contains 'Verificação de rebase' "$SKILL/templates/04-integration-report-template.md"
+  assert_contains 'activity reset' "$SKILL/templates/05-human-gate-spec.md"
+  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/02-review-template.md"
+  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/02-review-template.md"
 }
 
 test_registry() {
@@ -114,7 +112,7 @@ test_registry() {
   ' "$SKILL/references/workflow-states.json" > /dev/null || fail 'invalid workflow registry'
 
   registry=$(jq -r '.states[].label' "$SKILL/references/workflow-states.json" | sort)
-  documented=$(awk '/^\| Label/{f=1} f&&/^$/{exit} f{print}' "$SKILL/references/github-flow.md" | grep -oE 'stage:[a-z-]+' | sort -u)
+  documented=$(awk '/^\| Label/{f=1} f&&/^$/{exit} f{print}' "$SKILL/references/runtime.md" | grep -oE 'stage:[a-z-]+' | sort -u)
   [ "$registry" = "$documented" ] || fail 'registry and protocol table differ'
 }
 
@@ -288,7 +286,6 @@ test_syntax() {
   sh -n "$SKILL/scripts/doctor.sh"
   sh -n "$SKILL/scripts/transition-issue.sh"
   python3 -m py_compile "$SKILL/scripts/source-set-digest.py"
-  node --check "$SKILL/scripts/visual-companion/server.cjs"
 }
 
 test_structure

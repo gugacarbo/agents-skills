@@ -5,6 +5,6 @@
 	"description": "Development tooling for the code-flow skill.",
 	"scripts": {
 		"test": "bash dev/tests.sh",
-		"build": "bash -lc 'find scripts -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null; for file in scripts/*.sh scripts/visual-companion/*.sh; do bash -n \"$file\"; done; python3 -c \"import ast, pathlib; ast.parse(pathlib.Path(\\\"scripts/source-set-digest.py\\\").read_text(encoding=\\\"utf-8\\\"))\"; if command -v node >/dev/null 2>&1; then node --check scripts/visual-companion/server.cjs; fi'"
+		"build": "bash -lc 'find scripts -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null; for file in scripts/*.sh; do bash -n \"$file\"; done; python3 -c \"import ast, pathlib; ast.parse(pathlib.Path(\\\"scripts/source-set-digest.py\\\").read_text(encoding=\\\"utf-8\\\"))\"'"
 	}
 }

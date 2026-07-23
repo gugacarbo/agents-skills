@@ -18,7 +18,7 @@ assim, preserve o workflow Git, branch protection, forms e comandos do projeto.
 ## Gates determinísticos
 
 `/code-flow gate` não toma decisão: recebe uma resposta humana, valida o estado
-esperado, publica `templates/06-human-gate-spec.md`, aplica a transição da matriz
+esperado, publica `templates/05-human-gate-spec.md`, aplica a transição da matriz
 e confirma labels. Recuse gate com `stage:in-progress`, evidência ausente,
 digest/base obsoletos ou opção não permitida.
 
