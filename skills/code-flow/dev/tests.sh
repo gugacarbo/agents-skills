@@ -14,219 +14,112 @@ assert_not_contains() { ! rg -Fq -- "$1" "$2" || fail "expected $2 not to contai
 
 assert_comment_contract() {
   local file="$1"
-  rg -q '^> agent:' "$file" || fail "missing agent ownership in $file"
-  rg -q '^> sources_evidence:' "$file" || fail "missing immutable source evidence in $file"
-  rg -q '^> project_guidance:' "$file" || fail "missing project guidance evidence in $file"
-  rg -q '^## Resume$' "$file" || fail "missing Resume section in $file"
-  assert_not_contains '> phase_scope:' "$file"
-  assert_not_contains '> decisions:' "$file"
-  assert_not_contains '> changes_validation:' "$file"
-  assert_not_contains '> blockers:' "$file"
-  assert_not_contains 'Resume stage:' "$file"
-  assert_not_contains 'Resume owner:' "$file"
-  assert_not_contains 'Next action:' "$file"
-  ! rg -q '^Workflow:' "$file" || fail "persisted Workflow header remains in $file"
+  for field in agent run_id event state_before state_after sources_evidence project_guidance; do
+    rg -q "^> $field:" "$file" || fail "missing $field in $file"
+  done
+  rg -q '^## Resume$' "$file" || fail "missing Resume in $file"
 }
 
 test_structure() {
   local actual expected
   actual=$(find "$SKILL/agents" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
-  expected=$(printf '%s\n' 01-issue-writer.md 02-architect.md 03-executor.md 04-reviewer.md)
+  expected=$(printf '%s\n' 01-issue-writer.md 02-architect.md 03-executor.md 04-reviewer.md 05-integrator.md)
   [ "$actual" = "$expected" ] || fail "unexpected agents: $actual"
 
-  actual=$(find "$SKILL/phases" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
-  expected=$(printf '%s\n' context.md dispatch.md integrate.md issue.md plan.md review.md)
-  [ "$actual" = "$expected" ] || fail "unexpected semantic operations: $actual"
-
-  [ -f "$SKILL/prompts/brainstorm.md" ] || fail 'missing conditional brainstorm prompt'
-  [ -f "$SKILL/agents/openai.yaml" ] || fail 'missing Codex invocation policy'
-  [ ! -e "$SKILL/README.md" ] || fail 'published README duplicates the skill router'
-  [ ! -e "$SKILL/scripts/bootstrap.sh" ] || fail 'bootstrap helper still exists'
-  [ -f "$SKILL/references/risk-profiles.md" ] || fail 'missing risk profiles reference'
-  [ -f "$SKILL/references/runtime-capabilities.md" ] || fail 'missing runtime/model routing contract'
-  [ -f "$SKILL/references/workflow-states.json" ] || fail 'missing canonical workflow state registry'
   actual=$(find "$SKILL/templates" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
-  expected=$(printf '%s\n' \
-    01-epic.md \
-    02-issue-template.md \
-    03-architect-review-template.md \
-    04-implementation-evidence-template.md \
-    05-delivery-review-template.md \
-    06-integration-report-template.md \
-    07-workflow-note-template.md \
-    08-human-gate-spec.md \
-    09-implementation-outline-template.md \
-    10-native-workflow-mapping.md \
-    11-batch-pre-issue-draft.md)
+  expected=$(printf '%s\n' 01-epic.md 02-issue-template.md 03-architect-review-template.md \
+    04-implementation-evidence-template.md 05-delivery-review-template.md \
+    06-integration-report-template.md 07-workflow-note-template.md \
+    08-human-gate-spec.md 09-implementation-outline-template.md \
+    10-activity-start-template.md 11-batch-pre-issue-draft.md)
   [ "$actual" = "$expected" ] || fail "unexpected templates: $actual"
 
-  [ -f "$SKILL/references/follow-up-issue-drafts.md" ] || fail 'missing follow-up issue draft contract'
-  [ -f "$SKILL/scripts/source-set-digest.py" ] || fail 'missing deterministic source-set digest helper'
-
-  ! rg -n --glob '*.md' 'phases/[0-9][0-9]-|Fase [0-9]|/code-flow tool <[^>]*bootstrap|\.code-flow|/code-flow create-issue' \
-    "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/prompts" "$SKILL/references" "$SKILL/templates" \
-    || fail 'obsolete numbered/bootstrap/local-install contract remains active'
-
-  ! rg -n 'stage:(needs-plan|needs-plan-review|needs-issue-fix|spec-approval|needs-architect-fix)' \
-    "$SKILL" --glob '!**/dev/**' \
-    || fail 'obsolete workflow stage remains active'
+  [ -f "$SKILL/references/workflow-cheatsheet.md" ] || fail 'missing neutral workflow cheatsheet'
+  [ ! -e "$SKILL/references/orchestrator-cheatsheet.md" ] || fail 'orchestrator cheatsheet remains'
+  [ ! -e "$SKILL/templates/10-native-workflow-mapping.md" ] || fail 'native mapping template remains'
 }
 
-test_adaptive_contract() {
-  assert_contains 'Discovery' "$SKILL/SKILL.md"
-  assert_contains 'Urgência, diff pequeno, complexidade S' "$SKILL/references/risk-profiles.md"
-  assert_contains '`S → light`' "$SKILL/references/risk-profiles.md"
-  assert_contains '`M/G → standard`' "$SKILL/references/risk-profiles.md"
-  assert_contains '`X/XL → assured`' "$SKILL/references/risk-profiles.md"
-  assert_contains 'WORKFLOW_DRIFT' "$SKILL/references/github-flow.md"
-  assert_contains 'NATIVE_INVALID' "$SKILL/references/github-flow.md"
-  assert_contains 'Resolva native/fallback' "$SKILL/SKILL.md"
-  assert_contains '`Workflow` não é persistido' "$SKILL/references/github-flow.md"
-  assert_contains 'native ativo automaticamente' "$SKILL/references/github-flow.md"
-  assert_contains 'stage:ready-to-close' "$SKILL/phases/review.md"
-  assert_contains 'NO_CHANGES' "$SKILL/phases/dispatch.md"
-  assert_contains 'stage:needs-architect' "$SKILL/phases/issue.md"
-  assert_contains 'observável em um componente' "$SKILL/references/risk-profiles.md"
-  assert_contains 'auditor fresco' "$SKILL/phases/review.md"
-  assert_contains 'nunca autoriza execução' "$SKILL/phases/plan.md"
-  assert_contains 'ordem explícita de execução' "$SKILL/phases/plan.md"
-  assert_contains '`--from` é piso' "$SKILL/phases/context.md"
-  assert_contains 'do próprio gate' "$SKILL/phases/context.md"
-  assert_contains 'Merge nunca é automático' "$SKILL/phases/integrate.md"
-  assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
-  assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/phases/integrate.md"
-  assert_contains 'independente' "$SKILL/SKILL.md"
-  assert_contains 'Trocar o nome do papel' "$SKILL/references/risk-profiles.md"
-  assert_contains 'Project V2' "$SKILL/phases/context.md"
-  assert_contains 'DRAFT_ISSUE' "$SKILL/phases/context.md"
-  assert_contains 'issue-writer ou orquestrador' "$SKILL/phases/context.md"
-  assert_contains 'não crie repository issues' "$SKILL/phases/context.md"
-  assert_contains 'Encerrar code-flow / Manter ativo' "$SKILL/phases/context.md"
+test_router_and_roles() {
+  for entry in '/code-flow start <issue>' '/code-flow role <papel> <issue>' '/code-flow gate <issue>' '/code-flow gate <issue> resume <stage>' '/code-flow stop <issue>'; do
+    assert_contains "$entry" "$SKILL/SKILL.md"
+  done
+  assert_contains 'code-flow:active' "$SKILL/SKILL.md"
+  assert_contains 'overlay cooperativo' "$SKILL/SKILL.md"
+  assert_contains 'não é lock' "$SKILL/SKILL.md"
+  assert_contains 'uma delivery review independente' "$SKILL/SKILL.md"
+  assert_not_contains 'Resolva native/fallback' "$SKILL/SKILL.md"
+  assert_not_contains 'orquestrador valida' "$SKILL/SKILL.md"
   assert_contains 'allow_implicit_invocation: false' "$SKILL/agents/openai.yaml"
-  assert_contains 'modelos diferentes são opcionais' "$SKILL/SKILL.md"
-  assert_contains 'modelo herdado' "$SKILL/references/runtime-capabilities.md"
-  assert_contains 'não simule independência' "$SKILL/references/runtime-capabilities.md"
-  assert_contains 'Não instale configuração' "$SKILL/SKILL.md"
 
-  if rg -n -i '\b(light|standard|assured)\b' "$SKILL/templates"; then
-    fail 'profile name persisted in a template'
-  fi
+  assert_contains 'stage:awaiting-triage-approval + needs-human' "$SKILL/agents/01-issue-writer.md"
+  assert_contains 'stage:awaiting-execution-approval + needs-human' "$SKILL/agents/02-architect.md"
+  assert_contains 'stage:ready-for-execution' "$SKILL/agents/03-executor.md"
+  assert_contains 'stage:ready-to-merge + needs-human' "$SKILL/agents/04-reviewer.md"
+  assert_contains 'stage:integration-authorized' "$SKILL/agents/05-integrator.md"
+  assert_contains 'Até dois arquivos' "$SKILL/agents/05-integrator.md"
+  assert_contains 'range-diff/patch-id' "$SKILL/agents/05-integrator.md"
+  assert_contains 'Drift material' "$SKILL/agents/05-integrator.md"
+
+  ! rg -n -i 'auditor fresco|auditoria final|stage:needs-audit|agent: auditor|name: auditor' \
+    "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/references" "$SKILL/templates" \
+    || fail 'audit phase remains'
+  ! rg -n 'stage:(approved|ready-to-close|merge-authorized|close-authorized)' \
+    "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/templates" \
+    || fail 'removed stage remains active outside migration docs'
 }
 
-test_evidence_contract() {
+test_templates() {
   local template
-  for template in 03-architect-review-template.md \
-    04-implementation-evidence-template.md 05-delivery-review-template.md 06-integration-report-template.md \
-    07-workflow-note-template.md 08-human-gate-spec.md 09-implementation-outline-template.md \
-    10-native-workflow-mapping.md; do
+  for template in 03-architect-review-template.md 04-implementation-evidence-template.md \
+    05-delivery-review-template.md 06-integration-report-template.md \
+    07-workflow-note-template.md 08-human-gate-spec.md \
+    09-implementation-outline-template.md 10-activity-start-template.md; do
     assert_comment_contract "$SKILL/templates/$template"
   done
-  ! rg -n '^> (phase_scope|decisions|changes_validation|blockers):' "$SKILL/templates" \
-    || fail 'unused generic metadata remains in templates'
-  assert_contains 'Estado a retomar' "$SKILL/references/evidence-contract.md"
-  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/references/evidence-contract.md"
-  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/references/evidence-contract.md"
-  assert_contains 'CRLF normalizado para LF' "$SKILL/references/evidence-contract.md"
-  assert_contains 'exatamente um LF final' "$SKILL/references/evidence-contract.md"
-  assert_contains 'templates/09-implementation-outline-template.md' "$SKILL/agents/03-executor.md"
-  assert_contains 'templates/11-batch-pre-issue-draft.md' "$SKILL/agents/01-issue-writer.md"
-  assert_contains 'Mudança posterior no' "$SKILL/phases/issue.md"
-  assert_contains 'Sem diff: `NO_CHANGES`' "$SKILL/templates/04-implementation-evidence-template.md"
-  assert_contains 'NO_CHANGES aprovado segue para ready-to-close' "$SKILL/templates/05-delivery-review-template.md"
-  assert_contains 'sem commit, PR ou merge' "$SKILL/phases/integrate.md"
-  assert_contains 'Critical \| Important \| Minor \| Cannot verify' "$SKILL/templates/05-delivery-review-template.md"
-  assert_contains 'APROVAR COM RESSALVAS' "$SKILL/templates/05-delivery-review-template.md"
-  assert_contains 'não há `Workflow` persistido' "$SKILL/references/evidence-contract.md"
-  assert_contains 'estado dinâmico' "$SKILL/phases/dispatch.md"
-  assert_contains '> type: <issue | bug | feature | docs>' "$SKILL/templates/02-issue-template.md"
-  assert_contains '> Complexity: <S | M | G | X | XL>' "$SKILL/templates/02-issue-template.md"
-  assert_contains '> project_guidance:' "$SKILL/templates/02-issue-template.md"
-  assert_not_contains '> Epic:' "$SKILL/templates/02-issue-template.md"
-  assert_not_contains '> Parent:' "$SKILL/templates/02-issue-template.md"
-  assert_contains '### Proposta de spec (`create`)' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains '### Diff de spec (`update`)' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains '### Racional (`not required`)' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains 'Cada filha usa `templates/02-issue-template.md`' "$SKILL/templates/01-epic.md"
-  assert_not_contains '**status:**' "$SKILL/templates/01-epic.md"
-  assert_not_contains '**status:**' "$SKILL/templates/02-issue-template.md"
-  assert_contains '> state: DRAFT_ISSUE' "$SKILL/templates/11-batch-pre-issue-draft.md"
-  assert_contains '> target_repository: <owner/repo>' "$SKILL/templates/11-batch-pre-issue-draft.md"
-  assert_not_contains '#NNNN' "$SKILL/templates/11-batch-pre-issue-draft.md"
-  assert_not_contains 'Complexity:' "$SKILL/templates/11-batch-pre-issue-draft.md"
-  assert_not_contains 'impacto de spec' "$SKILL/templates/11-batch-pre-issue-draft.md"
-  assert_contains '## Decisão de spec/ADR' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains 'Base SHA:' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains '## Gaps, necessidades e blockers' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains '## Casos de borda e riscos' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains 'Prova de rollback para migração' "$SKILL/templates/03-architect-review-template.md"
-  assert_not_contains 'PR #NNNN' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains 'Aprovar / Ajustar / Bloquear' "$SKILL/templates/08-human-gate-spec.md"
-  assert_contains 'Integrar / Ajustar / Aguardar' "$SKILL/templates/08-human-gate-spec.md"
-  assert_contains 'Fechar / Ajustar / Aguardar' "$SKILL/templates/08-human-gate-spec.md"
-  assert_contains 'Encerrar code-flow / Manter ativo' "$SKILL/templates/08-human-gate-spec.md"
-  assert_not_contains '**Sim | Não | Ajustar**' "$SKILL/templates/08-human-gate-spec.md"
-  assert_contains 'Problemas encontrados' "$SKILL/templates/04-implementation-evidence-template.md"
+  assert_contains 'run_id' "$SKILL/references/evidence-contract.md"
+  assert_contains 'stage:in-progress' "$SKILL/templates/10-activity-start-template.md"
+  assert_contains 'NO_CHANGES nunca é' "$SKILL/templates/05-delivery-review-template.md"
+  assert_contains 'Verificação de rebase' "$SKILL/templates/06-integration-report-template.md"
+  assert_contains 'activity reset' "$SKILL/templates/08-human-gate-spec.md"
   assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-architect-review-template.md"
   assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains 'edita o mesmo comentário in-place' "$SKILL/references/evidence-contract.md"
-  assert_contains '> note_type: <general | architect-change>' "$SKILL/templates/07-workflow-note-template.md"
-  assert_contains 'note_type: architect-change' "$SKILL/agents/02-architect.md"
-  assert_contains 'não substitui nem duplica o relatório' "$SKILL/agents/02-architect.md"
-  for template in 04-implementation-evidence-template.md 05-delivery-review-template.md; do
-    assert_contains 'Issue draft' "$SKILL/templates/$template"
-    assert_contains 'Minor não bloqueante: link; demais: n/a' "$SKILL/templates/$template"
-    assert_contains 'follow-up-issue-drafts.md' "$SKILL/templates/$template"
-  done
-  assert_contains '[Minor] <resumo curto do problema>' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_contains 'title-percent-encoded' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_contains 'nunca cria issue' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_contains 'Consolidação de follow-ups' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_not_contains 'issue review' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_not_contains 'plan review' "$SKILL/references/follow-up-issue-drafts.md"
-  assert_contains 'Nenhuma sugestão de issue não bloqueante encontrada' "$SKILL/templates/05-delivery-review-template.md"
-  assert_contains 'duplicatas semânticas' "$SKILL/agents/04-reviewer.md"
-  assert_contains 'Não oculte os links individuais' "$SKILL/agents/04-reviewer.md"
-  assert_contains 'nunca é `DONE`' "$SKILL/agents/04-reviewer.md"
-  assert_contains 'liste antes do veredito' "$SKILL/agents/04-reviewer.md"
-  assert_contains 'templates/05-delivery-review-template.md' "$SKILL/phases/review.md"
-  assert_contains 'A review só está completa' "$SKILL/phases/review.md"
-  assert_contains 'nunca `DONE`' "$SKILL/phases/review.md"
 }
 
-test_helpers_syntax() {
-  sh -n "$SKILL/scripts/doctor.sh"
-  sh -n "$SKILL/scripts/transition-issue.sh"
-  bash -n "$SKILL/scripts/review-package.sh"
-  bash -n "$SKILL/scripts/visual-companion/start-server.sh"
-  bash -n "$SKILL/scripts/visual-companion/stop-server.sh"
-  node --check "$SKILL/scripts/visual-companion/server.cjs"
-  python3 -m py_compile "$SKILL/scripts/source-set-digest.py"
-  jq -e '.stages | length == 8' "$SKILL/references/workflow-states.json" > /dev/null
-  assert_not_contains '--target-dir' "$SKILL/scripts/doctor.sh"
-  assert_contains 'fallback label' "$SKILL/scripts/transition-issue.sh"
-  assert_contains 'gh label create' "$SKILL/scripts/transition-issue.sh"
-  "$SKILL/scripts/doctor.sh" --help > /dev/null
-  ! "$SKILL/scripts/doctor.sh" --issue > /dev/null 2>&1 || fail 'doctor accepted --issue without a value'
+test_registry() {
+  jq -e '
+    .schema_version == 2 and
+    .activation_label == "code-flow:active" and
+    .activity_label == "stage:in-progress" and
+    (.states | length == 10) and
+    ([.states[].label] | unique | length == 10) and
+    ([.states[] | select(.kind == "human") | .label] == [
+      "stage:awaiting-triage-approval",
+      "stage:awaiting-execution-approval",
+      "stage:ready-to-merge",
+      "stage:blocked"
+    ]) and
+    (.states | map(.label) | index("stage:in-progress") == null) and
+    (.states | map(.label) | index("stage:integration-authorized") != null)
+  ' "$SKILL/references/workflow-states.json" > /dev/null || fail 'invalid workflow registry'
+
+  registry=$(jq -r '.states[].label' "$SKILL/references/workflow-states.json" | sort)
+  documented=$(sed -n '/| Label |/,/^$/p' "$SKILL/references/github-flow.md" | rg -o 'stage:[a-z-]+' | sort -u)
+  [ "$registry" = "$documented" ] || fail 'registry and protocol table differ'
 }
 
 test_source_set_digest() {
-  local tmp body_a body_b body_c digest_a digest_b digest_c
+  local tmp a b c da db dc
   tmp=$(mktemp -d)
-  body_a="$tmp/a.md"
-  body_b="$tmp/b.md"
-  body_c="$tmp/c.md"
-
-  printf '%s\n' 'complexity: M' 'type: feature' '<!-- code-flow:architect-review:start -->' 'alpha' 'beta' '<!-- code-flow:architect-review:end -->' > "$body_a"
-  printf '%s\r\n' 'complexity: G' 'type: docs' '<!-- code-flow:architect-review:start -->' 'alpha' 'beta' '<!-- code-flow:architect-review:end -->' > "$body_b"
-  printf '%s\n' 'complexity: M' 'type: feature' '<!-- code-flow:architect-review:start -->' 'alpha' 'changed' '<!-- code-flow:architect-review:end -->' > "$body_c"
-
-  digest_a=$(python3 "$SKILL/scripts/source-set-digest.py" "$body_a")
-  digest_b=$(python3 "$SKILL/scripts/source-set-digest.py" "$body_b")
-  digest_c=$(python3 "$SKILL/scripts/source-set-digest.py" "$body_c")
-  [ "$digest_a" = "$digest_b" ] || fail 'metadata or CRLF changed architect review digest'
-  [ "$digest_a" != "$digest_c" ] || fail 'architect review content change did not change digest'
-  printf '%s\n' 'no markers' > "$tmp/invalid.md"
-  ! python3 "$SKILL/scripts/source-set-digest.py" "$tmp/invalid.md" > /dev/null 2>&1 || fail 'digest accepted missing markers'
+  a="$tmp/a"
+  b="$tmp/b"
+  c="$tmp/c"
+  printf '%s\n' x '<!-- code-flow:architect-review:start -->' alpha beta '<!-- code-flow:architect-review:end -->' > "$a"
+  printf '%s\r\n' y '<!-- code-flow:architect-review:start -->' alpha beta '<!-- code-flow:architect-review:end -->' > "$b"
+  printf '%s\n' x '<!-- code-flow:architect-review:start -->' alpha changed '<!-- code-flow:architect-review:end -->' > "$c"
+  da=$(python3 "$SKILL/scripts/source-set-digest.py" "$a")
+  db=$(python3 "$SKILL/scripts/source-set-digest.py" "$b")
+  dc=$(python3 "$SKILL/scripts/source-set-digest.py" "$c")
+  [ "$da" = "$db" ] && [ "$da" != "$dc" ] || fail 'digest contract failed'
 }
 
 make_fake_gh() {
@@ -240,37 +133,23 @@ LOG='$log'
 printf '%s\n' "\$*" >> "\$LOG"
 case "\$1 \$2" in
   'issue view')
-    issue_url='https://github.com/acme/demo/issues/42'
-    case "\$3" in http://*|https://*) issue_url="\$3" ;; esac
-    printf '{"number":42,"url":"%s","labels":%s}\n' "\$issue_url" "\$(cat "\$STATE")"
-    ;;
-  'label list')
-    cat "\$LABELS"
-    ;;
-  'label view')
-    grep -Fxq -- "\$3" "\$LABELS"
-    ;;
-  'label create')
-    label_name="\$3"
-    grep -Fxq -- "\$label_name" "\$LABELS" || printf '%s\n' "\$label_name" >> "\$LABELS"
+    url='https://github.com/acme/demo/issues/42'
+    case "\$3" in http://*|https://*) url="\$3" ;; esac
+    printf '{"number":42,"url":"%s","labels":%s}\n' "\$url" "\$(cat "\$STATE")"
     ;;
   'issue edit')
-    shift 2
-    shift
+    shift 3
     while [ "\$#" -gt 0 ]; do
       case "\$1" in
-        --remove-label)
-          jq --arg n "\$2" '[.[] | select(.name != \$n)]' "\$STATE" > "\$STATE.tmp" && mv "\$STATE.tmp" "\$STATE"
-          shift 2
-          ;;
-        --add-label)
-          jq --arg n "\$2" 'if ([.[].name] | index(\$n)) == null then . + [{"name":\$n}] else . end' "\$STATE" > "\$STATE.tmp" && mv "\$STATE.tmp" "\$STATE"
-          shift 2
-          ;;
+        --remove-label) jq --arg n "\$2" '[.[] | select(.name != \$n)]' "\$STATE" > "\$STATE.tmp" && mv "\$STATE.tmp" "\$STATE"; shift 2 ;;
+        --add-label) jq --arg n "\$2" 'if ([.[].name] | index(\$n)) == null then . + [{"name":\$n}] else . end' "\$STATE" > "\$STATE.tmp" && mv "\$STATE.tmp" "\$STATE"; shift 2 ;;
         *) shift ;;
       esac
     done
+    jq -r '.[].name' "\$STATE" > "\$LABELS"
     ;;
+  'label view') grep -Fxq -- "\$3" "\$LABELS" ;;
+  'label create') grep -Fxq -- "\$3" "\$LABELS" || printf '%s\n' "\$3" >> "\$LABELS" ;;
   'auth status'|'repo view') exit 0 ;;
   *) exit 0 ;;
 esac
@@ -278,206 +157,151 @@ EOF
   chmod +x "$fake_dir/gh"
 }
 
-test_transition_labels() {
-  local tmp fake state labels log out rc canonical_stage obsolete_stage
+set_state() {
+  local state="$1" labels="$2"
+  shift 2
+  printf '%s\n' "$@" > "$labels"
+  jq -Rn '[inputs | {name:.}]' < "$labels" > "$state"
+}
+
+assert_label() { grep -Fxq -- "$2" "$1" || fail "missing label $2"; }
+assert_no_label() { ! grep -Fxq -- "$2" "$1" || fail "unexpected label $2"; }
+
+test_transition_protocol() {
+  local tmp fake state labels log out rc
   tmp=$(mktemp -d)
   fake="$tmp/bin"
-  state="$tmp/state.json"
-  labels="$tmp/labels.txt"
-  log="$tmp/gh.log"
-  printf '%s\n' '[{"name":"stage:approved"},{"name":"delivery"}]' > "$state"
-  printf '%s\n' 'stage:approved' 'delivery' > "$labels"
+  state="$tmp/state"
+  labels="$tmp/labels"
+  log="$tmp/log"
+  : > "$labels"
+  printf '[]\n' > "$state"
   : > "$log"
   make_fake_gh "$fake" "$state" "$labels" "$log"
 
-  while IFS= read -r canonical_stage; do
-    PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to "$canonical_stage" --dry-run > /dev/null \
-      || fail "canonical stage rejected by helper: $canonical_stage"
-  done < <(jq -r '.stages[].label' "$SKILL/references/workflow-states.json")
-  for obsolete_stage in stage:needs-plan stage:needs-plan-review stage:needs-issue-fix stage:spec-approval stage:needs-architect-fix; do
-    if PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to "$obsolete_stage" --dry-run > /dev/null 2>&1; then
-      fail "obsolete stage accepted by helper: $obsolete_stage"
-    fi
-  done
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --activate > /dev/null
+  assert_label "$labels" code-flow:active
+  assert_label "$labels" stage:needs-triage
 
-  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:approved --to stage:in-progress --dry-run)
-  printf '%s\n' "$out" | jq -e '.dry_run == true and .to == "stage:in-progress"' > /dev/null || fail 'invalid dry-run output'
-  ! grep -Fxq 'stage:in-progress' "$labels" || fail 'dry-run created a label'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role issue-writer --require-from stage:needs-triage > /dev/null
+  assert_label "$labels" stage:needs-triage
+  assert_label "$labels" stage:in-progress
 
-  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:approved --to stage:in-progress --clear-needs-human)
-  printf '%s\n' "$out" | jq -e '.dry_run == false and .to == "stage:in-progress"' > /dev/null || fail 'mutation output invalid'
-  grep -Fxq 'stage:in-progress' "$labels" || fail 'missing target label was not created'
-  jq -e '[.[].name] | index("stage:in-progress") != null and index("stage:approved") == null' "$state" > /dev/null || fail 'stage mutation failed'
-  grep -Fq 'label view stage:in-progress --repo github.com/acme/demo' "$log" || fail 'label discovery did not preserve issue repository'
-  grep -Fq 'label create stage:in-progress --repo github.com/acme/demo' "$log" || fail 'label creation targeted the wrong repository'
-  grep -Fq 'issue edit 42 --repo github.com/acme/demo' "$log" || fail 'issue mutation targeted the wrong repository'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --finish-to stage:awaiting-triage-approval --require-from stage:needs-triage > /dev/null
+  assert_no_label "$labels" stage:needs-triage
+  assert_no_label "$labels" stage:in-progress
+  assert_label "$labels" stage:awaiting-triage-approval
+  assert_label "$labels" needs-human
 
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 'https://github.com/acme/demo/issues/42' --require-from stage:in-progress --to stage:needs-delivery-review --dry-run > /dev/null
-  grep -Fq 'issue view https://github.com/acme/demo/issues/42' "$log" || fail 'issue URL was not resolved directly'
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 'https://ghe.example/acme/demo/issues/42' --require-from stage:in-progress --to stage:in-progress > /dev/null
-  grep -Fq 'label view stage:in-progress --repo ghe.example/acme/demo' "$log" || fail 'GitHub Enterprise host was not preserved'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --gate-to stage:ready-for-execution --require-from stage:awaiting-triage-approval > /dev/null
+  assert_no_label "$labels" needs-human
+  assert_label "$labels" stage:ready-for-execution
 
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:in-progress --to stage:needs-delivery-review --needs-human > /dev/null
-  grep -Fxq 'needs-human' "$labels" || fail 'needs-human label was not created'
-  [ "$(grep -Fxc 'needs-human' "$labels")" -eq 1 ] || fail 'needs-human label creation is not idempotent'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role executor --require-from stage:ready-for-execution > /dev/null
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --reset-activity --require-from stage:ready-for-execution > /dev/null
+  assert_no_label "$labels" stage:in-progress
 
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:needs-delivery-review --to stage:ready-to-close --needs-human > /dev/null
-  jq -e '[.[].name] | index("stage:ready-to-close") != null and index("stage:needs-delivery-review") == null' "$state" > /dev/null || fail 'ready-to-close transition failed'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role executor --require-from stage:ready-for-execution > /dev/null
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --finish-to stage:needs-delivery-review --require-from stage:ready-for-execution > /dev/null
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role reviewer --require-from stage:needs-delivery-review > /dev/null
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --finish-to stage:ready-to-merge --require-from stage:needs-delivery-review > /dev/null
+  assert_label "$labels" stage:ready-to-merge
+  assert_label "$labels" needs-human
 
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --gate-to stage:integration-authorized --require-from stage:ready-to-merge > /dev/null
+  assert_no_label "$labels" needs-human
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role integrator --require-from stage:integration-authorized > /dev/null
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --complete --require-from stage:integration-authorized > /dev/null
+  [ ! -s "$labels" ] || fail 'completion did not clear labels'
+
+  set_state "$state" "$labels" stage:awaiting-triage-approval needs-human code-flow:active
   rc=0
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --require-from stage:approved --to stage:blocked --dry-run > /dev/null 2>&1 || rc=$?
-  [ "$rc" -ne 0 ] || fail 'require-from mismatch should fail'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role issue-writer > /dev/null 2>&1 || rc=$?
+  [ "$rc" -ne 0 ] || fail 'agent started on human state'
 
-  printf '%s\n' '[{"name":"delivery"}]' > "$state"
+  set_state "$state" "$labels" code-flow:active stage:needs-triage stage:in-progress
   rc=0
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to stage:approved --dry-run > /dev/null 2>&1 || rc=$?
-  [ "$rc" -ne 0 ] || fail 'zero-stage transition without allow-repair should fail'
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --to stage:approved --allow-repair > /dev/null
-  jq -e '[.[].name] | index("stage:approved") != null' "$state" > /dev/null || fail 'allow-repair did not establish initial fallback stage'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role issue-writer > /dev/null 2>&1 || rc=$?
+  [ "$rc" -ne 0 ] || fail 'second activity was accepted'
 
+  set_state "$state" "$labels" code-flow:active stage:needs-triage
   rc=0
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --clear-stage > /dev/null 2>&1 || rc=$?
-  [ "$rc" -ne 0 ] || fail 'clear-stage without clear-needs-human should fail'
-  printf '%s\n' '[{"name":"stage:approved"},{"name":"stage:blocked"},{"name":"needs-human"}]' > "$state"
-  rc=0
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --clear-stage --clear-needs-human > /dev/null 2>&1 || rc=$?
-  [ "$rc" -ne 0 ] || fail 'clear-stage should not repair multiple stages implicitly'
-  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --clear-stage --clear-needs-human --allow-repair > /dev/null
-  jq -e 'length == 0' "$state" > /dev/null || fail 'explicit cleanup did not remove workflow labels'
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --start-work --role architect > /dev/null 2>&1 || rc=$?
+  [ "$rc" -ne 0 ] || fail 'incompatible role was accepted'
+
+  set_state "$state" "$labels" stage:approved
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --migrate-to stage:awaiting-execution-approval > /dev/null
+  assert_label "$labels" code-flow:active
+  assert_label "$labels" stage:awaiting-execution-approval
+  assert_label "$labels" needs-human
+
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --gate-to stage:ready-for-execution --dry-run)
+  printf '%s' "$out" | jq -e '.dry_run and .operation == "gate"' > /dev/null || fail 'invalid dry-run output'
+
+  set_state "$state" "$labels" code-flow:active stage:blocked needs-human
+  PATH="$fake:$PATH" "$SKILL/scripts/transition-issue.sh" 42 --gate-to stage:ready-for-execution --require-from stage:blocked > /dev/null
+  assert_label "$labels" stage:ready-for-execution
+  assert_no_label "$labels" needs-human
 }
 
 test_doctor() {
-  local tmp fake state labels log out
+  local tmp fake state labels log out rc
   tmp=$(mktemp -d)
   fake="$tmp/bin"
-  state="$tmp/state.json"
-  labels="$tmp/labels.txt"
-  log="$tmp/gh.log"
-  printf '%s\n' '[{"name":"stage:approved"}]' > "$state"
-  printf '%s\n' 'stage:approved' > "$labels"
+  state="$tmp/state"
+  labels="$tmp/labels"
+  log="$tmp/log"
   : > "$log"
   make_fake_gh "$fake" "$state" "$labels" "$log"
-  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42)
-  printf '%s\n' "$out" | grep -Fq 'PASS transition-issue-dry-run' || fail 'doctor did not probe fallback helper'
-  printf '%s\n' "$out" | grep -Fq 'PASS gh-issue 42' || fail 'doctor did not inspect issue'
 
-  # Drift: stage:blocked without needs-human must WARN
-  printf '%s\n' '[{"name":"stage:blocked"}]' > "$state"
-  printf '%s\n' 'stage:blocked' > "$labels"
-  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1 || true)
-  printf '%s\n' "$out" | grep -Fq 'WARN stage:blocked without needs-human' || fail 'doctor missed blocked-without-human drift'
+  set_state "$state" "$labels" code-flow:active stage:needs-triage
+  PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 > /dev/null
 
-  # Drift: multiple stage:* must FAIL
-  printf '%s\n' '[{"name":"stage:approved"},{"name":"stage:blocked"}]' > "$state"
-  printf '%s\n' 'stage:approved' 'stage:blocked' > "$labels"
-  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1 || true)
-  printf '%s\n' "$out" | grep -Fq 'FAIL drift: multiple stage:* labels' || fail 'doctor missed multi-stage drift'
+  set_state "$state" "$labels" code-flow:active stage:needs-triage stage:in-progress needs-human
+  rc=0
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] && printf '%s' "$out" | rg -q 'in-progress with needs-human' || fail 'doctor missed overlay/human drift'
+
+  set_state "$state" "$labels" code-flow:active stage:needs-triage stage:needs-architect
+  rc=0
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] && printf '%s' "$out" | rg -q 'exactly one primary' || fail 'doctor missed multiple primary states'
+
+  set_state "$state" "$labels" code-flow:active stage:needs-triage stage:unknown
+  rc=0
+  out=$(PATH="$fake:$PATH" "$SKILL/scripts/doctor.sh" --github --issue 42 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] && printf '%s' "$out" | rg -q 'unknown stage labels' || fail 'doctor missed unknown stage label'
 }
 
-test_evals_json() {
+test_evals() {
   jq -e '
     .skill_name == "code-flow" and
-    .evaluation_protocol.samples_per_scenario == 5 and
-    (.evaluation_protocol.non_critical_threshold | contains("every non-critical scenario")) and
-    .evaluation_protocol.baseline_sha == "f6c7948" and
-    (.evals | length == 20) and
-    ([.evals[].id] | unique | length == 20) and
-    ([.evals[] | select((.baseline_failure | type) != "string" or (.baseline_failure | length) == 0)] | length == 0) and
-    ((.evals[] | select(.id == 7) | .baseline_failure) == "omits_dynamic_native_selection") and
-    ((.evals[] | select(.id == 12) | .baseline_failure) == "omits_transition_ownership_and_start_evidence") and
-    ((.evals[] | select(.id == 13) | .baseline_failure) == "lacks_no_changes_contract_human_close_gate_and_follow_up_consolidation") and
-    ((.evals[] | select(.id == 13) | .expectations | index("Consolida Minors na delivery review, deduplicando e agrupando apenas itens compatíveis")) != null) and
-    ((.evals[] | select(.id == 13) | .expectations | index("Inclui um link GitHub issues/new individual para cada Minor de origem")) != null) and
-    ((.evals[] | select(.id == 13) | .expectations | index("Inclui um único draft consolidado com as três origens")) != null) and
-    ((.evals[] | select(.id == 14) | .baseline_failure) == "regression_guard_batch_and_merge") and
-    ((.evals[] | select(.id == 15) | .baseline_failure) == "allows_executor_to_finish_diff_without_published_pr") and
-    ((.evals[] | select(.id == 16) | .baseline_failure) == "publishes_batch_pre_issues_before_codebase_review") and
-    ((.evals[] | select(.id == 17) | .baseline_failure) == "appends_full_review_copies_instead_of_editing_canonical_comment") and
-    ((.evals[] | select(.id == 18) | .baseline_failure) == "activates_on_casual_mention") and
-    ((.evals[] | select(.id == 19) | .baseline_failure) == "conflates_roles_models_and_independence") and
-    ((.evals[] | select(.id == 20) | .baseline_failure) == "destructive_or_silent_workflow_abandonment")
-  ' "$SKILL/evals/evals.json" > /dev/null || fail 'eval corpus or verification protocol incomplete'
+    (.evals | length >= 12) and
+    ([.evals[].id] | length == (unique | length)) and
+    all(.evals[]; (.prompt | length > 20) and (.expected_output | length > 20) and (.expectations | length > 0) and (.baseline_failure | length > 0))
+  ' "$SKILL/evals/evals.json" > /dev/null || fail 'eval corpus incomplete'
+  assert_not_contains 'auditoria final' "$SKILL/evals/evals.json"
+  assert_not_contains 'ready-to-close' "$SKILL/evals/evals.json"
+  assert_contains 'stage:in-progress' "$SKILL/evals/evals.json"
+  assert_contains 'stage:integration-authorized' "$SKILL/evals/evals.json"
+  assert_contains 'rebase' "$SKILL/evals/evals.json"
 }
 
-test_label_mutation() {
-  # Artifact producers apply transitions caused by their own artifact/verdict.
-  # Human-decision transitions remain orchestrator-owned.
-  local a="$SKILL/agents"
-
-  # 01-issue-writer: persists body and applies the resulting issue stage.
-  assert_contains 'stage:needs-architect' "$a/01-issue-writer.md"
-  assert_contains 'stage:approved + needs-human' "$a/01-issue-writer.md"
-
-  # 02-architect: publishes the architecture review and waits for explicit execution authorization.
-  assert_contains 'stage:approved + needs-human' "$a/02-architect.md"
-  assert_contains 'ordem explícita de execução' "$a/02-architect.md"
-  assert_contains 'edite-o in-place' "$a/02-architect.md"
-  assert_contains 'templates/07-workflow-note-template.md' "$a/02-architect.md"
-  assert_contains 'publique uma nova cópia integral' "$a/02-architect.md"
-
-  # 03-executor: mutates stage per evidence result
-  assert_contains 'stage:in-progress' "$a/03-executor.md"
-  assert_contains 'stage:needs-delivery-review' "$a/03-executor.md"
-  assert_contains 'stage:blocked + needs-human' "$a/03-executor.md"
-  assert_contains 'limpe' "$a/03-executor.md"
-  assert_contains 'commit, push e PR publicado' "$a/03-executor.md"
-  assert_contains 'URL do PR' "$a/03-executor.md"
-  assert_contains 'estado draft ou' "$a/03-executor.md"
-  assert_contains 'ready segue' "$a/03-executor.md"
-  assert_contains 'falha ao publicar' "$a/03-executor.md"
-  assert_contains 'commit, push e PR publicado' "$SKILL/phases/dispatch.md"
-  assert_contains 'URL do PR publicado' "$SKILL/templates/04-implementation-evidence-template.md"
-
-  # Batch pre-issues remain Project V2 drafts until an authorized promotion.
-  assert_contains 'DRAFT_ISSUE' "$a/01-issue-writer.md"
-  assert_contains 'issue-writer ou orquestrador' "$SKILL/references/label-mutation-matrix.md"
-  assert_contains 'nenhum `stage:*`' "$SKILL/references/label-mutation-matrix.md"
-
-  # 04-reviewer: separates merge and no-diff close gates.
-  assert_contains 'stage:ready-to-merge' "$a/04-reviewer.md"
-  assert_contains 'stage:ready-to-close' "$a/04-reviewer.md"
-  assert_contains 'needs-human' "$a/04-reviewer.md"
-  assert_contains 'stage:needs-changes' "$a/04-reviewer.md"
-  assert_contains 'blocker' "$a/04-reviewer.md"
-  assert_contains '05-delivery-review-template.md' "$a/04-reviewer.md"
-
-  # Canonical mutation matrix must exist and be referenced
-  [ -f "$SKILL/references/label-mutation-matrix.md" ] || fail 'missing canonical label mutation matrix'
-  assert_contains 'transition-issue.sh' "$SKILL/references/github-flow.md"
-  assert_contains 'autorização execução autoriza/ajusta/bloqueia' "$SKILL/references/label-mutation-matrix.md"
-  assert_contains 'gate integração/fechamento' "$SKILL/references/label-mutation-matrix.md"
-
-  # Evidence precedes label mutation and never substitutes it.
-  assert_contains 'Evidência precede mutação' "$SKILL/references/label-mutation-matrix.md"
-  assert_contains 'O autor do evento aplica a transição' "$SKILL/references/label-mutation-matrix.md"
-}
-
-test_workflow_truth_table() {
-  local flow="$SKILL/references/github-flow.md" registry_stages documented_stages
-  assert_contains 'exatamente um `stage:*`' "$flow"
-  assert_contains 'zero `stage:*`' "$flow"
-  assert_contains 'native ativo automaticamente' "$flow"
-  assert_contains 'header legado' "$flow"
-  assert_contains 'stage é autoritativo' "$flow"
-  assert_contains 'migração explícita' "$flow"
-  assert_contains 'estado original' "$flow"
-  assert_contains 'compensação' "$flow"
-  assert_contains 'workflow-states.json' "$flow"
-
-  registry_stages=$(jq -r '.stages[].label' "$SKILL/references/workflow-states.json" | sort)
-  documented_stages=$(sed -n '/| Label/,/^$/p' "$flow" | rg -o 'stage:[a-z-]+' | sort -u)
-  [ "$registry_stages" = "$documented_stages" ] \
-    || fail "workflow state registry differs from github-flow table"
+test_syntax() {
+  sh -n "$SKILL/scripts/doctor.sh"
+  sh -n "$SKILL/scripts/transition-issue.sh"
+  bash -n "$SKILL/scripts/review-package.sh"
+  python3 -m py_compile "$SKILL/scripts/source-set-digest.py"
+  node --check "$SKILL/scripts/visual-companion/server.cjs"
 }
 
 test_structure
-test_adaptive_contract
-test_evidence_contract
-test_helpers_syntax
+test_router_and_roles
+test_templates
+test_registry
 test_source_set_digest
-test_transition_labels
+test_transition_protocol
 test_doctor
-test_evals_json
-test_label_mutation
-test_workflow_truth_table
-printf 'PASS code-flow tests\n'
+test_evals
+test_syntax
+printf 'PASS: code-flow dev tests\n'

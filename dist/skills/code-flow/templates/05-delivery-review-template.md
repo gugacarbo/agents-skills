@@ -1,75 +1,48 @@
 > agent: reviewer
-> sources_evidence: <issue, executor, PR publicada/prova e fontes>
+> run_id: <uuid distinto dos autores>
+> event: delivery-review-result
+> state_before: stage:needs-delivery-review + stage:in-progress
+> state_after: <stage:ready-to-merge + needs-human | stage:integration-authorized | stage:needs-changes | stage:blocked + needs-human>
+> sources_evidence: <issue, arquitetura/outline, executor e PR/NO_CHANGES>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
-<resumo humano da revisão: escopo, conclusão, ressalvas e próxima decisão>
+<veredito, escopo, ressalvas e próximo responsável>
 
-## Resumo da revisão
-
-<o que foi revisado, o veredito e a decisão humana esperada>
-
-| Relatório/outline | Evidência | PR                         |
-| ----------------- | --------- | -------------------------- |
-| `<URL>`           | `<URL>`   | `<base..head, URL ou n/a>` |
-
-**Independência:** não produzi relatório de arquitetura, código nem evidência revisada.
+**Independência:** não produzi issue, arquitetura, código ou evidência revisada.
 
 **Veredito:** `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
 ## Cobertura dos critérios
 
-| Critério     | Evidência revisada | Resultado                       | Observação |
-| ------------ | ------------------ | ------------------------------- | ---------- |
-| `<critério>` | `<prova>`          | `PASS \| FAIL \| Cannot verify` | `<nota>`   |
+| Critério | Evidência revisada | Resultado | Observação |
+| --- | --- | --- | --- |
+| `<critério>` | `<prova>` | `PASS | FAIL | Cannot verify` | `<nota>` |
 
 ## Reconciliação de escopo
 
-| Autorizado | Entregue | Divergência/justificativa |
-| ---------- | -------- | ------------------------- |
-| `<item>`   | `<item>` | `<none ou motivo>`        |
+| Autorizado | Entregue | Divergência |
+| --- | --- | --- |
+| `<item>` | `<item>` | `<none ou justificativa>` |
 
 ## Achados
 
-| Severidade                                        | Local/prova                | Impacto     | Ação     | Issue draft                                 |
-| ------------------------------------------------- | -------------------------- | ----------- | -------- | ------------------------------------------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<file:line ou evidência>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
+| Severidade | Local/prova | Impacto | Ação | Issue draft |
+| --- | --- | --- | --- | --- |
+| `Critical | Important | Minor | Cannot verify` | `<file:line/prova>` | `<impacto>` | `<ação>` | `<Minor não bloqueante: link; demais: n/a>` |
 
-## Com diff
+## NO_CHANGES
 
-<range, testes e DoD revisados ou not applicable>
-
-## Sem diff: `NO_CHANGES`
-
-<escopo consultado, prova de ausência e confirmação de nenhum commit/PR vazio>
-
-## Decisão e transição proposta
-
-| Estado atual | Próximo gate                                | Efeito após decisão humana |
-| ------------ | ------------------------------------------- | -------------------------- |
-| `<stage>`    | `<merge \| close \| auditoria \| correção>` | `<transição>`              |
+<prova revisada de ausência de diff e confirmação de nenhum commit/PR vazio>
 
 ## Consolidação de follow-ups
 
-### Cobertura da coleta
+| Grupo | Sugestões/origens | Justificativa | Issue draft |
+| --- | --- | --- | --- |
+| `<grupo>` | `<itens e links>` | `<deduplicação/compatibilidade>` | `<URL>` |
 
-| Fonte                   | Evidência               | Minors coletados | Resultado               |
-| ----------------------- | ----------------------- | ---------------- | ----------------------- |
-| `<executor>`            | `<URL ou n/a>`          | `<n>`            | `PASS \| Cannot verify` |
-| `achados desta revisão` | `<seção Achados acima>` | `<n>`            | `PASS`                  |
+Sem itens, publique: `Nenhuma sugestão de issue não bloqueante encontrada`.
 
-### Lista final de issues sugeridas
-
-| Grupo                          | Sugestões e origens             | Justificativa                                                  | Issue draft                                                                                                             |
-| ------------------------------ | ------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `<grupo ou item independente>` | `<resumos e links das origens>` | `<duplicata removida, agrupamento compatível ou independente>` | `[Abrir issue](https://github.com/<owner>/<repo>/issues/new?title=<title-percent-encoded>&body=<body-percent-encoded>)` |
-
-Sem itens, publique literalmente: `Nenhuma sugestão de issue não bloqueante encontrada`.
-
-_NO_CHANGES aprovado segue para ready-to-close; diff aprovado segue para
-ready-to-merge. Para cada Minor, use
-[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
-Use `n/a — repositório GitHub não verificável` sem inventar URL. A consolidação
-não cria issue automaticamente nem muda o veredito. NO_CHANGES nunca é DONE e
-não pula review, consolidação nem gate humano._
+_Para cada Minor, use `references/follow-up-issue-drafts.md`. NO_CHANGES nunca é
+DONE e, aprovado, segue sem gate humano para `stage:integration-authorized`._

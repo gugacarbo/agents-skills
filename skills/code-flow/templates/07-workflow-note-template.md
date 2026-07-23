@@ -1,15 +1,14 @@
-> agent: <papel que publica a nota>
-> sources_evidence: <links, comandos ou fontes>
+> agent: <papel>
+> run_id: <uuid ou n/a para gate>
+> event: <architect-change | gate-decision | activity-reset | migration | stop | failure>
+> state_before: <labels>
+> state_after: <labels>
+> sources_evidence: <links/comandos/fontes>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
-> note_type: <general | architect-change>
 
 ## Resume
 
-<resumo humano do evento isolado e sua consequência>
-
-## Contexto
-
-<correção de source-set, promoção de risco/drift, migração, blocker ou falha transitória>
+<evento, consequência e próximo responsável>
 
 ## Evidência e impacto
 
@@ -17,18 +16,8 @@
 | -------- | -------------- | ----------- | ------------- |
 | `<fato>` | `<link/saída>` | `<impacto>` | `<ação>`      |
 
-## Alterações no relatório de arquitetura — somente para `architect-change`
+## Alterações do architect
 
-- <mudança essencial>
-- <mudança essencial, se houver>
-- <mudança essencial, se houver>
+<resumo breve apontando ao comentário canônico ou not applicable>
 
-### Motivo e impacto
-
-<por que o relatório canônico mudou e o efeito em escopo, risco, decisão de
-spec ou blockers, de forma breve>
-
-_Esta nota é append-only e não substitui issue, relatório de arquitetura,
-review, gate humano, evidência de implementação ou resultado de integração.
-Em `architect-change`, `sources_evidence` aponta para o comentário canônico e a
-Base SHA; o relatório completo permanece no comentário editado in-place._
+_Nota append-only; não substitui issue, relatório, review ou evidência final._

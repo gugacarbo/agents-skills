@@ -1,53 +1,66 @@
-# Contexto, discovery e retomada
+# Contexto, ativação, gates e retomada
 
-Discovery sem issue é read-only. Resolva primeiro as instruções aplicáveis do
-repositório e do diretório em escopo, respeitando nearest-wins; depois leia
-forms, ADR/spec, código/testes, labels, comentários, PRs e entregas. Registre em
-`project_guidance` os paths consultados, os comandos de validação e `none found`
-somente após busca explícita. Não pergunte fatos descobríveis.
+Discovery sem issue ativa é read-only. Resolva instruções nearest-wins, forms,
+ADR/spec, código/testes, labels, comentários, PRs e workflow Git. Registre em
+`project_guidance` os paths e comandos consultados; não pergunte fatos
+descobríveis.
 
-Antes de operar issue, confirme entrega/bug, proponha Complexity, recalcule
-risco e aplique a tabela de `references/github-flow.md`: um stage é fallback;
-zero stage reavalia native; múltiplos stages bloqueiam por drift.
+## Ativação
 
-Issue nova com mapeamento native incompleto inicializa fallback equivalente.
-Header legado `Workflow: native` que agora falha pausa e abre gate humano de
-migração; headers legados nunca controlam o fluxo e só somem numa edição
-legítima do body. Blocker resolvido lê `## Resume`, recalcula risco e valida o
-destino antes de transicionar.
+`/code-flow start <issue>` exige uma repository issue elegível, publica a
+evidência de ativação e adiciona `code-flow:active + stage:needs-triage`. Recuse
+ativação quando houver outro `stage:*`, labels legadas ou issue tracker/Epic.
+Labels legadas usam a migração segura de `references/github-flow.md`.
+
+Enquanto `code-flow:active` existir, o protocolo da skill é autoritativo. Ainda
+assim, preserve o workflow Git, branch protection, forms e comandos do projeto.
+
+## Gates determinísticos
+
+`/code-flow gate` não toma decisão: recebe uma resposta humana, valida o estado
+esperado, publica `templates/08-human-gate-spec.md`, aplica a transição da matriz
+e confirma labels. Recuse gate com `stage:in-progress`, evidência ausente,
+digest/base obsoletos ou opção não permitida.
+
+- triage: `approve | adjust | block`;
+- execution: `authorize | adjust | block`;
+- merge: `integrate | adjust | wait`;
+- resume: restaura somente o estado registrado no `Resume` publicado;
+- activity: `reset` preserva o estado principal, remove somente
+  `stage:in-progress` e registra por que a execução anterior foi abandonada.
+
+## Retomada
+
+Uma atividade iniciada contém `run_id`, papel e estado principal. A entrada
+`--resume <run-id>` exige correspondência exata com a última evidência de início
+ou `Resume`; não troca papel, estado ou escopo. Sem correspondência, use o gate
+humano `activity reset` antes de iniciar outra execução.
+
+Blocker deixa `stage:blocked + needs-human`, sem overlay, e registra no `Resume`
+o estado principal a restaurar, papel, impedimento e evidência. A retomada
+recalcula risco e valida o destino antes de `/code-flow gate <issue> resume
+<stage>` remover `needs-human` quando o destino for de agente.
 
 ## Batch
 
-Ao criar um batch para investigação posterior, descubra o Project V2 gravável
-e o repositório alvo de cada item. Use
-`templates/11-batch-pre-issue-draft.md` e crie cada pré-issue como um item cujo
-tipo observado seja `DRAFT_ISSUE`. Verifique o tipo após a mutação. Enquanto
-for draft, não aplique labels, `stage:*`, número de repository issue ou workflow
-de entrega.
+Crie pré-issues como Project V2 `DRAFT_ISSUE` com
+`templates/11-batch-pre-issue-draft.md`. Draft não recebe labels. O issue-writer
+investiga e completa o body antes da conversão. Depois de confirmar URL, número,
+repositório e tipo `ISSUE`, não repita a triagem: publique a promoção e adicione
+`code-flow:active + stage:awaiting-triage-approval + needs-human`.
 
-Se o Project V2 estiver ausente, ambíguo ou sem acesso de escrita, pare e peça
-o alvo correto; não crie repository issues abertas como fallback e não simule
-draft com título, label ou comentário. O `issue-writer` investiga a codebase e
-completa o body ainda no draft. A promoção pertence a issue-writer ou orquestrador.
-Depois da evidência, um deles pode converter o item; confirme URL, número,
-repositório e tipo `ISSUE` antes de iniciar o fluxo normal de `phases/issue.md`.
-
-`--from` é piso: issue anterior é inelegível; issue no piso ou adiante continua
-do próprio gate sem pular ou retroceder. Estado, worktree, falha e gate ficam
-isolados por issue.
+Se o Project V2 estiver ausente, ambíguo ou sem escrita, pare; não simule draft
+com repository issue, título ou label. `--from` é piso e cada issue mantém
+estado, worktree, falha e gate isolados.
 
 ## Saída segura
 
-`/code-flow stop <issue>` nunca significa abandonar silenciosamente o estado.
-Faça discovery, mostre issue/PR/worktree, estado atual e trabalho não integrado,
-e apresente `Encerrar code-flow / Manter ativo`.
+`/code-flow stop <issue>` mostra issue, PR, worktree, estado, overlay e trabalho
+não integrado e apresenta `Encerrar code-flow / Manter ativo`.
 
-- Antes de qualquer mutação da skill, `Encerrar code-flow` apenas encerra a
-  sessão read-only.
-- Em fallback, após confirmação, publique uma nota de handoff, remova somente
-  `stage:*` e `needs-human` e confirme o estado. Não feche issue/PR, não apague
-  branch/worktree e não reverta código sem autorização separada.
-- Em native, publique o handoff e pare de orquestrar; não altere estados nativos
-  apenas para marcar a saída da skill.
-- `Manter ativo` preserva tudo. Falha de cleanup mantém o estado anterior e
-  registra retomada; não declare encerramento parcial como sucesso.
+- Com atividade, exija handoff antes de limpar labels.
+- Encerrar publica a nota e remove somente `code-flow:active`, estado principal,
+  `stage:in-progress` e `needs-human`.
+- Não feche issue/PR, apague branch/worktree ou reverta código.
+- Manter ativo preserva tudo. Falha parcial preserva o estado observável e
+  registra como reparar; não declare encerramento incompleto como sucesso.

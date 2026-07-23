@@ -1,63 +1,49 @@
 > agent: executor
-> sources_evidence: <relatório de arquitetura/outline, digest, commits, PR e comandos>
+> run_id: <uuid>
+> event: implementation-result
+> state_before: <stage:ready-for-execution | stage:needs-changes> + stage:in-progress
+> state_after: <stage:needs-delivery-review | stage:blocked + needs-human>
+> sources_evidence: <outline/relatório, digest, commits, PR e comandos>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
-<DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED — resumo humano e conclusão esperada do reviewer>
-
-## Resultado para decisão
-
-<o que mudou, resultado, ressalvas e conclusão que o reviewer deve avaliar>
+<DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED — resumo e próximo papel>
 
 ## Rastreabilidade imutável
 
-| Base SHA | Head SHA | Range/PR              | Ambiente     |
-| -------- | -------- | --------------------- | ------------ |
-| `<sha>`  | `<sha>`  | `<base..head ou URL>` | `<ambiente>` |
+| Base SHA | Head SHA | Range/PR | Branch/worktree |
+| --- | --- | --- | --- |
+| `<sha>` | `<sha>` | `<URL ou n/a>` | `<valor>` |
 
-## Critérios de aprovação e evidências
+## Critérios e evidências
 
-| Critério     | Evidência         | Resultado             |
-| ------------ | ----------------- | --------------------- |
-| `<critério>` | `<comando/prova>` | `PASS \| FAIL \| n/a` |
+| Critério | Evidência | Resultado |
+| --- | --- | --- |
+| `<critério>` | `<comando/prova>` | `PASS | FAIL | n/a` |
 
 ## Reconciliação de escopo
 
-| Planejado | Implementado | Não feito / motivo |
-| --------- | ------------ | ------------------ |
-| `<item>`  | `<item>`     | `<none ou motivo>` |
+| Planejado | Implementado | Não feito/motivo |
+| --- | --- | --- |
+| `<item>` | `<item>` | `<none ou motivo>` |
 
-## Com diff: `DONE` ou `DONE_WITH_CONCERNS`
+## Com diff
 
-PR publicado: `<URL do PR publicado>` · estado:
-`<draft ou ready conforme workflow do repo>`
+PR publicado: `<URL>` · estado: `<draft ou ready>`
 
-| Arquivo  | Mudança       | Validação |
-| -------- | ------------- | --------- |
+| Arquivo | Mudança | Validação |
+| --- | --- | --- |
 | `<path>` | `<descrição>` | `<prova>` |
 
 ## Sem diff: `NO_CHANGES`
 
-<consulta objetiva que demonstra escopo já satisfeito; confirme ausência de commit e PR vazio.>
-
-## Blocked
-
-<impedimento, decisão/acesso necessário e evidência disponível ou not applicable>
-
-## Rollback de migração
-
-| Gatilho      | Prova executada   | Estado restaurado |
-| ------------ | ----------------- | ----------------- |
-| `<condição>` | `<comando/saída>` | `<estado>`        |
+<prova objetiva; confirme ausência de commit e PR vazio>
 
 ## Problemas encontrados
 
-| Nível                                             | Problema     | Solução aplicada | Riscos pendentes | Issue draft                                 |
-| ------------------------------------------------- | ------------ | ---------------- | ---------------- | ------------------------------------------- |
-| `Critical \| Important \| Minor \| Cannot verify` | `<problema>` | `<solução>`      | `<risco>`        | `<Minor não bloqueante: link; demais: n/a>` |
+| Nível | Problema | Solução aplicada | Risco pendente | Issue draft |
+| --- | --- | --- | --- | --- |
+| `Critical | Important | Minor | Cannot verify` | `<problema>` | `<ação>` | `<risco>` | `<Minor não bloqueante: link; demais: n/a>` |
 
-_Para cada Minor, use
-[`references/follow-up-issue-drafts.md`](../references/follow-up-issue-drafts.md).
-O link abre um formulário pré-preenchido; não cria issue automaticamente.
-NO_CHANGES não cria commit/PR vazio e ainda exige review independente._
+_Para Minor, use `references/follow-up-issue-drafts.md`._

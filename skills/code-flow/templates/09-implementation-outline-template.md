@@ -1,34 +1,24 @@
 > agent: executor
-> sources_evidence: <issue, digest, base SHA, código e testes>
+> run_id: <uuid>
+> event: implementation-outline
+> state_before: stage:ready-for-execution + stage:in-progress
+> state_after: stage:ready-for-execution + stage:in-progress
+> sources_evidence: <issue, Base SHA, código e testes>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
-<resumo claro da mudança, motivo, resultado esperado e fora de escopo>
+<objetivo, mudanças, validação e condições de parada>
 
-## Resumo para execução
+## Contorno
 
-<mudança autorizada, motivo, resultado esperado e fora de escopo>
+| Escopo   | Arquivos/áreas | Validação    |
+| -------- | -------------- | ------------ |
+| `<item>` | `<paths>`      | `<comandos>` |
 
-## Prontidão para execução
+| Worktree/branch | Base SHA | Rollback |
+| --------------- | -------- | -------- |
+| `<valor>`       | `<sha>`  | `<ação>` |
 
-| Ordem explícita | Worktree/branch    | Base SHA |
-| --------------- | ------------------ | -------- |
-| `<evidência>`   | `<caminho/branch>` | `<sha>`  |
-
-## Áreas, mudanças e validação
-
-| Área/arquivo | Mudança   | Validação esperada |
-| ------------ | --------- | ------------------ |
-| `<área>`     | `<passo>` | `<prova>`          |
-
-## Rollback
-
-| Condição de disparo | Ação concreta de reversão |
-| ------------------- | ------------------------- |
-| `<condição>`        | `<ação>`                  |
-
-## Condições para parar e promover
-
-<contrato público, risco novo, comportamento inesperado ou drift material
-interrompem S e retornam ao primeiro gate aplicável.>
+Pare para nova arquitetura diante de contrato público, hard trigger, decisão
+material ou drift não coberto.

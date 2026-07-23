@@ -1,22 +1,22 @@
-# Relatório de arquitetura da issue `<#n>` — ciclo `<k>/3`
+# Relatório de arquitetura da issue `<#n>` — ciclo `<k>`
 
 > agent: architect
-> sources_evidence: <issue, padrão local, fontes aceitas, código/testes, base SHA>
+> run_id: <uuid>
+> event: architecture-result
+> state_before: stage:needs-architect + stage:in-progress
+> state_after: <stage:ready-for-execution | stage:awaiting-execution-approval + needs-human | stage:blocked + needs-human>
+> sources_evidence: <issue, guidance, código/testes e Base SHA>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 <!-- code-flow:architect-review:start -->
 
 ## Resume
 
-<resultado esperado, decisão de spec/ADR, gaps e blockers, e próximo gate>
+<resultado, decisão de spec/ADR, gaps/blockers e próximo gate>
 
-## Objetivo
+## Objetivo e limites
 
-<resultado que esta entrega deve produzir, partindo da issue>
-
-## Limites
-
-<fora de escopo, dependências e restrições>
+<resultado, fora de escopo, dependências e restrições>
 
 Base SHA: `<sha>`
 
@@ -28,7 +28,7 @@ Base SHA: `<sha>`
 
 ### Proposta de spec (`create`)
 
-<conteúdo completo da spec/ADR a ser criada; use o template do repositório quando existir>
+<conteúdo completo>
 
 ### Diff de spec (`update`)
 
@@ -39,35 +39,28 @@ Base SHA: `<sha>`
 
 ### Racional (`not required`)
 
-<por que nenhuma especificação documentada precisa mudar>
+<por que nenhuma spec/ADR muda>
 
 ## Gaps, necessidades e blockers
 
-| Item         | Tipo                     | Detalhe       | Recomendação |
-| ------------ | ------------------------ | ------------- | ------------ |
-| `<gap/need>` | `<gap, need ou blocker>` | `<descrição>` | `<ação>`     |
+| Item     | Tipo  | Detalhe | Recomendação |
+| -------- | ----- | ------- | ------------ |
+| `<item>` | `<gap | need    | blocker>`    | `<descrição>` | `<ação>` |
 
 ## Casos de borda e riscos
 
-| Gatilho, caso ou risco | Resposta/mitigação | Rollback ou `n/a` |
-| ---------------------- | ------------------ | ----------------- |
-| `<caso>`               | `<ação>`           | `<ação>`          |
+| Caso/risco | Mitigação | Rollback ou n/a |
+| ---------- | --------- | --------------- |
+| `<caso>`   | `<ação>`  | `<prova>`       |
 
-## Prova de rollback para migração — somente quando aplicável
+## Prova de rollback para migração
 
-| Comando, simulação ou demonstração | Estado restaurado esperado |
-| ---------------------------------- | -------------------------- |
-| `<prova executável>`               | `<critério binário>`       |
+<prova executável ou not applicable>
 
-## Blocker e retomada — somente se aplicável
+## Blocker e retomada
 
-- Operação: `plan`
-- Estado a retomar: `<stage:* ou estado nativo>`
-- Responsável: `<papel | humano | orquestrador>`
-- Impedimento: `<fato e evidência>`
-
-_Este é o único comentário canônico do relatório de arquitetura. Em revisões,
-edite-o in-place e publique separadamente apenas o resumo breve das alterações.
-A spec/ADR quando `create/update` é materializada no PR do executor, não aqui._
+- Estado a retomar: `<stage:needs-architect ou not applicable>`
+- Responsável: `<architect | human | not applicable>`
+- Impedimento: `<fato/evidência ou not applicable>`
 
 <!-- code-flow:architect-review:end -->

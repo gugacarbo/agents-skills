@@ -1,23 +1,22 @@
 # Integração e fechamento
 
-O orquestrador é proprietário dos gates finais e registra o resultado mecânico
-com `templates/06-integration-report-template.md`.
+O `integrator` é o único consumidor de `stage:integration-authorized`. Publique
+início com `run_id`, estado, PR/review ou prova NO_CHANGES e adicione
+`stage:in-progress`, preservando o estado principal.
 
-## Com diff: ready-to-merge
+Com diff, use worktree isolada da branch da PR e aplique o contrato de rebase
+do papel. O gate anterior é sempre
+`stage:ready-to-merge + needs-human`; `integrate` remove `needs-human` e deixa
+`stage:integration-authorized`, `adjust` envia a `stage:needs-changes` e `wait`
+preserva o gate.
 
-Use o gate compartilhado com `Integrar / Ajustar / Aguardar`. Integrar executa
-merge, confirma o alvo, fecha issue e limpa workflow; Ajustar move a
-needs-changes; Aguardar mantém pronto. Merge nunca é automático.
+Com NO_CHANGES, confirme a review aprovada e ausência de diff, commit e PR vazio;
+feche sem gate humano adicional. Evidência ambígua ou contraditória bloqueia.
 
-## Sem diff: ready-to-close
+Após merge, confirme Merge SHA, PR e issue. Se o vínculo não fechar a issue,
+feche-a explicitamente. Publique `templates/06-integration-report-template.md`
+e remova `code-flow:active`, estado principal, overlay e `needs-human`.
 
-Use o gate compartilhado com `Fechar / Ajustar / Aguardar`. Fechar registra
-evidência, fecha issue e limpa workflow sem commit, PR ou merge; Ajustar volta
-a needs-changes; Aguardar mantém pronto.
-
-## Falha, blocker e Epic
-
-Falha transitória preserva estado pronto e registra causa em nota isolada;
-dependência externa usa Resume e gate compartilhado quando exigir decisão. Epic
-fecha somente após checkpoint compartilhado `Fechar Epic / Replanejar /
-Aguardar`, com filhas, medidas e decisões transversais verificadas.
+Falha transitória remove o overlay e preserva `stage:integration-authorized`.
+Permissão, branch protection, serviço externo ou decisão pendente deixa
+`stage:blocked + needs-human` com `Resume`; nunca declare sucesso parcial.

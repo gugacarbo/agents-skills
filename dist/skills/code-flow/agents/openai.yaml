@@ -1,7 +1,7 @@
 interface:
   display_name: "Code Flow"
-  short_description: "Entrega por issue com gates e agentes"
-  default_prompt: "Use $code-flow para coordenar esta entrega por issue com rigor proporcional ao risco."
+  short_description: "Entrega por issue com papéis independentes"
+  default_prompt: "Use $code-flow para executar esta entrega por issue com labels, evidência e papéis independentes."
 
 policy:
   allow_implicit_invocation: false

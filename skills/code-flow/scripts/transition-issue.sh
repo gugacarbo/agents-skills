@@ -1,30 +1,18 @@
 #!/usr/bin/env sh
 set -eu
 
-# Best-effort mutate fallback stage:* / needs-human labels on a GitHub issue.
-#
-# Idempotent:
-#   --needs-human        adds `needs-human` only when absent.
-#   --clear-needs-human  removes `needs-human` only when present.
-#
-# Drift guard:
-#   refuses to run when the issue has zero or multiple stage:* labels unless
-#   --allow-repair is given. --dry-run never creates or mutates labels.
-#
-# Not a single atomic API call: remove-then-add can leave zero stage:* if a
-# later gh edit fails — confirm after and repair with --allow-repair if needed.
-# Does not select native vs fallback, post comments, or choose the next stage.
+# Best-effort label protocol helper. GitHub label edits are not atomic; every
+# operation confirms the remote result and reports drift instead of claiming a lock.
 
-USAGE='Usage: transition-issue.sh <N|URL> [--to stage:…] [--needs-human|--clear-needs-human] [--clear-stage] [--require-from stage:…] [--dry-run] [--allow-repair]'
+USAGE='Usage: transition-issue.sh <N|URL> (--activate | --start-work --role ROLE | --finish-to STAGE | --gate-to STAGE | --reset-activity | --complete | --migrate-to STAGE) [--require-from STAGE] [--dry-run] [--allow-repair]'
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 STATES_FILE="$SCRIPT_DIR/../references/workflow-states.json"
 
 ISSUE=""
-TO=""
+OP=""
+TARGET=""
+ROLE=""
 REQUIRE_FROM=""
-NEEDS_HUMAN=""
-CLEAR_NEEDS_HUMAN=0
-CLEAR_STAGE=0
 DRY_RUN=0
 ALLOW_REPAIR=0
 
@@ -33,37 +21,56 @@ die() {
   exit 1
 }
 
-is_valid_stage() {
-  jq -e --arg label "$1" '.stages | map(.label) | index($label) != null' "$STATES_FILE" > /dev/null
-}
-
-json_escape() {
-  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+set_op() {
+  [ -z "$OP" ] || die "Error: choose exactly one operation\n$USAGE"
+  OP="$1"
 }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --to)
+    --activate)
+      set_op activate
+      shift
+      ;;
+    --start-work)
+      set_op start
+      shift
+      ;;
+    --finish-to)
       [ "$#" -ge 2 ] || die "$USAGE"
-      TO="$2"
+      set_op finish
+      TARGET="$2"
+      shift 2
+      ;;
+    --gate-to)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      set_op gate
+      TARGET="$2"
+      shift 2
+      ;;
+    --reset-activity)
+      set_op reset
+      shift
+      ;;
+    --complete)
+      set_op complete
+      shift
+      ;;
+    --migrate-to)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      set_op migrate
+      TARGET="$2"
+      shift 2
+      ;;
+    --role)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      ROLE="$2"
       shift 2
       ;;
     --require-from)
       [ "$#" -ge 2 ] || die "$USAGE"
       REQUIRE_FROM="$2"
       shift 2
-      ;;
-    --needs-human)
-      NEEDS_HUMAN=1
-      shift
-      ;;
-    --clear-needs-human)
-      CLEAR_NEEDS_HUMAN=1
-      shift
-      ;;
-    --clear-stage)
-      CLEAR_STAGE=1
-      shift
       ;;
     --dry-run)
       DRY_RUN=1
@@ -77,10 +84,7 @@ while [ "$#" -gt 0 ]; do
       printf '%s\n' "$USAGE"
       exit 0
       ;;
-    -*)
-      die "Unknown flag: $1
-$USAGE"
-      ;;
+    -*) die "Unknown flag: $1\n$USAGE" ;;
     *)
       [ -z "$ISSUE" ] || die "$USAGE"
       ISSUE="$1"
@@ -89,152 +93,202 @@ $USAGE"
   esac
 done
 
-[ -n "$ISSUE" ] || die "$USAGE"
-[ -n "$TO" ] || [ "$CLEAR_STAGE" -eq 1 ] || die "Error: provide --to stage:… or --clear-stage
-$USAGE"
-[ -z "$TO" ] || [ "$CLEAR_STAGE" -eq 0 ] || die "Error: --to and --clear-stage are mutually exclusive"
-[ -z "$NEEDS_HUMAN" ] || [ "$CLEAR_NEEDS_HUMAN" -eq 0 ] || die "Error: --needs-human and --clear-needs-human are mutually exclusive"
-if [ "$CLEAR_STAGE" -eq 1 ]; then
-  [ -z "$NEEDS_HUMAN" ] || die "Error: --clear-stage cannot be combined with --needs-human"
-  [ "$CLEAR_NEEDS_HUMAN" -eq 1 ] || die "Error: --clear-stage requires --clear-needs-human"
-fi
+[ -n "$ISSUE" ] && [ -n "$OP" ] || die "$USAGE"
+[ "$OP" = start ] || [ -z "$ROLE" ] || die 'Error: --role is only valid with --start-work'
+[ "$OP" != start ] || [ -n "$ROLE" ] || die 'Error: --start-work requires --role'
 
-command -v gh > /dev/null 2>&1 || die "Error: gh is required"
-command -v jq > /dev/null 2>&1 || die "Error: jq is required"
-[ -f "$STATES_FILE" ] || die "Error: missing canonical workflow states: $STATES_FILE"
+command -v gh > /dev/null 2>&1 || die 'Error: gh is required'
+command -v jq > /dev/null 2>&1 || die 'Error: jq is required'
+[ -f "$STATES_FILE" ] || die "Error: missing workflow registry: $STATES_FILE"
 jq -e '
-  (.stages | type) == "array" and
-  (.stages | length) > 0 and
-  ([.stages[].label] | length) == ([.stages[].label] | unique | length) and
-  all(.stages[]; (.label | test("^stage:[a-z-]+$")) and (.next | type == "string"))
-' "$STATES_FILE" > /dev/null || die "Error: invalid canonical workflow states: $STATES_FILE"
+  .schema_version == 2 and
+  (.activation_label | type == "string") and
+  (.activity_label | type == "string") and
+  (.states | type == "array" and length > 0) and
+  ([.states[].label] | length == (unique | length)) and
+  all(.states[]; (.label | test("^stage:[a-z-]+$")) and
+    (.actor | type == "string") and (.kind == "agent" or .kind == "human") and
+    (.next | type == "array"))
+' "$STATES_FILE" > /dev/null || die "Error: invalid workflow registry: $STATES_FILE"
 
-if [ -n "$TO" ]; then
-  is_valid_stage "$TO" || die "Error: invalid stage '$TO'"
-fi
-if [ -n "$REQUIRE_FROM" ]; then
-  is_valid_stage "$REQUIRE_FROM" || die "Error: invalid --require-from '$REQUIRE_FROM'"
-fi
+ACTIVATION=$(jq -r '.activation_label' "$STATES_FILE")
+ACTIVITY=$(jq -r '.activity_label' "$STATES_FILE")
+
+is_primary() { jq -e --arg label "$1" '.states | map(.label) | index($label) != null' "$STATES_FILE" > /dev/null; }
+target_kind() { jq -r --arg label "$1" '.states[] | select(.label == $label) | .kind' "$STATES_FILE"; }
+target_actor() { jq -r --arg label "$1" '.states[] | select(.label == $label) | .actor' "$STATES_FILE"; }
+transition_allowed() {
+  jq -e --arg from "$1" --arg to "$2" '.states[] | select(.label == $from) | .next | index($to) != null' "$STATES_FILE" > /dev/null
+}
+
+[ -z "$TARGET" ] || is_primary "$TARGET" || die "Error: invalid target state '$TARGET'"
+[ -z "$REQUIRE_FROM" ] || is_primary "$REQUIRE_FROM" || die "Error: invalid --require-from '$REQUIRE_FROM'"
 
 ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,url)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
-[ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != "null" ] || die "Error: could not resolve issue: $ISSUE"
 ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
-[ -n "$ISSUE_REPO" ] || die "Error: could not resolve issue repository from URL: $ISSUE"
+[ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != null ] || die "Error: could not resolve issue: $ISSUE"
+[ -n "$ISSUE_REPO" ] || die "Error: could not resolve repository: $ISSUE"
 
-CURRENT_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r '[.labels[].name | select(startswith("stage:"))] | join("\n")')
-STAGE_COUNT=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name | select(startswith("stage:"))] | length')
-HAS_NEEDS_HUMAN=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name | select(. == "needs-human")] | length')
-FROM_LIST=$(printf '%s' "$ISSUE_JSON" | jq -c '[.labels[].name | select(startswith("stage:"))]')
+labels_json() { printf '%s' "$1" | jq -c '[.labels[].name]'; }
+ALL_BEFORE=$(labels_json "$ISSUE_JSON")
+PRIMARY_LIST=$(printf '%s' "$ISSUE_JSON" | jq -r --slurpfile cfg "$STATES_FILE" '[.labels[].name | select(. as $n | ($cfg[0].states | map(.label) | index($n)) != null)] | join("\n")')
+PRIMARY_COUNT=$(printf '%s' "$ISSUE_JSON" | jq --slurpfile cfg "$STATES_FILE" '[.labels[].name | select(. as $n | ($cfg[0].states | map(.label) | index($n)) != null)] | length')
+CURRENT=$(printf '%s' "$PRIMARY_LIST" | sed -n '1p')
+HAS_ACTIVE=$(printf '%s' "$ISSUE_JSON" | jq --arg n "$ACTIVATION" '[.labels[].name] | index($n) != null')
+HAS_ACTIVITY=$(printf '%s' "$ISSUE_JSON" | jq --arg n "$ACTIVITY" '[.labels[].name] | index($n) != null')
+HAS_HUMAN=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name] | index("needs-human") != null')
+UNKNOWN_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r --slurpfile cfg "$STATES_FILE" --arg activity "$ACTIVITY" '[.labels[].name | select(startswith("stage:")) | select(. != $activity) | select(. as $n | ($cfg[0].states | map(.label) | index($n)) == null)] | join("\n")')
+ALL_STATE_LABELS=$(printf '%s' "$ISSUE_JSON" | jq -r --arg activity "$ACTIVITY" '[.labels[].name | select(startswith("stage:")) | select(. != $activity)] | join("\n")')
 
-if [ -n "$REQUIRE_FROM" ]; then
-  printf '%s\n' "$CURRENT_STAGES" | grep -Fxq -- "$REQUIRE_FROM" \
-    || die "Error: expected current stage '$REQUIRE_FROM' on #$ISSUE_NUMBER; found: ${CURRENT_STAGES:-"(none)"}"
+[ -z "$REQUIRE_FROM" ] || [ "$CURRENT" = "$REQUIRE_FROM" ] || die "Error: expected '$REQUIRE_FROM'; found '${CURRENT:-none}'"
+
+if [ "$HAS_ACTIVE" = true ] && [ -n "$UNKNOWN_STAGES" ] && { [ "$OP" != complete ] || [ "$ALLOW_REPAIR" -eq 0 ]; }; then
+  die "Error: active issue has unknown stage labels: $UNKNOWN_STAGES"
 fi
 
-if [ "$ALLOW_REPAIR" -eq 0 ]; then
-  if [ "$STAGE_COUNT" -eq 0 ] || [ "$STAGE_COUNT" -gt 1 ]; then
-    die "Error: issue #$ISSUE_NUMBER has $STAGE_COUNT stage:* label(s); use --allow-repair or fix manually (found: ${CURRENT_STAGES:-none})"
-  fi
-fi
-
-label_exists() {
-  gh label view "$1" --repo "$ISSUE_REPO" > /dev/null 2>&1
-}
-
-REMOVE_STAGES="$CURRENT_STAGES"
-PLANNED_NEEDS_HUMAN="$HAS_NEEDS_HUMAN"
-if [ -n "$NEEDS_HUMAN" ]; then
-  PLANNED_NEEDS_HUMAN=1
-elif [ "$CLEAR_NEEDS_HUMAN" -eq 1 ]; then
-  PLANNED_NEEDS_HUMAN=0
-fi
+case "$OP" in
+  activate)
+    [ "$HAS_ACTIVE" = false ] || die 'Error: code-flow is already active'
+    [ "$PRIMARY_COUNT" -eq 0 ] && [ "$HAS_ACTIVITY" = false ] && [ "$HAS_HUMAN" = false ] && [ -z "$UNKNOWN_STAGES" ] \
+      || die 'Error: activation requires no workflow labels; migrate or repair explicitly'
+    TARGET='stage:needs-triage'
+    ;;
+  migrate)
+    [ "$HAS_ACTIVE" = false ] || die 'Error: migration requires inactive issue'
+    [ -n "$ALL_STATE_LABELS" ] || die 'Error: no legacy stage found'
+    [ "$(printf '%s\n' "$ALL_STATE_LABELS" | sed '/^$/d' | wc -l)" -eq 1 ] || die 'Error: migration requires exactly one legacy stage'
+    LEGACY=$(printf '%s' "$ALL_STATE_LABELS" | sed -n '1p')
+    EXPECTED=$(jq -r --arg legacy "$LEGACY" '.legacy[$legacy] // empty' "$STATES_FILE")
+    [ -n "$EXPECTED" ] || die "Error: legacy state '$LEGACY' is ambiguous"
+    [ "$TARGET" = "$EXPECTED" ] || die "Error: legacy '$LEGACY' must migrate to '$EXPECTED'"
+    ;;
+  start)
+    [ "$HAS_ACTIVE" = true ] || die 'Error: missing code-flow:active'
+    [ "$PRIMARY_COUNT" -eq 1 ] && [ -z "$UNKNOWN_STAGES" ] || die 'Error: expected exactly one canonical primary state'
+    [ "$HAS_ACTIVITY" = false ] || die 'Error: activity already in progress; use a validated resume or human reset'
+    [ "$HAS_HUMAN" = false ] || die 'Error: cannot start work while needs-human is present'
+    [ "$(target_kind "$CURRENT")" = agent ] || die "Error: '$CURRENT' is a human state"
+    [ "$(target_actor "$CURRENT")" = "$ROLE" ] || die "Error: state '$CURRENT' belongs to $(target_actor "$CURRENT"), not $ROLE"
+    ;;
+  finish)
+    [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: finish requires one active primary state'
+    [ "$HAS_ACTIVITY" = true ] || die 'Error: finish requires stage:in-progress'
+    [ "$HAS_HUMAN" = false ] || die 'Error: activity and needs-human cannot coexist'
+    transition_allowed "$CURRENT" "$TARGET" || die "Error: transition '$CURRENT' -> '$TARGET' is not allowed"
+    ;;
+  gate)
+    [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: gate requires one active primary state'
+    [ "$HAS_ACTIVITY" = false ] || die 'Error: gate cannot run during active work'
+    [ "$HAS_HUMAN" = true ] || die 'Error: gate requires needs-human'
+    [ "$(target_kind "$CURRENT")" = human ] || die "Error: '$CURRENT' is not a human state"
+    transition_allowed "$CURRENT" "$TARGET" || die "Error: gate transition '$CURRENT' -> '$TARGET' is not allowed"
+    ;;
+  reset)
+    [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: reset requires one active primary state'
+    [ "$HAS_ACTIVITY" = true ] || die 'Error: no activity to reset'
+    [ "$HAS_HUMAN" = false ] || die 'Error: invalid activity + needs-human drift'
+    ;;
+  complete)
+    [ "$HAS_ACTIVE" = true ] || die 'Error: completion requires code-flow:active'
+    if [ "$ALLOW_REPAIR" -eq 0 ]; then
+      [ "$PRIMARY_COUNT" -eq 1 ] && [ -z "$UNKNOWN_STAGES" ] || die 'Error: completion found workflow drift; use --allow-repair after evidence'
+    fi
+    ;;
+esac
 
 if [ "$DRY_RUN" -eq 1 ]; then
-  TO_JSON="null"
-  [ -z "$TO" ] || TO_JSON="\"$(json_escape "$TO")\""
-  NEEDS_JSON=false
-  [ "$PLANNED_NEEDS_HUMAN" -eq 1 ] && NEEDS_JSON=true
-  printf '{"issue":%s,"from":%s,"to":%s,"needs_human":%s,"dry_run":true,"labels":null}\n' \
-    "$ISSUE_NUMBER" "$FROM_LIST" "$TO_JSON" "$NEEDS_JSON"
+  printf '{"issue":%s,"operation":"%s","from":%s,"to":%s,"labels_before":%s,"dry_run":true}\n' \
+    "$ISSUE_NUMBER" "$OP" "$(printf '%s' "${CURRENT:-null}" | jq -R 'if . == "null" then null else . end')" \
+    "$(printf '%s' "${TARGET:-null}" | jq -R 'if . == "null" then null else . end')" "$ALL_BEFORE"
   exit 0
 fi
 
+label_exists() { gh label view "$1" --repo "$ISSUE_REPO" > /dev/null 2>&1; }
 ensure_label() {
-  label_name="$1"
-  label_color="$2"
-  label_description="$3"
-  label_exists "$label_name" && return 0
-  gh label create "$label_name" --repo "$ISSUE_REPO" --color "$label_color" --description "$label_description" > /dev/null \
-    || die "Error: failed to create fallback label '$label_name'"
+  name="$1"
+  color="$2"
+  description="$3"
+  label_exists "$name" || gh label create "$name" --repo "$ISSUE_REPO" --color "$color" --description "$description" > /dev/null
 }
+add_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$1" > /dev/null; }
+remove_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$1" > /dev/null; }
 
-if [ -n "$TO" ]; then
-  ensure_label "$TO" "1D76DB" "code-flow fallback state"
-fi
-if [ -n "$NEEDS_HUMAN" ]; then
-  ensure_label "needs-human" "D93F0B" "human decision required"
-fi
+ensure_label "$ACTIVATION" '5319E7' 'code-flow workflow active'
+ensure_label "$ACTIVITY" 'FBCA04' 'code-flow agent activity in progress'
+ensure_label 'needs-human' 'D93F0B' 'human decision required'
+[ -z "$TARGET" ] || ensure_label "$TARGET" '1D76DB' 'code-flow primary state'
 
-# Remove every existing stage:* label.
-if [ -n "$REMOVE_STAGES" ]; then
-  printf '%s\n' "$REMOVE_STAGES" | while IFS= read -r stage_label; do
-    [ -n "$stage_label" ] || continue
-    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$stage_label" > /dev/null
-  done
-fi
-
-# Confirm removals before adding (narrows the empty-stage window on failure).
-if [ -n "$REMOVE_STAGES" ] || [ -n "$TO" ]; then
-  AFTER_REMOVE=$(gh issue view "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --json labels)
-  AFTER_REMOVE_COUNT=$(printf '%s' "$AFTER_REMOVE" | jq '[.labels[].name | select(startswith("stage:"))] | length')
-  if [ -n "$TO" ] && [ "$AFTER_REMOVE_COUNT" -ne 0 ]; then
-    die "Error: expected zero stage:* after remove before adding '$TO'; got $AFTER_REMOVE_COUNT — repair manually or retry with --allow-repair"
-  fi
-  if [ "$CLEAR_STAGE" -eq 1 ] && [ "$AFTER_REMOVE_COUNT" -ne 0 ]; then
-    die "Error: --clear-stage left $AFTER_REMOVE_COUNT stage:* label(s)"
-  fi
-fi
-
-if [ -n "$TO" ]; then
-  gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$TO" > /dev/null \
-    || die "Error: failed to add '$TO' after removing prior stage:* — issue may have zero stage:*; repair with --allow-repair --to $TO"
-fi
-
-if [ -n "$NEEDS_HUMAN" ]; then
-  if [ "$HAS_NEEDS_HUMAN" -eq 0 ]; then
-    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "needs-human" > /dev/null
-  fi
-elif [ "$CLEAR_NEEDS_HUMAN" -eq 1 ]; then
-  if [ "$HAS_NEEDS_HUMAN" -gt 0 ]; then
-    gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "needs-human" > /dev/null
-  fi
-fi
+case "$OP" in
+  activate)
+    add_label "$ACTIVATION"
+    add_label "$TARGET"
+    ;;
+  migrate)
+    remove_label "$LEGACY"
+    add_label "$ACTIVATION"
+    add_label "$TARGET"
+    if [ "$(target_kind "$TARGET")" = human ]; then
+      add_label 'needs-human'
+    elif [ "$HAS_HUMAN" = true ]; then
+      remove_label 'needs-human'
+    fi
+    ;;
+  start)
+    add_label "$ACTIVITY"
+    ;;
+  finish)
+    remove_label "$CURRENT"
+    remove_label "$ACTIVITY"
+    add_label "$TARGET"
+    if [ "$(target_kind "$TARGET")" = human ]; then add_label 'needs-human'; else [ "$HAS_HUMAN" = false ] || remove_label 'needs-human'; fi
+    ;;
+  gate)
+    [ "$TARGET" = "$CURRENT" ] || {
+      remove_label "$CURRENT"
+      add_label "$TARGET"
+    }
+    if [ "$(target_kind "$TARGET")" = human ]; then add_label 'needs-human'; else remove_label 'needs-human'; fi
+    ;;
+  reset)
+    remove_label "$ACTIVITY"
+    ;;
+  complete)
+    for label in $(printf '%s\n%s\n' "$PRIMARY_LIST" "$UNKNOWN_STAGES"); do [ -z "$label" ] || remove_label "$label"; done
+    [ "$HAS_ACTIVITY" = false ] || remove_label "$ACTIVITY"
+    [ "$HAS_HUMAN" = false ] || remove_label 'needs-human'
+    remove_label "$ACTIVATION"
+    ;;
+esac
 
 CONFIRM=$(gh issue view "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --json labels)
-CONFIRM_STAGES=$(printf '%s' "$CONFIRM" | jq '[.labels[].name | select(startswith("stage:"))]')
-CONFIRM_STAGE_COUNT=$(printf '%s' "$CONFIRM" | jq '[.labels[].name | select(startswith("stage:"))] | length')
-CONFIRM_NEEDS=$(printf '%s' "$CONFIRM" | jq '[.labels[].name | select(. == "needs-human")] | length')
-ALL_LABELS=$(printf '%s' "$CONFIRM" | jq -c '[.labels[].name]')
+LABELS_AFTER=$(labels_json "$CONFIRM")
+AFTER_PRIMARY=$(printf '%s' "$CONFIRM" | jq --slurpfile cfg "$STATES_FILE" '[.labels[].name | select(. as $n | ($cfg[0].states | map(.label) | index($n)) != null)]')
+AFTER_COUNT=$(printf '%s' "$AFTER_PRIMARY" | jq 'length')
+AFTER_ACTIVE=$(printf '%s' "$CONFIRM" | jq --arg n "$ACTIVATION" '[.labels[].name] | index($n) != null')
+AFTER_ACTIVITY=$(printf '%s' "$CONFIRM" | jq --arg n "$ACTIVITY" '[.labels[].name] | index($n) != null')
+AFTER_HUMAN=$(printf '%s' "$CONFIRM" | jq '[.labels[].name] | index("needs-human") != null')
 
-if [ -n "$TO" ]; then
-  [ "$CONFIRM_STAGE_COUNT" -eq 1 ] || die "Error: after mutation expected exactly one stage:*; got $CONFIRM_STAGE_COUNT ($CONFIRM_STAGES)"
-  printf '%s' "$CONFIRM" | jq -e --arg to "$TO" '[.labels[].name] | index($to) != null' > /dev/null \
-    || die "Error: after mutation missing expected label $TO"
-elif [ "$CLEAR_STAGE" -eq 1 ]; then
-  [ "$CONFIRM_STAGE_COUNT" -eq 0 ] || die "Error: after --clear-stage expected zero stage:*; got $CONFIRM_STAGE_COUNT"
+if [ "$OP" = complete ]; then
+  [ "$AFTER_ACTIVE" = false ] && [ "$AFTER_COUNT" -eq 0 ] && [ "$AFTER_ACTIVITY" = false ] && [ "$AFTER_HUMAN" = false ] \
+    || die "Error: completion confirmation failed: $LABELS_AFTER"
+else
+  [ "$AFTER_ACTIVE" = true ] && [ "$AFTER_COUNT" -eq 1 ] || die "Error: expected active workflow with one primary state: $LABELS_AFTER"
+  if [ "$OP" = start ]; then [ "$AFTER_ACTIVITY" = true ] || die 'Error: activity label missing after start'; fi
+  if [ "$OP" = reset ] || [ "$OP" = finish ] || [ "$OP" = gate ] || [ "$OP" = migrate ] || [ "$OP" = activate ]; then
+    [ "$AFTER_ACTIVITY" = false ] || die 'Error: unexpected activity label after operation'
+  fi
+  FINAL_PRIMARY=$(printf '%s' "$AFTER_PRIMARY" | jq -r '.[0]')
+  FINAL_KIND=$(target_kind "$FINAL_PRIMARY")
+  if [ "$AFTER_ACTIVITY" = true ]; then
+    [ "$AFTER_HUMAN" = false ] || die 'Error: activity and needs-human coexist'
+  elif [ "$FINAL_KIND" = human ]; then
+    [ "$AFTER_HUMAN" = true ] || die "Error: human state '$FINAL_PRIMARY' lacks needs-human"
+  else
+    [ "$AFTER_HUMAN" = false ] || die "Error: agent state '$FINAL_PRIMARY' has needs-human"
+  fi
 fi
 
-if [ -n "$NEEDS_HUMAN" ]; then
-  [ "$CONFIRM_NEEDS" -ge 1 ] || die "Error: after mutation expected needs-human"
-elif [ "$CLEAR_NEEDS_HUMAN" -eq 1 ]; then
-  [ "$CONFIRM_NEEDS" -eq 0 ] || die "Error: after mutation expected needs-human removed"
-fi
-
-TO_JSON="null"
-[ -z "$TO" ] || TO_JSON="\"$(json_escape "$TO")\""
-NEEDS_JSON=false
-[ "$CONFIRM_NEEDS" -ge 1 ] && NEEDS_JSON=true
-
-printf '{"issue":%s,"from":%s,"to":%s,"needs_human":%s,"dry_run":false,"labels":%s}\n' \
-  "$ISSUE_NUMBER" "$FROM_LIST" "$TO_JSON" "$NEEDS_JSON" "$ALL_LABELS"
+printf '{"issue":%s,"operation":"%s","from":%s,"to":%s,"labels":%s,"dry_run":false}\n' \
+  "$ISSUE_NUMBER" "$OP" "$(printf '%s' "${CURRENT:-null}" | jq -R 'if . == "null" then null else . end')" \
+  "$(printf '%s' "${TARGET:-null}" | jq -R 'if . == "null" then null else . end')" "$LABELS_AFTER"

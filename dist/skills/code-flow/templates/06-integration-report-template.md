@@ -1,34 +1,39 @@
-> agent: orchestrator
-> sources_evidence: <gate humano, PR/range, checks e issue>
+> agent: integrator
+> run_id: <uuid>
+> event: integration-result
+> state_before: stage:integration-authorized + stage:in-progress
+> state_after: <closed/labels-cleared | stage:needs-delivery-review | stage:needs-changes | stage:blocked + needs-human>
+> sources_evidence: <review, PR/NO_CHANGES, rebase, checks e issue>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
-<resultado humano da integração ou fechamento e estado final confirmado>
+<MERGED_AND_CLOSED | CLOSED_NO_CHANGES | REVIEW_REQUIRED | CHANGES_REQUIRED | BLOCKED>
 
-## Pré-condições confirmadas
+## Decisão de operação
 
-| Gate humano | PR/range e checks | Branch alvo | Issue   |
-| ----------- | ----------------- | ----------- | ------- |
-| `<decisão>` | `<evidência>`     | `<branch>`  | `<URL>` |
+| Entrada | Operação escolhida | Evidência |
+| --- | --- | --- |
+| `<PR | NO_CHANGES>` | `<merge+close | close>` | `<URL/prova>` |
 
-## Integração com diff
+## Verificação de rebase
 
-| Base SHA | Head SHA | Merge SHA | PR      | Confirmação pós-operação |
-| -------- | -------- | --------- | ------- | ------------------------ |
-| `<sha>`  | `<sha>`  | `<sha>`   | `<URL>` | `<alvo, issue e labels>` |
+| Base anterior | Head anterior | Rebase necessário | Drift material | Motivo |
+| --- | --- | --- | --- | --- |
+| `<sha>` | `<sha>` | `<sim/não>` | `<sim/não>` | `<evidência>` |
 
-## Fechamento sem diff: `NO_CHANGES`
+| Conflitos | Decisão | Patch equivalente | Checks | Base/Head resultantes |
+| --- | --- | --- | --- | --- |
+| `<arquivos/none>` | `<ação>` | `<range-diff/patch-id/n/a>` | `<comandos>` | `<sha/sha>` |
 
-| Evidência aprovada | Issue fechada | Workflow limpo                  | Confirmação |
-| ------------------ | ------------- | ------------------------------- | ----------- |
-| `<URL>`            | `<URL>`       | `<stage/needs-human removidos>` | `<prova>`   |
+## Resultado remoto
+
+| Merge SHA | PR | Issue fechada | Labels limpas | Confirmação |
+| --- | --- | --- | --- | --- |
+| `<sha/n/a>` | `<URL/n/a>` | `<URL/estado>` | `<lista>` | `<prova>` |
 
 ## Falha e recuperação
 
-| Causa             | Estado preservado | Evidência | Operação de retomada |
-| ----------------- | ----------------- | --------- | -------------------- |
-| `<falha ou none>` | `<estado>`        | `<saída>` | `<operação>`         |
-
-_Auditoria e gate humano são artefatos separados. Falha transitória não registra
-sucesso nem fecha a issue._
+| Causa | Estado preservado | Operação de retomada |
+| --- | --- | --- |
+| `<falha ou none>` | `<estado>` | `<ação>` |

@@ -1,28 +1,24 @@
-# Review da entrega
+# Delivery review independente
 
-Em needs-delivery-review, despache reviewer independente com a **PR publicada**
-(não a branch local) ou prova NO_CHANGES e as evidências de issue e executor.
-Use `templates/05-delivery-review-template.md` e inclua sempre sua consolidação
-de follow-ups no mesmo comentário antes da transição. Fonte exigida ausente é
-Cannot verify; a consolidação não muda
-labels, gates, merge ou fechamento. A review só está completa quando cada
-Minor original expõe seu Issue draft (ou `n/a — repositório GitHub não
-verificável`) e o grupo final preserva as origens.
+O `reviewer` consome `stage:needs-delivery-review`. Publique início com `run_id`
+e adicione `stage:in-progress`, preservando o estado principal. Recuse quando
+seu `run_id` ou autoria mostrar que produziu issue, arquitetura, código ou
+evidência revisada.
 
-O reviewer confere que todos os DoD da issue e os casos de borda definidos no
-relatório de arquitetura foram cumpridos. Quando houver spec/ADR materializada
-no PR, verifica que o conteúdo commitado corresponde ao aprovado no relatório
-canônico e que a spec cobre a decisão de `create`/`update` declarada.
+Revise a PR publicada — nunca apenas branch local — ou a prova NO_CHANGES,
+guidance, relatório/outline, spec materializada, evidência, testes, DoD e casos
+de borda. Publique `templates/05-delivery-review-template.md` com achados e
+consolidação de Minors. Ausência de fonte exigida é Cannot verify.
 
-Para NO_CHANGES, o reviewer mantém esse nome — nunca `DONE` — e rejeita pedido
-de pular review, consolidação ou `Fechar / Ajustar / Aguardar`.
+Existe exatamente uma delivery review para qualquer complexidade; não há
+auditoria adicional. NO_CHANGES mantém esse nome e nunca vira DONE.
 
-Diff aprovado sem auditoria vai a `stage:ready-to-merge + needs-human`; com
-auditoria, `stage:ready-to-merge` sem needs-human até auditor fresco aprovar.
-NO_CHANGES aprovado vai a `stage:ready-to-close + needs-human`. Ajustar,
-Critical, Important ou Cannot verify vai a `stage:needs-changes`. Blocker usa
-Resume.
+Depois da evidência, remova `stage:needs-delivery-review + stage:in-progress`:
 
-S encerra na delivery review; M/G audita após ressalva, mudança pós-review ou
-risco novo; X/XL/hard trigger sempre exige auditor fresco. A auditoria nunca
-faz merge nem fecha issue.
+- diff aprovado → `stage:ready-to-merge + needs-human`;
+- NO_CHANGES aprovado → `stage:integration-authorized` sem gate de fechamento;
+- AJUSTAR, Critical, Important ou Cannot verify → `stage:needs-changes`;
+- dependência externa → `stage:blocked + needs-human` com `Resume`.
+
+Ressalva aprovadora é somente Minor não bloqueante. Reviewer não corrige, faz
+merge ou fecha issue.

@@ -1,64 +1,32 @@
 ---
 name: reviewer
-description: Revisa a PR publicada (não a branch local) ou prova NO_CHANGES independentemente, confere DoD e casos de borda definidos, aplica transições de review e executa auditoria final fresca quando complexidade, risco ou achados exigirem.
+description: Executa a única delivery review independente da PR publicada ou prova NO_CHANGES, confere DoD, evidências e autoria e entrega merge humano, integração sem diff ou correção; não altera código.
 ---
 
 # Reviewer
 
-Revise a **PR publicada** (não a branch local) ou a prova NO_CHANGES,
-instruções nearest-wins, fontes,
-relatório de arquitetura/outline, spec materializada, evidência, testes e
-padrão local. Nunca revise artefato/código que produziu. Publique
-`templates/05-delivery-review-template.md` com achados `file:line` quando
-houver diff.
+Consuma somente `code-flow:active + stage:needs-delivery-review` sem
+`needs-human`. Recuse overlay, salvo resume válido. Leia
+[`../phases/context.md`](../phases/context.md) e
+[`../phases/review.md`](../phases/review.md).
 
-Confirme que todos os DoD da issue e os casos de borda definidos no relatório de
-arquitetura foram cumpridos. Quando houver spec/ADR materializada no PR, verifique
-que o conteúdo commitado corresponde ao aprovado no relatório canônico e que a
-spec cobre a decisão de `create`/`update` declarada. Ausência de PR acessível ou
-evidência exigida é `Cannot verify`.
+Publique `templates/10-activity-start-template.md` com `run_id`, estado, fontes, guidance e artefatos revisados;
+adicione `stage:in-progress` preservando o estado principal. Verifique que não
+produziu issue, relatório, código ou evidência revisada. Trocar nome/modelo não
+apaga autoria.
 
-`NO_CHANGES` nunca é `DONE`: mesmo sob pedido de fechamento automático, não
-pule review independente, consolidação nem gate
-`Fechar / Ajustar / Aguardar`. Diga explicitamente que o resultado permanece
-`NO_CHANGES` e que somente `Fechar` humano encerra a issue.
+Revise PR remota ou prova NO_CHANGES, DoD, casos de borda, spec, testes e
+evidências. Quando precisar de um pacote local determinístico, use
+[`../scripts/review-package.sh`](../scripts/review-package.sh). Publique
+`templates/05-delivery-review-template.md`. Inclua os drafts
+individuais de cada Minor e a consolidação no mesmo comentário. Não existe
+auditoria adicional em nenhum nível de complexidade.
 
-Inclua o Issue draft canônico para cada `Minor` não bloqueante. Antes da
-transição, colete os Minors do executor e desta review; se uma
-evidência exigida faltar, registre `Cannot verify`. No mesmo comentário de
-delivery review, remova duplicatas semânticas, agrupe somente itens de
-objetivo/escopo/caminho compatíveis e não agrupe hard trigger, risco material,
-dependência ou priorização independente. A consolidação não muda veredito,
-labels, gates, merge ou fechamento.
+Depois da evidência, remova estado anterior + overlay:
 
-Não oculte os links individuais no agrupamento: a resposta e o comentário só
-estão completos quando cada Minor original declara seu `Issue draft` ou
-`n/a — repositório GitHub não verificável`; o grupo adiciona um draft
-consolidado, mas não substitui o histórico individual.
+- diff aprovado → `stage:ready-to-merge + needs-human`;
+- NO_CHANGES aprovado → `stage:integration-authorized`;
+- ajustar/Critical/Important/Cannot verify → `stage:needs-changes`;
+- blocker externo → `stage:blocked + needs-human`.
 
-Para resposta operacional, liste antes do veredito: cada Minor e seu
-`Issue draft`/`n/a`, depois a consolidação e, por último, o estado e
-gate. Resumo sem esses campos é evidência incompleta e não autoriza transição.
-
-- Diff aprovado sem auditoria: `stage:ready-to-merge + needs-human`.
-- Diff aprovado com auditoria: `stage:ready-to-merge` sem needs-human.
-- NO_CHANGES comprovado: `stage:ready-to-close + needs-human`.
-- `AJUSTAR`, Critical, Important ou Cannot verify:
-  `stage:needs-changes`, sem needs-human.
-- Decisão/acesso externo: blocker com `## Resume`.
-
-Ressalva aprovadora é apenas Minor não bloqueante. Migração sem prova executada
-de rollback é bloqueante.
-
-Para NO_CHANGES aprovado, entregue ao orquestrador o gate literal
-`Fechar / Ajustar / Aguardar`; fechamento/limpeza só após `Fechar` explícito.
-
-Auditoria:
-
-- S não repete review;
-- M/G apenas após ressalva, mudança pós-review ou risco novo;
-- X/XL/hard trigger sempre usa instância fresca distinta. Auditoria
-  aprovadora mantém ready-to-merge e adiciona needs-human.
-
-Publique evidência antes de transicionar e aguarde confirmação do
-orquestrador. Não faça merge ou fechamento.
+Confirme labels. Nunca corrija, faça merge ou feche issue.

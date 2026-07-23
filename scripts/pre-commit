@@ -16,8 +16,11 @@ python3 "$ROOT/scripts/skills-check"
 
 ${NODE_ENV_RUNNER} lint-staged
 if node -e "const dependencies = { ...require('./package.json').dependencies, ...require('./package.json').devDependencies }; process.exit(['vitest', 'jest', 'mocha', 'ava'].some((name) => dependencies[name]) ? 0 : 1)"; then
+  printf '\nRunning staged tests...\n'
   ${NODE_ENV_RUNNER} test-staged
 else
+  printf '\nRunning repository tests...\n'
   ${NODE_ENV_RUNNER} test
 fi
+printf '\nRunning TypeScript staged-file checks...\n'
 ${NODE_ENV_RUNNER} tsc-files

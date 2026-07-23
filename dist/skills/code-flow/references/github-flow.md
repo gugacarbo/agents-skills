@@ -1,77 +1,58 @@
-# Workflow GitHub: seleção dinâmica nativa ou fallback
+# Protocolo GitHub da code-flow
 
-Plano, código, review e integração exigem issue de entrega/bug. Epic e tracker
-não recebem mutação de entrega.
+`code-flow:active` ativa o protocolo. Enquanto presente, exatamente um estado
+principal de `workflow-states.json` identifica o próximo responsável. O overlay
+`stage:in-progress` pode coexistir com esse estado durante uma execução.
 
-Pré-issue de batch é `DRAFT_ISSUE` dentro de Project V2, não uma issue de
-entrega. Ela não participa da seleção native/fallback e não recebe label ou
-`stage:*`. O fluxo abaixo começa somente após conversão autorizada e confirmação
-do tipo `ISSUE` no repositório alvo.
+| Label | Próximo responsável | Exige `needs-human` |
+| --- | --- | --- |
+| `stage:needs-triage` | issue-writer | não |
+| `stage:awaiting-triage-approval` | humano | sim |
+| `stage:needs-architect` | architect | não |
+| `stage:awaiting-execution-approval` | humano | sim |
+| `stage:ready-for-execution` | executor | não |
+| `stage:needs-changes` | executor | não |
+| `stage:needs-delivery-review` | reviewer | não |
+| `stage:ready-to-merge` | humano | sim |
+| `stage:integration-authorized` | integrator | não |
+| `stage:blocked` | responsável do Resume | sim |
 
-## Estado observável
+## Invariantes
 
-`Complexity: S|M|G|X|XL` permanece no bloco de metadata da issue e fica fora do
-source-set. `Workflow` não é persistido.
+- Issue ativa: `code-flow:active` + um estado principal.
+- Atividade: estado principal + `stage:in-progress`, nunca `needs-human`.
+- Gate: estado humano + `needs-human`, nunca `stage:in-progress`.
+- Overlay observado bloqueia cooperativamente novo início; não é lock atômico.
+- Evidência precede toda mutação e a confirmação remota a sucede.
+- Um agente aplica a transição causada por seu próprio artefato; `gate` aplica
+  apenas uma decisão humana já fornecida.
 
-| Estado observado                                                      | Resultado obrigatório                                                              |
-| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| exatamente um `stage:*`                                               | fallback ativo; retome o stage                                                     |
-| header legado + exatamente um `stage:*`                               | fallback ativo; o stage é autoritativo e o header nunca seleciona native           |
-| zero `stage:*` + mapeamento nativo `PASS`                             | native ativo automaticamente nesta entrada                                         |
-| zero `stage:*` + mapeamento nativo `FAIL` em issue nova               | declare `NATIVE_INCOMPLETE`, inicialize fallback equivalente                       |
-| múltiplos `stage:*`                                                   | `WORKFLOW_DRIFT`; pare e peça reparo                                               |
-| header legado `Workflow: fallback`                                    | ignore para controle; preserve stage e remova somente em edição legítima do body   |
-| header legado `Workflow: native` + zero `stage:*` + mapeamento `PASS` | ignore para controle; use native nesta entrada e remova somente em edição legítima |
-| header legado `Workflow: native` + mapeamento `FAIL`                  | `NATIVE_INVALID`; pause e apresente migração equivalente para decisão humana       |
+Use `scripts/transition-issue.sh` com `--require-from`. `--start-work` adiciona
+somente o overlay. `--finish-to` substitui o estado principal e remove overlay.
+`--activate` inicia uma issue; `--complete` limpa labels após fechamento/saída.
 
-Nunca escreva `Workflow`. Com um stage, ele sempre prevalece sobre qualquer
-header legado. Header legado não entra no digest e não é normalizado por uma
-mutação sem outro motivo.
+## Migração segura
 
-## Avaliação nativa
+Issue sem `code-flow:active` nunca é adotada automaticamente. Se houver labels
+legadas, publique primeiro a proposta:
 
-1. Descubra guidance, forms, labels, estados, gates, evidência e entregas
-   recentes sem mutar.
-2. Recalcule risco e Complexity antes de interpretar o estado.
-3. Preencha `templates/10-native-workflow-mapping.md` com evidência por
-   capacidade.
-4. Todas as linhas PASS usam native automaticamente; qualquer FAIL em issue
-   nova seleciona fallback e cria somente o stage equivalente necessário.
+| Legado | Destino após confirmação |
+| --- | --- |
+| `stage:needs-architect` | mesmo estado |
+| `stage:approved` | `stage:awaiting-execution-approval + needs-human` |
+| `stage:needs-delivery-review` | mesmo estado |
+| `stage:needs-changes` | mesmo estado |
+| `stage:ready-to-merge` | mesmo estado + `needs-human` |
+| `stage:ready-to-close` | `stage:integration-authorized` |
+| `stage:blocked` | mesmo estado + `needs-human` |
+| `stage:in-progress` sozinho | ambíguo; reconstruir por evidência e pedir escolha |
 
-## Migração legada native → fallback
+Não escreva `Workflow` no body. A skill continua lendo branch protection,
+forms, comandos e método de merge do repositório; somente seu estado de entrega
+usa labels canônicas.
 
-Para `NATIVE_INVALID`, não migre silenciosamente. O gate humano recebe o estado original,
-fallback equivalente, estratégia de compensação e prova final para
-uma migração explícita. Após
-aceite, publique evidência, aplique um único `stage:*`, confirme labels/status
-e só então remova o header legado em atualização legítima do body.
+## Falha parcial
 
-## Stages fallback
-
-Exatamente um `stage:*` representa o próximo ator/gate enquanto a issue está
-ativa. `needs-human` é ortogonal e existe somente quando o próximo ator é
-humano; remova-o ao devolver trabalho a agente e limpe ambos após merge/close.
-[`workflow-states.json`](workflow-states.json) é o registro operacional
-canônico; a tabela abaixo deve espelhá-lo exatamente.
-
-| Label                         | Próxima ação                                          |
-| ----------------------------- | ----------------------------------------------------- |
-| `stage:needs-architect`       | Produzir relatório de arquitetura e decidir spec/ADR. |
-| `stage:approved`              | Aguardar ordem explícita de execução; criar worktree. |
-| `stage:in-progress`           | Implementar/corrigir escopo autorizado.               |
-| `stage:needs-delivery-review` | Review independente da entrega.                       |
-| `stage:needs-changes`         | Executor corrige achados.                             |
-| `stage:ready-to-merge`        | Auditoria aplicável e gate final.                     |
-| `stage:ready-to-close`        | Gate de fechamento para NO_CHANGES aprovado.          |
-| `stage:blocked`               | Resolver blocker pelo Resume publicado.               |
-
-## Ownership e mutação
-
-Agente aplica a transição causada pelo artefato/veredito que publicou;
-orquestrador valida precondição, evidência e estado final. Decisões humanas
-transicionam pelo orquestrador. Use `transition-issue.sh` com `--require-from`,
-dry-run e confirmação por `gh issue view` no fallback.
-
-Saída voluntária usa o gate definido no router. Somente após `Encerrar
-code-flow` o orquestrador limpa labels fallback sem fechar a issue ou descartar
-branch, PR, worktree ou código.
+As APIs de label não formam uma transação. O helper relê e confirma cada
+resultado, retorna erro em drift e aceita reparo somente com `--allow-repair`.
+Não alegue exclusão concorrente ou sucesso quando a confirmação final falhar.

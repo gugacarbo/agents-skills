@@ -1,33 +1,27 @@
 # Gate humano
 
-> agent: <agente que solicita a decisão humana>
-> sources_evidence: <artefatos, reviews e estado observável que fundamentam o gate>
+> agent: gate
+> run_id: n/a
+> event: gate-decision
+> state_before: <estado principal + needs-human>
+> state_after: <estado resultante>
+> sources_evidence: <artefatos/digest/base e resposta humana>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Resume
 
-<decisão solicitada e motivo do gate>
+<decisão literal, consequência e próximo responsável>
 
-## Estado atual
+## Decisão
 
-<stage ou estado nativo, presença de needs-human e artefato aprovado>
+| Gate      | Opções aceitas                 |
+| --------- | ------------------------------ |
+| triage    | `approve                       | adjust | block` |
+| execution | `authorize                     | adjust | block` |
+| merge     | `integrate                     | adjust | wait`  |
+| resume    | `<stage registrado no Resume>` |
+| activity  | `reset`                        |
 
-## Decisão solicitada
-
-<o que a pessoa precisa decidir agora>
-
-## Opções e consequências
-
-| Resposta literal da fase | Transição ou permanência | Consequência e próximo ator |
-| ------------------------ | ------------------------ | --------------------------- |
-| `<opção>`                | `<estado resultante>`    | `<efeito>`                  |
-
-Use somente as opções literais da fase, por exemplo:
-
-- source/plan: `Aprovar / Ajustar / Bloquear`;
-- integração: `Integrar / Ajustar / Aguardar`;
-- NO_CHANGES: `Fechar / Ajustar / Aguardar`;
-- saída da skill: `Encerrar code-flow / Manter ativo`;
-- Epic: `Fechar Epic / Replanejar / Aguardar`.
-
-_O orquestrador aplica e confirma a transição causada pela decisão humana._
+Valide estado, `needs-human`, ausência de overlay, evidência e opção. Publique
+esta decisão antes de mutar e confirme labels depois. `activity reset` é a única
+exceção: exige overlay e preserva o estado principal.

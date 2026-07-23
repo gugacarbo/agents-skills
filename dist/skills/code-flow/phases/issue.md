@@ -1,28 +1,26 @@
-# Issue e triagem de complexidade
+# Issue e triagem
 
-Use `templates/02-issue-template.md`. O `issue-writer` investiga instruções
-aplicáveis e codebase, preenche contexto/objetivo e persiste
-`Complexity: S | M | G | X | XL`. `Workflow` não é gravado. Relações com Epic,
-Parent e sub-issues usam mecanismos nativos do repositório e ficam fora do body;
-toda filha usa o mesmo template.
+O `issue-writer` consome `stage:needs-triage`. Antes de investigar, publique
+evidência de início com `run_id` e adicione `stage:in-progress`, preservando
+`stage:needs-triage`.
 
-O `issue-writer` **não** decide impacto de spec/ADR, **não** preenche bloco de
-spec e **não** materializa ADR/spec: essa triagem é do `architect`.
+Use `templates/02-issue-template.md`. Descubra guidance e codebase, preencha
+contexto, objetivo e DoD e persista `Complexity: S | M | G | X | XL`. Não grave
+`Workflow`. Relações com Epic, Parent e sub-issues usam mecanismos nativos.
 
-Para pré-issue de batch, o issue-writer primeiro investiga fontes e codebase e
-substitui o body mínimo do Draft Issue pelo template completo, ainda sem
-labels/stage. Publique evidência do body e do repositório alvo; então o próprio
-issue-writer ou o orquestrador pode converter o item de `DRAFT_ISSUE` para
-`ISSUE`. Somente após confirmar a conversão aplique a regra de transição abaixo.
+Issue-writer não decide `create | update | not required` de spec/ADR e não cria
+arquitetura, código ou review. Publique a evidência da triagem antes de remover
+`stage:needs-triage + stage:in-progress` e deixar
+`stage:awaiting-triage-approval + needs-human`.
 
-- S interna: orquestrador cria issue mínima em `stage:approved + needs-human`.
-- M/G/X/XL: issue-writer publica issue escolada e vai a `stage:needs-architect`.
+O gate de triagem aplica:
 
-Mudança posterior no body que altere `Complexity` ou o objetivo invalida o gate
-aplicável; metadata externa não.
+- `approve`: S sem hard trigger → `stage:ready-for-execution`; M+, hard trigger
+  ou rigor promovido → `stage:needs-architect`;
+- `adjust`: `stage:needs-triage`;
+- `block`: `stage:blocked + needs-human` com `Resume`.
 
-## Disparo do architect
-
-Quando a Complexidade for `>= M`, o orquestrador despacha o `architect` a partir
-de `stage:needs-architect`. O relatório de arquitetura é a entrada do fluxo de
-arquitetura em [`phases/plan.md`](plan.md).
+Para Draft Issue já investigada, a conversão deixa diretamente
+`stage:awaiting-triage-approval + needs-human`; nunca execute a triagem duas
+vezes. Mudança posterior do body que altere objetivo, Complexity ou hard trigger
+invalida gates insuficientes e retorna a `stage:needs-triage`.
