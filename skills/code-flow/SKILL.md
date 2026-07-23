@@ -30,11 +30,11 @@ memória do orquestrador e sempre redescobrir o guidance nearest-wins do projeto
 
 ### Secundárias
 
-| Invocação                                          | Resultado e fase                                               |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| `/code-flow batch create --project <owner/number>` | Cria Draft Issues para triagem interativa — `context.md`.      |
-| `/code-flow batch <alvos> --from <operação>`       | Processa trilhas isoladas a partir de um piso — `context.md`.  |
-| `/code-flow tool doctor [args]`                    | Executa apenas `scripts/doctor.sh`.                            |
+| Invocação                                          | Resultado e fase                                              |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| `/code-flow batch create --project <owner/number>` | Cria Draft Issues para triagem interativa — `context.md`.     |
+| `/code-flow batch <alvos> --from <operação>`       | Processa trilhas isoladas a partir de um piso — `context.md`. |
+| `/code-flow tool doctor [args]`                    | Executa apenas `scripts/doctor.sh`.                           |
 
 Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
 `integrator`. Não interprete menção casual como invocação. Política:
@@ -51,7 +51,7 @@ Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
 4. Publique evidência antes de mutar labels. Cada papel inicia, conclui e
    confirma sua própria transição; decisões humanas usam o comando `gate`.
 5. Proponha `Complexity: XS | S | M | L | XL`, recalcule risco e aplique
-   [`references/risk-profiles.md`](references/risk-profiles.md). Hard trigger
+   [`references/runtime.md`](references/runtime.md). Hard trigger
    sempre vence esforço pequeno.
 6. Use worktree somente para implementação, correção ou integração. Com diff,
    o executor termina somente com commit, push e PR publicado.
@@ -66,14 +66,14 @@ estado e `run_id`. Para sair, aplique a saída segura de `phases/context.md`.
 
 ## Router
 
-| Operação                                    | Carregar                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)                           |
-| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)                               |
-| Arquitetura/autorização                     | [`phases/plan.md`](phases/plan.md)                                 |
-| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)                         |
-| Review                                      | [`phases/review.md`](phases/review.md)                             |
-| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md)                       |
+| Operação                                    | Carregar                                     |
+| ------------------------------------------- | -------------------------------------------- |
+| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)     |
+| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)         |
+| Arquitetura/autorização                     | [`phases/plan.md`](phases/plan.md)           |
+| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)   |
+| Review                                      | [`phases/review.md`](phases/review.md)       |
+| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md) |
 
 Antes de operar labels, leia
 [`references/runtime.md`](references/runtime.md) e

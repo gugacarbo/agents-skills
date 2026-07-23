@@ -235,6 +235,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  skills/brainstorm: {}
+
   skills/code-flow: {}
 
   skills/project-init: {}

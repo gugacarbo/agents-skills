@@ -34,7 +34,6 @@ memória do orquestrador e sempre redescobrir o guidance nearest-wins do projeto
 | -------------------------------------------------- | -------------------------------------------------------------- |
 | `/code-flow batch create --project <owner/number>` | Cria Draft Issues para triagem interativa — `context.md`.      |
 | `/code-flow batch <alvos> --from <operação>`       | Processa trilhas isoladas a partir de um piso — `context.md`.  |
-| `/code-flow brainstorm`                            | Resolve decisões materiais não descobríveis — `brainstorm.md`. |
 | `/code-flow tool doctor [args]`                    | Executa apenas `scripts/doctor.sh`.                            |
 
 Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
@@ -52,7 +51,7 @@ Papéis válidos: `issue-writer`, `architect`, `executor`, `reviewer` e
 4. Publique evidência antes de mutar labels. Cada papel inicia, conclui e
    confirma sua própria transição; decisões humanas usam o comando `gate`.
 5. Proponha `Complexity: XS | S | M | L | XL`, recalcule risco e aplique
-   [`references/risk-profiles.md`](references/risk-profiles.md). Hard trigger
+   [`references/runtime.md`](references/runtime.md). Hard trigger
    sempre vence esforço pequeno.
 6. Use worktree somente para implementação, correção ou integração. Com diff,
    o executor termina somente com commit, push e PR publicado.
@@ -75,16 +74,10 @@ estado e `run_id`. Para sair, aplique a saída segura de `phases/context.md`.
 | Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)                         |
 | Review                                      | [`phases/review.md`](phases/review.md)                             |
 | Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md)                       |
-| Brainstorm                                  | [`references/brainstorm.md`](references/brainstorm.md)             |
-| Visual opcional                             | [`references/visual-companion.md`](references/visual-companion.md) |
 
 Antes de operar labels, leia
-[`references/github-flow.md`](references/github-flow.md) e
-[`references/evidence-contract.md`](references/evidence-contract.md). Para
-modelos/capacidades, leia
-[`references/runtime-capabilities.md`](references/runtime-capabilities.md).
-Use [`references/workflow-cheatsheet.md`](references/workflow-cheatsheet.md)
-para a verificação operacional curta e
+[`references/runtime.md`](references/runtime.md) e
+[`references/evidence-contract.md`](references/evidence-contract.md). Use
 [`references/workflow-states.json`](references/workflow-states.json) como fonte
 canônica de estados, atores e transições.
 Use `scripts/transition-issue.sh` para mutações determinísticas e

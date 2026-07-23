@@ -1,0 +1,10 @@
+{
+	"name": "@gugacarbo/skill-brainstorm",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Development tooling for the brainstorm skill.",
+	"scripts": {
+		"test": "bash dev/tests.sh",
+		"build": "bash -lc 'for file in scripts/visual-companion/*.sh; do bash -n \"$file\"; done; if command -v node >/dev/null 2>&1; then node --check scripts/visual-companion/server.cjs; fi'"
+	}
+}

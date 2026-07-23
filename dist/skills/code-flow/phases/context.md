@@ -10,7 +10,7 @@ descobríveis.
 `/code-flow start <issue>` exige uma repository issue elegível, publica a
 evidência de ativação e adiciona `code-flow:active + stage:needs-triage`. Recuse
 ativação quando houver outro `stage:*`, labels legadas ou issue tracker/Epic.
-Labels legadas usam a migração segura de `references/github-flow.md`.
+Labels legadas usam a migração segura de `references/runtime.md`.
 
 Enquanto `code-flow:active` existir, o protocolo da skill é autoritativo. Ainda
 assim, preserve o workflow Git, branch protection, forms e comandos do projeto.
