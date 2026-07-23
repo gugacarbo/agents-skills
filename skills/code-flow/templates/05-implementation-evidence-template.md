@@ -1,14 +1,32 @@
 > agent: executor
 > run_id: <uuid>
-> event: implementation-result
+> event: implementation-outline | implementation-result
 > state_before: <stage:ready-for-execution | stage:needs-changes> + stage:in-progress
-> state_after: <stage:needs-delivery-review | stage:blocked + needs-human>
-> sources_evidence: <outline/relatório, digest, commits, PR e comandos>
+> state_after: <stage:ready-for-execution + stage:in-progress | stage:needs-delivery-review | stage:blocked + needs-human>
+> sources_evidence: <issue, Base SHA, código, testes, commits, PR e comandos>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
+
+<!-- Preencha apenas o que for necessário. Use `## Planejamento` antes de
+     executar e complete `## Evidências` após a execução. Se for complexidade
+     S, o planejamento pode ser inline; nos demais, referencie o
+     relatório/digest autorizado. -->
 
 ## Resume
 
-<DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED — resumo e próximo papel>
+<objetivo, mudanças, validação e condições de parada — ou DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED com resumo e próximo papel>
+
+## Planejamento
+
+| Escopo   | Arquivos/áreas | Validação    |
+| -------- | -------------- | ------------ |
+| `<item>` | `<paths>`      | `<comandos>` |
+
+| Worktree/branch | Base SHA | Rollback |
+| --------------- | -------- | -------- |
+| `<valor>`       | `<sha>`  | `<ação>` |
+
+Pare para nova arquitetura diante de contrato público, hard trigger, decisão
+material ou drift não coberto.
 
 ## Rastreabilidade imutável
 

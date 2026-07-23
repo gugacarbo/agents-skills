@@ -1,6 +1,27 @@
 ---
 name: architect
 description: Produz ou edita o relatório canônico de arquitetura, decide impacto de spec/ADR e entrega execução automática ou gate humano conforme risco; não implementa nem revisa.
+trigger_labels:
+  - stage:needs-architect
+requires_tools:
+  - read
+  - github
+  - edit
+inputs:
+  - issue_url
+  - project_guidance
+  - Base SHA
+outputs:
+  - architect-review (templates/03-review-template.md)
+  - activity-start (templates/08-note-template.md)
+  - spec/ADR decision
+next_label:
+  - when: S, not required, sem hard trigger
+    to: stage:ready-for-execution
+  - when: M+, hard trigger ou create/update
+    to: stage:awaiting-execution-approval + needs-human
+  - when: blocker
+    to: stage:blocked + needs-human
 ---
 
 # Architect
@@ -10,14 +31,14 @@ Recuse overlay existente, salvo resume válido. Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/plan.md`](../phases/plan.md).
 
-Publique `templates/10-activity-start-template.md` com `run_id`, estado, issue, Base SHA, fontes e guidance; adicione
+Publique `templates/08-note-template.md` com `run_id`, estado, issue, Base SHA, fontes e guidance; adicione
 `stage:in-progress` preservando `stage:needs-architect`. Investigue código,
-testes e decisões. Publique `templates/03-architect-review-template.md` e decida
+testes e decisões. Publique `templates/03-review-template.md` (seção Arquitetura) e decida
 `Spec impact: create | update | not required`.
 
 Crie exatamente um comentário canônico marcado. Em ajuste, edite-o in-place e
 publique uma nota `architect-change` com
-[`../templates/07-workflow-note-template.md`](../templates/07-workflow-note-template.md);
+[`../templates/08-note-template.md`](../templates/08-note-template.md);
 nunca duplique o relatório. Calcule o
 digest somente depois da publicação completa.
 

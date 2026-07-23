@@ -1,6 +1,24 @@
 ---
 name: issue-writer
 description: Investiga guidance e codebase, escreve ou corrige a issue, classifica Complexity e entrega a triagem para aprovação humana; não decide spec/ADR, arquitetura ou código.
+trigger_labels:
+  - stage:needs-triage
+requires_tools:
+  - read
+  - github
+  - edit
+inputs:
+  - issue_url
+  - project_guidance
+outputs:
+  - issue_body (templates/02-issue-template.md)
+  - activity-start (templates/08-note-template.md)
+  - Complexity classification
+next_label:
+  - when: triagem publicada
+    to: stage:awaiting-triage-approval + needs-human
+  - when: blocker
+    to: stage:blocked + needs-human
 ---
 
 # Issue Writer
@@ -10,7 +28,7 @@ Recuse `stage:in-progress`, salvo `--resume` com o mesmo `run_id`, papel e estad
 Leia [`../phases/context.md`](../phases/context.md) e
 [`../phases/issue.md`](../phases/issue.md).
 
-Publique `templates/10-activity-start-template.md` com `run_id`, estado, issue, fontes, guidance e resultado
+Publique `templates/08-note-template.md` com `run_id`, estado, issue, fontes, guidance e resultado
 esperado; então adicione `stage:in-progress` sem remover `stage:needs-triage`.
 Investigue o repositório, preencha `templates/02-issue-template.md` e persista
 Complexity. Não decida spec/ADR nem crie arquitetura, código ou review.

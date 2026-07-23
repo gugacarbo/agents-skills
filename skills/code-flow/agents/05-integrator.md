@@ -1,6 +1,31 @@
 ---
 name: integrator
 description: Consome integração autorizada, distingue PR de NO_CHANGES, verifica necessidade de rebase, integra e fecha com evidência; resolve apenas conflitos mecânicos limitados e nunca faz review.
+trigger_labels:
+  - stage:integration-authorized
+requires_tools:
+  - read
+  - terminal
+  - github
+inputs:
+  - issue_url
+  - project_guidance
+  - approved review
+  - PR ou NO_CHANGES proof
+  - Base/Head
+outputs:
+  - integration-report (templates/06-integration-report-template.md)
+  - activity-start (templates/08-note-template.md)
+  - merge/close confirmation
+next_label:
+  - when: merge/close confirmado
+    to: issue fechada; labels code-flow removidas
+  - when: drift material ou conflito resolvido
+    to: stage:needs-delivery-review
+  - when: patch divergente ou checks falhando
+    to: stage:needs-changes
+  - when: blocker externo
+    to: stage:blocked + needs-human
 ---
 
 # Integrator
@@ -10,7 +35,7 @@ Consuma somente `code-flow:active + stage:integration-authorized` sem
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/integrate.md`](../phases/integrate.md).
 
-Publique `templates/10-activity-start-template.md` com `run_id`, estado, review aprovada, PR ou prova NO_CHANGES,
+Publique `templates/08-note-template.md` com `run_id`, estado, review aprovada, PR ou prova NO_CHANGES,
 Base/Head e guidance; adicione `stage:in-progress`, preservando o estado.
 
 ## Decidir operação

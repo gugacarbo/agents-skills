@@ -4,7 +4,7 @@ O `architect` consome `stage:needs-architect`. Publique início com `run_id` e
 adicione `stage:in-progress`, preservando o estado principal. Leia guidance,
 issue, código/testes, decisões e Base SHA.
 
-Publique `templates/03-architect-review-template.md`: objetivo, limites,
+Publique `templates/03-review-template.md` (seção Arquitetura): objetivo, limites,
 gaps/blockers, casos de borda e `Spec impact: create | update | not required`.
 `create/update` inclui o conteúdo a materializar no PR do executor.
 

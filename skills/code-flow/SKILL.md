@@ -67,25 +67,26 @@ estado e `run_id`. Para sair, aplique a saída segura de `phases/context.md`.
 
 ## Router
 
-| Operação                                    | Carregar                                                     |
-| ------------------------------------------- | ------------------------------------------------------------ |
-| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)                     |
-| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)                         |
-| Arquitetura/autorização                     | [`phases/plan.md`](phases/plan.md)                           |
-| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)                   |
-| Review                                      | [`phases/review.md`](phases/review.md)                       |
-| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md)                 |
-| Brainstorm                                  | [`prompts/brainstorm.md`](prompts/brainstorm.md)             |
-| Visual opcional                             | [`prompts/visual-companion.md`](prompts/visual-companion.md) |
+| Operação                                    | Carregar                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)                           |
+| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)                               |
+| Arquitetura/autorização                     | [`phases/plan.md`](phases/plan.md)                                 |
+| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)                         |
+| Review                                      | [`phases/review.md`](phases/review.md)                             |
+| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md)                       |
+| Brainstorm                                  | [`references/brainstorm.md`](references/brainstorm.md)             |
+| Visual opcional                             | [`references/visual-companion.md`](references/visual-companion.md) |
 
 Antes de operar labels, leia
-[`references/github-flow.md`](references/github-flow.md),
-[`references/label-mutation-matrix.md`](references/label-mutation-matrix.md) e
+[`references/github-flow.md`](references/github-flow.md) e
 [`references/evidence-contract.md`](references/evidence-contract.md). Para
 modelos/capacidades, leia
 [`references/runtime-capabilities.md`](references/runtime-capabilities.md).
 Use [`references/workflow-cheatsheet.md`](references/workflow-cheatsheet.md)
-para a verificação operacional curta.
+para a verificação operacional curta e
+[`references/workflow-states.json`](references/workflow-states.json) como fonte
+canônica de estados, atores e transições.
 Use `scripts/transition-issue.sh` para mutações determinísticas e
 `scripts/source-set-digest.py` para o relatório canônico.
 Use [`templates/01-epic.md`](templates/01-epic.md) somente quando o usuário

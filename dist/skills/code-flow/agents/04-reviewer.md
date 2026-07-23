@@ -1,6 +1,30 @@
 ---
 name: reviewer
 description: Executa a única delivery review independente da PR publicada ou prova NO_CHANGES, confere DoD, evidências e autoria e entrega merge humano, integração sem diff ou correção; não altera código.
+trigger_labels:
+  - stage:needs-delivery-review
+requires_tools:
+  - read
+  - github
+  - edit
+inputs:
+  - issue_url
+  - project_guidance
+  - PR ou NO_CHANGES proof
+  - implementation-evidence
+outputs:
+  - delivery-review (templates/03-review-template.md)
+  - activity-start (templates/08-note-template.md)
+  - follow-up issue drafts
+next_label:
+  - when: diff aprovado
+    to: stage:ready-to-merge + needs-human
+  - when: NO_CHANGES aprovado
+    to: stage:integration-authorized
+  - when: ajustar/Critical/Important/Cannot verify
+    to: stage:needs-changes
+  - when: blocker externo
+    to: stage:blocked + needs-human
 ---
 
 # Reviewer
@@ -10,15 +34,14 @@ Consuma somente `code-flow:active + stage:needs-delivery-review` sem
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/review.md`](../phases/review.md).
 
-Publique `templates/10-activity-start-template.md` com `run_id`, estado, fontes, guidance e artefatos revisados;
+Publique `templates/08-note-template.md` com `run_id`, estado, fontes, guidance e artefatos revisados;
 adicione `stage:in-progress` preservando o estado principal. Verifique que não
 produziu issue, relatório, código ou evidência revisada. Trocar nome/modelo não
 apaga autoria.
 
 Revise PR remota ou prova NO_CHANGES, DoD, casos de borda, spec, testes e
-evidências. Quando precisar de um pacote local determinístico, use
-[`../scripts/review-package.sh`](../scripts/review-package.sh). Publique
-`templates/05-delivery-review-template.md`. Inclua os drafts
+evidências. Publique
+`templates/03-review-template.md` (seção Delivery review). Inclua os drafts
 individuais de cada Minor e a consolidação no mesmo comentário. Não existe
 auditoria adicional em nenhum nível de complexidade.
 

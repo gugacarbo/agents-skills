@@ -18,7 +18,7 @@ assim, preserve o workflow Git, branch protection, forms e comandos do projeto.
 ## Gates determinísticos
 
 `/code-flow gate` não toma decisão: recebe uma resposta humana, valida o estado
-esperado, publica `templates/08-human-gate-spec.md`, aplica a transição da matriz
+esperado, publica `templates/07-human-gate-spec.md`, aplica a transição da matriz
 e confirma labels. Recuse gate com `stage:in-progress`, evidência ausente,
 digest/base obsoletos ou opção não permitida.
 
@@ -43,8 +43,10 @@ recalcula risco e valida o destino antes de `/code-flow gate <issue> resume
 
 ## Batch
 
-Crie pré-issues como Project V2 `DRAFT_ISSUE` com
-`templates/11-batch-pre-issue-draft.md`. Draft não recebe labels. O issue-writer
+Crie pré-issues como Project V2 `DRAFT_ISSUE` usando
+`templates/02-issue-template.md`. No draft, preencha apenas as seções com
+informação disponível no momento (título, intenção, contexto fornecido); deixe as
+demais como placeholders a completar. Draft não recebe labels. O issue-writer
 investiga e completa o body antes da conversão. Depois de confirmar URL, número,
 repositório e tipo `ISSUE`, não repita a triagem: publique a promoção e adicione
 `code-flow:active + stage:awaiting-triage-approval + needs-human`.

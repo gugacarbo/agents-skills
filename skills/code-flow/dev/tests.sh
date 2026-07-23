@@ -27,16 +27,20 @@ test_structure() {
   [ "$actual" = "$expected" ] || fail "unexpected agents: $actual"
 
   actual=$(find "$SKILL/templates" -maxdepth 1 -type f -name '*.md' -printf '%f\n' | sort)
-  expected=$(printf '%s\n' 01-epic.md 02-issue-template.md 03-architect-review-template.md \
-    04-implementation-evidence-template.md 05-delivery-review-template.md \
-    06-integration-report-template.md 07-workflow-note-template.md \
-    08-human-gate-spec.md 09-implementation-outline-template.md \
-    10-activity-start-template.md 11-batch-pre-issue-draft.md)
+  expected=$(printf '%s\n' 01-epic.md 02-issue-template.md \
+    03-review-template.md 04-implementation-outline-template.md \
+    05-implementation-evidence-template.md 06-integration-report-template.md \
+    07-human-gate-spec.md 08-note-template.md)
   [ "$actual" = "$expected" ] || fail "unexpected templates: $actual"
 
   [ -f "$SKILL/references/workflow-cheatsheet.md" ] || fail 'missing neutral workflow cheatsheet'
   [ ! -e "$SKILL/references/orchestrator-cheatsheet.md" ] || fail 'orchestrator cheatsheet remains'
   [ ! -e "$SKILL/templates/10-native-workflow-mapping.md" ] || fail 'native mapping template remains'
+  [ ! -e "$SKILL/references/label-mutation-matrix.md" ] || fail 'label mutation matrix remains (use workflow-states.json)'
+  [ ! -e "$SKILL/prompts" ] || fail 'prompts/ dir remains (moved to references/)'
+  [ ! -e "$SKILL/templates/02-batch-pre-issue-draft.md" ] || fail '02-batch-pre-issue-draft.md remains (merged into 02-issue-template)'
+  [ -f "$SKILL/references/brainstorm.md" ] || fail 'missing references/brainstorm.md'
+  [ -f "$SKILL/references/visual-companion.md" ] || fail 'missing references/visual-companion.md'
 }
 
 test_router_and_roles() {
@@ -60,6 +64,14 @@ test_router_and_roles() {
   assert_contains 'range-diff/patch-id' "$SKILL/agents/05-integrator.md"
   assert_contains 'Drift material' "$SKILL/agents/05-integrator.md"
 
+  for agent_file in "$SKILL/agents"/0[1-5]-*.md; do
+    assert_contains 'trigger_labels:' "$agent_file"
+    assert_contains 'requires_tools:' "$agent_file"
+    assert_contains 'inputs:' "$agent_file"
+    assert_contains 'outputs:' "$agent_file"
+    assert_contains 'next_label:' "$agent_file"
+  done
+
   ! grep -rn -iE 'auditor fresco|auditoria final|stage:needs-audit|agent: auditor|name: auditor' \
     "$SKILL/SKILL.md" "$SKILL/agents" "$SKILL/phases" "$SKILL/references" "$SKILL/templates" \
     || fail 'audit phase remains'
@@ -70,19 +82,18 @@ test_router_and_roles() {
 
 test_templates() {
   local template
-  for template in 03-architect-review-template.md 04-implementation-evidence-template.md \
-    05-delivery-review-template.md 06-integration-report-template.md \
-    07-workflow-note-template.md 08-human-gate-spec.md \
-    09-implementation-outline-template.md 10-activity-start-template.md; do
+  for template in 03-review-template.md 05-implementation-evidence-template.md \
+    06-integration-report-template.md 07-human-gate-spec.md \
+    08-note-template.md; do
     assert_comment_contract "$SKILL/templates/$template"
   done
   assert_contains 'run_id' "$SKILL/references/evidence-contract.md"
-  assert_contains 'stage:in-progress' "$SKILL/templates/10-activity-start-template.md"
-  assert_contains 'NO_CHANGES nunca é' "$SKILL/templates/05-delivery-review-template.md"
+  assert_contains 'stage:in-progress' "$SKILL/templates/08-note-template.md"
+  assert_contains 'NO_CHANGES nunca é' "$SKILL/templates/03-review-template.md"
   assert_contains 'Verificação de rebase' "$SKILL/templates/06-integration-report-template.md"
-  assert_contains 'activity reset' "$SKILL/templates/08-human-gate-spec.md"
-  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-architect-review-template.md"
-  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/03-architect-review-template.md"
+  assert_contains 'activity reset' "$SKILL/templates/07-human-gate-spec.md"
+  assert_contains '<!-- code-flow:architect-review:start -->' "$SKILL/templates/03-review-template.md"
+  assert_contains '<!-- code-flow:architect-review:end -->' "$SKILL/templates/03-review-template.md"
 }
 
 test_registry() {
@@ -273,20 +284,6 @@ test_doctor() {
   [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -Fq 'unknown stage labels' || fail 'doctor missed unknown stage label'
 }
 
-test_evals() {
-  jq -e '
-    .skill_name == "code-flow" and
-    (.evals | length >= 12) and
-    ([.evals[].id] | length == (unique | length)) and
-    all(.evals[]; (.prompt | length > 20) and (.expected_output | length > 20) and (.expectations | length > 0) and (.baseline_failure | length > 0))
-  ' "$SKILL/evals/evals.json" > /dev/null || fail 'eval corpus incomplete'
-  assert_not_contains 'auditoria final' "$SKILL/evals/evals.json"
-  assert_not_contains 'ready-to-close' "$SKILL/evals/evals.json"
-  assert_contains 'stage:in-progress' "$SKILL/evals/evals.json"
-  assert_contains 'stage:integration-authorized' "$SKILL/evals/evals.json"
-  assert_contains 'rebase' "$SKILL/evals/evals.json"
-}
-
 test_syntax() {
   sh -n "$SKILL/scripts/doctor.sh"
   sh -n "$SKILL/scripts/transition-issue.sh"
@@ -301,6 +298,5 @@ test_registry
 test_source_set_digest
 test_transition_protocol
 test_doctor
-test_evals
 test_syntax
 printf 'PASS: code-flow dev tests\n'

@@ -5,7 +5,7 @@ evidência de início com `run_id` e adicione `stage:in-progress`, preservando
 `stage:needs-triage`.
 
 Use `templates/02-issue-template.md`. Descubra guidance e codebase, preencha
-contexto, objetivo e DoD e persista `Complexity: S | M | G | X | XL`. Não grave
+contexto, objetivo e DoD e persista `Complexity: XS | S | M | L | XL`. Não grave
 `Workflow`. Relações com Epic, Parent e sub-issues usam mecanismos nativos.
 
 Issue-writer não decide `create | update | not required` de spec/ADR e não cria
@@ -15,7 +15,7 @@ arquitetura, código ou review. Publique a evidência da triagem antes de remove
 
 O gate de triagem aplica:
 
-- `approve`: S sem hard trigger → `stage:ready-for-execution`; M+, hard trigger
+- `approve`: XS sem hard trigger → `stage:ready-for-execution`; S+, hard trigger
   ou rigor promovido → `stage:needs-architect`;
 - `adjust`: `stage:needs-triage`;
 - `block`: `stage:blocked + needs-human` com `Resume`.

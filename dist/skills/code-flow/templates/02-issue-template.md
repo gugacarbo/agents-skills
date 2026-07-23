@@ -1,7 +1,7 @@
 # <Título da issue>
 
 > type: <issue | bug | feature | docs>
-> Complexity: <S | M | G | X | XL>
+> Complexity: <XS | S | M | L | XL>
 > project_guidance: <paths nearest-wins e comandos; ou none found + busca>
 
 ## Contexto e objetivo
