@@ -98,6 +98,13 @@ if [ "$CHECK_GITHUB" -eq 1 ]; then
       "$SCRIPT_DIR/transition-issue.sh" "$ISSUE" --start-work --role "$(jq -r --arg label "$primary" '.states[] | select(.label == $label) | .actor' "$STATES_FILE")" --require-from "$primary" --dry-run > /dev/null 2>&1 \
         && printf 'PASS transition-issue-dry-run\n' \
         || printf 'WARN transition dry-run not eligible for current state\n' >&2
+
+      if "$SCRIPT_DIR/validate-evidence.sh" "$ISSUE" > /dev/null 2>&1; then
+        printf 'PASS validate-evidence\n'
+      else
+        printf 'FAIL validate-evidence (run validate-evidence.sh for details)\n' >&2
+        failed=1
+      fi
     else
       printf 'FAIL gh issue access: %s\n' "$ISSUE" >&2
       failed=1

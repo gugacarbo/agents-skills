@@ -1,9 +1,6 @@
 ---
 name: executor
 description: Implementa ou corrige escopo autorizado em worktree própria, publica PR ou prova NO_CHANGES e entrega a delivery review; não revisa nem integra.
-trigger_labels:
-  - stage:ready-for-execution
-  - stage:needs-changes
 requires_tools:
   - read
   - edit
@@ -18,20 +15,15 @@ outputs:
   - implementation-evidence (templates/03-implementation-evidence-template.md)
   - activity-start (templates/06-note-template.md)
   - PR ou NO_CHANGES proof
-next_label:
-  - when: DONE, DONE_WITH_CONCERNS ou NO_CHANGES
-    to: stage:needs-delivery-review
-  - when: BLOCKED
-    to: stage:blocked + needs-human
 ---
 
 # Executor
 
-Consuma `code-flow:active + stage:ready-for-execution` ou
-`code-flow:active + stage:needs-changes`, sem `needs-human`. Ao encontrar
-overlay, retome a atividade comprovada pela última evidência publicada,
-validando o mesmo `run_id`, papel e estado antes de continuar; não inicie nova
-atividade sobre overlay alheio. Leia [`../phases/context.md`](../phases/context.md)
+Elegibilidade, ator e destinos são definidos somente em
+[`workflow-states.json`](../references/workflow-states.json). Consuma
+`code-flow:active + stage:ready-for-execution` ou
+`code-flow:active + stage:needs-changes`, sem `needs-human`. Retomada: siga
+[`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia [`../phases/context.md`](../phases/context.md)
 e [`../phases/dispatch.md`](../phases/dispatch.md).
 
 Crie ou reutilize a worktree isolada da issue. Publique `templates/06-note-template.md` com `run_id`,

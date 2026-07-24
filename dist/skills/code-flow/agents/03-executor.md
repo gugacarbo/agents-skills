@@ -28,10 +28,8 @@ next_label:
 # Executor
 
 Consuma `code-flow:active + stage:ready-for-execution` ou
-`code-flow:active + stage:needs-changes`, sem `needs-human`. Ao encontrar
-overlay, retome a atividade comprovada pela última evidência publicada,
-validando o mesmo `run_id`, papel e estado antes de continuar; não inicie nova
-atividade sobre overlay alheio. Leia [`../phases/context.md`](../phases/context.md)
+`code-flow:active + stage:needs-changes`, sem `needs-human`. Retomada: siga
+[`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia [`../phases/context.md`](../phases/context.md)
 e [`../phases/dispatch.md`](../phases/dispatch.md).
 
 Crie ou reutilize a worktree isolada da issue. Publique `templates/06-note-template.md` com `run_id`,

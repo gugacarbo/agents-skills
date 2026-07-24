@@ -4,7 +4,7 @@ set -eu
 # Best-effort label protocol helper. GitHub label edits are not atomic; every
 # operation confirms the remote result and reports drift instead of claiming a lock.
 
-USAGE='Usage: transition-issue.sh <N|URL> (--activate | --start-work --role ROLE | --finish-to STAGE | --gate-to STAGE | --reset-activity | --complete | --migrate-to STAGE) [--require-from STAGE] [--dry-run] [--allow-repair]'
+USAGE='Usage: transition-issue.sh <N|URL> (--activate | --start-work --role ROLE | --finish-to STAGE | --gate-to STAGE | --reset-activity | --complete | --migrate-to STAGE) [--require-from STAGE] [--dry-run] [--allow-repair] [--provision-labels] [--run-id UUID] [--lease-ttl SECONDS]'
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 STATES_FILE="$SCRIPT_DIR/../references/workflow-states.json"
 
@@ -15,6 +15,9 @@ ROLE=""
 REQUIRE_FROM=""
 DRY_RUN=0
 ALLOW_REPAIR=0
+PROVISION_LABELS=0
+RUN_ID=""
+LEASE_TTL=""
 
 die() {
   printf '%s\n' "$1" >&2
@@ -80,6 +83,20 @@ while [ "$#" -gt 0 ]; do
       ALLOW_REPAIR=1
       shift
       ;;
+    --provision-labels)
+      PROVISION_LABELS=1
+      shift
+      ;;
+    --run-id)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      RUN_ID="$2"
+      shift 2
+      ;;
+    --lease-ttl)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      LEASE_TTL="$2"
+      shift 2
+      ;;
     --help | -h)
       printf '%s\n' "$USAGE"
       exit 0
@@ -96,6 +113,9 @@ done
 [ -n "$ISSUE" ] && [ -n "$OP" ] || die "$USAGE"
 [ "$OP" = start ] || [ -z "$ROLE" ] || die 'Error: --role is only valid with --start-work'
 [ "$OP" != start ] || [ -n "$ROLE" ] || die 'Error: --start-work requires --role'
+[ -z "$LEASE_TTL" ] || [ "$OP" = start ] || die 'Error: --lease-ttl is only valid with --start-work'
+[ -z "$LEASE_TTL" ] || [ -n "$RUN_ID" ] || die 'Error: --lease-ttl requires --run-id'
+[ -z "$RUN_ID" ] || [ "$OP" = start ] || die 'Error: --run-id is only valid with --start-work'
 
 command -v gh > /dev/null 2>&1 || die 'Error: gh is required'
 command -v jq > /dev/null 2>&1 || die 'Error: jq is required'
@@ -205,19 +225,39 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 
 label_exists() { gh label view "$1" --repo "$ISSUE_REPO" > /dev/null 2>&1; }
-ensure_label() {
+provision_label() {
   name="$1"
   color="$2"
   description="$3"
   label_exists "$name" || gh label create "$name" --repo "$ISSUE_REPO" --color "$color" --description "$description" > /dev/null
 }
+require_label() {
+  name="$1"
+  label_exists "$name" || MISSING_LABELS="$MISSING_LABELS $name"
+}
 add_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --add-label "$1" > /dev/null; }
 remove_label() { gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --remove-label "$1" > /dev/null; }
 
-ensure_label "$ACTIVATION" '5319E7' 'code-flow workflow active'
-ensure_label "$ACTIVITY" 'FBCA04' 'code-flow agent activity in progress'
-ensure_label 'needs-human' 'D93F0B' 'human decision required'
-[ -z "$TARGET" ] || ensure_label "$TARGET" '1D76DB' 'code-flow primary state'
+if [ "$PROVISION_LABELS" -eq 1 ]; then
+  provision_label "$ACTIVATION" '5319E7' 'code-flow workflow active'
+  provision_label "$ACTIVITY" 'FBCA04' 'code-flow agent activity in progress'
+  provision_label 'needs-human' 'D93F0B' 'human decision required'
+  [ -z "$TARGET" ] || provision_label "$TARGET" '1D76DB' 'code-flow primary state'
+  # Provision all primary states from the registry so subsequent transitions
+  # do not need --provision-labels again.
+  for state_label in $(jq -r '.states[].label' "$STATES_FILE"); do
+    provision_label "$state_label" '1D76DB' 'code-flow primary state'
+  done
+else
+  MISSING_LABELS=''
+  require_label "$ACTIVATION"
+  require_label "$ACTIVITY"
+  require_label 'needs-human'
+  [ -z "$TARGET" ] || require_label "$TARGET"
+  if [ -n "$MISSING_LABELS" ]; then
+    die "Error: required labels missing in $ISSUE_REPO:$MISSING_LABELS\nProvision them first or rerun with --provision-labels."
+  fi
+fi
 
 case "$OP" in
   activate)

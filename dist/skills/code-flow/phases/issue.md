@@ -10,15 +10,20 @@ contexto, objetivo e DoD e persista `Complexity: XS | S | M | L | XL`. Não grav
 
 Issue-writer não decide `create | update | not required` de spec/ADR e não cria
 arquitetura, código ou review. Publique a evidência da triagem antes de remover
-`stage:needs-triage + stage:in-progress` e deixar
-`stage:awaiting-triage-approval + needs-human`.
+`stage:needs-triage + stage:in-progress`.
 
 O gate de triagem aplica:
 
-- `approve`: XS sem hard trigger → `stage:ready-for-execution`; S+, hard trigger
-  ou rigor promovido → `stage:needs-architect`;
+- `approve`: XS sem hard trigger → `stage:ready-for-execution` (auto-aprovável
+  pelo issue-writer com evidência clara); S+, hard trigger ou rigor promovido →
+  `stage:needs-architect`;
 - `adjust`: `stage:needs-triage`;
 - `block`: `stage:blocked + needs-human` com `Resume`.
+
+Para XS sem hard trigger, o issue-writer publica a evidência de triagem e
+transiciona diretamente para `stage:ready-for-execution` sem `needs-human`.
+Para S+ ou hard trigger, publica a evidência e deixa
+`stage:awaiting-triage-approval + needs-human`.
 
 Para Draft Issue já investigada, a conversão deixa diretamente
 `stage:awaiting-triage-approval + needs-human`; nunca execute a triagem duas

@@ -1,5 +1,6 @@
 > agent: executor
 > run_id: <uuid>
+> protocol_version: <schema_version do workflow-states.json>
 > event: implementation-outline | implementation-result
 > state_before: <stage:ready-for-execution | stage:needs-changes> + stage:in-progress
 > state_after: <stage:ready-for-execution + stage:in-progress | stage:needs-delivery-review | stage:blocked + needs-human>

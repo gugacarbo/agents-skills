@@ -1,8 +1,6 @@
 ---
 name: architect
 description: Produz ou edita o relatório canônico de arquitetura, decide impacto de spec/ADR e entrega execução automática ou gate humano conforme risco; não implementa nem revisa.
-trigger_labels:
-  - stage:needs-architect
 requires_tools:
   - read
   - github
@@ -15,21 +13,14 @@ outputs:
   - architect-review (templates/02-review-template.md)
   - activity-start (templates/06-note-template.md)
   - spec/ADR decision
-next_label:
-  - when: S, not required, sem hard trigger
-    to: stage:ready-for-execution
-  - when: M+, hard trigger ou create/update
-    to: stage:awaiting-execution-approval + needs-human
-  - when: blocker
-    to: stage:blocked + needs-human
 ---
 
 # Architect
 
-Consuma somente `code-flow:active + stage:needs-architect` sem `needs-human`.
-Ao encontrar overlay existente, retome a atividade comprovada pela última
-evidência publicada, validando o mesmo `run_id`, papel e estado antes de
-continuar; não inicie nova atividade sobre overlay alheio. Leia
+Elegibilidade, ator e destinos são definidos somente em
+[`workflow-states.json`](../references/workflow-states.json). Consuma somente
+`code-flow:active + stage:needs-architect` sem `needs-human`.
+Retomada: siga [`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/architecture.md`](../phases/architecture.md).
 

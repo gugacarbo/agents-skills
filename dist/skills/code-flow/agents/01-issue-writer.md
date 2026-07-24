@@ -24,9 +24,7 @@ next_label:
 # Issue Writer
 
 Consuma somente `code-flow:active + stage:needs-triage` sem `needs-human`.
-Ao encontrar `stage:in-progress`, retome a atividade comprovada pela última
-evidência publicada, validando o mesmo `run_id`, papel e estado antes de
-continuar; não inicie nova atividade sobre overlay alheio. Leia
+Retomada: siga [`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/issue.md`](../phases/issue.md).
 

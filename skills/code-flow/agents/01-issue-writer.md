@@ -1,8 +1,6 @@
 ---
 name: issue-writer
 description: Investiga guidance e codebase, escreve ou corrige a issue, classifica Complexity e entrega a triagem para aprovação humana; não decide spec/ADR, arquitetura ou código.
-trigger_labels:
-  - stage:needs-triage
 requires_tools:
   - read
   - github
@@ -14,19 +12,14 @@ outputs:
   - issue_body (templates/01-issue-template.md)
   - activity-start (templates/06-note-template.md)
   - Complexity classification
-next_label:
-  - when: triagem publicada
-    to: stage:awaiting-triage-approval + needs-human
-  - when: blocker
-    to: stage:blocked + needs-human
 ---
 
 # Issue Writer
 
-Consuma somente `code-flow:active + stage:needs-triage` sem `needs-human`.
-Ao encontrar `stage:in-progress`, retome a atividade comprovada pela última
-evidência publicada, validando o mesmo `run_id`, papel e estado antes de
-continuar; não inicie nova atividade sobre overlay alheio. Leia
+Elegibilidade, ator e destinos são definidos somente em
+[`workflow-states.json`](../references/workflow-states.json). Consuma somente
+`code-flow:active + stage:needs-triage` sem `needs-human`.
+Retomada: siga [`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/issue.md`](../phases/issue.md).
 

@@ -1,9 +1,9 @@
 # Delivery review independente
 
-O `reviewer` consome `stage:needs-delivery-review`. Publique início com `run_id`
-e adicione `stage:in-progress`, preservando o estado principal. Recuse quando
-seu `run_id` ou autoria mostrar que produziu issue, arquitetura, código ou
-evidência revisada.
+O `reviewer` consome o estado que o registry atribui a ele. Publique início com
+`run_id` e adicione `stage:in-progress`, preservando o estado principal. Rode
+`validate-evidence.sh` antes de revisar; se o autor GitHub já assinou artefato
+de issue-writer, architect ou executor, pare para revisão humana externa.
 
 Revise a PR publicada — nunca apenas branch local — ou a prova NO_CHANGES,
 guidance, relatório/outline, spec materializada, evidência, testes, DoD e casos

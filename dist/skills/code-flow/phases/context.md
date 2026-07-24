@@ -7,10 +7,11 @@ descobríveis.
 
 ## Ativação
 
-Ativação implícita: ao interagir com uma repository issue elegível, publique a
-evidência de ativação e adicione `code-flow:active + stage:needs-triage`. Recuse
-ativação quando houver outro `stage:*`, labels legadas ou issue tracker/Epic.
-Labels legadas usam a migração segura de `references/runtime.md`.
+Ativação somente explícita via `/code-flow` ou `transition-issue.sh --activate`.
+Antes de ativar, valide que a issue não tem `code-flow:active`, nenhum `stage:*`
+canônico, nenhum overlay e nenhum `needs-human`. Labels legados exigem a
+migração segura de `references/runtime.md` antes de ativar. Nunca adote uma
+issue somente por interagir com ela; discovery read-only não muta labels.
 
 Enquanto `code-flow:active` existir, o protocolo da skill é autoritativo. Ainda
 assim, preserve o workflow Git, branch protection, forms e comandos do projeto.
@@ -22,7 +23,8 @@ esperado, publica `templates/05-human-gate-spec.md`, aplica a transição da mat
 e confirma labels. Recuse gate com `stage:in-progress`, evidência ausente,
 digest/base obsoletos ou opção não permitida.
 
-- triage: `approve | adjust | block`;
+- triage: `approve | adjust | block` (XS sem hard trigger pode ser
+  auto-aprovado pelo issue-writer sem gate humano);
 - execution: `authorize | adjust | block`;
 - merge: `integrate | adjust | wait`;
 - resume: restaura somente o estado registrado no `Resume` publicado;

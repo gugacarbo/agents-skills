@@ -5,21 +5,27 @@ description: "Coordinate explicitly requested GitHub issue deliveries with repos
 
 # code-flow
 
-Coordene somente entregas iniciadas explicitamente. Use labels e evidências no
-GitHub como protocolo compartilhado; não instale configuração, agentes, estado
-ou instruções no repositório-alvo. Cada papel deve conseguir retomar a issue sem
+Coordene somente entregas iniciadas explicitamente via `/code-flow` ou
+`transition-issue.sh --activate`. Use labels e evidências no GitHub como
+protocolo compartilhado; não instale configuração, agentes, estado ou
+instruções no repositório-alvo. Cada papel deve conseguir retomar a issue sem
 memória do orquestrador e sempre redescobrir o guidance nearest-wins do projeto.
+
+Esta é uma **workflow engine skill**: coordena papéis, gates, evidência e
+integração em múltiplos estágios. Não é uma skill leve de uso único; a
+profundidade reflete o escopo de orquestração declarado. Para entregas simples
+sem gates, prefira fluxo direto.
 
 ## Entradas públicas
 
 ### Centrais
 
-| Invocação                                                      | Resultado                                                    |
-| -------------------------------------------------------------- | ------------------------------------------------------------ |
-| `/code-flow`                                                   | Discovery read-only e próxima ação recomendada.                                        |
-| `/code-flow role <papel> <issue>`                              | Executa um papel elegível isoladamente; retoma atividade comprovada quando há overlay. |
-| `/code-flow gate <issue> <decisão-humana>`                    | Aplica decisão humana ao estado atual.                                                 |
-| `/code-flow stop <issue>`                                     | Solicita saída segura sem descartar trabalho.                                          |
+| Invocação                                  | Resultado                                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `/code-flow`                               | Discovery read-only e próxima ação recomendada.                                        |
+| `/code-flow role <papel> <issue>`          | Executa um papel elegível isoladamente; retoma atividade comprovada quando há overlay. |
+| `/code-flow gate <issue> <decisão-humana>` | Aplica decisão humana ao estado atual.                                                 |
+| `/code-flow stop <issue>`                  | Solicita saída segura sem descartar trabalho.                                          |
 
 ### Secundárias
 
@@ -57,21 +63,23 @@ sobre overlay alheio. Para sair, aplique a saída segura de `phases/context.md`.
 
 ## Router
 
-| Operação                                    | Carregar                                     |
-| ------------------------------------------- | -------------------------------------------- |
-| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)     |
-| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)         |
+| Operação                                    | Carregar                                           |
+| ------------------------------------------- | -------------------------------------------------- |
+| Contexto, start, batch, resume, gate e stop | [`phases/context.md`](phases/context.md)           |
+| Issue e triagem                             | [`phases/issue.md`](phases/issue.md)               |
 | Arquitetura/autorização                     | [`phases/architecture.md`](phases/architecture.md) |
-| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)   |
-| Review                                      | [`phases/review.md`](phases/review.md)       |
-| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md) |
+| Execução/correção                           | [`phases/dispatch.md`](phases/dispatch.md)         |
+| Review                                      | [`phases/review.md`](phases/review.md)             |
+| Integração/fechamento                       | [`phases/integrate.md`](phases/integrate.md)       |
 
 Antes de operar labels, leia
 [`references/runtime.md`](references/runtime.md) e
 [`references/evidence-contract.md`](references/evidence-contract.md). Use
 [`references/workflow-states.json`](references/workflow-states.json) como fonte
-canônica de estados, atores e transições.
-Use `scripts/transition-issue.sh` para mutações determinísticas e
+canônica de estados, atores e transições. Para execução distribuída em VPS,
+consulte [`references/vps-runtime.md`](references/vps-runtime.md).
+Use `scripts/transition-issue.sh` para mutações determinísticas,
+`scripts/validate-evidence.sh` para validar correspondência overlay↔evidência e
 `scripts/source-set-digest.py` para o relatório canônico.
 Use [`templates/01-issue-template.md`](templates/01-issue-template.md) para issues e epics,
 [`templates/02-review-template.md`](templates/02-review-template.md) para arquitetura e delivery review,

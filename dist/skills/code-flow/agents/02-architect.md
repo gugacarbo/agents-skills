@@ -27,9 +27,7 @@ next_label:
 # Architect
 
 Consuma somente `code-flow:active + stage:needs-architect` sem `needs-human`.
-Ao encontrar overlay existente, retome a atividade comprovada pela última
-evidência publicada, validando o mesmo `run_id`, papel e estado antes de
-continuar; não inicie nova atividade sobre overlay alheio. Leia
+Retomada: siga [`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/architecture.md`](../phases/architecture.md).
 

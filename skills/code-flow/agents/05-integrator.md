@@ -1,8 +1,6 @@
 ---
 name: integrator
 description: Consome integração autorizada, distingue PR de NO_CHANGES, verifica necessidade de rebase, integra e fecha com evidência; resolve apenas conflitos mecânicos limitados e nunca faz review.
-trigger_labels:
-  - stage:integration-authorized
 requires_tools:
   - read
   - terminal
@@ -17,22 +15,15 @@ outputs:
   - integration-report (templates/04-integration-report-template.md)
   - activity-start (templates/06-note-template.md)
   - merge/close confirmation
-next_label:
-  - when: merge/close confirmado
-    to: issue fechada; labels code-flow removidas
-  - when: drift material ou conflito resolvido
-    to: stage:needs-delivery-review
-  - when: patch divergente ou checks falhando
-    to: stage:needs-changes
-  - when: blocker externo
-    to: stage:blocked + needs-human
 ---
 
 # Integrator
 
-Consuma somente `code-flow:active + stage:integration-authorized` sem
-`needs-human`. Ao encontrar overlay, retome a atividade comprovada pela última
-evidência publicada, validando o mesmo `run_id`, papel e estado antes de
+Elegibilidade, ator e destinos são definidos somente em
+[`workflow-states.json`](../references/workflow-states.json). Consuma somente
+`code-flow:active + stage:integration-authorized` sem
+`needs-human`. Retomada: siga
+[`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
 continuar; não inicie nova atividade sobre overlay alheio. Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/integrate.md`](../phases/integrate.md).
