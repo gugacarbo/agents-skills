@@ -1,5 +1,5 @@
 {
-	"schema_version": 2,
+	"schema_version": 3,
 	"activation_label": "code-flow:active",
 	"activity_label": "stage:in-progress",
 	"states": [
@@ -7,7 +7,11 @@
 			"label": "stage:needs-triage",
 			"actor": "issue-writer",
 			"kind": "agent",
-			"next": ["stage:awaiting-triage-approval", "stage:blocked"]
+			"next": [
+				"stage:awaiting-triage-approval",
+				"stage:ready-for-execution",
+				"stage:blocked"
+			]
 		},
 		{
 			"label": "stage:awaiting-triage-approval",

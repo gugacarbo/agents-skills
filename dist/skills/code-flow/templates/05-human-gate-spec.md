@@ -2,6 +2,7 @@
 
 > agent: gate
 > run_id: n/a
+> protocol_version: <schema_version do workflow-states.json>
 > event: gate-decision
 > state_before: <estado principal + needs-human>
 > state_after: <estado resultante>
@@ -36,6 +37,7 @@ humana ou a aprovação automática:
 > ajuste/bloqueio conforme indicado.
 >
 > Evidência revisada:
+>
 > - artefato: <link>
 > - digest: <sha>
 > - Base/Head: <sha/sha ou n/a>
@@ -44,6 +46,8 @@ humana ou a aprovação automática:
 > Próximo responsável: <humano | papel>
 ```
 
-Para aprovação automática (ex.: XS sem hard trigger e evidência clara), publique
-o mesmo formato substituindo a primeira linha por `Decisão automática aplicada
-por regra de projeto.` e documente a regra seguida.
+Para aprovação automática (XS sem hard trigger com evidência clara), publique o
+mesmo formato substituindo a primeira linha por `Decisão automática aplicada por
+regra de projeto: XS sem hard trigger.` e documente a regra seguida. Esta é a
+única aprovação automática permitida; S+, hard trigger e todos os demais gates
+exigem confirmação humana.

@@ -41,7 +41,7 @@ for command_name in git jq python3; do
   }
 done
 
-jq -e '.schema_version == 2 and (.states | length == 10)' "$STATES_FILE" > /dev/null 2>&1 \
+jq -e '.schema_version == 3 and (.states | length == 10)' "$STATES_FILE" > /dev/null 2>&1 \
   && printf 'PASS workflow-registry\n' || {
   printf 'FAIL workflow-registry\n' >&2
   failed=1

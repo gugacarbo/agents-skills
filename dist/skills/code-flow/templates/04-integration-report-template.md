@@ -1,5 +1,6 @@
 > agent: integrator
 > run_id: <uuid>
+> protocol_version: <schema_version do workflow-states.json>
 > event: integration-result
 > state_before: stage:integration-authorized + stage:in-progress
 > state_after: <closed/labels-cleared | stage:needs-delivery-review | stage:needs-changes | stage:blocked + needs-human>

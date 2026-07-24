@@ -2,6 +2,7 @@
 
 > agent: <architect | reviewer>
 > run_id: <uuid>
+> protocol_version: <schema_version do workflow-states.json>
 > event: <architecture-result | delivery-review-result>
 > state_before: <stage:needs-architect + stage:in-progress | stage:needs-delivery-review + stage:in-progress>
 > state_after: <stage:ready-for-execution | stage:awaiting-execution-approval + needs-human | stage:ready-to-merge + needs-human | stage:integration-authorized | stage:needs-changes | stage:blocked + needs-human>
@@ -75,9 +76,9 @@ Base SHA: `<sha>`
 
 ### Cobertura dos critérios
 
-| Critério     | Evidência revisada | Resultado | Observação |
-| ------------ | ------------------ | --------- | ---------- |
-| `<critério>` | `<prova>`          | `PASS     | FAIL       | Cannot verify` | `<nota>` |
+| Critério     | Evidência revisada | Resultado                       | Observação |
+| ------------ | ------------------ | ------------------------------- | ---------- |
+| `<critério>` | `<prova>`          | `PASS \| FAIL \| Cannot verify` | `<nota>`   |
 
 ### Reconciliação de escopo
 

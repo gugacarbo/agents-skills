@@ -121,7 +121,7 @@ command -v gh > /dev/null 2>&1 || die 'Error: gh is required'
 command -v jq > /dev/null 2>&1 || die 'Error: jq is required'
 [ -f "$STATES_FILE" ] || die "Error: missing workflow registry: $STATES_FILE"
 jq -e '
-  .schema_version == 2 and
+  .schema_version == 3 and
   (.activation_label | type == "string") and
   (.activity_label | type == "string") and
   (.states | type == "array" and length > 0) and
@@ -144,7 +144,7 @@ transition_allowed() {
 [ -z "$TARGET" ] || is_primary "$TARGET" || die "Error: invalid target state '$TARGET'"
 [ -z "$REQUIRE_FROM" ] || is_primary "$REQUIRE_FROM" || die "Error: invalid --require-from '$REQUIRE_FROM'"
 
-ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,url)
+ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
 ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
 [ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != null ] || die "Error: could not resolve issue: $ISSUE"
@@ -211,6 +211,7 @@ case "$OP" in
     ;;
   complete)
     [ "$HAS_ACTIVE" = true ] || die 'Error: completion requires code-flow:active'
+    [ "$(printf '%s' "$ISSUE_JSON" | jq -r '.state // empty')" = CLOSED ] || die 'Error: completion requires a closed issue'
     if [ "$ALLOW_REPAIR" -eq 0 ]; then
       [ "$PRIMARY_COUNT" -eq 1 ] && [ -z "$UNKNOWN_STAGES" ] || die 'Error: completion found workflow drift; use --allow-repair after evidence'
     fi

@@ -1,8 +1,6 @@
 ---
 name: reviewer
 description: Executa a única delivery review independente da PR publicada ou prova NO_CHANGES, confere DoD, evidências e autoria e entrega merge humano, integração sem diff ou correção; não altera código.
-trigger_labels:
-  - stage:needs-delivery-review
 requires_tools:
   - read
   - github
@@ -16,29 +14,22 @@ outputs:
   - delivery-review (templates/02-review-template.md)
   - activity-start (templates/06-note-template.md)
   - follow-up issue drafts
-next_label:
-  - when: diff aprovado
-    to: stage:ready-to-merge + needs-human
-  - when: NO_CHANGES aprovado
-    to: stage:integration-authorized
-  - when: ajustar/Critical/Important/Cannot verify
-    to: stage:needs-changes
-  - when: blocker externo
-    to: stage:blocked + needs-human
 ---
 
 # Reviewer
 
-Consuma somente `code-flow:active + stage:needs-delivery-review` sem
+Elegibilidade, ator e destinos são definidos somente em
+[`workflow-states.json`](../references/workflow-states.json). Consuma somente
+`code-flow:active + stage:needs-delivery-review` sem
 `needs-human`. Retomada: siga
 [`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
 [`../phases/context.md`](../phases/context.md) e
 [`../phases/review.md`](../phases/review.md).
 
 Publique `templates/06-note-template.md` com `run_id`, estado, fontes, guidance e artefatos revisados;
-adicione `stage:in-progress` preservando o estado principal. Verifique que não
-produziu issue, relatório, código ou evidência revisada. Trocar nome/modelo não
-apaga autoria.
+adicione `stage:in-progress` preservando o estado principal. Execute
+`validate-evidence.sh` antes de revisar; se o autor GitHub não for independente
+dos artefatos anteriores, pare para revisão humana externa.
 
 Revise PR remota ou prova NO_CHANGES, DoD, casos de borda, spec, testes e
 evidências. Publique

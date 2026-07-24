@@ -2,6 +2,7 @@
 
 > agent: <issue-writer | architect | executor | reviewer | integrator | papel>
 > run_id: <uuid ou n/a para gate>
+> protocol_version: <schema_version do workflow-states.json>
 > event: <activity-start | architect-change | gate-decision | activity-reset | migration | stop | failure>
 > state_before: <estado principal | labels>
 > state_after: <estado principal + stage:in-progress | labels>
@@ -18,7 +19,8 @@
 - Iniciado em: `<ISO-8601>`
 - Resultado esperado: `<artefato e próximo estado>`
 - Base/Head: `<sha/sha ou n/a>`
-- Branch/worktree: `<valor ou n/a>>
+- Branch/worktree: `<valor ou n/a>`
+- lease_ttl: `<segundos ou n/a>`
 
 _Publique antes de adicionar `stage:in-progress`. O overlay é cooperativo e não
 constitui lock atômico._

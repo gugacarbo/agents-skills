@@ -30,15 +30,17 @@ hard trigger.
 
 ### Papéis e gates
 
-- Toda triagem exige gate humano.
+- Toda triagem exige gate humano, exceto XS sem hard trigger, que pode ser
+  auto-aprovado pelo issue-writer com evidência clara e publicada.
 - XS sem hard trigger não exige arquitetura.
 - S sem hard trigger usa architect, mas `not required` segue direto à execução.
 - M+, hard trigger ou spec create/update exige gate humano de execução.
 - Toda entrega exige uma única delivery review independente; não há auditoria.
 - Diff aprovado exige gate humano de merge; `NO_CHANGES` não exige close gate.
 
-Trocar nome/modelo ou sessão não apaga autoria. Reviewer não pode ter produzido
-issue, arquitetura, código ou evidência revisada.
+Trocar nome/modelo ou sessão não apaga autoria. O autor GitHub do início do
+reviewer não pode ter produzido artefato anterior de issue-writer, architect ou
+executor; sem autor independente comprovável, pare para revisão humana externa.
 
 ### Drift de base
 
@@ -62,18 +64,23 @@ crie `.codex/agents`, altere `config.toml` ou instale configuração no repo alv
 
 Configuração explícita do usuário vence preferências. Sem roteamento, use o
 modelo herdado e preserve papéis por instâncias independentes. Sem paralelismo,
-execute em sequência. Sem instância independente para review, pare e peça
-revisão humana externa; nunca simule independência.
+execute em sequência. Sem instância e autor GitHub independentes para review,
+pare e peça revisão humana externa; nunca simule independência.
 
 Nunca persista modelo, effort ou disponibilidade em body, labels ou arquivos do
-repositório. O futuro runtime de VPS poderá adicionar leases; a skill atual
-oferece somente sinalização cooperativa por `stage:in-progress`.
+repositório. A skill oferece somente sinalização cooperativa por
+`stage:in-progress`; para execução distribuída em VPS com lease atômico, consulte
+[`vps-runtime.md`](vps-runtime.md).
 
 ## Protocolo GitHub
 
 `code-flow:active` ativa o protocolo. Enquanto presente, exatamente um estado
 principal de `workflow-states.json` identifica o próximo responsável. O overlay
 `stage:in-progress` pode coexistir com esse estado durante uma execução.
+
+`workflow-states.json` é a única fonte de labels canônicas, ator, tipo e
+transições permitidas. Papéis e fases descrevem trabalho e evidências; não
+definem roteamento próprio.
 
 | Label                               | Próximo responsável   | Exige `needs-human` |
 | ----------------------------------- | --------------------- | ------------------- |
@@ -88,6 +95,12 @@ principal de `workflow-states.json` identifica o próximo responsável. O overla
 | `stage:integration-authorized`      | integrator            | não                 |
 | `stage:blocked`                     | responsável do Resume | sim                 |
 
+`responsável do Resume` é o humano operando o gate `resume`, não um agente
+canônico. O self-loop `stage:ready-to-merge` → `stage:ready-to-merge` em
+`workflow-states.json` representa o gate `wait`: é idempotente e não muta labels
+(o `transition-issue.sh --gate-to stage:ready-to-merge --require-from
+stage:ready-to-merge` valida e não aplica nenhuma mutação).
+
 ### Invariantes
 
 - Issue ativa: `code-flow:active` + um estado principal.
@@ -100,7 +113,8 @@ principal de `workflow-states.json` identifica o próximo responsável. O overla
 
 Use `scripts/transition-issue.sh` com `--require-from`. `--start-work` adiciona
 somente o overlay. `--finish-to` substitui o estado principal e remove overlay.
-`--activate` inicia uma issue; `--complete` limpa labels após fechamento/saída.
+`--activate` inicia uma issue; `--complete` limpa labels somente após a issue
+estar fechada. A saída segura usa `stop`, não `--complete`.
 
 ### Migração segura
 

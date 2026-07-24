@@ -36,7 +36,10 @@ execução. A retomada recalcula risco e revalida guidance nearest-wins.
 `scripts/validate-evidence.sh` verifica tecnicamente essa correspondência: busca
 o último comentário `activity-start`, extrai `run_id`/`agent`/`state_before` e
 confronta com as labels atuais e o `actor` do estado principal no
-`workflow-states.json`. Use-o antes de retomar e no `doctor.sh --issue`.
+`workflow-states.json`. Para reviewer, também exige que o autor GitHub do início
+não seja autor de artefato anterior de issue-writer, architect ou executor. Sem
+essa prova disponível, pare para revisão humana externa. Use-o antes de retomar
+e no `doctor.sh --issue`.
 
 ## Relatório canônico de arquitetura
 
