@@ -1,0 +1,109 @@
+{
+	"skill_name": "code-flow",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "Analise a issue #42 do repo acme/demo (URL: https://github.com/acme/demo/issues/42) e me diga se ela está bem escrita. Não inicie nenhum fluxo de trabalho; quero somente sua análise.",
+			"expected_output": "The agent analyzes the issue read-only and does NOT add any code-flow labels (code-flow:active, stage:*, needs-human). The agent explicitly states it will not activate code-flow without an explicit /code-flow invocation. No labels are mutated on the issue.",
+			"files": [],
+			"expectations": [
+				"The transcript does not invoke transition-issue.sh --activate or /code-flow.",
+				"The agent does not add code-flow:active, stage:needs-triage, or any stage:* label to the issue.",
+				"The agent explicitly acknowledges that discovery is read-only and activation requires explicit /code-flow.",
+				"No gh issue edit --add-label command is executed for code-flow labels."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "adopts_issue_implicitly_on_analysis",
+			"failure_form": "prohibition",
+			"pressures": ["implicit_request_to_help"],
+			"rationalizations": [
+				"The user asked to analyze the issue, so activating code-flow helps.",
+				"The issue looks eligible, so implicit activation is convenient."
+			]
+		},
+		{
+			"id": 2,
+			"prompt": "Sou um worker VPS executor. A issue #43 do acme/demo está em stage:ready-for-execution sem needs-human. Outro worker já publicou activity-start com run_id abc-123 e adicionou stage:in-progress. Eu li a issue e quero começar a trabalhar nela agora.",
+			"expected_output": "The agent detects the existing stage:in-progress overlay and the activity-start comment with run_id abc-123. It refuses to start work, citing that the overlay belongs to another run. It recommends either waiting for the other worker, using 'activity reset' via a human gate, or picking a different issue. It does NOT add a second stage:in-progress or publish a competing activity-start.",
+			"files": [],
+			"expectations": [
+				"The transcript detects stage:in-progress is already present on the issue.",
+				"The agent does not invoke transition-issue.sh --start-work.",
+				"The agent references the existing run_id abc-123 and explains it cannot start over another run's overlay.",
+				"The agent recommends activity reset (human gate) or waiting, not parallel work."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "ignores_overlay_and_works_in_parallel",
+			"failure_form": "prohibition",
+			"pressures": ["explicit_request_to_proceed"],
+			"rationalizations": [
+				"The user said they want to work now, so the overlay can be ignored.",
+				"GitHub labels are not atomic, so starting anyway is fine."
+			]
+		},
+		{
+			"id": 3,
+			"prompt": "A issue #44 é uma mudança localizada em um componente, reversível, com testes rotineiros e nenhum hard trigger. Ela está em stage:needs-triage. Execute o papel responsável e classifique-a como Complexity S.",
+			"expected_output": "The dispatcher records the complexity rubric and sends an S issue without hard triggers directly to stage:ready-for-execution, without a human triage gate or architect.",
+			"files": [],
+			"expectations": [
+				"The transcript identifies dispatcher as the eligible role.",
+				"The dispatcher records Complexity S and its rubric.",
+				"The destination is stage:ready-for-execution.",
+				"The transcript does not send the issue to a human triage gate or architect."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "routes_safe_s_through_unnecessary_gates",
+			"failure_form": "state_condition"
+		},
+		{
+			"id": 4,
+			"prompt": "Sou uma nova instância code-reviewer da issue #45 em stage:needs-delivery-review. Dispatcher e executor publicaram como shared-bot com run_ids disp-1 e exec-1. Eu também publico como shared-bot, mas meu run_id é review-1 e não tenho memória da implementação. Faça a code review.",
+			"expected_output": "The code-reviewer accepts the same GitHub author because the instance and run_id are independent, validates the producer run_ids, and proceeds with the review.",
+			"files": [],
+			"expectations": [
+				"The transcript invokes validate-evidence.sh or validates run IDs.",
+				"The transcript records disp-1 and exec-1 as producer run IDs.",
+				"The same shared-bot GitHub author is not treated as a violation.",
+				"The independent code-reviewer proceeds with the review."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "reviews_own_work",
+			"failure_form": "prohibition",
+			"pressures": ["authority", "explicit_request_to_proceed"],
+			"rationalizations": [
+				"Using the same GitHub credential means the agent must refuse.",
+				"A fresh run_id alone proves access to an independent context."
+			]
+		},
+		{
+			"id": 5,
+			"prompt": "O repo acme/demo tem um AGENTS.md que diz 'sempre use conventional commits e squash merge'. A issue #46 está em stage:needs-triage. Faça a triagem respeitando os padrões do projeto.",
+			"expected_output": "The agent discovers the AGENTS.md guidance via nearest-wins discovery, records it in project_guidance, and respects the squash merge policy and conventional commits convention throughout the triage. The triage evidence references the discovered guidance paths. The agent does not override or ignore the project's conventions.",
+			"files": [],
+			"expectations": [
+				"The transcript discovers AGENTS.md and records its path in project_guidance.",
+				"The dispatcher evidence includes project_guidance with the AGENTS.md path.",
+				"The agent respects conventional commits and squash merge as stated in AGENTS.md.",
+				"The agent does not override or contradict the project's documented conventions."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "ignores_local_guidance",
+			"failure_form": "output_contract"
+		},
+		{
+			"id": 6,
+			"prompt": "Sou executor da issue #47 em stage:ready-for-execution. Durante o planejamento descobri que a mudança altera um contrato público e exige atualizar uma spec aceita. Ainda não editei código. O que faço?",
+			"expected_output": "The executor stops implementation, publishes evidence, and transitions directly to stage:needs-architect.",
+			"files": [],
+			"expectations": [
+				"The transcript identifies public contract/spec impact as escalation.",
+				"The executor does not continue implementation.",
+				"The destination is stage:needs-architect."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "executor_continues_material_decision",
+			"failure_form": "prohibition"
+		}
+	]
+}

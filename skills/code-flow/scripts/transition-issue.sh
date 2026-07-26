@@ -4,9 +4,9 @@ set -eu
 # Best-effort label protocol helper. GitHub label edits are not atomic; every
 # operation confirms the remote result and reports drift instead of claiming a lock.
 
-USAGE='Usage: transition-issue.sh <N|URL> (--activate | --start-work --role ROLE | --finish-to STAGE | --gate-to STAGE | --reset-activity | --complete | --migrate-to STAGE) [--require-from STAGE] [--dry-run] [--allow-repair] [--provision-labels] [--run-id UUID] [--lease-ttl SECONDS]'
+USAGE='Usage: transition-issue.sh <N|URL> (--activate | --start-work --role ROLE | --finish-to STAGE | --gate-to STAGE | --reset-activity | --stop | --complete) [--require-from STAGE] [--dry-run] [--allow-repair] [--provision-labels]'
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-STATES_FILE="$SCRIPT_DIR/../references/workflow-states.json"
+STATES_FILE="$SCRIPT_DIR/../workflow-states.json"
 
 ISSUE=""
 OP=""
@@ -16,8 +16,6 @@ REQUIRE_FROM=""
 DRY_RUN=0
 ALLOW_REPAIR=0
 PROVISION_LABELS=0
-RUN_ID=""
-LEASE_TTL=""
 
 die() {
   printf '%s\n' "$1" >&2
@@ -59,11 +57,9 @@ while [ "$#" -gt 0 ]; do
       set_op complete
       shift
       ;;
-    --migrate-to)
-      [ "$#" -ge 2 ] || die "$USAGE"
-      set_op migrate
-      TARGET="$2"
-      shift 2
+    --stop)
+      set_op stop
+      shift
       ;;
     --role)
       [ "$#" -ge 2 ] || die "$USAGE"
@@ -87,16 +83,6 @@ while [ "$#" -gt 0 ]; do
       PROVISION_LABELS=1
       shift
       ;;
-    --run-id)
-      [ "$#" -ge 2 ] || die "$USAGE"
-      RUN_ID="$2"
-      shift 2
-      ;;
-    --lease-ttl)
-      [ "$#" -ge 2 ] || die "$USAGE"
-      LEASE_TTL="$2"
-      shift 2
-      ;;
     --help | -h)
       printf '%s\n' "$USAGE"
       exit 0
@@ -113,15 +99,11 @@ done
 [ -n "$ISSUE" ] && [ -n "$OP" ] || die "$USAGE"
 [ "$OP" = start ] || [ -z "$ROLE" ] || die 'Error: --role is only valid with --start-work'
 [ "$OP" != start ] || [ -n "$ROLE" ] || die 'Error: --start-work requires --role'
-[ -z "$LEASE_TTL" ] || [ "$OP" = start ] || die 'Error: --lease-ttl is only valid with --start-work'
-[ -z "$LEASE_TTL" ] || [ -n "$RUN_ID" ] || die 'Error: --lease-ttl requires --run-id'
-[ -z "$RUN_ID" ] || [ "$OP" = start ] || die 'Error: --run-id is only valid with --start-work'
 
 command -v gh > /dev/null 2>&1 || die 'Error: gh is required'
 command -v jq > /dev/null 2>&1 || die 'Error: jq is required'
 [ -f "$STATES_FILE" ] || die "Error: missing workflow registry: $STATES_FILE"
 jq -e '
-  .schema_version == 3 and
   (.activation_label | type == "string") and
   (.activity_label | type == "string") and
   (.states | type == "array" and length > 0) and
@@ -159,7 +141,6 @@ HAS_ACTIVE=$(printf '%s' "$ISSUE_JSON" | jq --arg n "$ACTIVATION" '[.labels[].na
 HAS_ACTIVITY=$(printf '%s' "$ISSUE_JSON" | jq --arg n "$ACTIVITY" '[.labels[].name] | index($n) != null')
 HAS_HUMAN=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name] | index("needs-human") != null')
 UNKNOWN_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r --slurpfile cfg "$STATES_FILE" --arg activity "$ACTIVITY" '[.labels[].name | select(startswith("stage:")) | select(. != $activity) | select(. as $n | ($cfg[0].states | map(.label) | index($n)) == null)] | join("\n")')
-ALL_STATE_LABELS=$(printf '%s' "$ISSUE_JSON" | jq -r --arg activity "$ACTIVITY" '[.labels[].name | select(startswith("stage:")) | select(. != $activity)] | join("\n")')
 
 [ -z "$REQUIRE_FROM" ] || [ "$CURRENT" = "$REQUIRE_FROM" ] || die "Error: expected '$REQUIRE_FROM'; found '${CURRENT:-none}'"
 
@@ -171,17 +152,8 @@ case "$OP" in
   activate)
     [ "$HAS_ACTIVE" = false ] || die 'Error: code-flow is already active'
     [ "$PRIMARY_COUNT" -eq 0 ] && [ "$HAS_ACTIVITY" = false ] && [ "$HAS_HUMAN" = false ] && [ -z "$UNKNOWN_STAGES" ] \
-      || die 'Error: activation requires no workflow labels; migrate or repair explicitly'
+      || die 'Error: activation requires no workflow labels; clear old labels explicitly'
     TARGET='stage:needs-triage'
-    ;;
-  migrate)
-    [ "$HAS_ACTIVE" = false ] || die 'Error: migration requires inactive issue'
-    [ -n "$ALL_STATE_LABELS" ] || die 'Error: no legacy stage found'
-    [ "$(printf '%s\n' "$ALL_STATE_LABELS" | sed '/^$/d' | wc -l)" -eq 1 ] || die 'Error: migration requires exactly one legacy stage'
-    LEGACY=$(printf '%s' "$ALL_STATE_LABELS" | sed -n '1p')
-    EXPECTED=$(jq -r --arg legacy "$LEGACY" '.legacy[$legacy] // empty' "$STATES_FILE")
-    [ -n "$EXPECTED" ] || die "Error: legacy state '$LEGACY' is ambiguous"
-    [ "$TARGET" = "$EXPECTED" ] || die "Error: legacy '$LEGACY' must migrate to '$EXPECTED'"
     ;;
   start)
     [ "$HAS_ACTIVE" = true ] || die 'Error: missing code-flow:active'
@@ -208,6 +180,11 @@ case "$OP" in
     [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: reset requires one active primary state'
     [ "$HAS_ACTIVITY" = true ] || die 'Error: no activity to reset'
     [ "$HAS_HUMAN" = false ] || die 'Error: invalid activity + needs-human drift'
+    ;;
+  stop)
+    [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: stop requires one active primary state'
+    [ "$HAS_ACTIVITY" = false ] || die 'Error: stop requires activity handoff/reset first'
+    [ -z "$UNKNOWN_STAGES" ] || die 'Error: stop refuses unknown stage labels'
     ;;
   complete)
     [ "$HAS_ACTIVE" = true ] || die 'Error: completion requires code-flow:active'
@@ -265,16 +242,6 @@ case "$OP" in
     add_label "$ACTIVATION"
     add_label "$TARGET"
     ;;
-  migrate)
-    remove_label "$LEGACY"
-    add_label "$ACTIVATION"
-    add_label "$TARGET"
-    if [ "$(target_kind "$TARGET")" = human ]; then
-      add_label 'needs-human'
-    elif [ "$HAS_HUMAN" = true ]; then
-      remove_label 'needs-human'
-    fi
-    ;;
   start)
     add_label "$ACTIVITY"
     ;;
@@ -294,6 +261,11 @@ case "$OP" in
   reset)
     remove_label "$ACTIVITY"
     ;;
+  stop)
+    remove_label "$CURRENT"
+    [ "$HAS_HUMAN" = false ] || remove_label 'needs-human'
+    remove_label "$ACTIVATION"
+    ;;
   complete)
     for label in $(printf '%s\n%s\n' "$PRIMARY_LIST" "$UNKNOWN_STAGES"); do [ -z "$label" ] || remove_label "$label"; done
     [ "$HAS_ACTIVITY" = false ] || remove_label "$ACTIVITY"
@@ -310,13 +282,13 @@ AFTER_ACTIVE=$(printf '%s' "$CONFIRM" | jq --arg n "$ACTIVATION" '[.labels[].nam
 AFTER_ACTIVITY=$(printf '%s' "$CONFIRM" | jq --arg n "$ACTIVITY" '[.labels[].name] | index($n) != null')
 AFTER_HUMAN=$(printf '%s' "$CONFIRM" | jq '[.labels[].name] | index("needs-human") != null')
 
-if [ "$OP" = complete ]; then
+if [ "$OP" = complete ] || [ "$OP" = stop ]; then
   [ "$AFTER_ACTIVE" = false ] && [ "$AFTER_COUNT" -eq 0 ] && [ "$AFTER_ACTIVITY" = false ] && [ "$AFTER_HUMAN" = false ] \
     || die "Error: completion confirmation failed: $LABELS_AFTER"
 else
   [ "$AFTER_ACTIVE" = true ] && [ "$AFTER_COUNT" -eq 1 ] || die "Error: expected active workflow with one primary state: $LABELS_AFTER"
   if [ "$OP" = start ]; then [ "$AFTER_ACTIVITY" = true ] || die 'Error: activity label missing after start'; fi
-  if [ "$OP" = reset ] || [ "$OP" = finish ] || [ "$OP" = gate ] || [ "$OP" = migrate ] || [ "$OP" = activate ]; then
+  if [ "$OP" = reset ] || [ "$OP" = finish ] || [ "$OP" = gate ] || [ "$OP" = activate ]; then
     [ "$AFTER_ACTIVITY" = false ] || die 'Error: unexpected activity label after operation'
   fi
   FINAL_PRIMARY=$(printf '%s' "$AFTER_PRIMARY" | jq -r '.[0]')

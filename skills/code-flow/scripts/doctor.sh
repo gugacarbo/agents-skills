@@ -3,7 +3,7 @@ set -eu
 
 USAGE='Usage: doctor.sh [--github] [--issue N|URL]'
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-STATES_FILE="$SCRIPT_DIR/../references/workflow-states.json"
+STATES_FILE="$SCRIPT_DIR/../workflow-states.json"
 CHECK_GITHUB=0
 ISSUE=""
 
@@ -34,20 +34,27 @@ while [ "$#" -gt 0 ]; do
 done
 
 failed=0
-for command_name in git jq python3; do
+for command_name in bash git jq iconv; do
   command -v "$command_name" > /dev/null 2>&1 && printf 'PASS %s\n' "$command_name" || {
     printf 'FAIL %s\n' "$command_name" >&2
     failed=1
   }
 done
 
-jq -e '.schema_version == 3 and (.states | length == 10)' "$STATES_FILE" > /dev/null 2>&1 \
+jq -e '(.states | length == 10)' "$STATES_FILE" > /dev/null 2>&1 \
   && printf 'PASS workflow-registry\n' || {
   printf 'FAIL workflow-registry\n' >&2
   failed=1
 }
 
 git worktree list > /dev/null 2>&1 && printf 'PASS git-worktree\n' || printf 'WARN current directory is not a Git worktree\n' >&2
+
+if command -v sha256sum > /dev/null 2>&1 || command -v shasum > /dev/null 2>&1; then
+  printf 'PASS sha256-provider\n'
+else
+  printf 'FAIL sha256-provider\n' >&2
+  failed=1
+fi
 
 if [ "$CHECK_GITHUB" -eq 1 ]; then
   command -v gh > /dev/null 2>&1 || {

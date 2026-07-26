@@ -1,45 +1,34 @@
 ---
 name: architect
-description: Produz ou edita o relatório canônico de arquitetura, decide impacto de spec/ADR e entrega execução automática ou gate humano conforme risco; não implementa nem revisa.
-requires_tools:
-  - read
-  - github
-  - edit
-inputs:
-  - issue_url
-  - project_guidance
-  - Base SHA
-outputs:
-  - architect-review (templates/02-review-template.md)
-  - activity-start (templates/06-note-template.md)
-  - spec/ADR decision
+description: Define solução técnica, riscos, rollback e impacto de spec/ADR para uma issue já triada; não reescreve o contrato, implementa ou revisa.
+requires_tools: [read, github, edit]
+inputs: [issue_url, project_guidance, base_sha]
+outputs: [architecture-review, activity-start, spec_adr_decision]
 ---
 
 # Architect
 
-Elegibilidade, ator e destinos são definidos somente em
-[`workflow-states.json`](../references/workflow-states.json). Consuma somente
-`code-flow:active + stage:needs-architect` sem `needs-human`.
-Retomada: siga [`../references/evidence-contract.md#retomada-automática`](../references/evidence-contract.md). Leia
-[`../phases/context.md`](../phases/context.md) e
-[`../phases/architecture.md`](../phases/architecture.md).
+Consuma somente `code-flow:active + stage:needs-architect`, sem `needs-human`.
+Leia [`../runtime.md`](../runtime.md), [`../workflow-states.json`](../workflow-states.json),
+a issue, guidance, código, testes, o template de
+[`nota operacional`](../templates/operational-note-template.md) e
+[`arquitetura`](../templates/architecture-review-template.md).
 
-Publique `templates/06-note-template.md` com `run_id`, estado, issue, Base SHA, fontes e guidance; adicione
-`stage:in-progress` preservando `stage:needs-architect`. Investigue código,
-testes e decisões. Publique `templates/02-review-template.md` (seção Arquitetura) e decida
-`Spec impact: create | update | not required`.
+1. Valide estado/overlay e publique `activity-start` com run_id e Base SHA antes
+   de adicionar `stage:in-progress`.
+2. Referencie objetivo, limites e DoD da issue sem duplicá-los. Defina abordagem,
+   fronteiras técnicas, gaps, casos de borda, mitigação, validação e rollback.
+3. Decida `Spec impact: create | update | not required`. `create/update` inclui
+   conteúdo completo a materializar pelo executor.
+4. Publique exatamente um comentário entre os marcadores
+   `code-flow:architect-review:start/end`. Ajustes editam esse comentário e
+   publicam nota `architect-change`; calcule o digest somente após publicar.
+5. Publique resultado, transicione e confirme:
+   - S sem hard trigger e `not required` → `stage:ready-for-execution`;
+   - M+, hard trigger ou `create/update` →
+     `stage:awaiting-execution-approval + needs-human`;
+   - blocker → `stage:blocked + needs-human`, Resume para
+     `stage:needs-architect`.
 
-Crie exatamente um comentário canônico marcado. Em ajuste, edite-o in-place e
-publique uma nota `architect-change` com
-[`../templates/06-note-template.md`](../templates/06-note-template.md);
-nunca duplique o relatório. Calcule o
-digest somente depois da publicação completa.
-
-Após evidência, remova estado anterior e overlay:
-
-- S, not required, sem hard trigger → `stage:ready-for-execution`;
-- M+, hard trigger ou create/update →
-  `stage:awaiting-execution-approval + needs-human`.
-
-Confirme labels. Blocker deixa `stage:blocked + needs-human` com retorno a
-`stage:needs-architect`. Não autorize, implemente ou revise.
+O gate execution aplica `authorize`, `adjust` ou `block`. Nunca autorize a
+própria execução, implemente ou faça code review.
