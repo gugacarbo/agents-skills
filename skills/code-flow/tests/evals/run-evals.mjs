@@ -203,7 +203,8 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[1],
-				hasText("Complexity:?\\s*S|complexidade:?\\s*S") && hasText("rubric|rubrica|revers"),
+				hasText("Complexity:?\\s*S|complexidade:?\\s*S") &&
+					hasText("rubric|rubrica|revers"),
 				`transcript records S rubric`,
 			),
 			result(
@@ -271,9 +272,21 @@ async function grade(evalCase, context) {
 
 	if (evalCase.id === 6) {
 		expectations.push(
-			result(evalCase.expectations[0], hasText("contrato público|public contract|spec"), "material impact detected"),
-			result(evalCase.expectations[1], hasText("pare|stop|não.*implement|do not.*implement"), "implementation stops"),
-			result(evalCase.expectations[2], hasText("stage:needs-architect"), "architect destination selected"),
+			result(
+				evalCase.expectations[0],
+				hasText("contrato público|public contract|spec"),
+				"material impact detected",
+			),
+			result(
+				evalCase.expectations[1],
+				hasText("pare|stop|não.*implement|do not.*implement"),
+				"implementation stops",
+			),
+			result(
+				evalCase.expectations[2],
+				hasText("stage:needs-architect"),
+				"architect destination selected",
+			),
 		);
 	}
 

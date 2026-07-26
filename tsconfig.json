@@ -12,6 +12,6 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true
 	},
-	"include": ["skills/code-flow/**/*.js"],
+	"include": [".lintstagedrc.js"],
 	"exclude": ["node_modules"]
 }

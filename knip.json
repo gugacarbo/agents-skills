@@ -1,9 +1,11 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"ignore": [
-		"skills/code-flow/scripts/visual-companion/helper.js",
-		"skills/code-flow/scripts/visual-companion/server.cjs",
+		"skills/brainstorm/scripts/visual-companion/helper.js",
+		"skills/brainstorm/scripts/visual-companion/server.cjs",
+		"skills/code-flow/tests/evals/run-evals.mjs",
 		"skills/project-init/evals/run-evals.mjs",
+		"skills/project-init/templates/typescript/files/src/index.ts",
 		"skills/project-init/templates/typescript/optional-tools/lint-staged/files/.lintstagedrc.js"
 	],
 	"ignoreDependencies": ["prettier-plugin-sh"]
