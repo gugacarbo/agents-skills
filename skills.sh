@@ -8,7 +8,7 @@ SCRIPT_DIR=$(
 SCRIPT_BASENAME=${0##*/}
 
 case "$SCRIPT_BASENAME" in
-  sh|dash)
+  sh | dash)
     IS_STREAMED=1
     ;;
   *)
@@ -19,7 +19,7 @@ esac
 if [ "$IS_STREAMED" -eq 1 ]; then
   INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/.agents-skills-streamed-bootstrap
 else
-    INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/src
+  INTERNAL_SCRIPTS_DIR=$SCRIPT_DIR/src
 fi
 
 AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}
@@ -56,7 +56,7 @@ list_commands() {
 }
 
 usage() {
-  cat <<EOF
+  cat << EOF
 Uso: ./skills.sh <comando> [args]
 
 Comandos disponiveis:
@@ -64,6 +64,7 @@ $(list_commands | sed 's/^/  - /')
 
 Exemplos:
   ./skills.sh install
+  ./skills.sh install commit-changes find-docs
   ./skills.sh install --path ~/.codex/skills
   ./skills.sh update
   ./skills.sh update --yes
@@ -81,9 +82,9 @@ download_archive() {
   archive_url=$1
   output_path=$2
 
-  if command -v curl >/dev/null 2>&1; then
+  if command -v curl > /dev/null 2>&1; then
     curl -fsSL "$archive_url" -o "$output_path"
-  elif command -v wget >/dev/null 2>&1; then
+  elif command -v wget > /dev/null 2>&1; then
     wget -qO "$output_path" "$archive_url"
   else
     die "curl ou wget eh necessario para baixar o pacote de bootstrap"
@@ -121,7 +122,7 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
-  -h|--help|help)
+  -h | --help | help)
     usage
     exit 0
     ;;

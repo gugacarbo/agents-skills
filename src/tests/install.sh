@@ -53,7 +53,7 @@ run_capture() {
   shift
 
   set +e
-  "$@" >"$output_file" 2>&1
+  "$@" > "$output_file" 2>&1
   local status=$?
   set -e
 
@@ -63,8 +63,8 @@ run_capture() {
 
 setup_fixture_skill() {
   mkdir -p "$FIXTURE_DIR"
-  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$FIXTURE_DIR/SKILL.md"
-  sh "$BUILD_SCRIPT" >/dev/null
+  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' > "$FIXTURE_DIR/SKILL.md"
+  sh "$BUILD_SCRIPT" > /dev/null
 }
 
 cleanup_fixture_skill() {
@@ -85,6 +85,51 @@ test_explicit_path_installs_to_target() {
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
 }
 
+test_installs_one_selected_skill() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  run_capture "$tmp/output.log" "$INSTALLER" "$FIXTURE_SKILL" --path "$tmp/custom-skills"
+
+  assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
+  assert_not_exists "$tmp/custom-skills/commit-changes"
+  assert_contains "Instalacao concluida com 1 skill(s)"
+}
+
+test_installs_multiple_selected_skills() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  run_capture "$tmp/output.log" "$INSTALLER" "$FIXTURE_SKILL" commit-changes --path "$tmp/custom-skills"
+
+  assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
+  assert_exists "$tmp/custom-skills/commit-changes/SKILL.md"
+  assert_not_exists "$tmp/custom-skills/find-docs"
+  assert_contains "Instalacao concluida com 2 skill(s)"
+}
+
+test_rejects_unknown_skill_before_copying() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  if run_capture "$tmp/output.log" "$INSTALLER" "$FIXTURE_SKILL" missing-skill --path "$tmp/custom-skills"; then
+    fail "expected unknown skill selection to fail"
+  fi
+
+  assert_not_exists "$tmp/custom-skills"
+  assert_contains "Skill nao encontrada: missing-skill"
+}
+
+test_duplicate_selection_is_installed_once() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  run_capture "$tmp/output.log" "$INSTALLER" "$FIXTURE_SKILL" "$FIXTURE_SKILL" --path "$tmp/custom-skills"
+
+  assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
+  assert_contains "Instalacao concluida com 1 skill(s)"
+}
+
 test_cwd_skills_installs_in_place() {
   local tmp
   tmp=$(mktemp -d)
@@ -103,9 +148,9 @@ test_fresh_removes_existing_skills_and_preserves_non_skill_files() {
   tmp=$(mktemp -d)
   target="$tmp/custom-skills"
   mkdir -p "$target/old-skill" "$target/.hidden-old-skill"
-  printf '%s\n' '---' 'name: old-skill' '---' >"$target/old-skill/SKILL.md"
-  printf '%s\n' '---' 'name: hidden-old-skill' '---' >"$target/.hidden-old-skill/SKILL.md"
-  printf 'keep me\n' >"$target/README.md"
+  printf '%s\n' '---' 'name: old-skill' '---' > "$target/old-skill/SKILL.md"
+  printf '%s\n' '---' 'name: hidden-old-skill' '---' > "$target/.hidden-old-skill/SKILL.md"
+  printf 'keep me\n' > "$target/README.md"
 
   run_capture "$tmp/output.log" "$INSTALLER" --fresh --path "$target"
 
@@ -114,6 +159,24 @@ test_fresh_removes_existing_skills_and_preserves_non_skill_files() {
   assert_exists "$target/$FIXTURE_SKILL/SKILL.md"
   grep -qx 'keep me' "$target/README.md"
   assert_contains "--fresh removeu 2 skill(s)"
+}
+
+test_fresh_with_selection_preserves_other_skills() {
+  local tmp target
+  tmp=$(mktemp -d)
+  target="$tmp/custom-skills"
+  mkdir -p "$target/$FIXTURE_SKILL" "$target/other-skill"
+  printf '%s\n' '---' "name: $FIXTURE_SKILL" '---' 'stale' > "$target/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: other-skill' '---' > "$target/other-skill/SKILL.md"
+
+  run_capture "$tmp/output.log" "$INSTALLER" --fresh "$FIXTURE_SKILL" --path "$target"
+
+  assert_exists "$target/$FIXTURE_SKILL/SKILL.md"
+  assert_exists "$target/other-skill/SKILL.md"
+  if grep -q 'stale' "$target/$FIXTURE_SKILL/SKILL.md"; then
+    fail "expected selected skill to be replaced"
+  fi
+  assert_contains "--fresh removeu 1 skill(s)"
 }
 
 test_fresh_rejects_init() {
@@ -127,12 +190,23 @@ test_fresh_rejects_init() {
   assert_contains "--fresh nao pode ser usado com --init"
 }
 
+test_selection_rejects_init() {
+  local tmp
+  tmp=$(mktemp -d)
+
+  if run_capture "$tmp/output.log" "$INSTALLER" "$FIXTURE_SKILL" --init --path "$tmp/custom-skills"; then
+    fail "expected skill selection with --init to fail"
+  fi
+
+  assert_contains "A selecao de skills nao pode ser usada com --init"
+}
+
 test_non_skills_directory_defaults_to_global_target() {
   local tmp
   tmp=$(mktemp -d)
   mkdir -p "$tmp/home" "$tmp/project/work"
-  printf 'y\n' >"$tmp/tty-input"
-  git -C "$tmp/project" init >/dev/null 2>&1
+  printf 'y\n' > "$tmp/tty-input"
+  git -C "$tmp/project" init > /dev/null 2>&1
 
   (
     cd "$tmp/project/work"
@@ -149,7 +223,7 @@ test_non_skills_directory_decline_does_not_install() {
   local tmp
   tmp=$(mktemp -d)
   mkdir -p "$tmp/home" "$tmp/work"
-  printf 'n\n' >"$tmp/tty-input"
+  printf 'n\n' > "$tmp/tty-input"
 
   (
     cd "$tmp/work"
@@ -169,7 +243,7 @@ test_global_flag_prompts_even_with_yes() {
 
   (
     cd "$tmp/work"
-    printf 'y\n' | env HOME="$tmp/home" "$INSTALLER" --global --yes >"$tmp/output.log" 2>&1
+    printf 'y\n' | env HOME="$tmp/home" "$INSTALLER" --global --yes > "$tmp/output.log" 2>&1
   )
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
@@ -180,13 +254,13 @@ test_global_flag_prompts_even_with_yes() {
 setup_fixture_git_source() {
   local source_dir="$1"
 
-  git -C "$source_dir" init -b main >/dev/null 2>&1
+  git -C "$source_dir" init -b main > /dev/null 2>&1
   cp -R "$REPO_ROOT/src" "$source_dir/src"
   cp "$REPO_ROOT/skills.sh" "$source_dir/skills.sh"
   mkdir -p "$source_dir/dist/skills/$FIXTURE_SKILL"
-  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' >"$source_dir/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  git -C "$source_dir" add . >/dev/null 2>&1
-  git -C "$source_dir" -c user.email=test@example.com -c user.name=test commit -m "fixture" >/dev/null 2>&1
+  printf '%s\n' '---' 'name: install-test-fixture-skill' '---' > "$source_dir/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  git -C "$source_dir" add . > /dev/null 2>&1
+  git -C "$source_dir" -c user.email=test@example.com -c user.name=test commit -m "fixture" > /dev/null 2>&1
 }
 
 test_init_clones_repo_to_target() {
@@ -206,7 +280,7 @@ test_init_clones_repo_to_target() {
 
   assert_exists "$clone_dest/dist/skills/$FIXTURE_SKILL/SKILL.md"
   assert_exists "$clone_dest/.git"
-  git -C "$clone_dest" rev-parse --is-inside-work-tree >/dev/null
+  git -C "$clone_dest" rev-parse --is-inside-work-tree > /dev/null
 }
 
 test_init_merges_nonempty_destination_with_confirmation() {
@@ -215,8 +289,8 @@ test_init_merges_nonempty_destination_with_confirmation() {
   source_dir="$tmp/source"
   clone_dest="$tmp/cloned-skills"
   mkdir -p "$tmp/work" "$source_dir" "$clone_dest"
-  printf 'occupied\n' >"$clone_dest/existing.txt"
-  printf 'y\n' >"$tmp/tty-input"
+  printf 'occupied\n' > "$clone_dest/existing.txt"
+  printf 'y\n' > "$tmp/tty-input"
 
   setup_fixture_git_source "$source_dir"
 
@@ -254,7 +328,7 @@ test_instructions_keeps_existing_readme() {
   local tmp
   tmp=$(mktemp -d)
   mkdir -p "$tmp/work" "$tmp/custom-skills"
-  printf 'custom readme\n' >"$tmp/custom-skills/README.md"
+  printf 'custom readme\n' > "$tmp/custom-skills/README.md"
 
   (
     cd "$tmp/work"
@@ -272,8 +346,8 @@ test_init_nonempty_without_confirmation_cancels() {
   source_dir="$tmp/source"
   clone_dest="$tmp/cloned-skills"
   mkdir -p "$tmp/work" "$source_dir" "$clone_dest"
-  printf 'occupied\n' >"$clone_dest/existing.txt"
-  printf 'n\n' >"$tmp/tty-input"
+  printf 'occupied\n' > "$clone_dest/existing.txt"
+  printf 'n\n' > "$tmp/tty-input"
 
   setup_fixture_git_source "$source_dir"
 
@@ -296,7 +370,7 @@ test_confirmation_reads_from_terminal_when_stdin_is_pipe() {
   local tmp
   tmp=$(mktemp -d)
   mkdir -p "$tmp/home" "$tmp/work"
-  printf 'y\n' >"$tmp/tty-input"
+  printf 'y\n' > "$tmp/tty-input"
 
   (
     cd "$tmp/work"
@@ -314,9 +388,15 @@ main() {
   assert_exists "$INSTALLER"
 
   test_explicit_path_installs_to_target
+  test_installs_one_selected_skill
+  test_installs_multiple_selected_skills
+  test_rejects_unknown_skill_before_copying
+  test_duplicate_selection_is_installed_once
   test_cwd_skills_installs_in_place
   test_fresh_removes_existing_skills_and_preserves_non_skill_files
+  test_fresh_with_selection_preserves_other_skills
   test_fresh_rejects_init
+  test_selection_rejects_init
   test_non_skills_directory_defaults_to_global_target
   test_non_skills_directory_decline_does_not_install
   test_global_flag_prompts_even_with_yes

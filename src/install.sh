@@ -21,6 +21,7 @@ USE_INIT=0
 USE_INSTRUCTIONS=0
 USE_FRESH=0
 TARGET_PATH=''
+SELECTED_SKILLS=''
 
 if [ -t 1 ] && [ -z "${NO_COLOR-}" ]; then
   USE_COLOR=1
@@ -64,12 +65,12 @@ error() {
 }
 
 read_reply_from() {
-  IFS= read -r reply <"$1"
+  IFS= read -r reply < "$1"
 }
 
 usage() {
-  cat <<'EOF'
-Uso: ./src/install.sh [opcoes]
+  cat << 'EOF'
+Uso: ./src/install.sh [opcoes] [SKILL...]
 
 Opcoes:
   -p, --path PATH   Instala as skills no PATH informado
@@ -79,6 +80,9 @@ Opcoes:
       --fresh       Remove as skills existentes no destino antes de instalar
   -y, --yes         Aprova automaticamente apenas a instalacao local do repo
   -h, --help        Mostra esta ajuda
+
+Argumentos:
+  SKILL...          Instala somente uma ou mais skills especificas
 EOF
 }
 
@@ -124,7 +128,7 @@ confirm() {
 
   printf '%s %s [y/N]: ' "$(color 36 '[PROMPT]')" "$prompt_message"
 
-  if read_reply_from "$prompt_input" 2>/dev/null; then
+  if read_reply_from "$prompt_input" 2> /dev/null; then
     :
   elif ! IFS= read -r reply; then
     printf '\n'
@@ -132,13 +136,66 @@ confirm() {
   fi
 
   case "$reply" in
-    y|Y|yes|YES|Yes)
+    y | Y | yes | YES | Yes)
       return 0
       ;;
     *)
       return 1
       ;;
   esac
+}
+
+add_selected_skill() {
+  skill_name=$1
+
+  case "$skill_name" in
+    '' | .* | */* | *[!a-z0-9_-]*)
+      die "Nome de skill invalido: $skill_name"
+      ;;
+  esac
+
+  case "
+$SELECTED_SKILLS
+" in
+    *"
+$skill_name
+"*)
+      return 0
+      ;;
+  esac
+
+  if [ -z "$SELECTED_SKILLS" ]; then
+    SELECTED_SKILLS=$skill_name
+  else
+    SELECTED_SKILLS="$SELECTED_SKILLS
+$skill_name"
+  fi
+}
+
+validate_selected_skills() {
+  [ -n "$SELECTED_SKILLS" ] || return 0
+  [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas nao encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
+
+  for skill_name in $SELECTED_SKILLS; do
+    skill_dir=$SKILLS_SOURCE_DIR/$skill_name
+    [ -d "$skill_dir" ] && [ -f "$skill_dir/SKILL.md" ] || die "Skill nao encontrada: $skill_name"
+  done
+}
+
+copy_skill_dir() {
+  source_skill_dir=$1
+  destination=$2
+  skill_name=${source_skill_dir##*/}
+  destination_skill_dir=$destination/$skill_name
+
+  if same_dir "$source_skill_dir" "$destination_skill_dir"; then
+    warn "Pulando $skill_name porque origem e destino sao o mesmo diretorio"
+    return 0
+  fi
+
+  cp -R "$source_skill_dir" "$destination/"
+  copied_count=$((copied_count + 1))
+  success "Skill copiada: $skill_name"
 }
 
 copy_skills() {
@@ -150,22 +207,18 @@ copy_skills() {
 
   [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas nao encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
 
-  for skill_dir in "$SKILLS_SOURCE_DIR"/*; do
-    [ -d "$skill_dir" ] || continue
-    [ -f "$skill_dir/SKILL.md" ] || continue
+  if [ -n "$SELECTED_SKILLS" ]; then
+    for skill_name in $SELECTED_SKILLS; do
+      copy_skill_dir "$SKILLS_SOURCE_DIR/$skill_name" "$destination"
+    done
+  else
+    for skill_dir in "$SKILLS_SOURCE_DIR"/*; do
+      [ -d "$skill_dir" ] || continue
+      [ -f "$skill_dir/SKILL.md" ] || continue
 
-    skill_name=${skill_dir##*/}
-    destination_skill_dir=$destination/$skill_name
-
-    if same_dir "$skill_dir" "$destination_skill_dir"; then
-      warn "Pulando $skill_name porque origem e destino sao o mesmo diretorio"
-      continue
-    fi
-
-    cp -R "$skill_dir" "$destination/"
-    copied_count=$((copied_count + 1))
-    success "Skill copiada: $skill_name"
-  done
+      copy_skill_dir "$skill_dir" "$destination"
+    done
+  fi
 
   if [ "$copied_count" -eq 0 ]; then
     die "Nenhuma skill elegivel foi encontrada para copiar"
@@ -184,15 +237,27 @@ remove_installed_skills() {
     die "--fresh nao pode usar o diretorio-fonte de skills como destino"
   fi
 
-  for skill_dir in "$destination"/* "$destination"/.[!.]* "$destination"/..?*; do
-    [ -d "$skill_dir" ] || continue
-    [ -f "$skill_dir/SKILL.md" ] || continue
+  if [ -n "$SELECTED_SKILLS" ]; then
+    for skill_name in $SELECTED_SKILLS; do
+      skill_dir=$destination/$skill_name
+      [ -d "$skill_dir" ] || continue
+      [ -f "$skill_dir/SKILL.md" ] || continue
 
-    skill_name=${skill_dir##*/}
-    rm -rf "$skill_dir"
-    removed_count=$((removed_count + 1))
-    info "Skill removida: $skill_name"
-  done
+      rm -rf "$skill_dir"
+      removed_count=$((removed_count + 1))
+      info "Skill removida: $skill_name"
+    done
+  else
+    for skill_dir in "$destination"/* "$destination"/.[!.]* "$destination"/..?*; do
+      [ -d "$skill_dir" ] || continue
+      [ -f "$skill_dir/SKILL.md" ] || continue
+
+      skill_name=${skill_dir##*/}
+      rm -rf "$skill_dir"
+      removed_count=$((removed_count + 1))
+      info "Skill removida: $skill_name"
+    done
+  fi
 
   info "--fresh removeu $removed_count skill(s) existente(s) de $destination"
 }
@@ -216,7 +281,7 @@ copy_instructions() {
 }
 
 dir_is_nonempty() {
-  [ -d "$1" ] && [ -n "$(ls -A "$1" 2>/dev/null)" ]
+  [ -d "$1" ] && [ -n "$(ls -A "$1" 2> /dev/null)" ]
 }
 
 merge_without_overwrite() {
@@ -225,12 +290,12 @@ merge_without_overwrite() {
 
   mkdir -p "$destination_dir"
 
-  if command -v rsync >/dev/null 2>&1; then
+  if command -v rsync > /dev/null 2>&1; then
     rsync -a --ignore-existing "$source_dir/" "$destination_dir/"
     return 0
   fi
 
-  if cp -Rn "$source_dir/." "$destination_dir/." 2>/dev/null; then
+  if cp -Rn "$source_dir/." "$destination_dir/." 2> /dev/null; then
     return 0
   fi
 
@@ -266,7 +331,7 @@ merge_clone_into_nonempty() {
 clone_skills_repo() {
   destination=$1
 
-  command -v git >/dev/null 2>&1 || die "git eh necessario para --init"
+  command -v git > /dev/null 2>&1 || die "git eh necessario para --init"
 
   if same_dir "$destination" "$SKILLS_REPO_ROOT"; then
     die "Destino igual ao repositorio atual; use install sem --init para copiar skills"
@@ -292,12 +357,12 @@ clone_skills_repo() {
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    -p|--path)
+    -p | --path)
       shift
       [ $# -gt 0 ] || die "A opcao $0 requer um path apos -p/--path"
       TARGET_PATH=$1
       ;;
-    -g|--global)
+    -g | --global)
       USE_GLOBAL=1
       ;;
     --init)
@@ -309,16 +374,19 @@ while [ $# -gt 0 ]; do
     --fresh)
       USE_FRESH=1
       ;;
-    -y|--yes)
+    -y | --yes)
       YES=1
       ;;
-    -h|--help)
+    -h | --help)
       usage
       exit 0
       ;;
-    *)
+    -*)
       usage >&2
       die "Opcao desconhecida: $1"
+      ;;
+    *)
+      add_selected_skill "$1"
       ;;
   esac
   shift
@@ -331,6 +399,12 @@ fi
 if [ "$USE_INIT" -eq 1 ] && [ "$USE_FRESH" -eq 1 ]; then
   die "--fresh nao pode ser usado com --init"
 fi
+
+if [ "$USE_INIT" -eq 1 ] && [ -n "$SELECTED_SKILLS" ]; then
+  die "A selecao de skills nao pode ser usada com --init"
+fi
+
+validate_selected_skills
 
 GLOBAL_TARGET=$(expand_path "~/.agents/skills")
 CURRENT_DIR=$PWD
@@ -357,7 +431,7 @@ else
 fi
 
 case "$TARGET_KIND" in
-  explicit|cwd-skills)
+  explicit | cwd-skills)
     ;;
   global)
     if [ "$YES" -eq 1 ]; then

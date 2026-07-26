@@ -8,6 +8,13 @@ Pacote de skills para agentes de codificação (VS Code, Codex, Cursor, etc.), c
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install
 ```
 
+Para instalar somente uma ou mais skills, informe os nomes depois de `install`:
+
+```sh
+./skills.sh install commit-changes
+./skills.sh install commit-changes find-docs
+```
+
 ## Comandos
 
 | Comando   | Descrição                                                     |
@@ -51,6 +58,9 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 | `--fresh`         | Remove as skills existentes no destino antes de instalar (preserva outros arquivos) |
 | `-y, --yes`       | Aprova automaticamente a instalação local (não pula confirmação global)             |
 | `-h, --help`      | Exibe a ajuda do comando                                                            |
+
+Além das opções, o comando aceita um ou mais nomes de skills. Quando nenhum
+nome é informado, todas as skills disponíveis são instaladas.
 
 ## Opções do `update`
 
@@ -99,6 +109,12 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 # Instalar em um caminho específico
 ./skills.sh install --path ~/.codex/skills
 
+# Instalar somente uma skill
+./skills.sh install commit-changes --path ~/.codex/skills
+
+# Instalar mais de uma skill
+./skills.sh install commit-changes find-docs --path ~/.codex/skills
+
 # Instalação global
 ./skills.sh install --global
 
@@ -113,6 +129,7 @@ e manifests de desenvolvimento não fazem parte do artefato instalado.
 
 # Via curl (bootstrap remoto)
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install
+curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install commit-changes find-docs
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- install --global
 ```
 
@@ -170,4 +187,7 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
     └── task-completion-notifier/ # Notificação de conclusão
 ```
 
-O comando `./skills.sh install` copia cada skill de `dist/skills/` diretamente para o destino escolhido. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de publicar alterações.
+O comando `./skills.sh install` copia as skills de `dist/skills/` diretamente
+para o destino escolhido. Nomes posicionais limitam a cópia às skills
+selecionadas. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de
+publicar alterações.

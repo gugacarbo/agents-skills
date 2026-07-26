@@ -25,6 +25,14 @@ assert_exists() {
   fi
 }
 
+assert_not_exists() {
+  local path="$1"
+
+  if [ -e "$path" ]; then
+    fail "expected path to be absent: $path"
+  fi
+}
+
 assert_contains() {
   local path="$1"
   local needle="$2"
@@ -43,19 +51,44 @@ test_bootstrap_uses_archive_and_runs_install() {
   mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL"
   cp -R "$REPO_ROOT/src" "$archive_root/src"
   cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
-  printf '%s\n' '---' 'name: sample-skill' '---' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: sample-skill' '---' > "$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
 
   (
     cd "$tmp"
-    cat "$ORCHESTRATOR" | \
-    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
-    AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
-      sh -s -- install --path "$tmp/custom-skills" >"$tmp/output.log" 2>&1
+    cat "$ORCHESTRATOR" \
+      | AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
+        AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
+        sh -s -- install --path "$tmp/custom-skills" > "$tmp/output.log" 2>&1
   )
 
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
+}
+
+test_bootstrap_forwards_selected_skills() {
+  local tmp archive_root archive_path
+  tmp=$(mktemp -d)
+  archive_root="$tmp/archive-src/agents-skills-main"
+  archive_path="$tmp/agents-skills-main.tar.gz"
+
+  mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/dist/skills/other-skill"
+  cp -R "$REPO_ROOT/src" "$archive_root/src"
+  cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
+  printf '%s\n' '---' 'name: sample-skill' '---' > "$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: other-skill' '---' > "$archive_root/dist/skills/other-skill/SKILL.md"
+
+  tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
+
+  (
+    cd "$tmp"
+    cat "$ORCHESTRATOR" \
+      | AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
+        sh -s -- install "$FIXTURE_SKILL" --path "$tmp/custom-skills" > "$tmp/output-selected.log" 2>&1
+  )
+
+  assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
+  assert_not_exists "$tmp/custom-skills/other-skill"
 }
 
 test_bootstrap_uses_archive_and_runs_update() {
@@ -68,17 +101,17 @@ test_bootstrap_uses_archive_and_runs_update() {
   mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$target/dist/skills/$FIXTURE_SKILL"
   cp -R "$REPO_ROOT/src" "$archive_root/src"
   cp "$REPO_ROOT/skills.sh" "$archive_root/skills.sh"
-  printf '%s\n' '---' 'name: sample-skill' '---' 'version: remote' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  printf '%s\n' 'version: local' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: sample-skill' '---' 'version: remote' > "$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' 'version: local' > "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
 
   (
     cd "$tmp"
-    cat "$ORCHESTRATOR" | \
-    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
-    AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
-      sh -s -- update --path "$target" --yes >"$tmp/output-update.log" 2>&1
+    cat "$ORCHESTRATOR" \
+      | AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
+        AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
+        sh -s -- update --path "$target" --yes > "$tmp/output-update.log" 2>&1
   )
 
   grep -q 'version: remote' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
@@ -97,10 +130,10 @@ test_bootstrap_missing_command_does_not_loop() {
   set +e
   (
     cd "$tmp"
-    cat "$ORCHESTRATOR" | \
-    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
-    AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
-      timeout 5 sh -s -- install --path "$tmp/custom-skills" >"$tmp/output-missing.log" 2>&1
+    cat "$ORCHESTRATOR" \
+      | AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
+        AGENTS_SKILLS_ARCHIVE_URL_FORCE=1 \
+        timeout 5 sh -s -- install --path "$tmp/custom-skills" > "$tmp/output-missing.log" 2>&1
   )
   status=$?
   set -e
@@ -121,6 +154,7 @@ main() {
   assert_exists "$ORCHESTRATOR"
 
   test_bootstrap_uses_archive_and_runs_install
+  test_bootstrap_forwards_selected_skills
   test_bootstrap_uses_archive_and_runs_update
   test_bootstrap_missing_command_does_not_loop
 

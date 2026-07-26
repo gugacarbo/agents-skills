@@ -57,21 +57,21 @@ test_build_copies_skills_and_removes_stale_output() {
     "$fixture/__pycache__" \
     "$fixture/.turbo" \
     "$fixture/.code-flow"
-  printf 'fixture\n' >"$fixture/SKILL.md"
-  printf 'keep\n' >"$fixture/.gitignore"
-  printf 'keep\n' >"$fixture/.env.example"
-  printf 'ignored\n' >"$fixture/.env"
-  printf 'ignored\n' >"$fixture/.env.local"
-  printf 'ignored\n' >"$fixture/swap.swp"
-  printf 'ignored\n' >"$fixture/swap.swo"
-  printf 'ignored\n' >"$fixture/backup~"
-  printf 'ignored\n' >"$fixture/.DS_Store"
-  printf 'ignored\n' >"$fixture/Thumbs.db"
-  printf 'ignored\n' >"$fixture/build.log"
-  printf 'ignored\n' >"$fixture/state.tsbuildinfo"
-  printf 'ignored\n' >"$fixture/__pycache__/module.pyc"
+  printf 'fixture\n' > "$fixture/SKILL.md"
+  printf 'keep\n' > "$fixture/.gitignore"
+  printf 'keep\n' > "$fixture/.env.example"
+  printf 'ignored\n' > "$fixture/.env"
+  printf 'ignored\n' > "$fixture/.env.local"
+  printf 'ignored\n' > "$fixture/swap.swp"
+  printf 'ignored\n' > "$fixture/swap.swo"
+  printf 'ignored\n' > "$fixture/backup~"
+  printf 'ignored\n' > "$fixture/.DS_Store"
+  printf 'ignored\n' > "$fixture/Thumbs.db"
+  printf 'ignored\n' > "$fixture/build.log"
+  printf 'ignored\n' > "$fixture/state.tsbuildinfo"
+  printf 'ignored\n' > "$fixture/__pycache__/module.pyc"
   mkdir -p "$output/stale-skill"
-  printf 'stale\n' >"$output/stale-skill/SKILL.md"
+  printf 'stale\n' > "$output/stale-skill/SKILL.md"
 
   AGENTS_SKILLS_BUILD_OUTPUT="$output" \
     AGENTS_SKILLS_BUILD_TARGET="$target" \
@@ -81,7 +81,7 @@ test_build_copies_skills_and_removes_stale_output() {
   assert_exists "$output/code-flow/SKILL.md"
   assert_not_exists "$output/stale-skill"
   assert_not_exists "$output/skill-master/dev"
-  assert_not_exists "$output/code-flow/dev"
+  assert_not_exists "$output/code-flow/tests"
   assert_not_exists "$output/task-completion-notifier/tests"
   assert_not_exists "$output/skill-master/package.json"
   assert_not_exists "$output/code-flow/package.json"
@@ -97,11 +97,11 @@ test_build_copies_skills_and_removes_stale_output() {
   done
   assert_exists "$target/commit-changes/SKILL.md"
   mkdir -p "$target/code-toolbox"
-  printf 'legacy\n' >"$target/code-toolbox/SKILL.md"
+  printf 'legacy\n' > "$target/code-toolbox/SKILL.md"
   mkdir -p "$target/code-flow/templates"
-  printf 'stale\n' >"$target/code-flow/templates/obsolete-template.md"
+  printf 'stale\n' > "$target/code-flow/templates/obsolete-template.md"
   mkdir -p "$target/external-skill"
-  printf 'external\n' >"$target/external-skill/SKILL.md"
+  printf 'external\n' > "$target/external-skill/SKILL.md"
 
   AGENTS_SKILLS_BUILD_OUTPUT="$output" \
     AGENTS_SKILLS_BUILD_TARGET="$target" \
@@ -112,7 +112,7 @@ test_build_copies_skills_and_removes_stale_output() {
   assert_not_exists "$target/code-flow/templates/obsolete-template.md"
   assert_exists "$target/external-skill/SKILL.md"
   assert_not_exists "$target/skill-master/dev"
-  assert_not_exists "$target/code-flow/dev"
+  assert_not_exists "$target/code-flow/tests"
   assert_not_exists "$target/task-completion-notifier/tests"
   assert_not_exists "$target/skill-master/package.json"
   assert_not_exists "$target/code-flow/package.json"
