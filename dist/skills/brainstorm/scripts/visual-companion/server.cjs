@@ -511,7 +511,11 @@ function handleMessage(text) {
 	}
 	touchActivity();
 	console.log(JSON.stringify({ source: "user-event", ...event }));
-	if (typeof event?.type === "string" && event.payload && typeof event.payload === "object") {
+	if (
+		typeof event?.type === "string" &&
+		event.payload &&
+		typeof event.payload === "object"
+	) {
 		const eventsFile = path.join(STATE_DIR, "events");
 		fs.appendFileSync(eventsFile, `${JSON.stringify(event)}\n`);
 	}
