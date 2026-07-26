@@ -4,6 +4,6 @@
 	"type": "module",
 	"scripts": {
 		"test": "node --test tests/*.test.mjs",
-		"validate": "node --check scripts/project-init.mjs && node scripts/project-init.mjs list"
+		"validate": "node --check scripts/project-init.mjs && node --check evals/run-evals.mjs && node -e \"JSON.parse(require('node:fs').readFileSync('evals/evals.json', 'utf8'))\" && node scripts/project-init.mjs list"
 	}
 }

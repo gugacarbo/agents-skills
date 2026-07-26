@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
+import {
+	cp,
+	mkdir,
+	mkdtemp,
+	readFile,
+	stat,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -11,13 +19,26 @@ const skillDirectory = path.dirname(
 );
 const script = path.join(skillDirectory, "scripts", "project-init.mjs");
 
-function run(args, cwd) {
+function run(args, cwd, selectedScript = script) {
 	return JSON.parse(
-		execFileSync(process.execPath, [script, ...args], {
+		execFileSync(process.execPath, [selectedScript, ...args], {
 			cwd,
 			encoding: "utf8",
 		}),
 	);
+}
+
+function runResult(args, cwd, selectedScript = script) {
+	const result = spawnSync(process.execPath, [selectedScript, ...args], {
+		cwd,
+		encoding: "utf8",
+	});
+	return {
+		status: result.status,
+		stdout: result.stdout,
+		stderr: result.stderr,
+		json: JSON.parse(result.stdout),
+	};
 }
 
 async function temporaryDirectory(t) {
@@ -29,7 +50,11 @@ async function temporaryDirectory(t) {
 	return directory;
 }
 
-test("lists manifest-backed templates", () => {
+async function writeJson(filePath, value) {
+	await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+test("lists templates with inherited complete optional tools", () => {
 	const result = run(["list"], skillDirectory);
 	assert.deepEqual(
 		result.templates.map((template) => template.id),
@@ -42,9 +67,24 @@ test("lists manifest-backed templates", () => {
 			"typescript/vite",
 		],
 	);
+	const node = result.templates.find(
+		(template) => template.id === "typescript/node",
+	);
+	assert.deepEqual(
+		node.optionalTools.map((tool) => tool.id),
+		["cspell", "lint-staged"],
+	);
+	assert.equal(
+		result.templates.some((template) =>
+			template.optionalTools.some((tool) =>
+				["test-staged", "t3oss", "turbo"].includes(tool.id),
+			),
+		),
+		false,
+	);
 });
 
-test("plans then applies Node with only CSpell assets", async (t) => {
+test("plans and applies a complete Node overlay with CSpell", async (t) => {
 	const directory = await temporaryDirectory(t);
 	const target = path.join(directory, "api-core");
 	const args = [
@@ -57,11 +97,12 @@ test("plans then applies Node with only CSpell assets", async (t) => {
 	];
 	const plan = run(["plan", ...args], directory);
 	assert.deepEqual(plan.stack, ["_base", "typescript", "typescript/node"]);
-	assert.equal(plan.commands.install[0].includes("@biomejs/biome"), true);
-	assert.equal(
-		plan.files.some((file) => file.target === ".lintstagedrc.js"),
-		false,
-	);
+	assert.equal(plan.lifecycle.frameworkCommand, null);
+	assert.equal(plan.commands.setup.includes("pnpm exec husky init"), false);
+	assert.match(plan.commands.install.join("\n"), /@biomejs\/biome/);
+	assert.match(plan.commands.optional.join("\n"), /cspell/);
+	assert.deepEqual(plan.collisions, []);
+
 	const applied = run(["apply", ...args], directory);
 	assert.equal(applied.applied, true);
 	for (const file of [
@@ -69,7 +110,11 @@ test("plans then applies Node with only CSpell assets", async (t) => {
 		"REQUIREMENTS.md",
 		".editorconfig",
 		".gitignore",
+		"biome.json",
 		"knip.json",
+		"tsconfig.json",
+		"src/index.ts",
+		"package.json",
 		"cspell.config.yaml",
 		".husky/pre-commit",
 		".husky/pre-push",
@@ -79,17 +124,24 @@ test("plans then applies Node with only CSpell assets", async (t) => {
 	]) {
 		assert.equal((await stat(path.join(target, file))).isFile(), true, file);
 	}
-	const agents = await readFile(path.join(target, "AGENTS.md"), "utf8");
-	assert.match(agents, /## General/);
-	assert.match(agents, /Node\.js LTS/);
-	assert.doesNotMatch(agents, /request_user_input/);
-	const knip = await readFile(path.join(target, "knip.json"), "utf8");
-	assert.doesNotMatch(knip, /lite-llm|shadcn|tailwindcss/);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.equal(packageJson.scripts.prepare, "husky");
+	assert.equal(packageJson.scripts.typecheck, "tsc --noEmit");
+	assert.equal(packageJson.scripts.spellcheck, "cspell .");
+	assert.equal(packageJson.scripts.dev, "tsx watch src/index.ts");
+	assert.equal(
+		await stat(path.join(target, "scripts/pre-commit")).then(
+			(item) => item.mode & 0o111,
+		),
+		0o111,
+	);
 });
 
-test("keeps Vite plan-only until the generator has created package.json", async (t) => {
+test("plans nested Vite targets from their absolute parent", async (t) => {
 	const directory = await temporaryDirectory(t);
-	const target = path.join(directory, "web-ui");
+	const target = path.join(directory, "apps", "customer portal");
 	const plan = run(
 		[
 			"plan",
@@ -97,6 +149,8 @@ test("keeps Vite plan-only until the generator has created package.json", async 
 			"typescript/vite",
 			"--target",
 			target,
+			"--name",
+			"customer-portal",
 			"--variant",
 			"svelte-ts",
 		],
@@ -104,37 +158,122 @@ test("keeps Vite plan-only until the generator has created package.json", async 
 	);
 	assert.equal(
 		plan.lifecycle.frameworkCommand,
-		"pnpm create vite . --template svelte-ts",
+		"pnpm create vite 'customer portal' --template svelte-ts",
 	);
+	assert.equal(plan.lifecycle.frameworkCwd, path.dirname(target));
 	assert.equal(plan.commands.typecheck, "svelte-check");
 	assert.equal(plan.lifecycle.frameworkReady, false);
-	assert.equal(plan.targetExists, false);
+	assert.deepEqual(plan.lifecycle.missingPackages, ["vite", "svelte"]);
+	assert.equal(
+		await stat(target)
+			.then(() => true)
+			.catch(() => false),
+		false,
+	);
 });
 
-test("plans TanStack Start before overlay without redundant framework packages", async (t) => {
+test("requires framework-specific Vite readiness markers", async (t) => {
 	const directory = await temporaryDirectory(t);
-	const target = path.join(directory, "dashboard");
+	const target = path.join(directory, "web-ui");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "web-ui",
+		private: true,
+		type: "module",
+		dependencies: { vite: "latest" },
+	});
+	const args = [
+		"plan",
+		"--template",
+		"typescript/vite",
+		"--target",
+		target,
+		"--variant",
+		"react-ts",
+	];
+	const incomplete = run(args, directory);
+	assert.equal(incomplete.lifecycle.frameworkReady, false);
+	assert.deepEqual(incomplete.lifecycle.missingPackages, ["react"]);
+
+	await writeJson(path.join(target, "package.json"), {
+		name: "web-ui",
+		private: true,
+		type: "module",
+		dependencies: { vite: "latest", react: "latest" },
+	});
+	const ready = run(args, directory);
+	assert.equal(ready.lifecycle.frameworkReady, true);
+	assert.deepEqual(ready.lifecycle.missingPackages, []);
+});
+
+test("plans TanStack Start with its current generator contract", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "products", "dashboard");
 	const plan = run(
 		["plan", "--template", "typescript/tanstack-start", "--target", target],
 		directory,
 	);
 	assert.equal(
 		plan.lifecycle.frameworkCommand,
-		"pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm",
+		"pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm --toolchain biome",
 	);
-	assert.match(
-		plan.notes.join("\n"),
-		/full-stack React.*server-side rendering.*Vite/i,
-	);
+	assert.equal(plan.lifecycle.frameworkCwd, path.dirname(target));
+	assert.match(plan.notes.join("\n"), /full-stack React.*Vite/i);
 	assert.match(plan.notes.join("\n"), /src\/routeTree\.gen\.ts/);
-	assert.doesNotMatch(
-		plan.commands.install.join("\n"),
-		/@tanstack\/react-(?:start|router)/,
-	);
-	assert.equal(plan.targetExists, false);
+	assert.equal(plan.lifecycle.frameworkReady, false);
 });
 
-test("requires exact collision approval and preserves unrelated files", async (t) => {
+test("merges package.json semantically with field-level approval", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "library");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "library",
+		private: true,
+		type: "module",
+		scripts: {
+			dev: "custom-dev",
+			lint: "eslint .",
+		},
+		custom: { preserved: true },
+	});
+	const args = ["--template", "typescript", "--target", target];
+	const plan = run(["plan", ...args], directory);
+	assert.deepEqual(plan.collisions, [
+		"package.json#/scripts/dev",
+		"package.json#/scripts/lint",
+	]);
+	assert.equal(
+		plan.packageChanges.some(
+			(change) =>
+				change.pointer === "/scripts/typecheck" && change.status === "add",
+		),
+		true,
+	);
+	const refused = runResult(["apply", ...args], directory);
+	assert.equal(refused.status, 2);
+	assert.deepEqual(refused.json.unapproved, plan.collisions);
+
+	const applied = run(
+		[
+			"apply",
+			...args,
+			"--approve",
+			"package.json#/scripts/dev,package.json#/scripts/lint",
+		],
+		directory,
+	);
+	assert.deepEqual(applied.merged, ["package.json"]);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.deepEqual(packageJson.custom, { preserved: true });
+	assert.equal(packageJson.scripts.dev, "tsc --watch");
+	assert.equal(packageJson.scripts.lint, "biome check .");
+	assert.equal(packageJson.scripts.prepare, "husky");
+});
+
+test("requires exact file approval and preserves unrelated files", async (t) => {
 	const directory = await temporaryDirectory(t);
 	const target = path.join(directory, "existing-app");
 	await mkdir(target);
@@ -147,10 +286,7 @@ test("requires exact collision approval and preserves unrelated files", async (t
 		plan.files.some((file) => file.target === "README.md"),
 		false,
 	);
-	const refused = spawnSync(process.execPath, [script, "apply", ...args], {
-		cwd: directory,
-		encoding: "utf8",
-	});
+	const refused = runResult(["apply", ...args], directory);
 	assert.equal(refused.status, 2);
 	assert.equal(
 		await readFile(path.join(target, "AGENTS.md"), "utf8"),
@@ -162,26 +298,128 @@ test("requires exact collision approval and preserves unrelated files", async (t
 		await readFile(path.join(target, "README.md"), "utf8"),
 		"keep me\n",
 	);
+});
+
+test("rejects unknown CLI flags with structured JSON", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const result = runResult(
+		[
+			"plan",
+			"--template",
+			"base-only",
+			"--target",
+			path.join(directory, "app"),
+			"--opitonal",
+			"cspell",
+		],
+		directory,
+	);
+	assert.equal(result.status, 1);
+	assert.equal(result.json.ok, false);
+	assert.match(result.json.error, /Unknown option/);
+});
+
+test("rejects symlink destinations before planning writes", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "app");
+	const external = path.join(directory, "external-agents.md");
+	await mkdir(target);
+	await writeFile(external, "outside\n");
+	await symlink(external, path.join(target, "AGENTS.md"));
+	const result = runResult(
+		["plan", "--template", "base-only", "--target", target],
+		directory,
+	);
+	assert.equal(result.status, 1);
+	assert.match(result.json.error, /Symlinks are not allowed/);
+	assert.equal(await readFile(external, "utf8"), "outside\n");
+});
+
+test("rejects manifest targets that escape the destination", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const copiedSkill = path.join(directory, "project-init");
+	await cp(skillDirectory, copiedSkill, { recursive: true });
+	const manifestPath = path.join(
+		copiedSkill,
+		"templates",
+		"_base",
+		"template.json",
+	);
+	const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+	manifest.files.push({
+		source: "files/.editorconfig",
+		target: "../escaped",
+	});
+	await writeJson(manifestPath, manifest);
+	const result = runResult(
+		[
+			"plan",
+			"--template",
+			"base-only",
+			"--target",
+			path.join(directory, "target"),
+		],
+		directory,
+		path.join(copiedSkill, "scripts", "project-init.mjs"),
+	);
+	assert.equal(result.status, 1);
+	assert.match(result.json.error, /Invalid output target/);
 	assert.equal(
-		(await stat(path.join(target, "REQUIREMENTS.md"))).isFile(),
-		true,
+		await stat(path.join(directory, "escaped"))
+			.then(() => true)
+			.catch(() => false),
+		false,
 	);
 });
 
-test("renders Bun-aware hooks without repository-specific commands", async (t) => {
+test("applies Bun tooling only after Bun readiness and renders Bun commands", async (t) => {
 	const directory = await temporaryDirectory(t);
-	const target = path.join(directory, "bun-worker");
-	const args = ["--template", "bun", "--target", target, "--optional", "turbo"];
+	const target = path.join(directory, "workers", "bun-worker");
+	const prePlan = run(
+		["plan", "--template", "bun", "--target", target],
+		directory,
+	);
+	assert.equal(prePlan.lifecycle.frameworkReady, false);
+	assert.equal(prePlan.lifecycle.frameworkCommand, "bun init bun-worker");
+	assert.equal(prePlan.lifecycle.frameworkCwd, path.dirname(target));
+
+	await mkdir(target, { recursive: true });
+	await writeJson(path.join(target, "package.json"), {
+		name: "bun-worker",
+		private: true,
+		type: "module",
+		devDependencies: { "@types/bun": "latest" },
+	});
+	await writeJson(path.join(target, "tsconfig.json"), {
+		compilerOptions: { types: ["bun"] },
+	});
+	const args = [
+		"--template",
+		"bun",
+		"--target",
+		target,
+		"--optional",
+		"lint-staged",
+	];
+	const plan = run(["plan", ...args], directory);
+	assert.equal(plan.lifecycle.frameworkReady, true);
+	assert.match(plan.commands.optional.join("\n"), /lint-staged/);
 	const applied = run(["apply", ...args], directory);
 	assert.equal(applied.applied, true);
-	assert.deepEqual(applied.selectedOptionalTools, ["turbo"]);
-	const shared = await readFile(
-		path.join(target, "scripts/lib/shared.sh"),
+	const lintStaged = await readFile(
+		path.join(target, ".lintstagedrc.js"),
 		"utf8",
 	);
-	const prePush = await readFile(path.join(target, "scripts/pre-push"), "utf8");
-	assert.match(shared, /PACKAGE_MANAGER="bun"/);
-	assert.doesNotMatch(`${shared}\n${prePush}`, /release:verify|pnpm/);
-	assert.equal(applied.commands.optional[0], "bun add -d turbo");
-	assert.match(applied.commands.install[0], /@biomejs\/biome/);
+	const preCommit = await readFile(
+		path.join(target, "scripts/pre-commit"),
+		"utf8",
+	);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.match(lintStaged, /bunx biome/);
+	assert.doesNotMatch(lintStaged, /pnpm/);
+	assert.match(preCommit, /run_pm run lint-staged/);
+	assert.equal(packageJson.scripts.test, "bun test");
+	assert.equal(packageJson.scripts.typecheck, "tsc --noEmit");
 });

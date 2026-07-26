@@ -1,6 +1,6 @@
 # Template system
 
-The deterministic executor in `../scripts/project-init.mjs` is the only implementation of template discovery, inheritance, composition, collision detection, and file writes.
+The deterministic executor in `../scripts/project-init.mjs` is the only implementation of template discovery, inheritance, document composition, semantic package merges, collision detection, and file writes.
 
 ## Layer model
 
@@ -21,50 +21,48 @@ _base
 
 Supported fields:
 
-- `id`: stable template id;
-- `extends`: parent ids, resolved before the current layer;
-- `description`: user-facing discovery text;
-- `packageManager`: resolved package manager;
+- `id`, `extends`, and `description`: identity, parent layers, and discovery text;
+- `packageManager`: package manager used for generated recommendations;
 - `documents`: output document name to Markdown section source;
-- `files`: explicit `{ source, target }` assets;
-- `commands`: recommended framework, install, setup, and typecheck commands;
-- `requiresFrameworkReady`: block overlay application until `package.json` exists;
-- `variants`: named framework variants and their typecheck contract;
-- `optionalTools`: tool descriptions, per-package-manager commands, assets, and notes.
+- `files` and `omitTargets`: explicit assets and inherited targets removed by a derivative;
+- `packageJson` and `omitPackageJson`: semantically managed fields and inherited JSON pointers removed by a derivative;
+- `dependencies` and `devDependencies`: packages used to build missing-only install recommendations;
+- `commands`: recommended framework, setup, and typecheck commands;
+- `requiresFrameworkReady` and `readiness`: application gate plus required files and installed package names;
+- `variants`: named framework variants and their typecheck/readiness contract;
+- `optionalTools`: complete optional package, script, asset, and note overlays.
 
-No file is copied merely because it exists under a `files/` directory. Every emitted asset must be declared by a manifest.
+No file is copied merely because it exists under `files/`. Every emitted asset must be declared by a manifest. Sources remain under `templates/`; output targets are normalized relative paths and may not contain `.` or `..`.
 
-## Document composition
+## Document and package composition
 
-Layer `AGENTS.md` and `REQUIREMENTS.md` files are project-facing fragments. They must not contain scaffolder control flow, question-tool instructions, copy rules, or optional-tool selection logic.
+Project-facing `AGENTS.md` and `REQUIREMENTS.md` fragments contain only second-level sections. New headings accumulate in layer order; a deeper layer replaces a shallower section with the same heading.
 
-The executor merges second-level Markdown sections by heading:
+Managed `package.json` objects merge by key:
 
-- new headings accumulate in layer order;
-- a deeper layer replaces a shallower section with the same heading;
-- the generated document reports no scaffolder-only instructions.
+- missing fields are added without approval;
+- equal fields are unchanged;
+- differing managed fields become collisions such as `package.json#/scripts/lint`;
+- unrelated existing fields are preserved.
 
-Use stable concern headings such as `General`, `Runtime`, `Package manager`, `Module system`, `Env contract`, `Entry point`, `Scripts contract`, `Test runner`, `Lint & Format`, `Type checking`, `Dead code`, `Git hooks`, `Commands`, `Dependencies`, `Project Structure`, `CI/CD`, and `Skills`.
-
-## Lifecycle contract
+## Lifecycle and safety
 
 - `plan` never creates the target.
-- Existing files are collisions only when the overlay would write the same path with different bytes.
-- `apply` is atomic with respect to approval: it writes nothing while any collision lacks exact path approval.
-- Unrelated files are preserved.
-- Generator-first templates such as Vite and TanStack Start require `package.json` before the overlay can be applied.
+- `apply` writes nothing while any file or package-field collision lacks exact approval.
+- Generator-first templates require their declared files and framework packages.
+- Framework commands run from the absolute target parent and safely quote the target basename.
+- Manifest sources and targets remain inside their allowed roots.
+- Symlinks are rejected anywhere along planned write paths.
 - Package-manager and framework commands are recommendations only.
 
 ## Optional tools
 
-Optional tools merge by id across the resolved stack. Assets are copied only when the tool is selected. Package-manager-specific commands belong in the manifest, not in project-facing Markdown.
+Optional tools merge by id across the resolved stack. Assets and package fields apply only when the tool is selected. A published optional tool must provide enough package, script, configuration, and hook wiring to be operational; dependency-only entries are not allowed.
 
 ## Adding a template
 
-1. Add `template.json` with explicit inheritance.
-2. Add project-facing document fragments.
-3. Declare every emitted asset.
-4. Add deterministic tests for plan, apply, collisions, and lifecycle.
-5. Add a behavioral eval only when it exercises agent decisions beyond the script's deterministic tests.
-
-Keep the static publication inventory in [FILES.md](FILES.md) aligned with manifest sources.
+1. Add a manifest with explicit inheritance, readiness, package fields, and dependencies.
+2. Add project-facing document fragments and explicitly declared assets.
+3. Add deterministic tests for plan, apply, merge conflicts, path safety, and lifecycle.
+4. Add a behavioral eval only when it exercises agent decisions beyond the executor.
+5. Keep [FILES.md](FILES.md) aligned with every manifest-reachable source.

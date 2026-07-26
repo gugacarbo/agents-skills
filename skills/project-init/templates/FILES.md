@@ -23,7 +23,10 @@ The runtime resolves these files through manifests. This inventory keeps that dy
 ## Base and shared assets
 
 - [`_base/files/.editorconfig`](_base/files/.editorconfig)
+- [`_base/files/.gitignore`](_base/files/.gitignore)
 - [`_base/optional-tools/cspell/files/cspell.config.yaml`](_base/optional-tools/cspell/files/cspell.config.yaml)
+- [`_shared/tooling/files/biome.template.json`](_shared/tooling/files/biome.template.json)
+- [`_shared/optional-tools/lint-staged/files/scripts/pre-commit`](_shared/optional-tools/lint-staged/files/scripts/pre-commit)
 - [`_shared/husky/files/.husky/pre-commit`](_shared/husky/files/.husky/pre-commit)
 - [`_shared/husky/files/.husky/pre-push`](_shared/husky/files/.husky/pre-push)
 - [`_shared/husky/files/scripts/lib/shared.sh`](_shared/husky/files/scripts/lib/shared.sh)
@@ -33,4 +36,7 @@ The runtime resolves these files through manifests. This inventory keeps that dy
 ## TypeScript assets
 
 - [`typescript/files/knip.json`](typescript/files/knip.json)
+- [`typescript/files/tsconfig.json`](typescript/files/tsconfig.json)
+- [`typescript/files/src/index.ts`](typescript/files/src/index.ts)
+- [`typescript/tanstack-start/files/knip.json`](typescript/tanstack-start/files/knip.json)
 - [`typescript/optional-tools/lint-staged/files/.lintstagedrc.js`](typescript/optional-tools/lint-staged/files/.lintstagedrc.js)

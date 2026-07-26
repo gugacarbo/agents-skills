@@ -1,7 +1,7 @@
 {
 	"id": "typescript",
 	"extends": ["_base"],
-	"description": "Strict TypeScript conventions with Vitest, Biome, Knip, and Husky.",
+	"description": "A strict TypeScript library or package with deterministic tooling and repository conventions.",
 	"packageManager": "pnpm",
 	"documents": {
 		"AGENTS.md": "AGENTS.md",
@@ -9,6 +9,12 @@
 	},
 	"files": [
 		{ "source": "files/knip.json", "target": "knip.json" },
+		{ "source": "files/tsconfig.json", "target": "tsconfig.json" },
+		{ "source": "files/src/index.ts", "target": "src/index.ts" },
+		{
+			"source": "../_shared/tooling/files/biome.template.json",
+			"target": "biome.json"
+		},
 		{
 			"source": "../_shared/husky/files/.husky/pre-commit",
 			"target": ".husky/pre-commit"
@@ -30,44 +36,66 @@
 			"target": "scripts/lib/shared.sh"
 		}
 	],
+	"packageJson": {
+		"name": "{{projectName}}",
+		"private": true,
+		"type": "module",
+		"scripts": {
+			"dev": "tsc --watch",
+			"build": "tsc",
+			"test": "vitest run --passWithNoTests",
+			"lint": "biome check .",
+			"format": "biome check --write .",
+			"typecheck": "tsc --noEmit",
+			"knip": "knip",
+			"prepare": "husky"
+		}
+	},
+	"devDependencies": [
+		"typescript",
+		"vitest",
+		"@biomejs/biome",
+		"knip",
+		"husky"
+	],
 	"commands": {
-		"install": ["pnpm add -D typescript vitest @biomejs/biome knip husky"],
-		"setup": ["pnpm exec biome init", "pnpm exec husky init"],
-		"typecheck": "tsc --noEmit"
+		"setup": ["pnpm run prepare"],
+		"typecheck": "pnpm run typecheck"
 	},
 	"optionalTools": {
 		"cspell": {
-			"description": "Spell-check code and documentation in English and Brazilian Portuguese.",
-			"commands": { "pnpm": "pnpm add -D cspell @cspell/dict-pt-br" },
+			"description": "Configure spell checking for English and Brazilian Portuguese.",
+			"devDependencies": ["cspell", "@cspell/dict-pt-br"],
+			"packageJson": {
+				"scripts": {
+					"spellcheck": "cspell ."
+				}
+			},
 			"files": [
 				{
 					"source": "../_base/optional-tools/cspell/files/cspell.config.yaml",
 					"target": "cspell.config.yaml"
 				}
-			],
-			"notes": ["Add a spellcheck script that runs cspell ."]
+			]
 		},
 		"lint-staged": {
-			"description": "Run formatting and type checks only for staged files.",
-			"commands": { "pnpm": "pnpm add -D lint-staged prettier tsc-files" },
+			"description": "Configure staged-file formatting and type checking in pre-commit.",
+			"devDependencies": ["lint-staged", "prettier", "tsc-files"],
+			"packageJson": {
+				"scripts": {
+					"lint-staged": "lint-staged"
+				}
+			},
 			"files": [
 				{
 					"source": "optional-tools/lint-staged/files/.lintstagedrc.js",
 					"target": ".lintstagedrc.js"
+				},
+				{
+					"source": "../_shared/optional-tools/lint-staged/files/scripts/pre-commit",
+					"target": "scripts/pre-commit"
 				}
 			]
-		},
-		"test-staged": {
-			"description": "Run tests related to staged files.",
-			"commands": { "pnpm": "pnpm add -D test-staged" }
-		},
-		"t3oss": {
-			"description": "Type-safe environment variable validation.",
-			"commands": { "pnpm": "pnpm add @t3-oss/env-core" }
-		},
-		"turbo": {
-			"description": "Turborepo task orchestration.",
-			"commands": { "pnpm": "pnpm add -D turbo" }
 		}
 	}
 }

@@ -7,13 +7,15 @@
 		"AGENTS.md": "AGENTS.md",
 		"REQUIREMENTS.md": "REQUIREMENTS.md"
 	},
+	"packageJson": {
+		"scripts": {
+			"dev": "tsx watch src/index.ts",
+			"build": "tsc",
+			"start": "node dist/index.js"
+		}
+	},
+	"devDependencies": ["@types/node", "tsx"],
 	"commands": {
-		"framework": "pnpm init",
-		"frameworkCwd": "{{targetName}}",
-		"install": [
-			"pnpm add -D typescript @types/node vitest @biomejs/biome tsx knip husky"
-		],
-		"setup": ["pnpm exec biome init", "pnpm exec husky init"],
-		"typecheck": "tsc --noEmit"
+		"typecheck": "pnpm run typecheck"
 	}
 }

@@ -4,9 +4,9 @@
 
 - The selected Vite generator owns Vite, TypeScript, and framework packages.
 
-## Dev Dependencies
+## Overlay tooling
 
-- Add `vitest`, `@biomejs/biome`, `knip`, and `husky` after generation.
+- Add only missing `vitest`, `@biomejs/biome`, `knip`, and `husky` packages after generation.
 - Use the selected framework's generated type-checking dependencies when applicable.
 
 ## CI/CD

@@ -4,9 +4,10 @@
 
 - The generator owns React, TanStack Start, TanStack Router, Vite, and SSR integration packages.
 
-## Dev Dependencies
+## Overlay tooling
 
-- Add `vitest`, `@biomejs/biome`, `knip`, and `husky` after generation.
+- The generator owns its selected Biome toolchain.
+- Add only missing `vitest`, `@biomejs/biome`, `knip`, and `husky` packages after generation.
 
 ## Generated code
 

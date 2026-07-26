@@ -1,10 +1,16 @@
 {
 	"id": "typescript/tanstack-start",
 	"extends": ["typescript"],
-	"description": "A full-stack React application with TanStack Start, SSR, and file-based routing.",
+	"description": "A full-stack React application with TanStack Start, SSR, file routing, and complete repository tooling.",
 	"packageManager": "pnpm",
 	"frameworkName": "TanStack Start React",
 	"requiresFrameworkReady": true,
+	"readiness": {
+		"files": ["package.json"],
+		"packages": ["@tanstack/react-start"]
+	},
+	"omitTargets": ["tsconfig.json", "src/index.ts"],
+	"omitPackageJson": ["/scripts/dev", "/scripts/build"],
 	"planNotes": [
 		"TanStack Start is a full-stack React framework with server-side rendering built on Vite.",
 		"Treat src/routeTree.gen.ts as generated code: do not edit it and exclude it from dead-code enforcement."
@@ -13,11 +19,10 @@
 		"AGENTS.md": "AGENTS.md",
 		"REQUIREMENTS.md": "REQUIREMENTS.md"
 	},
+	"files": [{ "source": "files/knip.json", "target": "knip.json" }],
 	"commands": {
-		"framework": "pnpm dlx create-tanstack-app@latest {{targetName}} --template file-router --package-manager pnpm",
-		"frameworkCwd": ".",
-		"install": ["pnpm add -D vitest @biomejs/biome knip husky"],
-		"setup": ["pnpm exec biome init", "pnpm exec husky init"],
-		"typecheck": "tsc --noEmit"
+		"framework": "pnpm dlx create-tanstack-app@latest {{targetArg}} --template file-router --package-manager pnpm --toolchain biome",
+		"frameworkCwd": "{{targetParent}}",
+		"typecheck": "pnpm run typecheck"
 	}
 }

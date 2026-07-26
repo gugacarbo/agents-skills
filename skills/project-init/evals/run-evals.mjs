@@ -175,7 +175,7 @@ function projectInitPlan(events) {
 
 function packageManagerWasExecuted(commands) {
 	return commands.some((command) =>
-		/(^|(?:&&|\|\||;|\n)\s*)(?:pnpm|npm|bun)(?:\s|$)/m.test(command),
+		/(^|[\s"';&|()])(?:pnpm|npm|npx|bun|bunx)(?=$|[\s"';&|()])/m.test(command),
 	);
 }
 
@@ -215,15 +215,17 @@ async function grade(evalCase, context) {
 	} = context;
 	const combined = `${transcriptText}\n${finalText}`;
 	const plannerResult = projectInitPlan(events);
-	const targetName = [2, 4].includes(evalCase.id)
-		? evalCase.id === 2
-			? "web-ui"
-			: "dashboard"
-		: evalCase.id === 5
-			? "bun-worker"
-			: evalCase.id === 1
-				? "api-core"
-				: "existing-app";
+	const targetName = {
+		1: "api-core",
+		2: "web-ui",
+		3: "existing-app",
+		4: "dashboard",
+		5: "bun-worker",
+		6: "existing-app",
+		7: "products/customer portal",
+		8: "library",
+		9: "symlink-app",
+	}[evalCase.id];
 	const target = path.join(workspace, targetName);
 	const targetFiles = fileMap(
 		files.filter((item) => item.path.startsWith(`${targetName}/`)),
@@ -240,6 +242,10 @@ async function grade(evalCase, context) {
 		const required = [
 			"AGENTS.md",
 			"REQUIREMENTS.md",
+			"package.json",
+			"tsconfig.json",
+			"src/index.ts",
+			"biome.json",
 			".editorconfig",
 			".gitignore",
 			"knip.json",
@@ -252,6 +258,11 @@ async function grade(evalCase, context) {
 		const agents = await fs
 			.readFile(path.join(target, "AGENTS.md"), "utf8")
 			.catch(() => "");
+		const packageJson = JSON.parse(
+			await fs
+				.readFile(path.join(target, "package.json"), "utf8")
+				.catch(() => "{}"),
+		);
 		expectations.push(
 			result(
 				evalCase.expectations[0],
@@ -277,6 +288,22 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[4],
+				[
+					"lint",
+					"format",
+					"test",
+					"typecheck",
+					"knip",
+					"prepare",
+					"dev",
+					"build",
+					"start",
+					"spellcheck",
+				].every((script) => packageJson.scripts?.[script]),
+				`scripts=${JSON.stringify(packageJson.scripts ?? {})}`,
+			),
+			result(
+				evalCase.expectations[5],
 				combined.includes("@biomejs/biome") &&
 					/cspell/i.test(finalText) &&
 					noPackageExecution,
@@ -295,7 +322,8 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[1],
-				combined.includes("pnpm create vite . --template svelte-ts") &&
+				combined.includes("pnpm create vite web-ui --template svelte-ts") &&
+					combined.includes(path.dirname(target)) &&
 					/overlay/i.test(combined),
 				"framework command and overlay order inspected in transcript",
 			),
@@ -366,7 +394,7 @@ async function grade(evalCase, context) {
 			result(
 				evalCase.expectations[1],
 				combined.includes(
-					"pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm",
+					"pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm --toolchain biome",
 				) && /overlay/i.test(combined),
 				"TanStack CLI and overlay order inspected in transcript",
 			),
@@ -396,22 +424,35 @@ async function grade(evalCase, context) {
 
 	if (evalCase.id === 5) {
 		const required = [
+			"package.json",
+			"biome.json",
 			"AGENTS.md",
 			"REQUIREMENTS.md",
 			".editorconfig",
 			".gitignore",
 			"knip.json",
+			".lintstagedrc.js",
 			".husky/pre-commit",
 			".husky/pre-push",
 			"scripts/pre-commit",
 			"scripts/lib/shared.sh",
 		];
 		const scripts = await Promise.all(
-			["scripts/pre-commit", "scripts/lib/shared.sh", ".husky/pre-push"].map(
-				(file) => fs.readFile(path.join(target, file), "utf8").catch(() => ""),
+			[
+				"scripts/pre-commit",
+				"scripts/lib/shared.sh",
+				".husky/pre-push",
+				".lintstagedrc.js",
+			].map((file) =>
+				fs.readFile(path.join(target, file), "utf8").catch(() => ""),
 			),
 		);
 		const scriptText = scripts.join("\n");
+		const packageJson = JSON.parse(
+			await fs
+				.readFile(path.join(target, "package.json"), "utf8")
+				.catch(() => "{}"),
+		);
 		expectations.push(
 			result(
 				evalCase.expectations[0],
@@ -425,19 +466,35 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[2],
-				!relativeTargetFiles.has("cspell.config.yaml") &&
-					!relativeTargetFiles.has(".lintstagedrc.js"),
+				!relativeTargetFiles.has("cspell.config.yaml"),
 				`files=${JSON.stringify([...relativeTargetFiles])}`,
 			),
 			result(
 				evalCase.expectations[3],
-				/bun/i.test(scriptText) && !scriptText.includes("release:verify"),
+				/bunx/i.test(scriptText) &&
+					!scriptText.includes("pnpm") &&
+					/run_pm run lint-staged/.test(scriptText),
 				`script_chars=${scriptText.length}`,
 			),
 			result(
 				evalCase.expectations[4],
-				/bun add[^\n]*turbo/i.test(finalText) &&
-					finalText.includes("@biomejs/biome") &&
+				[
+					"dev",
+					"build",
+					"start",
+					"test",
+					"lint",
+					"format",
+					"typecheck",
+					"knip",
+					"prepare",
+					"lint-staged",
+				].every((script) => packageJson.scripts?.[script]),
+				`scripts=${JSON.stringify(packageJson.scripts ?? {})}`,
+			),
+			result(
+				evalCase.expectations[5],
+				/bun add[^\n]*(?:lint-staged|@biomejs\/biome)/i.test(finalText) &&
 					noPackageExecution,
 				`package_manager_executed=${!noPackageExecution}`,
 			),
@@ -485,6 +542,88 @@ async function grade(evalCase, context) {
 		);
 	}
 
+	if (evalCase.id === 7) {
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				hasProjectInitCommand(commands, "plan") &&
+					combined.includes("typescript/vite") &&
+					combined.includes("react-ts") &&
+					combined.includes("--name") &&
+					combined.includes("customer-portal"),
+				`commands=${JSON.stringify(commands)}`,
+			),
+			result(
+				evalCase.expectations[1],
+				combined.includes(
+					"pnpm create vite 'customer portal' --template react-ts",
+				) && combined.includes(path.dirname(target)),
+				"quoted framework command and absolute cwd inspected",
+			),
+			result(
+				evalCase.expectations[2],
+				!(await exists(target)) && noPackageExecution,
+				`target_exists=${await exists(target)} package_manager_executed=${!noPackageExecution}`,
+			),
+		);
+	}
+
+	if (evalCase.id === 8) {
+		const packageJson = JSON.parse(
+			await fs
+				.readFile(path.join(target, "package.json"), "utf8")
+				.catch(() => "{}"),
+		);
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				planIndex >= 0 &&
+					applyIndex > planIndex &&
+					commands[applyIndex].includes("--approve") &&
+					commands[applyIndex].includes("package.json#/scripts/lint") &&
+					!commands[applyIndex].includes("package.json#/scripts/custom-script"),
+				`commands=${JSON.stringify(commands)}`,
+			),
+			result(
+				evalCase.expectations[1],
+				packageJson.scripts?.lint === "biome check ." &&
+					packageJson.scripts?.["custom-script"] === "node custom.mjs" &&
+					packageJson.metadata?.keep === true &&
+					packageJson.scripts?.typecheck === "tsc --noEmit",
+				`package=${JSON.stringify(packageJson)}`,
+			),
+			result(
+				evalCase.expectations[2],
+				/merg|mescl/i.test(finalText) && /criad|creat/i.test(finalText),
+				`final=${finalText}`,
+			),
+		);
+	}
+
+	if (evalCase.id === 9) {
+		const outsidePath = path.join(workspace, "outside-agents.md");
+		const outsideHash = await hashFile(outsidePath).catch(() => "missing");
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				hasProjectInitCommand(commands, "plan") &&
+					!hasProjectInitCommand(commands, "apply"),
+				`commands=${JSON.stringify(commands)}`,
+			),
+			result(
+				evalCase.expectations[1],
+				outsideHash === beforeHashes.OUTSIDE,
+				`before=${beforeHashes.OUTSIDE} after=${outsideHash}`,
+			),
+			result(
+				evalCase.expectations[2],
+				/symlink/i.test(finalText) &&
+					/(?:not allowed|nao.*permit|não.*permit)/i.test(finalText),
+				`final=${finalText}`,
+			),
+		);
+	}
+
 	const passed = expectations.filter(
 		(expectation) => expectation.passed,
 	).length;
@@ -524,6 +663,57 @@ async function prepareWorkspace(workspace, selectedSkill, evalCase) {
 				force: true,
 			},
 		);
+	}
+	if (evalCase.id === 5) {
+		const target = path.join(workspace, "bun-worker");
+		await fs.mkdir(target, { recursive: true });
+		await fs.writeFile(
+			path.join(target, "package.json"),
+			`${JSON.stringify(
+				{
+					name: "bun-worker",
+					private: true,
+					type: "module",
+					devDependencies: { "@types/bun": "latest" },
+				},
+				null,
+				2,
+			)}\n`,
+		);
+		await fs.writeFile(
+			path.join(target, "tsconfig.json"),
+			'{"compilerOptions":{"types":["bun"]}}\n',
+		);
+		await fs.writeFile(path.join(target, "index.ts"), "export {};\n");
+	}
+	if (evalCase.id === 8) {
+		const target = path.join(workspace, "library");
+		await fs.mkdir(target, { recursive: true });
+		await fs.writeFile(
+			path.join(target, "package.json"),
+			`${JSON.stringify(
+				{
+					name: "library",
+					private: true,
+					type: "module",
+					scripts: {
+						dev: "tsc --watch",
+						lint: "eslint .",
+						"custom-script": "node custom.mjs",
+					},
+					metadata: { keep: true },
+				},
+				null,
+				2,
+			)}\n`,
+		);
+	}
+	if (evalCase.id === 9) {
+		const target = path.join(workspace, "symlink-app");
+		const outside = path.join(workspace, "outside-agents.md");
+		await fs.mkdir(target, { recursive: true });
+		await fs.writeFile(outside, "outside content\n");
+		await fs.symlink(outside, path.join(target, "AGENTS.md"));
 	}
 }
 
@@ -566,6 +756,11 @@ async function main() {
 			);
 			beforeHashes.README = await hashFile(
 				path.join(workspace, "existing-app", "README.md"),
+			);
+		}
+		if (evalCase.id === 9) {
+			beforeHashes.OUTSIDE = await hashFile(
+				path.join(workspace, "outside-agents.md"),
 			);
 		}
 
