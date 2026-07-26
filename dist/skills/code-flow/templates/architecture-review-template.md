@@ -1,4 +1,5 @@
 <!-- Preencha os campos; mantenha exatamente um par de marcadores. -->
+
 > agent: architect
 > run_id: <uuid>
 > event: architecture-result
@@ -12,6 +13,7 @@
 <decisão técnica, spec/ADR, riscos e próximo responsável>
 
 <!-- code-flow:architect-review:start -->
+
 ## Solução e fronteiras técnicas
 
 <abordagem, componentes, contratos e limites; referencie objetivo/DoD da issue>
@@ -27,12 +29,13 @@ Base SHA: `<sha>`
 ## Riscos, casos de borda e rollback
 
 | Risco/caso | Mitigação | Rollback/prova |
-| --- | --- | --- |
-| `<item>` | `<ação>` | `<prova>` |
+| ---------- | --------- | -------------- |
+| `<item>`   | `<ação>`  | `<prova>`      |
 
 ## Validação e blockers
 
-| Item | Evidência | Ação |
-| --- | --- | --- |
+| Item     | Evidência | Ação     |
+| -------- | --------- | -------- |
 | `<item>` | `<prova>` | `<ação>` |
+
 <!-- code-flow:architect-review:end -->

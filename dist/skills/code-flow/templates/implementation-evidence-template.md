@@ -11,33 +11,34 @@
 <objetivo ou DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED>
 
 <!-- Publique Planejamento antes de editar e complete o restante ao terminar. -->
+
 ## Planejamento
 
-| Escopo | Áreas | Validação |
-| --- | --- | --- |
+| Escopo   | Áreas     | Validação    |
+| -------- | --------- | ------------ |
 | `<item>` | `<paths>` | `<comandos>` |
 
 | Worktree/branch | Base SHA | Rollback |
-| --- | --- | --- |
-| `<valor>` | `<sha>` | `<ação>` |
+| --------------- | -------- | -------- |
+| `<valor>`       | `<sha>`  | `<ação>` |
 
 ## Rastreabilidade imutável
 
-| Base SHA | Head SHA | Range/PR | Branch/worktree |
-| --- | --- | --- | --- |
-| `<sha>` | `<sha>` | `<URL ou n/a>` | `<valor>` |
+| Base SHA | Head SHA | Range/PR       | Branch/worktree |
+| -------- | -------- | -------------- | --------------- |
+| `<sha>`  | `<sha>`  | `<URL ou n/a>` | `<valor>`       |
 
 ## Critérios e evidências
 
-| Critério | Evidência | Resultado |
-| --- | --- | --- |
-| `<critério>` | `<comando/prova>` | `PASS | FAIL | n/a` |
+| Critério     | Evidência         | Resultado |
+| ------------ | ----------------- | --------- |
+| `<critério>` | `<comando/prova>` | `PASS     | FAIL | n/a` |
 
 ## Reconciliação de escopo
 
-| Planejado | Implementado | Não feito/motivo |
-| --- | --- | --- |
-| `<item>` | `<item>` | `<none ou motivo>` |
+| Planejado | Implementado | Não feito/motivo   |
+| --------- | ------------ | ------------------ |
+| `<item>`  | `<item>`     | `<none ou motivo>` |
 
 ## Resultado
 
@@ -47,6 +48,6 @@ PR publicado: `<URL ou n/a>`
 
 ## Problemas encontrados
 
-| Nível | Problema | Solução | Risco | Issue draft |
-| --- | --- | --- | --- | --- |
-| `Critical | Important | Minor | Cannot verify` | `<item>` | `<ação>` | `<risco>` | `<link ou n/a>` |
+| Nível     | Problema  | Solução | Risco          | Issue draft |
+| --------- | --------- | ------- | -------------- | ----------- |
+| `Critical | Important | Minor   | Cannot verify` | `<item>`    | `<ação>` | `<risco>` | `<link ou n/a>` |

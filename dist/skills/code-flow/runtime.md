@@ -19,14 +19,14 @@ no limite, publique handoff e preserve o estado atual.
 
 O dispatcher persiste `Complexity: XS | S | M | L | XL` e evidencia:
 
-| Dimensão | Pergunta |
-| --- | --- |
-| Áreas | Quantos componentes e contratos são tocados? |
-| Acoplamento | Quantas mudanças dependem umas das outras? |
-| Validação | O caminho de prova é conhecido e rotineiro? |
-| Reversibilidade | O rollback é simples e demonstrável? |
-| Dependências | Há coordenação interna, externa ou cross-repo? |
-| Incerteza | Existem decisões materiais ainda abertas? |
+| Dimensão        | Pergunta                                       |
+| --------------- | ---------------------------------------------- |
+| Áreas           | Quantos componentes e contratos são tocados?   |
+| Acoplamento     | Quantas mudanças dependem umas das outras?     |
+| Validação       | O caminho de prova é conhecido e rotineiro?    |
+| Reversibilidade | O rollback é simples e demonstrável?           |
+| Dependências    | Há coordenação interna, externa ou cross-repo? |
+| Incerteza       | Existem decisões materiais ainda abertas?      |
 
 - XS: interna, uma área, caminho conhecido, reversível e sem acoplamento.
 - S: um componente, poucas mudanças acopladas e validação rotineira.

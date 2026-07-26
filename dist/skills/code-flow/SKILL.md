@@ -10,22 +10,22 @@ Orquestre issues existentes sem instalar configuração no repositório-alvo.
 gate, blocker, conclusão ou dez papéis. Sempre leia [`runtime.md`](runtime.md)
 e use [`workflow-states.json`](workflow-states.json) como registry canônico.
 
-| Comando | Ação |
-| --- | --- |
-| `/code-flow` | Mostra ajuda e faz discovery read-only. |
-| `/code-flow <issue>` | Provisiona labels ausentes, ativa/retoma e orquestra. |
-| `/code-flow role <papel> <issue>` | Executa exatamente um papel elegível. |
-| `/code-flow gate <issue> <decisão>` | Aplica uma decisão humana válida. |
-| `/code-flow stop <issue>` | Faz handoff e encerra somente o protocolo. |
-| `/code-flow doctor [args]` | Executa `scripts/doctor.sh`. |
+| Comando                             | Ação                                                  |
+| ----------------------------------- | ----------------------------------------------------- |
+| `/code-flow`                        | Mostra ajuda e faz discovery read-only.               |
+| `/code-flow <issue>`                | Provisiona labels ausentes, ativa/retoma e orquestra. |
+| `/code-flow role <papel> <issue>`   | Executa exatamente um papel elegível.                 |
+| `/code-flow gate <issue> <decisão>` | Aplica uma decisão humana válida.                     |
+| `/code-flow stop <issue>`           | Faz handoff e encerra somente o protocolo.            |
+| `/code-flow doctor [args]`          | Executa `scripts/doctor.sh`.                          |
 
-| Estado | Papel |
-| --- | --- |
-| `stage:needs-triage` | [`dispatcher`](agents/01-dispatcher.md) |
-| `stage:needs-architect` | [`architect`](agents/02-architect.md) |
-| `stage:ready-for-execution`, `stage:needs-changes` | [`executor`](agents/03-executor.md) |
-| `stage:needs-delivery-review` | [`code-reviewer`](agents/04-code-reviewer.md) |
-| `stage:integration-authorized` | [`integrator`](agents/05-integrator.md) |
+| Estado                                             | Papel                                         |
+| -------------------------------------------------- | --------------------------------------------- |
+| `stage:needs-triage`                               | [`dispatcher`](agents/01-dispatcher.md)       |
+| `stage:needs-architect`                            | [`architect`](agents/02-architect.md)         |
+| `stage:ready-for-execution`, `stage:needs-changes` | [`executor`](agents/03-executor.md)           |
+| `stage:needs-delivery-review`                      | [`code-reviewer`](agents/04-code-reviewer.md) |
+| `stage:integration-authorized`                     | [`integrator`](agents/05-integrator.md)       |
 
 Publique evidência antes de labels e confirme o estado remoto depois. Atividade
 usa `stage:in-progress`; gate usa `needs-human`; nunca ambos. Cada papel lê seu

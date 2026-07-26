@@ -12,24 +12,24 @@
 
 ## Decisão de operação
 
-| Entrada | Operação | Evidência |
-| --- | --- | --- |
-| `<PR | NO_CHANGES>` | `<merge+close | close>` | `<prova>` |
+| Entrada | Operação     | Evidência     |
+| ------- | ------------ | ------------- |
+| `<PR    | NO_CHANGES>` | `<merge+close | close>` | `<prova>` |
 
 ## Verificação de rebase
 
-| Base/Head anteriores | Rebase | Drift material | Conflitos | Patch equivalente | Checks | Base/Head finais |
-| --- | --- | --- | --- | --- | --- | --- |
-| `<sha/sha>` | `<ação>` | `<sim/não>` | `<arquivos/none>` | `<prova/n/a>` | `<comandos>` | `<sha/sha>` |
+| Base/Head anteriores | Rebase   | Drift material | Conflitos         | Patch equivalente | Checks       | Base/Head finais |
+| -------------------- | -------- | -------------- | ----------------- | ----------------- | ------------ | ---------------- |
+| `<sha/sha>`          | `<ação>` | `<sim/não>`    | `<arquivos/none>` | `<prova/n/a>`     | `<comandos>` | `<sha/sha>`      |
 
 ## Resultado remoto
 
-| Merge SHA | PR | Issue fechada | Labels limpas | Confirmação |
-| --- | --- | --- | --- | --- |
-| `<sha/n/a>` | `<URL/n/a>` | `<estado>` | `<lista>` | `<prova>` |
+| Merge SHA   | PR          | Issue fechada | Labels limpas | Confirmação |
+| ----------- | ----------- | ------------- | ------------- | ----------- |
+| `<sha/n/a>` | `<URL/n/a>` | `<estado>`    | `<lista>`     | `<prova>`   |
 
 ## Falha e recuperação
 
-| Causa | Estado preservado | Retomada |
-| --- | --- | --- |
-| `<falha ou none>` | `<estado>` | `<ação>` |
+| Causa             | Estado preservado | Retomada |
+| ----------------- | ----------------- | -------- |
+| `<falha ou none>` | `<estado>`        | `<ação>` |

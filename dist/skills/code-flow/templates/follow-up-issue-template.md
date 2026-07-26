@@ -6,6 +6,7 @@ Não crie a issue. Se owner/repo não for verificável, use n/a.
 O code-reviewer deduplica por problema/efeito/escopo e consolida apenas itens
 com objetivo e caminho de implementação compatíveis.
 -->
+
 # [Minor] `<resumo curto>`
 
 ## Resumo

@@ -11,8 +11,9 @@
 <resultado esperado, retomada e próximo responsável>
 
 <!-- Em activity-start, publique antes do overlay. -->
+
 ## Evidência
 
-| Fato | Evidência | Impacto | Próximo passo |
-| --- | --- | --- | --- |
-| `<fato>` | `<prova>` | `<impacto>` | `<ação>` |
+| Fato     | Evidência | Impacto     | Próximo passo |
+| -------- | --------- | ----------- | ------------- |
+| `<fato>` | `<prova>` | `<impacto>` | `<ação>`      |

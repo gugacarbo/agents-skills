@@ -1,4 +1,5 @@
 <!-- Use somente em instância nova e liste todos os run_ids produtores. -->
+
 > agent: code-reviewer
 > run_id: <uuid novo>
 > event: delivery-review-result
@@ -17,21 +18,21 @@ Veredito: `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
 ## Cobertura dos critérios
 
-| Critério | Evidência | Resultado | Observação |
-| --- | --- | --- | --- |
-| `<critério>` | `<prova>` | `PASS | FAIL | Cannot verify` | `<nota>` |
+| Critério     | Evidência | Resultado | Observação |
+| ------------ | --------- | --------- | ---------- |
+| `<critério>` | `<prova>` | `PASS     | FAIL       | Cannot verify` | `<nota>` |
 
 ## Reconciliação de escopo
 
-| Autorizado | Entregue | Divergência |
-| --- | --- | --- |
-| `<item>` | `<item>` | `<none ou justificativa>` |
+| Autorizado | Entregue | Divergência               |
+| ---------- | -------- | ------------------------- |
+| `<item>`   | `<item>` | `<none ou justificativa>` |
 
 ## Achados
 
-| Severidade | Local/prova | Impacto | Ação | Issue draft |
-| --- | --- | --- | --- | --- |
-| `Critical | Important | Minor | Cannot verify` | `<prova>` | `<impacto>` | `<ação>` | `<link ou n/a>` |
+| Severidade | Local/prova | Impacto | Ação           | Issue draft |
+| ---------- | ----------- | ------- | -------------- | ----------- |
+| `Critical  | Important   | Minor   | Cannot verify` | `<prova>`   | `<impacto>` | `<ação>` | `<link ou n/a>` |
 
 ## NO_CHANGES
 
@@ -39,8 +40,8 @@ Veredito: `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
 ## Consolidação de follow-ups
 
-| Grupo | Origens | Justificativa | Issue draft |
-| --- | --- | --- | --- |
-| `<grupo>` | `<itens>` | `<deduplicação>` | `<URL>` |
+| Grupo     | Origens   | Justificativa    | Issue draft |
+| --------- | --------- | ---------------- | ----------- |
+| `<grupo>` | `<itens>` | `<deduplicação>` | `<URL>`     |
 
 <!-- Sem itens, escreva: Nenhuma sugestão de issue não bloqueante encontrada. -->

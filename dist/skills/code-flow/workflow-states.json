@@ -1,76 +1,114 @@
 {
-  "activation_label": "code-flow:active",
-  "activity_label": "stage:in-progress",
-  "states": [
-    {
-      "label": "stage:needs-triage",
-      "actor": "dispatcher",
-      "kind": "agent",
-      "next": ["stage:awaiting-triage-approval", "stage:ready-for-execution", "stage:blocked"]
-    },
-    {
-      "label": "stage:awaiting-triage-approval",
-      "actor": "human",
-      "kind": "human",
-      "next": ["stage:ready-for-execution", "stage:needs-architect", "stage:needs-triage", "stage:blocked"]
-    },
-    {
-      "label": "stage:needs-architect",
-      "actor": "architect",
-      "kind": "agent",
-      "next": ["stage:ready-for-execution", "stage:awaiting-execution-approval", "stage:blocked"]
-    },
-    {
-      "label": "stage:awaiting-execution-approval",
-      "actor": "human",
-      "kind": "human",
-      "next": ["stage:ready-for-execution", "stage:needs-architect", "stage:blocked"]
-    },
-    {
-      "label": "stage:ready-for-execution",
-      "actor": "executor",
-      "kind": "agent",
-      "next": ["stage:needs-architect", "stage:needs-delivery-review", "stage:blocked"]
-    },
-    {
-      "label": "stage:needs-changes",
-      "actor": "executor",
-      "kind": "agent",
-      "next": ["stage:needs-architect", "stage:needs-delivery-review", "stage:blocked"]
-    },
-    {
-      "label": "stage:needs-delivery-review",
-      "actor": "code-reviewer",
-      "kind": "agent",
-      "next": ["stage:ready-to-merge", "stage:integration-authorized", "stage:needs-changes", "stage:blocked"]
-    },
-    {
-      "label": "stage:ready-to-merge",
-      "actor": "human",
-      "kind": "human",
-      "next": ["stage:integration-authorized", "stage:needs-changes", "stage:ready-to-merge"]
-    },
-    {
-      "label": "stage:integration-authorized",
-      "actor": "integrator",
-      "kind": "agent",
-      "next": ["stage:needs-delivery-review", "stage:needs-changes", "stage:blocked"]
-    },
-    {
-      "label": "stage:blocked",
-      "actor": "resume-owner",
-      "kind": "human",
-      "next": [
-        "stage:needs-triage",
-        "stage:awaiting-triage-approval",
-        "stage:needs-architect",
-        "stage:awaiting-execution-approval",
-        "stage:ready-for-execution",
-        "stage:needs-changes",
-        "stage:needs-delivery-review",
-        "stage:ready-to-merge",
-        "stage:integration-authorized"
-      ]
-    }
-  ]
+	"activation_label": "code-flow:active",
+	"activity_label": "stage:in-progress",
+	"states": [
+		{
+			"label": "stage:needs-triage",
+			"actor": "dispatcher",
+			"kind": "agent",
+			"next": [
+				"stage:awaiting-triage-approval",
+				"stage:ready-for-execution",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:awaiting-triage-approval",
+			"actor": "human",
+			"kind": "human",
+			"next": [
+				"stage:ready-for-execution",
+				"stage:needs-architect",
+				"stage:needs-triage",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:needs-architect",
+			"actor": "architect",
+			"kind": "agent",
+			"next": [
+				"stage:ready-for-execution",
+				"stage:awaiting-execution-approval",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:awaiting-execution-approval",
+			"actor": "human",
+			"kind": "human",
+			"next": [
+				"stage:ready-for-execution",
+				"stage:needs-architect",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:ready-for-execution",
+			"actor": "executor",
+			"kind": "agent",
+			"next": [
+				"stage:needs-architect",
+				"stage:needs-delivery-review",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:needs-changes",
+			"actor": "executor",
+			"kind": "agent",
+			"next": [
+				"stage:needs-architect",
+				"stage:needs-delivery-review",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:needs-delivery-review",
+			"actor": "code-reviewer",
+			"kind": "agent",
+			"next": [
+				"stage:ready-to-merge",
+				"stage:integration-authorized",
+				"stage:needs-changes",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:ready-to-merge",
+			"actor": "human",
+			"kind": "human",
+			"next": [
+				"stage:integration-authorized",
+				"stage:needs-changes",
+				"stage:ready-to-merge"
+			]
+		},
+		{
+			"label": "stage:integration-authorized",
+			"actor": "integrator",
+			"kind": "agent",
+			"next": [
+				"stage:needs-delivery-review",
+				"stage:needs-changes",
+				"stage:blocked"
+			]
+		},
+		{
+			"label": "stage:blocked",
+			"actor": "resume-owner",
+			"kind": "human",
+			"next": [
+				"stage:needs-triage",
+				"stage:awaiting-triage-approval",
+				"stage:needs-architect",
+				"stage:awaiting-execution-approval",
+				"stage:ready-for-execution",
+				"stage:needs-changes",
+				"stage:needs-delivery-review",
+				"stage:ready-to-merge",
+				"stage:integration-authorized"
+			]
+		}
+	]
 }

@@ -2,7 +2,8 @@
 name: integrator
 description: Consome integração autorizada, verifica rebase/drift, integra PR ou fecha NO_CHANGES e confirma o resultado; não faz code review.
 requires_tools: [read, terminal, github]
-inputs: [issue_url, project_guidance, approved_review, pr_or_no_changes, base_head]
+inputs:
+  [issue_url, project_guidance, approved_review, pr_or_no_changes, base_head]
 outputs: [integration-report, activity-start, merge_close_confirmation]
 ---
 

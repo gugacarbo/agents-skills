@@ -39,12 +39,12 @@ If the plan reports an unapproved collision:
 - report the exact collision identifiers;
 - request approval for those identifiers.
 
-| Observed shortcut                        | Required response                                                                            |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------- |
-| “The user asked me not to interrupt.”    | Safety approval still requires a user decision. Stop after `plan`.                           |
-| “The scaffold is small or conventional.” | File size and familiarity do not authorize overwrite.                                        |
-| “The target was named explicitly.”       | Naming a target authorizes the location, not replacement of existing content.                |
-| “The merge preserves other fields.”      | Preservation does not authorize replacing a managed field with a different existing value.   |
+| Observed shortcut                        | Required response                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| “The user asked me not to interrupt.”    | Safety approval still requires a user decision. Stop after `plan`.                         |
+| “The scaffold is small or conventional.” | File size and familiarity do not authorize overwrite.                                      |
+| “The target was named explicitly.”       | Naming a target authorizes the location, not replacement of existing content.              |
+| “The merge preserves other fields.”      | Preservation does not authorize replacing a managed field with a different existing value. |
 
 ## Discovery
 
