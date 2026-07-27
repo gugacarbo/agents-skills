@@ -4,7 +4,7 @@ The runtime resolves these files through manifests. This inventory keeps that dy
 
 ## Manifests
 
-- [`_base/template.json`](_base/template.json)
+- [`base/template.json`](base/template.json)
 - [`typescript/template.json`](typescript/template.json)
 - [`typescript/node/template.json`](typescript/node/template.json)
 - [`typescript/vite/template.json`](typescript/vite/template.json)
@@ -13,7 +13,7 @@ The runtime resolves these files through manifests. This inventory keeps that dy
 
 ## Project requirement fragments
 
-- [`_base/REQUIREMENTS.md`](_base/REQUIREMENTS.md)
+- [`base/REQUIREMENTS.md`](base/REQUIREMENTS.md)
 - [`typescript/REQUIREMENTS.md`](typescript/REQUIREMENTS.md)
 - [`typescript/node/REQUIREMENTS.md`](typescript/node/REQUIREMENTS.md)
 - [`typescript/vite/REQUIREMENTS.md`](typescript/vite/REQUIREMENTS.md)
@@ -22,9 +22,9 @@ The runtime resolves these files through manifests. This inventory keeps that dy
 
 ## Base and shared assets
 
-- [`_base/files/.editorconfig`](_base/files/.editorconfig)
-- [`_base/files/.gitignore`](_base/files/.gitignore)
-- [`_base/optional-tools/cspell/files/cspell.config.yaml`](_base/optional-tools/cspell/files/cspell.config.yaml)
+- [`base/files/.editorconfig`](base/files/.editorconfig)
+- [`base/files/.gitignore`](base/files/.gitignore)
+- [`base/optional-tools/cspell/files/cspell.config.yaml`](base/optional-tools/cspell/files/cspell.config.yaml)
 - [`_shared/tooling/files/biome.template.json`](_shared/tooling/files/biome.template.json)
 - [`_shared/optional-tools/lint-staged/files/scripts/pre-commit`](_shared/optional-tools/lint-staged/files/scripts/pre-commit)
 - [`_shared/husky/files/.husky/pre-commit`](_shared/husky/files/.husky/pre-commit)
