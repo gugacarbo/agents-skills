@@ -79,6 +79,9 @@ pnpm skills-check        # relações e arquivos publicados das skills válidos
   Jest/Vitest detectável. O `scripts/pre-commit` seleciona testes por escopo:
   runtime raiz roda `pnpm test`, e mudanças em uma skill rodam somente o teste
   daquela skill.
+- O commit automático de `dist/` no pre-push define
+  `AGENTS_SKILLS_GENERATED_ARTIFACT_COMMIT=1`; o pre-commit então não repete
+  checks que o `pnpm verify` já concluiu antes de gerar o artefato.
 
 ## Mapa de contexto
 
