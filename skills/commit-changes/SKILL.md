@@ -293,7 +293,7 @@ If `git commit` fails because `user.name` or `user.email` is not configured, sto
 
 ### Conversation-Scoped Requests
 
-- If the user says only `commit`, `commit this`, `commit the fix`, `commita isso`, or similar after a specific implementation or command run, infer the scope from that recent work instead of committing the whole worktree
+- If the user says only `commit`, `commit this`, `commit the fix`, `faça commit disso`, or similar after a specific implementation or command run, infer the scope from that recent work instead of committing the whole worktree
 - If unrelated modified files exist outside that inferred scope, mention they were left untouched
 - If the recent execution touched mixed concerns and the correct scope is not clear from file boundaries, pause and explain the ambiguity
 

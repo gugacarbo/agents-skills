@@ -30,7 +30,7 @@ flowchart TD
     Inspect[2. Inspect Working Tree<br/>git status --short<br/>git diff --stat HEAD<br/>git diff HEAD -- scope] --> CheckState{Estado do repo ok?}
 
     CheckState -->|merge conflict / rebase / cherry-pick / merge em andamento| StopConflict[Parar e escalar]
-    CheckState -->|sem mudanças no escopo| StopEmpty[Parar: nada a commitar]
+    CheckState -->|sem mudanças no escopo| StopEmpty[Parar: nenhum commit a fazer]
     CheckState -->|ok| DelegateFlag{User passou flag<br/>--sub / --subagent / --delegate<br/>ou similares?}
 
     DelegateFlag -->|sim| Delegate{Subagent disponível?<br/>e plataforma permite?}
@@ -60,7 +60,7 @@ flowchart TD
 
     MessageReady --> Agents[5. Check AGENTS.md Impact]
     Agents --> AgentsCheck{Diff muda como agentes<br/>devem trabalhar?}
-    AgentsCheck -->|sim, e user não pediu skip| AgentsUpdate[Atualizar AGENTS.md mais próximo<br/>ler, atualizar seção, preservar markers,<br/>atualizar timestamp, stagear junto]
+    AgentsCheck -->|sim, e user não pediu skip| AgentsUpdate[Atualizar AGENTS.md mais próximo<br/>ler, atualizar seção, preservar markers,<br/>atualizar timestamp, incluir no stage]
     AgentsCheck -->|não| AgentsNone[Anotar: nenhum update AGENTS necessário]
     AgentsCheck -->|user pediu skip AGENTS| AgentsSkip[Pular AGENTS update]
 
@@ -74,7 +74,7 @@ flowchart TD
     RiskCheck -->|não| Execute[7. Execute the Plan]
 
     Execute --> Loop{Próximo commit?}
-    Loop -->|sim| StageCommit[Stagear apenas arquivos do commit<br/>incluir AGENTS updates se pertencem<br/>git add files]
+    Loop -->|sim| StageCommit[Adicionar ao stage apenas arquivos do commit<br/>incluir AGENTS updates se pertencem<br/>git add files]
     StageCommit --> DoCommit[git commit -m message<br/>-m body se necessário]
     DoCommit --> Verify[Verificar commit<br/>git show --stat --oneline HEAD]
     Verify --> Refresh[Refresh git status --short]
@@ -115,12 +115,12 @@ flowchart TD
 
 ## Legenda
 
-| Cor                       | Significado                                |
-| ------------------------- | ------------------------------------------ |
-| 🟢 Verde escuro           | Início / Fim                               |
-| 🔴 Vermelho escuro        | Parada (não executar)                      |
-| 🟡 Amarelo escuro         | Pausa para o usuário                       |
-| 🟠 Laranja escurja escuro | Caminho `--no-verify` (exceção controlada) |
+| Cor                | Significado                                |
+| ------------------ | ------------------------------------------ |
+| 🟢 Verde escuro    | Início / Fim                               |
+| 🔴 Vermelho escuro | Parada (não executar)                      |
+| 🟡 Amarelo escuro  | Pausa para o usuário                       |
+| 🟠 Laranja escuro  | Caminho `--no-verify` (exceção controlada) |
 
 ## Etapas do Fluxo
 

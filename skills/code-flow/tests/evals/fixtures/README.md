@@ -2,7 +2,7 @@
 
 Os evals de code-flow são baseados em **transcript e comportamento do agente**,
 não em arquivos criados no filesystem. Os cenários assumem issues reais ou
-mockadas no GitHub (acme/demo) acessíveis ao agente durante a execução.
+simuladas no GitHub (acme/demo) acessíveis ao agente durante a execução.
 
 ## Setup por cenário
 

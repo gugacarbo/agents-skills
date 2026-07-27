@@ -77,7 +77,7 @@ decisão antes da transição. Merge com diff exige `integrate`; `NO_CHANGES`
 aprovado segue sem gate de merge.
 
 `stop` mostra trabalho não integrado e oferece encerrar/manter. Com atividade,
-publique handoff e resete o overlay antes de `--stop`. Encerrar remove somente
+publique handoff e redefina o overlay antes de `--stop`. Encerrar remove somente
 labels do protocolo; nunca fecha issue/PR, apaga worktree/branch ou reverte
 código.
 

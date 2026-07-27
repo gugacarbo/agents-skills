@@ -22,7 +22,7 @@ autorizadas, o template de [`nota operacional`](../templates/operational-note-te
 3. Revalide escopo, base, aceite, testes e workflow Git. Spec/ADR aprovada é
    materializada no mesmo PR sem alterar silenciosamente seu conteúdo.
 4. Ao descobrir spec/ADR, hard trigger, decisão material ou risco não coberto,
-   publique evidência e transicione para `stage:needs-architect`.
+   publique evidência e faça a transição para `stage:needs-architect`.
 5. Com diff, conclua somente com commit, push e PR publicada; correção reutiliza
    a mesma branch/PR. `NO_CHANGES` nunca cria commit ou PR vazio.
 6. Publique evidência antes de concluir:

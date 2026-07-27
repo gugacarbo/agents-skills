@@ -20,7 +20,7 @@ o template de [`nota operacional`](../templates/operational-note-template.md) e
 2. PR aprovada implica integração com diff; NO_CHANGES aprovado e ausência de
    diff/PR vazio implica fechamento sem diff. Ambas ou nenhuma bloqueiam.
 3. Para PR, use worktree isolada, atualize remotes e confira target,
-   mergeabilidade, proteção, método de merge e checks.
+   possibilidade de merge, proteção, método de merge e checks.
 4. Rebase limpo com drift não material, patch equivalente e checks verdes pode
    usar `--force-with-lease`. Drift material ou qualquer conflito resolvido →
    `stage:needs-delivery-review`. Patch divergente/check falho → needs-changes.

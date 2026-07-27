@@ -23,7 +23,7 @@ a issue, guidance, código, testes, o template de
 4. Publique exatamente um comentário entre os marcadores
    `code-flow:architect-review:start/end`. Ajustes editam esse comentário e
    publicam nota `architect-change`; calcule o digest somente após publicar.
-5. Publique resultado, transicione e confirme:
+5. Publique o resultado, faça a transição e confirme:
    - S sem hard trigger e `not required` → `stage:ready-for-execution`;
    - M+, hard trigger ou `create/update` →
      `stage:awaiting-execution-approval + needs-human`;
