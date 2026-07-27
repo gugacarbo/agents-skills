@@ -8,7 +8,7 @@
 #
 # Uso: sh scripts/casa-update-check [root]
 # Requer: curl e gh autenticado (GITHUB_TOKEN no Actions). Fonte da versão vigente
-# sobrescrevível por CASA_SOURCE_URL (teste/fork).
+# pode ser sobrescrita por CASA_SOURCE_URL (teste/fork).
 set -u
 ROOT="${1:-.}"
 LABEL="casa-update"

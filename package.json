@@ -10,6 +10,7 @@
 		"test:skills": "pnpm -r --if-present run test",
 		"validate:skills": "pnpm -r --if-present run validate",
 		"lint": "biome check .",
+		"spellcheck": "cspell .",
 		"format:md": "pnpm prettier --write \"**/*.{md,mdx}\" --log-level=warn --no-error-on-unmatched-pattern  --cache",
 		"format:sh": "pnpm exec prettier --write \"**/*.sh\" --plugin=prettier-plugin-sh --log-level=warn --no-error-on-unmatched-pattern --cache",
 		"format:ts": "biome check --write .",
@@ -29,6 +30,8 @@
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.5",
+		"@cspell/dict-pt-br": "^2.4.2",
+		"cspell": "^10.0.1",
 		"husky": "^9.1.7",
 		"knip": "^6.27.0",
 		"lint-staged": "^17.1.0",

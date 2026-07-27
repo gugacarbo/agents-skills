@@ -19,7 +19,7 @@ O que faz:
      campos obrigatórios (status, date), data de calendário real AAAA-MM-DD,
      vocabulário de status por camada; campo fora do vocabulário → AVISO.
   5. Valida grafo: builds-on/superseded-by resolvem (cross-repo vira AVISO);
-     sem auto-supersessão; superseded-by só em ADR; ADR superseded exige o
+     sem uma ADR substituir a si própria; superseded-by só em ADR; ADR superseded exige o
      bloco "VERDADE ATUAL" real, fora de comentário HTML.
   6. Valida Specs: accepted/implemented exige DoD real, sem questões abertas;
      implemented exige implemented-by resolvendo para paths reais e "## Verificação"
@@ -29,7 +29,7 @@ O que faz:
      cópia numerada ("x 2.md", "x copy.md", "x (1).md") só quando o original
      existe ao lado. Ignora .git, node_modules, .venv, dist, build e afins.
   9. Índices frescos: compara os READMEs gerados por conteúdo canônico (e
-     docs/index.json, se existir) com os commitados e FALHA se divergirem.
+     docs/index.json, se existir) com os arquivos versionados e FALHA se divergirem.
      --emit-index regenera tudo.
 
 Exit: 1 se houver ERRO (default). --warn-only imprime tudo e sai 0 —
