@@ -20,7 +20,6 @@
 		"verify": "bash scripts/verify",
 		"prepare": "husky",
 		"lint-staged": "lint-staged",
-		"test-staged": "test-staged",
 		"skills-check": "python3 ./scripts/skills-check"
 	},
 	"keywords": [],
