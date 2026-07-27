@@ -12,6 +12,7 @@
 		"pnpm-lock.yaml"
 	],
 	"words": [
+		"ACMRD",
 		"CDPATH",
 		"CLAUDECODE",
 		"Conv",
@@ -46,6 +47,7 @@
 		"dirpath",
 		"elif",
 		"endswith",
+		"esac",
 		"evals",
 		"exfiltration",
 		"explícit",
@@ -72,6 +74,7 @@
 		"loooong",
 		"lstrip",
 		"maxsplit",
+		"mapfile",
 		"merg",
 		"mescl",
 		"mktemp",
