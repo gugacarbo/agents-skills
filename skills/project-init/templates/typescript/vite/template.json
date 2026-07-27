@@ -8,21 +8,44 @@
 	"variants": {
 		"vanilla-ts": {
 			"frameworkName": "Vite vanilla TypeScript",
-			"typecheck": "tsc --noEmit"
+			"typecheck": "tsc --noEmit",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "tsc --noEmit"
+				}
+			}
 		},
 		"react-ts": {
 			"frameworkName": "Vite React",
 			"typecheck": "tsc -b",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "tsc -b"
+				}
+			},
+			"removePackageJson": ["/devDependencies/oxlint"],
 			"readiness": { "packages": ["react"] }
 		},
 		"vue-ts": {
 			"frameworkName": "Vite Vue",
 			"typecheck": "vue-tsc -b",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "vue-tsc -b"
+				}
+			},
+			"devDependencies": ["vue-tsc"],
 			"readiness": { "packages": ["vue"] }
 		},
 		"svelte-ts": {
 			"frameworkName": "Vite Svelte",
-			"typecheck": "svelte-check",
+			"typecheck": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+				}
+			},
+			"devDependencies": ["svelte-check"],
 			"readiness": { "packages": ["svelte"] }
 		}
 	},
@@ -36,9 +59,20 @@
 		"AGENTS.md": "AGENTS.md",
 		"REQUIREMENTS.md": "REQUIREMENTS.md"
 	},
+	"files": [
+		{
+			"source": "files/vitest.config.ts",
+			"target": "vitest.config.ts"
+		}
+	],
+	"packageJson": {
+		"scripts": {
+			"test": "vitest run --config vitest.config.ts --passWithNoTests"
+		}
+	},
 	"commands": {
 		"framework": "pnpm create vite {{targetArg}} --template {{variantArg}}",
 		"frameworkCwd": "{{targetParent}}",
-		"typecheck": "{{typecheckCommand}}"
+		"typecheck": "pnpm run typecheck"
 	}
 }

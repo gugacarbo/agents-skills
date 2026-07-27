@@ -14,7 +14,7 @@ const usage = `Usage:
 Options:
   --configuration NAME  Result directory label (default: with_skill)
   --evals IDS           Comma-separated eval IDs (default: all)
-  --model MODEL         Codex executor model (default: gpt-5.4-mini)
+  --model MODEL         Codex executor model (default: gpt-5.6-luna)
   --reasoning EFFORT    Model reasoning effort (default: medium)
   --run NUMBER          Run number (default: 1)
   --help                Show this help`;
@@ -22,7 +22,7 @@ Options:
 function parseArgs(argv) {
 	const options = {
 		configuration: "with_skill",
-		model: "gpt-5.4-mini",
+		model: "gpt-5.6-luna",
 		reasoning: "medium",
 		run: 1,
 	};
@@ -175,7 +175,9 @@ function projectInitPlan(events) {
 
 function packageManagerWasExecuted(commands) {
 	return commands.some((command) =>
-		/(^|[\s"';&|()])(?:pnpm|npm|npx|bun|bunx)(?=$|[\s"';&|()])/m.test(command),
+		/(?:^|\s-lc\s+["']|(?:&&|\|\||[;|])\s*)(?:pnpm|npm|npx|bun|bunx)(?=$|[\s"'])/m.test(
+			command,
+		),
 	);
 }
 
@@ -329,9 +331,15 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[2],
-				combined.includes("svelte-check") &&
+				plannerResult?.commands?.typecheck === "pnpm run typecheck" &&
+					plannerResult?.packageChanges?.some(
+						(change) =>
+							change.pointer === "/scripts/typecheck" &&
+							change.after ===
+								"svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+					) &&
 					combined.includes("@biomejs/biome"),
-				"typecheck and Biome command inspected in transcript",
+				`typecheck=${plannerResult?.commands?.typecheck ?? null} package_changes=${JSON.stringify(plannerResult?.packageChanges ?? null)}`,
 			),
 			result(
 				evalCase.expectations[3],
@@ -394,7 +402,7 @@ async function grade(evalCase, context) {
 			result(
 				evalCase.expectations[1],
 				combined.includes(
-					"pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm --toolchain biome",
+					"pnpm dlx @tanstack/cli@latest create dashboard --package-manager pnpm --toolchain biome --no-examples --no-intent --yes",
 				) && /overlay/i.test(combined),
 				"TanStack CLI and overlay order inspected in transcript",
 			),
@@ -408,11 +416,14 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[3],
-				combined.includes("@biomejs/biome") &&
+				!plannerResult?.files?.some((file) => file.target === "biome.json") &&
+					plannerResult?.files?.some(
+						(file) => file.target === "vitest.config.ts",
+					) &&
 					!/pnpm add[^\n]*(?:@tanstack\/react-start|@tanstack\/react-router)/i.test(
 						finalText,
 					),
-				"post-generator dependencies inspected",
+				`files=${JSON.stringify(plannerResult?.files ?? null)}`,
 			),
 			result(
 				evalCase.expectations[4],
@@ -456,7 +467,10 @@ async function grade(evalCase, context) {
 		expectations.push(
 			result(
 				evalCase.expectations[0],
-				planIndex >= 0 && applyIndex > planIndex,
+				planIndex >= 0 &&
+					applyIndex > planIndex &&
+					commands[applyIndex].includes("--approve") &&
+					commands[applyIndex].includes(".gitignore"),
 				`commands=${JSON.stringify(commands)}`,
 			),
 			result(
@@ -586,7 +600,7 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[1],
-				packageJson.scripts?.lint === "biome check ." &&
+				packageJson.scripts?.lint === "biome lint ." &&
 					packageJson.scripts?.["custom-script"] === "node custom.mjs" &&
 					packageJson.metadata?.keep === true &&
 					packageJson.scripts?.typecheck === "tsc --noEmit",
@@ -594,7 +608,11 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[2],
-				/merg|mescl/i.test(finalText) && /criad|creat/i.test(finalText),
+				/package\.json/i.test(finalText) &&
+					/criad|creat/i.test(finalText) &&
+					/(?:merg|mescl|(?:preservado|preservada)[\s\S]*exceto|substitu|adicionado|adicionada)/i.test(
+						finalText,
+					),
 				`final=${finalText}`,
 			),
 		);
@@ -617,8 +635,10 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[2],
-				/symlink/i.test(finalText) &&
-					/(?:not allowed|nao.*permit|não.*permit)/i.test(finalText),
+				/(?:symlink|link simbólico)/i.test(finalText) &&
+					/(?:not allowed|nao.*permit|não.*permit|proíbe|proibido|proibida)/i.test(
+						finalText,
+					),
 				`final=${finalText}`,
 			),
 		);
@@ -672,9 +692,11 @@ async function prepareWorkspace(workspace, selectedSkill, evalCase) {
 			`${JSON.stringify(
 				{
 					name: "bun-worker",
+					module: "index.ts",
 					private: true,
 					type: "module",
 					devDependencies: { "@types/bun": "latest" },
+					peerDependencies: { typescript: "^5" },
 				},
 				null,
 				2,
@@ -685,6 +707,7 @@ async function prepareWorkspace(workspace, selectedSkill, evalCase) {
 			'{"compilerOptions":{"types":["bun"]}}\n',
 		);
 		await fs.writeFile(path.join(target, "index.ts"), "export {};\n");
+		await fs.writeFile(path.join(target, ".gitignore"), "node_modules\ndist\n");
 	}
 	if (evalCase.id === 8) {
 		const target = path.join(workspace, "library");

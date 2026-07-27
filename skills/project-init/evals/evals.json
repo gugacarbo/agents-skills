@@ -21,12 +21,12 @@
 		{
 			"id": 2,
 			"prompt": "Planeje um app novo Vite com Svelte e TypeScript em ./web-ui usando project-init. Eu ainda não executei create-vite. Não escreva arquivos e não rode comandos de framework ou package manager; quero a ordem exata dos próximos passos.",
-			"expected_output": "The agent executes the real planner in plan-only mode for typescript/vite with the svelte-ts variant. It does not create ./web-ui. The plan places `pnpm create vite web-ui --template svelte-ts` from the target parent before the overlay, identifies missing readiness markers, and uses svelte-check as the typecheck command. No framework or package-manager command is executed.",
+			"expected_output": "The agent executes the real planner in plan-only mode for typescript/vite with the svelte-ts variant. It does not create ./web-ui. The plan places `pnpm create vite web-ui --template svelte-ts` from the target parent before the overlay, identifies missing readiness markers, composes the Svelte-aware package script, and recommends `pnpm run typecheck`. No framework or package-manager command is executed.",
 			"files": [],
 			"expectations": [
 				"The transcript executes scripts/project-init.mjs plan with the typescript/vite template and svelte-ts variant.",
 				"The planner reports `pnpm create vite web-ui --template svelte-ts` from the absolute target parent before the overlay apply step.",
-				"The plan uses svelte-check for type checking and @biomejs/biome for Biome installation.",
+				"The plan composes `svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json` as the managed typecheck script, recommends `pnpm run typecheck`, and includes @biomejs/biome in the provisional post-generator installation.",
 				"The real ./web-ui directory is not created and no package-manager or framework CLI is executed."
 			],
 			"skill_type": "technique",
@@ -64,13 +64,13 @@
 		{
 			"id": 4,
 			"prompt": "Planeje um projeto full-stack novo com TanStack Start e React em ./dashboard usando pnpm e o template file-router. Não quero add-ons adicionais. Ainda não executei o CLI; não crie o diretório nem rode package manager.",
-			"expected_output": "The agent executes the real project-init planner for the typescript/tanstack-start template in plan-only mode. The framework phase recommends `pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm --toolchain biome` from the absolute target parent before the overlay. The plan identifies readiness markers and preserves generated routeTree files.",
+			"expected_output": "The agent executes the real project-init planner for the typescript/tanstack-start template in plan-only mode. The framework phase recommends `pnpm dlx @tanstack/cli@latest create dashboard --package-manager pnpm --toolchain biome --no-examples --no-intent --yes` from the absolute target parent before the overlay. The plan identifies readiness markers, preserves the generator-owned Biome configuration, and protects generated routeTree files.",
 			"files": [],
 			"expectations": [
 				"The transcript executes scripts/project-init.mjs plan with the typescript/tanstack-start template.",
-				"The plan recommends `pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm --toolchain biome` before the overlay apply step.",
+				"The plan recommends `pnpm dlx @tanstack/cli@latest create dashboard --package-manager pnpm --toolchain biome --no-examples --no-intent --yes` before the overlay apply step.",
 				"The resolved conventions describe TanStack Start as React full-stack SSR built on Vite and account for src/routeTree.gen.ts as generated code.",
-				"The plan recommends @biomejs/biome and does not redundantly reinstall packages supplied by the TanStack Start generator.",
+				"The plan preserves the generator-owned biome.json, adds an isolated Vitest config, and explains that post-generator dependencies are recalculated after readiness.",
 				"The real ./dashboard directory is not created and no package-manager command is executed."
 			],
 			"skill_type": "technique",
@@ -79,11 +79,11 @@
 		},
 		{
 			"id": 5,
-			"prompt": "O bun init já foi executado em ./bun-worker. Use project-init Bun, inclua somente lint-staged e aplique o overlay completo, mas não execute bun add, bunx ou qualquer package manager.",
-			"expected_output": "The agent verifies Bun readiness, plans before applying, and overlays complete Bun tooling onto the initialized fixture. It semantically adds package scripts, writes Bun-aware hooks and lint-staged configuration using bunx, and never executes Bun.",
+			"prompt": "O bun init já foi executado em ./bun-worker. Use project-init Bun, inclua somente lint-staged, aprove substituir apenas .gitignore e aplique o overlay completo, mas não execute bun add, bunx ou qualquer package manager.",
+			"expected_output": "The agent verifies Bun readiness, plans before applying, passes approval scoped to .gitignore, and overlays complete Bun tooling onto the initialized fixture. It semantically adds package scripts, writes Bun-aware hooks and lint-staged configuration using bunx, and never executes Bun.",
 			"files": [],
 			"expectations": [
-				"The transcript executes scripts/project-init.mjs plan before scripts/project-init.mjs apply for the bun template.",
+				"The transcript executes scripts/project-init.mjs plan before apply for the bun template and scopes overwrite approval to .gitignore.",
 				"The real target contains package.json, biome.json, knip.json, .lintstagedrc.js, Husky hooks, scripts/pre-commit, and scripts/lib/shared.sh.",
 				"The real target does not contain cspell.config.yaml because only lint-staged was selected.",
 				"The generated lint-staged and hook scripts resolve Bun or bunx and do not hard-code pnpm.",

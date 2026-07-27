@@ -26,10 +26,12 @@ Supported fields:
 - `documents`: output document name to Markdown section source;
 - `files` and `omitTargets`: explicit assets and inherited targets removed by a derivative;
 - `packageJson` and `omitPackageJson`: semantically managed fields and inherited JSON pointers removed by a derivative;
+- `removePackageJson`: obsolete existing fields removed only after exact JSON-pointer approval;
 - `dependencies` and `devDependencies`: packages used to build missing-only install recommendations;
+- `allowedBuilds`: reviewed dependency lifecycle scripts passed explicitly to pnpm 11;
 - `commands`: recommended framework, setup, and typecheck commands;
 - `requiresFrameworkReady` and `readiness`: application gate plus required files and installed package names;
-- `variants`: named framework variants and their typecheck/readiness contract;
+- `variants`: named framework variants and their package, dependency, typecheck, and readiness contract;
 - `optionalTools`: complete optional package, script, asset, and note overlays.
 
 No file is copied merely because it exists under `files/`. Every emitted asset must be declared by a manifest. Sources remain under `templates/`; output targets are normalized relative paths and may not contain `.` or `..`.
@@ -54,6 +56,9 @@ Managed `package.json` objects merge by key:
 - Manifest sources and targets remain inside their allowed roots.
 - Symlinks are rejected anywhere along planned write paths.
 - Package-manager and framework commands are recommendations only.
+- pnpm install recommendations explicitly allow reviewed lifecycle scripts such
+  as `esbuild` and framework-required `lightningcss`, so pnpm 11 does not leave
+  unresolved `allowBuilds` placeholders.
 
 ## Optional tools
 

@@ -139,8 +139,8 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 # Gera dist/skills/ e copia as skills para ~/.agents/skills.
 ./skills.sh build
 
-# Pergunta o destino (padrão: ~/.agents/skills), publica o build inicial
-# e o atualiza sempre que skills/ mudar.
+# Gera e atualiza dist/skills sempre que skills/ mudar, sem publicar
+# em ~/.agents/skills.
 ./skills.sh dev
 ```
 
@@ -190,4 +190,6 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 O comando `./skills.sh install` copia as skills de `dist/skills/` diretamente
 para o destino escolhido. Nomes posicionais limitam a cópia às skills
 selecionadas. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de
-publicar alterações.
+publicar alterações. Depois da instalação, o comando oferece copiar a mesma
+seleção para `~/.claude/skills`; a pergunta não aparece quando esse já é o
+destino principal.

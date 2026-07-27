@@ -520,6 +520,36 @@ function removePointer(object, pointer) {
 	delete current?.[segments.at(-1)];
 }
 
+function removePointerAndPrune(object, pointer) {
+	const segments = pointerSegments(pointer);
+	const parents = [];
+	let current = object;
+	for (const segment of segments.slice(0, -1)) {
+		if (!isPlainObject(current?.[segment])) return false;
+		parents.push([current, segment]);
+		current = current[segment];
+	}
+	const leaf = segments.at(-1);
+	if (!Object.hasOwn(current, leaf)) return false;
+	delete current[leaf];
+	for (const [parent, segment] of parents.reverse()) {
+		if (Object.keys(parent[segment]).length > 0) break;
+		delete parent[segment];
+	}
+	return true;
+}
+
+function pointerValue(object, pointer) {
+	let current = object;
+	for (const segment of pointerSegments(pointer)) {
+		if (!isPlainObject(current) || !Object.hasOwn(current, segment)) {
+			return { found: false, value: undefined };
+		}
+		current = current[segment];
+	}
+	return { found: true, value: current };
+}
+
 function encodePointerSegment(segment) {
 	return segment.replaceAll("~", "~0").replaceAll("/", "~1");
 }
@@ -528,7 +558,7 @@ function valuesEqual(left, right) {
 	return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function mergeManagedPackage(existing, desired) {
+function mergeManagedPackage(existing, desired, removals = []) {
 	const result = clone(existing ?? {});
 	const changes = [];
 	const collisions = [];
@@ -564,6 +594,18 @@ function mergeManagedPackage(existing, desired) {
 		}
 	}
 	visit(result, desired);
+	for (const pointer of removals) {
+		const before = pointerValue(result, pointer);
+		if (!before.found) continue;
+		removePointerAndPrune(result, pointer);
+		changes.push({
+			pointer,
+			status: "remove",
+			before: clone(before.value),
+			after: null,
+		});
+		collisions.push(`package.json#${pointer}`);
+	}
 	return { result, changes, collisions };
 }
 
@@ -611,11 +653,19 @@ async function loadPackage(target) {
 	return { value, raw, info };
 }
 
-function resolvePackageContract(stack, selectedTools, toolRegistry, variables) {
+function resolvePackageContract(
+	stack,
+	variant,
+	selectedTools,
+	toolRegistry,
+	variables,
+) {
 	let desired = {};
 	const dependencies = new Set();
 	const devDependencies = new Set();
-	for (const manifest of stack) {
+	const allowedBuilds = new Set();
+	const removals = new Set();
+	for (const manifest of [...stack, variant].filter(Boolean)) {
 		desired = mergeObjects(
 			desired,
 			renderDeep(manifest.packageJson ?? {}, variables),
@@ -626,6 +676,11 @@ function resolvePackageContract(stack, selectedTools, toolRegistry, variables) {
 		for (const item of manifest.dependencies ?? []) dependencies.add(item);
 		for (const item of manifest.devDependencies ?? [])
 			devDependencies.add(item);
+		for (const item of manifest.allowedBuilds ?? []) allowedBuilds.add(item);
+		for (const pointer of manifest.removePackageJson ?? []) {
+			pointerSegments(pointer);
+			removals.add(pointer);
+		}
 	}
 	const core = {
 		dependencies: [...dependencies],
@@ -650,6 +705,8 @@ function resolvePackageContract(stack, selectedTools, toolRegistry, variables) {
 			dependencies: [...optionalDependencies],
 			devDependencies: [...optionalDevDependencies],
 		},
+		allowedBuilds: [...allowedBuilds],
+		removals: [...removals],
 	};
 }
 
@@ -661,7 +718,12 @@ function dependencyNames(packageValue) {
 	]);
 }
 
-function installCommands(packageManager, requirements, installed) {
+function installCommands(
+	packageManager,
+	requirements,
+	installed,
+	allowedBuilds = [],
+) {
 	if (!packageManager) return [];
 	const commands = [];
 	const dependencies = requirements.dependencies.filter(
@@ -670,7 +732,12 @@ function installCommands(packageManager, requirements, installed) {
 	const devDependencies = requirements.devDependencies.filter(
 		(item) => !installed.has(item) && !dependencies.includes(item),
 	);
-	const add = packageManager === "bun" ? "bun add" : `${packageManager} add`;
+	const add =
+		packageManager === "bun"
+			? "bun add"
+			: packageManager === "pnpm"
+				? `pnpm${allowedBuilds.map((item) => ` --allow-build=${item}`).join("")} add`
+				: `${packageManager} add`;
 	if (dependencies.length) commands.push(`${add} ${dependencies.join(" ")}`);
 	if (devDependencies.length) {
 		commands.push(
@@ -697,6 +764,7 @@ function resolveCommands(
 		packageManager,
 		packageContract.core,
 		coreInstalled,
+		packageContract.allowedBuilds,
 	);
 	for (const item of [
 		...packageContract.core.dependencies,
@@ -818,8 +886,9 @@ async function buildPlan(options) {
 		targetParent: path.dirname(target),
 		variant: variant?.id ?? "",
 		variantArg: shellQuote(variant?.id ?? ""),
-		typecheckCommand:
-			variant?.typecheck ?? stack.at(-1).commands?.typecheck ?? "",
+		typecheckCommand: variant
+			? `${packageManager} run typecheck`
+			: (stack.at(-1).commands?.typecheck ?? ""),
 		frameworkName:
 			variant?.frameworkName ?? stack.at(-1).frameworkName ?? stack.at(-1).id,
 	};
@@ -851,6 +920,7 @@ async function buildPlan(options) {
 	const existingPackage = await loadPackage(target);
 	const packageContract = resolvePackageContract(
 		stack,
+		variant,
 		selectedTools,
 		toolRegistry,
 		variables,
@@ -863,6 +933,7 @@ async function buildPlan(options) {
 		const merged = mergeManagedPackage(
 			existingPackage.value,
 			packageContract.desired,
+			packageContract.removals,
 		);
 		packageChanges = merged.changes;
 		packageCollisions = merged.collisions;

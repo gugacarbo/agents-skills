@@ -47,17 +47,17 @@
 			"dev": "bun --watch index.ts",
 			"build": "bun build index.ts --outdir dist --target bun",
 			"start": "bun run index.ts",
-			"test": "bun test",
-			"lint": "biome check .",
-			"format": "biome check --write .",
-			"typecheck": "tsc --noEmit",
+			"test": "bun test --pass-with-no-tests",
+			"lint": "biome lint .",
+			"format": "biome format --write .",
+			"typecheck": "tsc --noEmit --types bun",
 			"knip": "knip",
 			"prepare": "husky"
 		}
 	},
 	"devDependencies": ["typescript", "@biomejs/biome", "knip", "husky"],
 	"commands": {
-		"framework": "bun init {{targetArg}}",
+		"framework": "bun init --yes {{targetArg}}",
 		"frameworkCwd": "{{targetParent}}",
 		"setup": ["bun run prepare"],
 		"typecheck": "bun run typecheck"

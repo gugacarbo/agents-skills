@@ -21,10 +21,5 @@ export default {
 		`pnpm prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --log-level=warn --cache`,
 	"*.sh": (files) =>
 		`pnpm exec prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --plugin=prettier-plugin-sh --log-level=warn --cache`,
-	"*.{js,ts,jsx,tsx}": [
-		// Run TypeScript compiler on staged files without emitting output
-		"tsc-files --noEmit",
-		// Run test-staged to execute tests related to staged files
-		"test-staged",
-	],
+	"*.{js,ts,jsx,tsx}": "tsc-files --noEmit",
 };

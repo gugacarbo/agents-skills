@@ -122,6 +122,10 @@ same_dir() {
   [ "$(resolve_existing_dir "$1")" = "$(resolve_existing_dir "$2")" ]
 }
 
+same_path() {
+  [ "$1" = "$2" ] || same_dir "$1" "$2"
+}
+
 confirm() {
   prompt_message=$1
   prompt_input=${AGENTS_SKILLS_PROMPT_INPUT:-/dev/tty}
@@ -407,6 +411,7 @@ fi
 validate_selected_skills
 
 GLOBAL_TARGET=$(expand_path "~/.agents/skills")
+CLAUDE_TARGET=$(expand_path "~/.claude/skills")
 CURRENT_DIR=$PWD
 CURRENT_DIR_NAME=${CURRENT_DIR##*/}
 INSTALL_TARGET=''
@@ -459,4 +464,16 @@ fi
 
 if [ "$USE_INSTRUCTIONS" -eq 1 ]; then
   copy_instructions "$INSTALL_TARGET"
+fi
+
+if [ "$USE_INIT" -eq 0 ] && ! same_path "$INSTALL_TARGET" "$CLAUDE_TARGET"; then
+  if confirm "Também deseja instalar as skills em $CLAUDE_TARGET para uso pelo Claude?"; then
+    if [ "$USE_FRESH" -eq 1 ]; then
+      remove_installed_skills "$CLAUDE_TARGET"
+    fi
+
+    copy_skills "$CLAUDE_TARGET"
+  else
+    info "Instalação em $CLAUDE_TARGET não solicitada"
+  fi
 fi

@@ -1,5 +1,4 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
-	"includeEntryExports": true,
-	"ignore": [".agents/**", "src/routeTree.gen.ts"]
+	"includeEntryExports": true
 }

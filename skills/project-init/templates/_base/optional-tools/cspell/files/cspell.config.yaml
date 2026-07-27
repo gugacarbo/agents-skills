@@ -21,10 +21,12 @@ words:
   - autofix
   - biome
   - bun
+  - CDPATH
   - cli
   - codebase
   - codex
   - dotenv
+  - esbuild
   - env
   - eslint
   - frontend
@@ -44,6 +46,7 @@ words:
   - sdk
   - ts
   - tsx
+  - toplevel
   - turborepo
   - typescript
   - vite

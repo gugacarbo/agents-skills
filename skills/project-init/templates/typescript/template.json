@@ -44,8 +44,8 @@
 			"dev": "tsc --watch",
 			"build": "tsc",
 			"test": "vitest run --passWithNoTests",
-			"lint": "biome check .",
-			"format": "biome check --write .",
+			"lint": "biome lint .",
+			"format": "biome format --write .",
 			"typecheck": "tsc --noEmit",
 			"knip": "knip",
 			"prepare": "husky"
@@ -58,6 +58,7 @@
 		"knip",
 		"husky"
 	],
+	"allowedBuilds": ["esbuild"],
 	"commands": {
 		"setup": ["pnpm run prepare"],
 		"typecheck": "pnpm run typecheck"

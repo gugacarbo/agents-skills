@@ -5,7 +5,8 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": true
+		"ignoreUnknown": true,
+		"includes": ["**", "!public"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -14,7 +15,13 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"preset": "recommended",
+			"a11y": {
+				"noAmbiguousAnchorText": "warn"
+			},
+			"security": {
+				"noBlankTarget": "warn"
+			}
 		}
 	}
 }

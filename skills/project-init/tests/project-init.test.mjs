@@ -99,6 +99,10 @@ test("plans and applies a complete Node overlay with CSpell", async (t) => {
 	assert.deepEqual(plan.stack, ["_base", "typescript", "typescript/node"]);
 	assert.equal(plan.lifecycle.frameworkCommand, null);
 	assert.equal(plan.commands.setup.includes("pnpm exec husky init"), false);
+	assert.match(
+		plan.commands.install.join("\n"),
+		/^pnpm --allow-build=esbuild add -D /m,
+	);
 	assert.match(plan.commands.install.join("\n"), /@biomejs\/biome/);
 	assert.match(plan.commands.optional.join("\n"), /cspell/);
 	assert.deepEqual(plan.collisions, []);
@@ -161,7 +165,14 @@ test("plans nested Vite targets from their absolute parent", async (t) => {
 		"pnpm create vite 'customer portal' --template svelte-ts",
 	);
 	assert.equal(plan.lifecycle.frameworkCwd, path.dirname(target));
-	assert.equal(plan.commands.typecheck, "svelte-check");
+	assert.equal(plan.commands.typecheck, "pnpm run typecheck");
+	assert.equal(
+		plan.packageChanges.find(
+			(change) => change.pointer === "/scripts/typecheck",
+		)?.after,
+		"svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+	);
+	assert.match(plan.commands.install.join("\n"), /svelte-check/);
 	assert.equal(plan.lifecycle.frameworkReady, false);
 	assert.deepEqual(plan.lifecycle.missingPackages, ["vite", "svelte"]);
 	assert.equal(
@@ -170,6 +181,98 @@ test("plans nested Vite targets from their absolute parent", async (t) => {
 			.catch(() => false),
 		false,
 	);
+});
+
+test("composes framework-specific Vite typecheck scripts", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const variants = {
+		"vanilla-ts": "tsc --noEmit",
+		"react-ts": "tsc -b",
+		"vue-ts": "vue-tsc -b",
+		"svelte-ts":
+			"svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+	};
+	for (const [variant, expected] of Object.entries(variants)) {
+		const plan = run(
+			[
+				"plan",
+				"--template",
+				"typescript/vite",
+				"--target",
+				path.join(directory, variant),
+				"--variant",
+				variant,
+			],
+			directory,
+		);
+		assert.equal(
+			plan.packageChanges.find(
+				(change) => change.pointer === "/scripts/typecheck",
+			)?.after,
+			expected,
+			variant,
+		);
+		assert.equal(plan.commands.typecheck, "pnpm run typecheck", variant);
+		assert.equal(
+			plan.files.some((file) => file.target === "vitest.config.ts"),
+			true,
+			variant,
+		);
+	}
+});
+
+test("removes Vite React's replaced linter dependency with scoped approval", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "react-app");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "react-app",
+		private: true,
+		type: "module",
+		scripts: {
+			dev: "vite",
+			build: "tsc -b && vite build",
+			lint: "oxlint",
+		},
+		dependencies: { react: "latest" },
+		devDependencies: { oxlint: "latest", vite: "latest" },
+	});
+	const args = [
+		"--template",
+		"typescript/vite",
+		"--target",
+		target,
+		"--variant",
+		"react-ts",
+	];
+	const plan = run(["plan", ...args], directory);
+	assert.equal(
+		plan.packageChanges.some(
+			(change) =>
+				change.pointer === "/devDependencies/oxlint" &&
+				change.status === "remove",
+		),
+		true,
+	);
+	assert.deepEqual(plan.collisions, [
+		"package.json#/scripts/lint",
+		"package.json#/devDependencies/oxlint",
+	]);
+	const applied = run(
+		[
+			"apply",
+			...args,
+			"--approve",
+			"package.json#/devDependencies/oxlint,package.json#/scripts/lint",
+		],
+		directory,
+	);
+	assert.equal(applied.applied, true);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.equal(packageJson.devDependencies.oxlint, undefined);
+	assert.equal(packageJson.devDependencies.vite, "latest");
 });
 
 test("requires framework-specific Vite readiness markers", async (t) => {
@@ -215,12 +318,84 @@ test("plans TanStack Start with its current generator contract", async (t) => {
 	);
 	assert.equal(
 		plan.lifecycle.frameworkCommand,
-		"pnpm dlx create-tanstack-app@latest dashboard --template file-router --package-manager pnpm --toolchain biome",
+		"pnpm dlx @tanstack/cli@latest create dashboard --package-manager pnpm --toolchain biome --no-examples --no-intent --yes",
 	);
 	assert.equal(plan.lifecycle.frameworkCwd, path.dirname(target));
 	assert.match(plan.notes.join("\n"), /full-stack React.*Vite/i);
 	assert.match(plan.notes.join("\n"), /src\/routeTree\.gen\.ts/);
 	assert.equal(plan.lifecycle.frameworkReady, false);
+	assert.equal(
+		plan.files.some((file) => file.target === "biome.json"),
+		false,
+	);
+	assert.equal(
+		plan.files.some((file) => file.target === "vitest.config.ts"),
+		true,
+	);
+	assert.equal(
+		plan.packageChanges.find((change) => change.pointer === "/scripts/test")
+			?.after,
+		"vitest run --config vitest.config.ts --passWithNoTests",
+	);
+	assert.match(
+		plan.commands.install.join("\n"),
+		/pnpm --allow-build=esbuild --allow-build=lightningcss add -D/,
+	);
+	assert.deepEqual(plan.commands.setup, [
+		"pnpm exec biome migrate --write",
+		"pnpm run prepare",
+	]);
+});
+
+test("removes obsolete TanStack pnpm policy with scoped approval", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "dashboard");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "dashboard",
+		private: true,
+		type: "module",
+		scripts: {
+			dev: "vite dev",
+			build: "vite build",
+			lint: "biome lint",
+			format: "biome format",
+		},
+		dependencies: { "@tanstack/react-start": "latest" },
+		devDependencies: { "@biomejs/biome": "2.4.5" },
+		pnpm: { onlyBuiltDependencies: ["esbuild", "lightningcss"] },
+		custom: { preserved: true },
+	});
+	const args = ["--template", "typescript/tanstack-start", "--target", target];
+	const plan = run(["plan", ...args], directory);
+	assert.equal(plan.lifecycle.frameworkReady, true);
+	assert.equal(
+		plan.packageChanges.some(
+			(change) =>
+				change.pointer === "/pnpm/onlyBuiltDependencies" &&
+				change.status === "remove",
+		),
+		true,
+	);
+	assert.equal(
+		plan.collisions.includes("package.json#/pnpm/onlyBuiltDependencies"),
+		true,
+	);
+	const applied = run(
+		[
+			"apply",
+			...args,
+			"--approve",
+			"package.json#/scripts/format,package.json#/pnpm/onlyBuiltDependencies",
+		],
+		directory,
+	);
+	assert.equal(applied.applied, true);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.equal(packageJson.pnpm, undefined);
+	assert.deepEqual(packageJson.custom, { preserved: true });
 });
 
 test("merges package.json semantically with field-level approval", async (t) => {
@@ -269,7 +444,7 @@ test("merges package.json semantically with field-level approval", async (t) => 
 	);
 	assert.deepEqual(packageJson.custom, { preserved: true });
 	assert.equal(packageJson.scripts.dev, "tsc --watch");
-	assert.equal(packageJson.scripts.lint, "biome check .");
+	assert.equal(packageJson.scripts.lint, "biome lint .");
 	assert.equal(packageJson.scripts.prepare, "husky");
 });
 
@@ -380,7 +555,7 @@ test("applies Bun tooling only after Bun readiness and renders Bun commands", as
 		directory,
 	);
 	assert.equal(prePlan.lifecycle.frameworkReady, false);
-	assert.equal(prePlan.lifecycle.frameworkCommand, "bun init bun-worker");
+	assert.equal(prePlan.lifecycle.frameworkCommand, "bun init --yes bun-worker");
 	assert.equal(prePlan.lifecycle.frameworkCwd, path.dirname(target));
 
 	await mkdir(target, { recursive: true });
@@ -420,6 +595,6 @@ test("applies Bun tooling only after Bun readiness and renders Bun commands", as
 	assert.match(lintStaged, /bunx biome/);
 	assert.doesNotMatch(lintStaged, /pnpm/);
 	assert.match(preCommit, /run_pm run lint-staged/);
-	assert.equal(packageJson.scripts.test, "bun test");
-	assert.equal(packageJson.scripts.typecheck, "tsc --noEmit");
+	assert.equal(packageJson.scripts.test, "bun test --pass-with-no-tests");
+	assert.equal(packageJson.scripts.typecheck, "tsc --noEmit --types bun");
 });

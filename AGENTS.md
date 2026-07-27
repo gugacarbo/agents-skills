@@ -75,6 +75,9 @@ pnpm skills-check        # relações e arquivos publicados das skills válidos
 - `skills/skill-master` validate (`scripts/quick_validate.py`) usa PyYAML se
   disponível; sem o pacote cai num parser mínimo de frontmatter. Não deixar o
   monorepo build depender de `pip install PyYAML` para passar.
+- Não execute `test-staged` dentro do `lint-staged`: o hook já decide entre
+  testes relacionados e `pnpm test`, e o pacote raiz pode não expor um runner
+  Jest/Vitest detectável.
 
 ## Mapa de contexto
 

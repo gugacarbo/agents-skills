@@ -8,7 +8,9 @@
 
 - Add only missing `vitest`, `@biomejs/biome`, `knip`, and `husky` packages after generation.
 - Use the selected framework's generated type-checking dependencies when applicable.
+- When the React generator supplies `oxlint`, replace its script with Biome and remove the now-unused package only after exact field approval.
+- Allow the reviewed `esbuild` lifecycle script when pnpm installs missing tooling.
 
 ## CI/CD
 
-- Run `{{typecheckCommand}}`, Vitest, Biome, Knip, and `vite build`.
+- Run `pnpm run typecheck`, Vitest, Biome, Knip, and `vite build`.

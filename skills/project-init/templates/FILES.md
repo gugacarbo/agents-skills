@@ -38,5 +38,6 @@ The runtime resolves these files through manifests. This inventory keeps that dy
 - [`typescript/files/knip.json`](typescript/files/knip.json)
 - [`typescript/files/tsconfig.json`](typescript/files/tsconfig.json)
 - [`typescript/files/src/index.ts`](typescript/files/src/index.ts)
+- [`typescript/vite/files/vitest.config.ts`](typescript/vite/files/vitest.config.ts)
 - [`typescript/tanstack-start/files/knip.json`](typescript/tanstack-start/files/knip.json)
 - [`typescript/optional-tools/lint-staged/files/.lintstagedrc.js`](typescript/optional-tools/lint-staged/files/.lintstagedrc.js)

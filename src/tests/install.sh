@@ -88,6 +88,52 @@ test_explicit_path_installs_to_target() {
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
 }
 
+test_offers_installation_in_claude_after_primary_destination() {
+  local tmp primary claude_target
+  tmp=$(mktemp -d)
+  primary="$tmp/custom-skills"
+  claude_target="$tmp/home/.claude/skills"
+  printf 'y\n' > "$tmp/tty-input"
+
+  run_capture "$tmp/output.log" env HOME="$tmp/home" \
+    AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" \
+    "$INSTALLER" --path "$primary" < /dev/null
+
+  assert_exists "$primary/$FIXTURE_SKILL/SKILL.md"
+  assert_exists "$claude_target/$FIXTURE_SKILL/SKILL.md"
+  assert_contains "Também deseja instalar as skills em $claude_target"
+}
+
+test_declining_claude_installation_preserves_primary_destination() {
+  local tmp primary claude_target
+  tmp=$(mktemp -d)
+  primary="$tmp/custom-skills"
+  claude_target="$tmp/home/.claude/skills"
+  printf 'n\n' > "$tmp/tty-input"
+
+  run_capture "$tmp/output.log" env HOME="$tmp/home" \
+    AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" \
+    "$INSTALLER" --path "$primary" < /dev/null
+
+  assert_exists "$primary/$FIXTURE_SKILL/SKILL.md"
+  assert_not_exists "$claude_target"
+  assert_contains "Instalação em $claude_target não solicitada"
+}
+
+test_does_not_offer_claude_when_it_is_the_primary_destination() {
+  local tmp claude_target
+  tmp=$(mktemp -d)
+  claude_target="$tmp/home/.claude/skills"
+
+  run_capture "$tmp/output.log" env HOME="$tmp/home" \
+    "$INSTALLER" --path "$claude_target" < /dev/null
+
+  assert_exists "$claude_target/$FIXTURE_SKILL/SKILL.md"
+  case "$LAST_OUTPUT" in
+    *"Também deseja instalar as skills"*) fail 'Claude installation prompt appeared for the primary destination' ;;
+  esac
+}
+
 test_installs_one_selected_skill() {
   local tmp
   tmp=$(mktemp -d)
@@ -391,6 +437,9 @@ main() {
   assert_exists "$INSTALLER"
 
   test_explicit_path_installs_to_target
+  test_offers_installation_in_claude_after_primary_destination
+  test_declining_claude_installation_preserves_primary_destination
+  test_does_not_offer_claude_when_it_is_the_primary_destination
   test_installs_one_selected_skill
   test_installs_multiple_selected_skills
   test_rejects_unknown_skill_before_copying

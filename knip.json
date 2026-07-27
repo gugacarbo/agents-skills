@@ -6,6 +6,7 @@
 		"skills/code-flow/tests/evals/run-evals.mjs",
 		"skills/project-init/evals/run-evals.mjs",
 		"skills/project-init/templates/typescript/files/src/index.ts",
+		"skills/project-init/templates/typescript/vite/files/vitest.config.ts",
 		"skills/project-init/templates/typescript/optional-tools/lint-staged/files/.lintstagedrc.js"
 	],
 	"ignoreDependencies": ["prettier-plugin-sh"]
