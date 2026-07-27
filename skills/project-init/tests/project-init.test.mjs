@@ -59,7 +59,7 @@ test("lists templates with inherited complete optional tools", () => {
 	assert.deepEqual(
 		result.templates.map((template) => template.id),
 		[
-			"base-only",
+			"base",
 			"bun",
 			"typescript",
 			"typescript/node",
@@ -73,14 +73,6 @@ test("lists templates with inherited complete optional tools", () => {
 	assert.deepEqual(
 		node.optionalTools.map((tool) => tool.id),
 		["cspell", "lint-staged"],
-	);
-	assert.equal(
-		result.templates.some((template) =>
-			template.optionalTools.some((tool) =>
-				["test-staged", "t3oss", "turbo"].includes(tool.id),
-			),
-		),
-		false,
 	);
 });
 
@@ -96,7 +88,7 @@ test("plans and applies a complete Node overlay with CSpell", async (t) => {
 		"cspell",
 	];
 	const plan = run(["plan", ...args], directory);
-	assert.deepEqual(plan.stack, ["_base", "typescript", "typescript/node"]);
+	assert.deepEqual(plan.stack, ["base", "typescript", "typescript/node"]);
 	assert.equal(plan.lifecycle.frameworkCommand, null);
 	assert.equal(plan.commands.setup.includes("pnpm exec husky init"), false);
 	assert.match(
@@ -454,7 +446,7 @@ test("requires exact file approval and preserves unrelated files", async (t) => 
 	await mkdir(target);
 	await writeFile(path.join(target, "AGENTS.md"), "existing agents\n");
 	await writeFile(path.join(target, "README.md"), "keep me\n");
-	const args = ["--template", "base-only", "--target", target];
+	const args = ["--template", "base", "--target", target];
 	const plan = run(["plan", ...args], directory);
 	assert.deepEqual(plan.collisions, ["AGENTS.md"]);
 	assert.equal(
@@ -475,13 +467,30 @@ test("requires exact file approval and preserves unrelated files", async (t) => 
 	);
 });
 
-test("rejects unknown CLI flags with structured JSON", async (t) => {
+test("rejects the removed base-only template id", async (t) => {
 	const directory = await temporaryDirectory(t);
 	const result = runResult(
 		[
 			"plan",
 			"--template",
 			"base-only",
+			"--target",
+			path.join(directory, "app"),
+		],
+		directory,
+	);
+	assert.equal(result.status, 1);
+	assert.equal(result.json.ok, false);
+	assert.match(result.json.error, /Unknown template: base-only/);
+});
+
+test("rejects unknown CLI flags with structured JSON", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const result = runResult(
+		[
+			"plan",
+			"--template",
+			"base",
 			"--target",
 			path.join(directory, "app"),
 			"--opitonal",
@@ -502,7 +511,7 @@ test("rejects symlink destinations before planning writes", async (t) => {
 	await writeFile(external, "outside\n");
 	await symlink(external, path.join(target, "AGENTS.md"));
 	const result = runResult(
-		["plan", "--template", "base-only", "--target", target],
+		["plan", "--template", "base", "--target", target],
 		directory,
 	);
 	assert.equal(result.status, 1);
@@ -517,7 +526,7 @@ test("rejects manifest targets that escape the destination", async (t) => {
 	const manifestPath = path.join(
 		copiedSkill,
 		"templates",
-		"_base",
+		"base",
 		"template.json",
 	);
 	const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -527,13 +536,7 @@ test("rejects manifest targets that escape the destination", async (t) => {
 	});
 	await writeJson(manifestPath, manifest);
 	const result = runResult(
-		[
-			"plan",
-			"--template",
-			"base-only",
-			"--target",
-			path.join(directory, "target"),
-		],
+		["plan", "--template", "base", "--target", path.join(directory, "target")],
 		directory,
 		path.join(copiedSkill, "scripts", "project-init.mjs"),
 	);

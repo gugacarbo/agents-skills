@@ -34,5 +34,3 @@ coverage/
 # Cache
 .cache/
 *.tsbuildinfo
-
-.code-toolbox

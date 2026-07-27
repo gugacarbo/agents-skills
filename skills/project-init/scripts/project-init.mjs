@@ -121,7 +121,7 @@ async function assertSafeTarget(target) {
 function validateTemplateId(templateId) {
 	if (
 		typeof templateId !== "string" ||
-		!/^_base$|^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/.test(
+		!/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/.test(
 			templateId,
 		)
 	) {
@@ -205,12 +205,7 @@ async function listTemplates() {
 	async function visit(relative = "") {
 		const absolute = path.join(templatesDirectory, relative);
 		for (const entry of await fs.readdir(absolute, { withFileTypes: true })) {
-			if (
-				!entry.isDirectory() ||
-				(entry.name.startsWith("_") && entry.name !== "_base")
-			) {
-				continue;
-			}
+			if (!entry.isDirectory() || entry.name.startsWith("_")) continue;
 			const child = path.join(relative, entry.name);
 			const manifestPath = path.join(
 				templatesDirectory,
@@ -222,7 +217,7 @@ async function listTemplates() {
 				manifests.set(manifest.id, manifest);
 				found.push({
 					_manifest: manifest,
-					id: manifest.id === "_base" ? "base-only" : manifest.id,
+					id: manifest.id,
 					description: manifest.description,
 					variants: Object.keys(manifest.variants ?? {}),
 					defaultVariant: manifest.defaultVariant ?? null,
@@ -260,8 +255,6 @@ async function listTemplates() {
 }
 
 async function resolveStack(requestedTemplate) {
-	const templateId =
-		requestedTemplate === "base-only" ? "_base" : requestedTemplate;
 	const stack = [];
 	const visiting = new Set();
 	async function add(id) {
@@ -273,7 +266,7 @@ async function resolveStack(requestedTemplate) {
 		visiting.delete(id);
 		stack.push(manifest);
 	}
-	await add(templateId);
+	await add(requestedTemplate);
 	return stack;
 }
 
@@ -788,10 +781,7 @@ function resolveCommands(
 			packageContract.optional,
 			coreInstalled,
 		),
-		typecheck: renderTemplate(
-			merged.typecheck ?? variant?.typecheck ?? "",
-			variables,
-		),
+		typecheck: renderTemplate(merged.typecheck ?? "", variables),
 	};
 }
 
@@ -1022,7 +1012,7 @@ async function buildPlan(options) {
 	return {
 		ok: true,
 		action: "plan",
-		template: deepest.id === "_base" ? "base-only" : deepest.id,
+		template: deepest.id,
 		variant: variant?.id ?? null,
 		stack: stack.map((manifest) => manifest.id),
 		description: deepest.description,
