@@ -1,0 +1,17 @@
+{
+	"id": "typescript/node",
+	"extends": ["typescript"],
+	"description": "Node.js LTS service or CLI.",
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"packageJson": {
+		"scripts": {
+			"dev": "tsx watch src/index.ts",
+			"build": "tsc",
+			"start": "node dist/index.js"
+		}
+	},
+	"devDependencies": ["@types/node", "tsx"]
+}

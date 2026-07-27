@@ -1,0 +1,101 @@
+{
+	"id": "bun",
+	"extends": ["base"],
+	"description": "Bun application tooling and conventions.",
+	"packageManager": "bun",
+	"requiresFrameworkReady": true,
+	"readiness": {
+		"files": ["package.json", "tsconfig.json"],
+		"packages": ["@types/bun"]
+	},
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"files": [
+		{ "source": "../typescript/files/knip.json", "target": "knip.json" },
+		{
+			"source": "../_shared/tooling/files/biome.template.json",
+			"target": "biome.json"
+		},
+		{
+			"source": "../_shared/husky/files/.husky/pre-commit",
+			"target": ".husky/pre-commit"
+		},
+		{
+			"source": "../_shared/husky/files/.husky/pre-push",
+			"target": ".husky/pre-push"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/pre-commit",
+			"target": "scripts/pre-commit"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/pre-push",
+			"target": "scripts/pre-push"
+		},
+		{
+			"source": "../_shared/husky/files/scripts/lib/shared.sh",
+			"target": "scripts/lib/shared.sh"
+		}
+	],
+	"packageJson": {
+		"name": "{{projectName}}",
+		"private": true,
+		"type": "module",
+		"scripts": {
+			"dev": "bun --watch index.ts",
+			"build": "bun build index.ts --outdir dist --target bun",
+			"start": "bun run index.ts",
+			"test": "bun test --pass-with-no-tests",
+			"lint": "biome lint .",
+			"format": "biome format --write .",
+			"typecheck": "tsc --noEmit --types bun",
+			"knip": "knip",
+			"prepare": "husky"
+		}
+	},
+	"devDependencies": ["typescript", "@biomejs/biome", "knip", "husky"],
+	"commands": {
+		"framework": "bun init --yes {{targetArg}}",
+		"frameworkCwd": "{{targetParent}}",
+		"setup": ["bun run prepare"],
+		"typecheck": "bun run typecheck"
+	},
+	"optionalTools": {
+		"cspell": {
+			"description": "Add English and Brazilian Portuguese spell checking.",
+			"devDependencies": ["cspell", "@cspell/dict-pt-br"],
+			"packageJson": {
+				"scripts": {
+					"spellcheck": "cspell ."
+				}
+			},
+			"files": [
+				{
+					"source": "../base/optional-tools/cspell/files/cspell.config.yaml",
+					"target": "cspell.config.yaml"
+				}
+			]
+		},
+		"lint-staged": {
+			"description": "Format and type-check staged files before commit.",
+			"devDependencies": ["lint-staged", "prettier", "tsc-files"],
+			"packageJson": {
+				"scripts": {
+					"lint-staged": "lint-staged"
+				}
+			},
+			"files": [
+				{
+					"source": "../typescript/optional-tools/lint-staged/files/.lintstagedrc.js",
+					"target": ".lintstagedrc.js"
+				},
+				{
+					"source": "../_shared/optional-tools/lint-staged/files/scripts/pre-commit",
+					"target": "scripts/pre-commit"
+				}
+			]
+		}
+	}
+}

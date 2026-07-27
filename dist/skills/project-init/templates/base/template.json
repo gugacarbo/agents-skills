@@ -1,0 +1,13 @@
+{
+	"id": "base",
+	"extends": [],
+	"description": "Repository conventions and editor defaults.",
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"files": [
+		{ "source": "files/.editorconfig", "target": ".editorconfig" },
+		{ "source": "files/.gitignore", "target": ".gitignore" }
+	]
+}
