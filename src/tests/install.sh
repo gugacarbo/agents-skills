@@ -13,6 +13,7 @@ BUILD_SCRIPT="$REPO_ROOT/src/build.sh"
 FIXTURE_SKILL="install-test-fixture-skill"
 FIXTURE_DIR="$REPO_ROOT/skills/$FIXTURE_SKILL"
 BUILT_FIXTURE_DIR="$REPO_ROOT/dist/skills/$FIXTURE_SKILL"
+BUILD_TARGET=''
 
 LAST_OUTPUT=''
 
@@ -64,12 +65,14 @@ run_capture() {
 setup_fixture_skill() {
   mkdir -p "$FIXTURE_DIR"
   printf '%s\n' '---' 'name: install-test-fixture-skill' '---' > "$FIXTURE_DIR/SKILL.md"
-  sh "$BUILD_SCRIPT" > /dev/null
+  BUILD_TARGET=$(mktemp -d)
+  AGENTS_SKILLS_BUILD_TARGET="$BUILD_TARGET" sh "$BUILD_SCRIPT" > /dev/null
 }
 
 cleanup_fixture_skill() {
   rm -rf "$FIXTURE_DIR"
   rm -rf "$BUILT_FIXTURE_DIR"
+  [ -z "$BUILD_TARGET" ] || rm -rf "$BUILD_TARGET"
 }
 
 test_explicit_path_installs_to_target() {
@@ -93,7 +96,7 @@ test_installs_one_selected_skill() {
 
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
   assert_not_exists "$tmp/custom-skills/commit-changes"
-  assert_contains "Instalacao concluida com 1 skill(s)"
+  assert_contains "Instalação concluída com 1 skill(s)"
 }
 
 test_installs_multiple_selected_skills() {
@@ -105,7 +108,7 @@ test_installs_multiple_selected_skills() {
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
   assert_exists "$tmp/custom-skills/commit-changes/SKILL.md"
   assert_not_exists "$tmp/custom-skills/find-docs"
-  assert_contains "Instalacao concluida com 2 skill(s)"
+  assert_contains "Instalação concluída com 2 skill(s)"
 }
 
 test_rejects_unknown_skill_before_copying() {
@@ -117,7 +120,7 @@ test_rejects_unknown_skill_before_copying() {
   fi
 
   assert_not_exists "$tmp/custom-skills"
-  assert_contains "Skill nao encontrada: missing-skill"
+  assert_contains "Skill não encontrada: missing-skill"
 }
 
 test_duplicate_selection_is_installed_once() {
@@ -127,7 +130,7 @@ test_duplicate_selection_is_installed_once() {
   run_capture "$tmp/output.log" "$INSTALLER" "$FIXTURE_SKILL" "$FIXTURE_SKILL" --path "$tmp/custom-skills"
 
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
-  assert_contains "Instalacao concluida com 1 skill(s)"
+  assert_contains "Instalação concluída com 1 skill(s)"
 }
 
 test_cwd_skills_installs_in_place() {
@@ -187,7 +190,7 @@ test_fresh_rejects_init() {
     fail "expected --fresh with --init to fail"
   fi
 
-  assert_contains "--fresh nao pode ser usado com --init"
+  assert_contains "--fresh não pode ser usado com --init"
 }
 
 test_selection_rejects_init() {
@@ -198,7 +201,7 @@ test_selection_rejects_init() {
     fail "expected skill selection with --init to fail"
   fi
 
-  assert_contains "A selecao de skills nao pode ser usada com --init"
+  assert_contains "A seleção de skills não pode ser usada com --init"
 }
 
 test_non_skills_directory_defaults_to_global_target() {
@@ -216,7 +219,7 @@ test_non_skills_directory_defaults_to_global_target() {
   LAST_OUTPUT=$(cat "$tmp/output.log")
   assert_exists "$tmp/home/.agents/skills/$FIXTURE_SKILL/SKILL.md"
   assert_not_exists "$tmp/project/.agents/skills/$FIXTURE_SKILL"
-  assert_contains "destino padrao global"
+  assert_contains "destino padrão global"
 }
 
 test_non_skills_directory_decline_does_not_install() {
@@ -337,7 +340,7 @@ test_instructions_keeps_existing_readme() {
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
   grep -qx 'custom readme' "$tmp/custom-skills/README.md"
-  assert_contains "README.md ja existe"
+  assert_contains "README.md já existe"
 }
 
 test_init_nonempty_without_confirmation_cancels() {

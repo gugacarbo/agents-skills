@@ -59,7 +59,7 @@ usage() {
   cat << EOF
 Uso: ./skills.sh <comando> [args]
 
-Comandos disponiveis:
+Comandos disponíveis:
 $(list_commands | sed 's/^/  - /')
 
 Exemplos:
@@ -87,7 +87,7 @@ download_archive() {
   elif command -v wget > /dev/null 2>&1; then
     wget -qO "$output_path" "$archive_url"
   else
-    die "curl ou wget eh necessario para baixar o pacote de bootstrap"
+    die "curl ou wget é necessário para baixar o pacote de bootstrap"
   fi
 }
 
@@ -109,8 +109,8 @@ bootstrap_from_archive() {
   tar -xzf "$archive_path" -C "$tmp_dir"
 
   extracted_root=$(find "$tmp_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1)
-  [ -n "$extracted_root" ] || die "Nao foi possivel localizar os arquivos extraidos"
-  [ -f "$extracted_root/skills.sh" ] || die "Arquivo skills.sh nao encontrado no pacote baixado"
+  [ -n "$extracted_root" ] || die "Não foi possível localizar os arquivos extraídos"
+  [ -f "$extracted_root/skills.sh" ] || die "Arquivo skills.sh não encontrado no pacote baixado"
 
   printf '%s %s\n' "$(color 34 '[INFO]')" "Executando comando $command_name a partir do pacote baixado"
   AGENTS_SKILLS_BOOTSTRAPPED=1 sh "$extracted_root/skills.sh" "$command_name" "$@"
@@ -135,13 +135,13 @@ COMMAND_SCRIPT=$INTERNAL_SCRIPTS_DIR/$COMMAND.sh
 
 if [ ! -f "$COMMAND_SCRIPT" ]; then
   if [ "${AGENTS_SKILLS_BOOTSTRAPPED:-0}" = "1" ]; then
-    die "Comando $COMMAND nao encontrado no pacote baixado"
+    die "Comando $COMMAND não encontrado no pacote baixado"
   fi
 
   bootstrap_from_archive "$COMMAND" "$@"
   exit 0
 fi
 
-[ -x "$COMMAND_SCRIPT" ] || die "Script interno sem permissao de execucao: $COMMAND_SCRIPT"
+[ -x "$COMMAND_SCRIPT" ] || die "Script interno sem permissão de execução: $COMMAND_SCRIPT"
 
 exec "$COMMAND_SCRIPT" "$@"

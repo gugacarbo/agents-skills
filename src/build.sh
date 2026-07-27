@@ -11,6 +11,7 @@ SKILLS_REPO_ROOT=$(
 SKILLS_SOURCE_DIR=$SKILLS_REPO_ROOT/skills
 BUILD_OUTPUT_DIR=${AGENTS_SKILLS_BUILD_OUTPUT:-$SKILLS_REPO_ROOT/dist/skills}
 BUILD_TARGET_DIR=${AGENTS_SKILLS_BUILD_TARGET:-$HOME/.agents/skills}
+BUILD_DEPLOY=${AGENTS_SKILLS_BUILD_DEPLOY:-1}
 
 die() {
   printf '[ERROR] %s\n' "$*" >&2
@@ -26,7 +27,7 @@ remove_test_artifacts() {
     -name tests -o \
     -name __test__ -o \
     -name __tests__ \
-  \) -prune -exec rm -rf {} \;
+    \) -prune -exec rm -rf {} \;
 
   find "$build_dir" -type f \( \
     -name '*.test.*' -o \
@@ -35,7 +36,7 @@ remove_test_artifacts() {
     -name '*_spec.*' -o \
     -name 'test_*' -o \
     -name 'spec_*' \
-  \) -exec rm -f {} \;
+    \) -exec rm -f {} \;
 }
 
 remove_ignored_artifacts() {
@@ -55,7 +56,7 @@ remove_ignored_artifacts() {
     -name __pycache__ -o \
     -name .turbo -o \
     -name .code-flow \
-  \) -prune -exec rm -rf {} \;
+    \) -prune -exec rm -rf {} \;
 
   find "$build_dir" -type f \( \
     -name package.json -o \
@@ -73,12 +74,13 @@ remove_ignored_artifacts() {
     -name Thumbs.db -o \
     -name '*.log' -o \
     -name '*.tsbuildinfo' \
-  \) -exec rm -f {} \;
+    \) -exec rm -f {} \;
 }
 
-[ -d "$SKILLS_SOURCE_DIR" ] || die "Diretorio de skills nao encontrado: $SKILLS_SOURCE_DIR"
-[ "$BUILD_OUTPUT_DIR" != "$SKILLS_SOURCE_DIR" ] || die "A saida de build nao pode ser o diretorio de fontes"
-[ "$BUILD_TARGET_DIR" != "$SKILLS_SOURCE_DIR" ] || die "O destino de build nao pode ser o diretorio de fontes"
+[ -d "$SKILLS_SOURCE_DIR" ] || die "Diretório de skills não encontrado: $SKILLS_SOURCE_DIR"
+[ "$BUILD_OUTPUT_DIR" != "$SKILLS_SOURCE_DIR" ] || die "A saída de build não pode ser o diretório de fontes"
+[ "$BUILD_TARGET_DIR" != "$SKILLS_SOURCE_DIR" ] || die "O destino de build não pode ser o diretório de fontes"
+[ "$BUILD_DEPLOY" != "1" ] || [ "$BUILD_TARGET_DIR" != "$BUILD_OUTPUT_DIR" ] || die "O destino de build não pode ser a saída de build"
 
 rm -rf "$BUILD_OUTPUT_DIR"
 mkdir -p "$BUILD_OUTPUT_DIR"
@@ -92,24 +94,27 @@ for skill_dir in "$SKILLS_SOURCE_DIR"/*; do
   copied_count=$((copied_count + 1))
 done
 
-[ "$copied_count" -gt 0 ] || die "Nenhuma skill elegivel foi encontrada para build"
+[ "$copied_count" -gt 0 ] || die "Nenhuma skill elegível foi encontrada para build"
 
 remove_test_artifacts "$BUILD_OUTPUT_DIR"
 remove_ignored_artifacts "$BUILD_OUTPUT_DIR"
 
-mkdir -p "$BUILD_TARGET_DIR"
-# Migration cleanup: publishing code-flow must not leave the renamed skill
-# discoverable under its former name.
-rm -rf "$BUILD_TARGET_DIR/code-toolbox"
+case "$BUILD_DEPLOY" in
+  0)
+    ;;
+  1)
+    mkdir -p "$BUILD_TARGET_DIR"
+    # A publicação é um snapshot completo: inclusive arquivos ocultos e skills
+    # de outras origens devem sair antes de copiar o novo artefato.
+    find "$BUILD_TARGET_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+    cp -R "$BUILD_OUTPUT_DIR/." "$BUILD_TARGET_DIR/"
+    ;;
+  *)
+    die "AGENTS_SKILLS_BUILD_DEPLOY deve ser 0 ou 1"
+    ;;
+esac
 
-# Replace only skills owned by this repository so removed files do not survive
-# publication while unrelated installed skills remain untouched.
-for published_skill_dir in "$BUILD_OUTPUT_DIR"/*; do
-  [ -d "$published_skill_dir" ] || continue
-  skill_name=${published_skill_dir##*/}
-  rm -rf "$BUILD_TARGET_DIR/$skill_name"
-  cp -R "$published_skill_dir" "$BUILD_TARGET_DIR/"
-done
-
-printf '[OK] Build concluido com %s skill(s) em %s\n' "$copied_count" "$BUILD_OUTPUT_DIR"
-printf '[OK] Skills copiadas para %s\n' "$BUILD_TARGET_DIR"
+printf '[OK] Build concluído com %s skill(s) em %s\n' "$copied_count" "$BUILD_OUTPUT_DIR"
+if [ "$BUILD_DEPLOY" = "1" ]; then
+  printf '[OK] Skills copiadas para %s\n' "$BUILD_TARGET_DIR"
+fi

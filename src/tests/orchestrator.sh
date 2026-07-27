@@ -9,10 +9,9 @@ REPO_ROOT=$(
   CDPATH='' cd -- "$SCRIPT_DIR/../.." && pwd -P
 )
 ORCHESTRATOR="$REPO_ROOT/skills.sh"
-BUILD_SCRIPT="$REPO_ROOT/src/build.sh"
 FIXTURE_SKILL="orchestrator-test-fixture-skill"
 FIXTURE_DIR="$REPO_ROOT/skills/$FIXTURE_SKILL"
-BUILT_FIXTURE_DIR="$REPO_ROOT/dist/skills/$FIXTURE_SKILL"
+BUILD_TARGET=''
 
 fail() {
   printf 'FAIL: %s\n' "$1" >&2
@@ -29,13 +28,14 @@ assert_exists() {
 
 setup_fixture_skill() {
   mkdir -p "$FIXTURE_DIR"
-  printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' >"$FIXTURE_DIR/SKILL.md"
-  sh "$BUILD_SCRIPT" >/dev/null
+  printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' > "$FIXTURE_DIR/SKILL.md"
+  BUILD_TARGET=$(mktemp -d)
+  AGENTS_SKILLS_BUILD_TARGET="$BUILD_TARGET" sh "$REPO_ROOT/src/build.sh" > /dev/null
 }
 
 cleanup_fixture_skill() {
   rm -rf "$FIXTURE_DIR"
-  rm -rf "$BUILT_FIXTURE_DIR"
+  [ -z "$BUILD_TARGET" ] || rm -rf "$BUILD_TARGET"
 }
 
 test_install_subcommand_delegates_to_inner_script() {
@@ -45,37 +45,37 @@ test_install_subcommand_delegates_to_inner_script() {
 
   (
     cd "$tmp/work"
-    "$ORCHESTRATOR" install --path "$tmp/custom-skills" >"$tmp/output.log" 2>&1
+    "$ORCHESTRATOR" install --path "$tmp/custom-skills" > "$tmp/output.log" 2>&1
   )
 
   assert_exists "$tmp/custom-skills/$FIXTURE_SKILL/SKILL.md"
 }
 
 test_build_subcommand_delegates_to_inner_script() {
-  local tmp output
+  local tmp output target
   tmp=$(mktemp -d)
   output="$tmp/generated-skills"
+  target="$tmp/installed-skills"
 
-  AGENTS_SKILLS_BUILD_OUTPUT="$output" "$ORCHESTRATOR" build >"$tmp/output.log" 2>&1
+  AGENTS_SKILLS_BUILD_OUTPUT="$output" \
+    AGENTS_SKILLS_BUILD_TARGET="$target" \
+    "$ORCHESTRATOR" build > "$tmp/output.log" 2>&1
 
   assert_exists "$output/commit-changes/SKILL.md"
+  assert_exists "$target/commit-changes/SKILL.md"
 }
 
-test_dev_subcommand_publishes_once() {
-  local tmp prompt_input build_output target
+test_dev_subcommand_builds_once_without_publishing() {
+  local tmp build_output
   tmp=$(mktemp -d)
-  prompt_input="$tmp/prompt-input"
   build_output="$tmp/build-output"
-  target="$tmp/published-skills"
-  printf '%s\n' "$target" >"$prompt_input"
 
   env \
-    AGENTS_SKILLS_PROMPT_INPUT="$prompt_input" \
     AGENTS_SKILLS_BUILD_OUTPUT="$build_output" \
     AGENTS_SKILLS_WATCH_ONCE=1 \
-    "$ORCHESTRATOR" dev >"$tmp/output.log" 2>&1
+    "$ORCHESTRATOR" dev > "$tmp/output.log" 2>&1
 
-  assert_exists "$target/commit-changes/SKILL.md"
+  assert_exists "$build_output/commit-changes/SKILL.md"
 }
 
 test_update_subcommand_delegates_to_inner_script() {
@@ -86,15 +86,15 @@ test_update_subcommand_delegates_to_inner_script() {
   target="$tmp/custom-skills"
 
   mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/src" "$target/dist/skills/$FIXTURE_SKILL" "$tmp/work"
-  printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' 'version: remote' >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/skills.sh"
-  printf '%s\n' "#!/usr/bin/env sh" >"$archive_root/src/install.sh"
-  printf '%s\n' 'version: local' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' '---' 'name: orchestrator-test-fixture-skill' '---' 'version: remote' > "$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' "#!/usr/bin/env sh" > "$archive_root/skills.sh"
+  printf '%s\n' "#!/usr/bin/env sh" > "$archive_root/src/install.sh"
+  printf '%s\n' 'version: local' > "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
 
   (
     cd "$tmp/work"
-    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" "$ORCHESTRATOR" update --path "$target" --yes >"$tmp/output.log" 2>&1
+    AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" "$ORCHESTRATOR" update --path "$target" --yes > "$tmp/output.log" 2>&1
   )
 
   grep -q 'version: remote' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
@@ -110,7 +110,7 @@ main() {
 
   test_install_subcommand_delegates_to_inner_script
   test_build_subcommand_delegates_to_inner_script
-  test_dev_subcommand_publishes_once
+  test_dev_subcommand_builds_once_without_publishing
   test_update_subcommand_delegates_to_inner_script
 
   printf 'PASS: orchestrator.sh\n'

@@ -70,15 +70,15 @@ read_reply_from() {
 
 usage() {
   cat << 'EOF'
-Uso: ./src/install.sh [opcoes] [SKILL...]
+Uso: ./src/install.sh [opções] [SKILL...]
 
-Opcoes:
+Opções:
   -p, --path PATH   Instala as skills no PATH informado
   -g, --global      Usa ~/.agents/skills como primeira escolha
-      --init        Clona o repositorio de skills no destino (em vez de copiar)
-      --instructions  Copia README.md do repositorio para o destino
+      --init        Clona o repositório de skills no destino (em vez de copiar)
+      --instructions  Copia README.md do repositório para o destino
       --fresh       Remove as skills existentes no destino antes de instalar
-  -y, --yes         Aprova automaticamente apenas a instalacao local do repo
+  -y, --yes         Aprova automaticamente apenas a instalação local do repo
   -h, --help        Mostra esta ajuda
 
 Argumentos:
@@ -150,7 +150,7 @@ add_selected_skill() {
 
   case "$skill_name" in
     '' | .* | */* | *[!a-z0-9_-]*)
-      die "Nome de skill invalido: $skill_name"
+      die "Nome de skill inválido: $skill_name"
       ;;
   esac
 
@@ -174,11 +174,11 @@ $skill_name"
 
 validate_selected_skills() {
   [ -n "$SELECTED_SKILLS" ] || return 0
-  [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas nao encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
+  [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas não encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
 
   for skill_name in $SELECTED_SKILLS; do
     skill_dir=$SKILLS_SOURCE_DIR/$skill_name
-    [ -d "$skill_dir" ] && [ -f "$skill_dir/SKILL.md" ] || die "Skill nao encontrada: $skill_name"
+    [ -d "$skill_dir" ] && [ -f "$skill_dir/SKILL.md" ] || die "Skill não encontrada: $skill_name"
   done
 }
 
@@ -189,7 +189,7 @@ copy_skill_dir() {
   destination_skill_dir=$destination/$skill_name
 
   if same_dir "$source_skill_dir" "$destination_skill_dir"; then
-    warn "Pulando $skill_name porque origem e destino sao o mesmo diretorio"
+    warn "Pulando $skill_name porque origem e destino são o mesmo diretório"
     return 0
   fi
 
@@ -205,7 +205,7 @@ copy_skills() {
   mkdir -p "$destination"
   info "Instalando skills em $destination"
 
-  [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas nao encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
+  [ -d "$SKILLS_SOURCE_DIR" ] || die "Skills geradas não encontradas em $SKILLS_SOURCE_DIR. Execute ./skills.sh build antes de instalar."
 
   if [ -n "$SELECTED_SKILLS" ]; then
     for skill_name in $SELECTED_SKILLS; do
@@ -221,10 +221,10 @@ copy_skills() {
   fi
 
   if [ "$copied_count" -eq 0 ]; then
-    die "Nenhuma skill elegivel foi encontrada para copiar"
+    die "Nenhuma skill elegível foi encontrada para copiar"
   fi
 
-  success "Instalacao concluida com $copied_count skill(s)"
+  success "Instalação concluída com $copied_count skill(s)"
 }
 
 remove_installed_skills() {
@@ -234,7 +234,7 @@ remove_installed_skills() {
   [ -d "$destination" ] || return 0
 
   if same_dir "$SKILLS_SOURCE_DIR" "$destination"; then
-    die "--fresh nao pode usar o diretorio-fonte de skills como destino"
+    die "--fresh não pode usar o diretório-fonte de skills como destino"
   fi
 
   if [ -n "$SELECTED_SKILLS" ]; then
@@ -267,12 +267,12 @@ copy_instructions() {
   source_readme=$SKILLS_REPO_ROOT/README.md
   dest_readme=$destination/README.md
 
-  [ -f "$source_readme" ] || die "README.md nao encontrado em $SKILLS_REPO_ROOT"
+  [ -f "$source_readme" ] || die "README.md não encontrado em $SKILLS_REPO_ROOT"
 
   mkdir -p "$destination"
 
   if [ -e "$dest_readme" ]; then
-    warn "README.md ja existe em $destination; mantendo arquivo existente"
+    warn "README.md já existe em $destination; mantendo arquivo existente"
     return 0
   fi
 
@@ -299,7 +299,7 @@ merge_without_overwrite() {
     return 0
   fi
 
-  die "Nao foi possivel mesclar arquivos sem sobrescrever (instale rsync ou use cp GNU)"
+  die "Não foi possível mesclar arquivos sem sobrescrever (instale rsync ou use cp GNU)"
 }
 
 merge_clone_into_nonempty() {
@@ -316,32 +316,32 @@ merge_clone_into_nonempty() {
   info "Clonando $AGENTS_SKILLS_REPO_URL (branch $AGENTS_SKILLS_REF) para mesclar em $destination"
   git clone --branch "$AGENTS_SKILLS_REF" --single-branch --depth 1 "$AGENTS_SKILLS_REPO_URL" "$checkout_dir"
 
-  info "Mesclando arquivos do repositorio em $destination sem sobrescrever existentes"
+  info "Mesclando arquivos do repositório em $destination sem sobrescrever existentes"
   merge_without_overwrite "$checkout_dir" "$destination"
 
   if [ ! -d "$destination/.git" ]; then
     cp -R "$checkout_dir/.git" "$destination/.git"
-    success "Repositorio git inicializado em $destination (arquivos existentes preservados na worktree)"
+    success "Repositório git inicializado em $destination (arquivos existentes preservados na worktree)"
   else
-    warn "Destino ja possui .git; mantendo o repositorio git existente"
-    success "Arquivos do repositorio de skills mesclados em $destination"
+    warn "Destino já possui .git; mantendo o repositório git existente"
+    success "Arquivos do repositório de skills mesclados em $destination"
   fi
 }
 
 clone_skills_repo() {
   destination=$1
 
-  command -v git > /dev/null 2>&1 || die "git eh necessario para --init"
+  command -v git > /dev/null 2>&1 || die "git é necessário para --init"
 
   if same_dir "$destination" "$SKILLS_REPO_ROOT"; then
-    die "Destino igual ao repositorio atual; use install sem --init para copiar skills"
+    die "Destino igual ao repositório atual; use install sem --init para copiar skills"
   fi
 
   if dir_is_nonempty "$destination"; then
     if [ "$YES" -eq 1 ]; then
-      info "Flag --yes aplicada; mesclando repositorio em $destination mantendo arquivos existentes"
-    elif ! confirm "Destino $destination ja contem arquivos. Continuar mesclando o repositorio de skills e mantendo os arquivos existentes na worktree?"; then
-      die "Instalacao cancelada pelo usuario"
+      info "Flag --yes aplicada; mesclando repositório em $destination mantendo arquivos existentes"
+    elif ! confirm "Destino $destination já contém arquivos. Continuar mesclando o repositório de skills e mantendo os arquivos existentes na worktree?"; then
+      die "Instalação cancelada pelo usuário"
     fi
 
     merge_clone_into_nonempty "$destination"
@@ -352,14 +352,14 @@ clone_skills_repo() {
 
   info "Clonando $AGENTS_SKILLS_REPO_URL (branch $AGENTS_SKILLS_REF) em $destination"
   git clone --branch "$AGENTS_SKILLS_REF" --single-branch --depth 1 "$AGENTS_SKILLS_REPO_URL" "$destination"
-  success "Repositorio clonado em $destination"
+  success "Repositório clonado em $destination"
 }
 
 while [ $# -gt 0 ]; do
   case "$1" in
     -p | --path)
       shift
-      [ $# -gt 0 ] || die "A opcao $0 requer um path apos -p/--path"
+      [ $# -gt 0 ] || die "A opção $0 requer um path após -p/--path"
       TARGET_PATH=$1
       ;;
     -g | --global)
@@ -383,7 +383,7 @@ while [ $# -gt 0 ]; do
       ;;
     -*)
       usage >&2
-      die "Opcao desconhecida: $1"
+      die "Opção desconhecida: $1"
       ;;
     *)
       add_selected_skill "$1"
@@ -393,15 +393,15 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "$USE_INIT" -eq 1 ]; then
-  info "Flag --init detectada; o destino sera um git clone do repositorio de skills"
+  info "Flag --init detectada; o destino será um git clone do repositório de skills"
 fi
 
 if [ "$USE_INIT" -eq 1 ] && [ "$USE_FRESH" -eq 1 ]; then
-  die "--fresh nao pode ser usado com --init"
+  die "--fresh não pode ser usado com --init"
 fi
 
 if [ "$USE_INIT" -eq 1 ] && [ -n "$SELECTED_SKILLS" ]; then
-  die "A selecao de skills nao pode ser usada com --init"
+  die "A seleção de skills não pode ser usada com --init"
 fi
 
 validate_selected_skills
@@ -419,15 +419,15 @@ if [ -n "$TARGET_PATH" ]; then
 elif [ "$USE_GLOBAL" -eq 1 ]; then
   INSTALL_TARGET=$GLOBAL_TARGET
   TARGET_KIND=global
-  info "Flag --global detectada; usando instalacao global como primeira escolha"
+  info "Flag --global detectada; usando instalação global como primeira escolha"
 elif [ "$CURRENT_DIR_NAME" = "skills" ]; then
   INSTALL_TARGET=$CURRENT_DIR
   TARGET_KIND=cwd-skills
-  info "Diretorio atual termina com skills; instalando no local atual"
+  info "Diretório atual termina com skills; instalando no local atual"
 else
   INSTALL_TARGET=$GLOBAL_TARGET
   TARGET_KIND=global
-  info "Diretorio atual nao termina com skills; usando o destino padrao global"
+  info "Diretório atual não termina com skills; usando o destino padrão global"
 fi
 
 case "$TARGET_KIND" in
@@ -435,15 +435,15 @@ case "$TARGET_KIND" in
     ;;
   global)
     if [ "$YES" -eq 1 ]; then
-      warn "A flag --yes nao pula confirmacao para instalacao global"
+      warn "A flag --yes não pula confirmação para instalação global"
     fi
 
     if ! confirm "Instalar as skills globalmente em $INSTALL_TARGET?"; then
-      die "Instalacao global cancelada pelo usuario"
+      die "Instalação global cancelada pelo usuário"
     fi
     ;;
   *)
-    die "Nao foi possivel determinar um destino de instalacao"
+    die "Não foi possível determinar um destino de instalação"
     ;;
 esac
 

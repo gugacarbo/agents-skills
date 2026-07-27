@@ -60,17 +60,17 @@ error() {
 }
 
 read_reply_from() {
-  IFS= read -r reply <"$1"
+  IFS= read -r reply < "$1"
 }
 
 usage() {
-  cat <<'EOF'
-Uso: ./src/update.sh [opcoes]
+  cat << 'EOF'
+Uso: ./src/update.sh [opções]
 
-Opcoes:
+Opções:
   -p, --path PATH   Atualiza as skills no PATH informado
   -g, --global      Atualiza ~/.agents/skills
-  -y, --yes         Sobrescreve automaticamente se houver diferencas
+  -y, --yes         Sobrescreve automaticamente se houver diferenças
   -h, --help        Mostra esta ajuda
 EOF
 }
@@ -109,7 +109,7 @@ confirm() {
 
   printf '%s %s [y/N]: ' "$(color 36 '[PROMPT]')" "$prompt_message"
 
-  if read_reply_from "$prompt_input" 2>/dev/null; then
+  if read_reply_from "$prompt_input" 2> /dev/null; then
     :
   elif ! IFS= read -r reply; then
     printf '\n'
@@ -117,7 +117,7 @@ confirm() {
   fi
 
   case "$reply" in
-    y|Y|yes|YES|Yes)
+    y | Y | yes | YES | Yes)
       return 0
       ;;
     *)
@@ -130,12 +130,12 @@ download_archive() {
   archive_url=$1
   output_path=$2
 
-  if command -v curl >/dev/null 2>&1; then
+  if command -v curl > /dev/null 2>&1; then
     curl -fsSL "$archive_url" -o "$output_path"
-  elif command -v wget >/dev/null 2>&1; then
+  elif command -v wget > /dev/null 2>&1; then
     wget -qO "$output_path" "$archive_url"
   else
-    die "curl ou wget eh necessario para baixar a versao remota"
+    die "curl ou wget é necessário para baixar a versão remota"
   fi
 }
 
@@ -178,24 +178,24 @@ copy_remote_files() {
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    -p|--path)
+    -p | --path)
       shift
-      [ $# -gt 0 ] || die "A opcao $0 requer um path apos -p/--path"
+      [ $# -gt 0 ] || die "A opção $0 requer um path após -p/--path"
       TARGET_PATH=$1
       ;;
-    -g|--global)
+    -g | --global)
       USE_GLOBAL=1
       ;;
-    -y|--yes)
+    -y | --yes)
       YES=1
       ;;
-    -h|--help)
+    -h | --help)
       usage
       exit 0
       ;;
     *)
       usage >&2
-      die "Opcao desconhecida: $1"
+      die "Opção desconhecida: $1"
       ;;
   esac
   shift
@@ -210,15 +210,15 @@ if [ -n "$TARGET_PATH" ]; then
   info "Destino definido via --path: $UPDATE_TARGET"
 elif [ "$USE_GLOBAL" -eq 1 ]; then
   UPDATE_TARGET=$GLOBAL_TARGET
-  info "Flag --global detectada; atualizando instalacao global"
+  info "Flag --global detectada; atualizando instalação global"
 elif [ "$CURRENT_DIR_NAME" = "skills" ] || [ -f "$CURRENT_DIR/skills.sh" ]; then
   UPDATE_TARGET=$CURRENT_DIR
-  info "Atualizando o diretorio atual: $UPDATE_TARGET"
+  info "Atualizando o diretório atual: $UPDATE_TARGET"
 elif [ -d "$GLOBAL_TARGET" ]; then
   UPDATE_TARGET=$GLOBAL_TARGET
-  warn "Diretorio atual nao parece ser uma instalacao; usando $GLOBAL_TARGET"
+  warn "Diretório atual não parece ser uma instalação; usando $GLOBAL_TARGET"
 else
-  die "Nao foi possivel determinar o destino. Use --path PATH ou --global"
+  die "Não foi possível determinar o destino. Use --path PATH ou --global"
 fi
 
 tmp_dir=$(mktemp -d)
@@ -230,28 +230,28 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-info "Baixando versao remota de $AGENTS_SKILLS_ARCHIVE_URL"
+info "Baixando versão remota de $AGENTS_SKILLS_ARCHIVE_URL"
 download_archive "$AGENTS_SKILLS_ARCHIVE_URL" "$archive_path"
 tar -xzf "$archive_path" -C "$tmp_dir"
 
 REMOTE_ROOT=$(find_extracted_root "$tmp_dir")
-[ -n "$REMOTE_ROOT" ] || die "Nao foi possivel localizar os arquivos extraidos"
-[ -f "$REMOTE_ROOT/skills.sh" ] || die "Arquivo skills.sh nao encontrado no pacote baixado"
+[ -n "$REMOTE_ROOT" ] || die "Não foi possível localizar os arquivos extraídos"
+[ -f "$REMOTE_ROOT/skills.sh" ] || die "Arquivo skills.sh não encontrado no pacote baixado"
 
-[ -d "$UPDATE_TARGET" ] || die "Destino de update nao existe: $UPDATE_TARGET. Use install primeiro."
+[ -d "$UPDATE_TARGET" ] || die "Destino de update não existe: $UPDATE_TARGET. Use install primeiro."
 
 if remote_matches_local "$REMOTE_ROOT" "$UPDATE_TARGET"; then
-  success "Instalacao local ja esta atualizada"
+  success "Instalação local já está atualizada"
   exit 0
 fi
 
-warn "A versao local em $UPDATE_TARGET esta diferente do repositorio remoto"
+warn "A versão local em $UPDATE_TARGET está diferente do repositório remoto"
 
 if [ "$YES" -eq 1 ]; then
-  info "Flag --yes aplicada; sobrescrevendo arquivos locais com a versao remota"
-elif ! confirm "Sobrescrever os arquivos em $UPDATE_TARGET com a versao remota?"; then
-  die "Atualizacao cancelada pelo usuario"
+  info "Flag --yes aplicada; sobrescrevendo arquivos locais com a versão remota"
+elif ! confirm "Sobrescrever os arquivos em $UPDATE_TARGET com a versão remota?"; then
+  die "Atualização cancelada pelo usuário"
 fi
 
 copy_remote_files "$REMOTE_ROOT" "$UPDATE_TARGET"
-success "Atualizacao concluida em $UPDATE_TARGET"
+success "Atualização concluída em $UPDATE_TARGET"

@@ -17,13 +17,13 @@ Para instalar somente uma ou mais skills, informe os nomes depois de `install`:
 
 ## Comandos
 
-| Comando   | Descrição                                                     |
-| --------- | ------------------------------------------------------------- |
-| `install` | Instala as skills no diretório de destino                     |
-| `update`  | Atualiza uma instalação existente com a versão remota         |
-| `build`   | Gera `dist/skills/` e copia as skills para `~/.agents/skills` |
-| `dev`     | Observa as fontes e publica builds no destino escolhido       |
-| `help`    | Exibe a ajuda com os comandos disponíveis                     |
+| Comando   | Descrição                                                            |
+| --------- | -------------------------------------------------------------------- |
+| `install` | Instala as skills no diretório de destino                            |
+| `update`  | Atualiza uma instalação existente com a versão remota                |
+| `build`   | Gera `dist/skills/`, limpa e copia as skills para `~/.agents/skills` |
+| `dev`     | Observa as fontes e atualiza somente `dist/skills`                   |
+| `help`    | Exibe a ajuda com os comandos disponíveis                            |
 
 ## Desenvolvimento das skills
 

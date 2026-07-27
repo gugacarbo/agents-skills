@@ -42,7 +42,7 @@ run_capture() {
   shift
 
   set +e
-  "$@" >"$output_file" 2>&1
+  "$@" > "$output_file" 2>&1
   local status=$?
   set -e
 
@@ -59,10 +59,10 @@ create_archive() {
   archive_path="$tmp/agents-skills-main.tar.gz"
 
   mkdir -p "$archive_root/dist/skills/$FIXTURE_SKILL" "$archive_root/src"
-  printf '%s\n' '---' "name: $FIXTURE_SKILL" "---" "version: $version" >"$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' remote-$version" >"$archive_root/skills.sh"
-  printf '%s\n' "remote readme $version" >"$archive_root/README.md"
-  printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' install-$version" >"$archive_root/src/install.sh"
+  printf '%s\n' '---' "name: $FIXTURE_SKILL" "---" "version: $version" > "$archive_root/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' remote-$version" > "$archive_root/skills.sh"
+  printf '%s\n' "remote readme $version" > "$archive_root/README.md"
+  printf '%s\n' "#!/usr/bin/env sh" "printf '%s\n' install-$version" > "$archive_root/src/install.sh"
 
   tar -czf "$archive_path" -C "$tmp/archive-src" agents-skills-main
   printf '%s\n' "$archive_path"
@@ -88,7 +88,7 @@ test_update_reports_already_current_when_files_match() {
 
   run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" "$UPDATER" --path "$target"
 
-  assert_contains "ja esta atualizada"
+  assert_contains "já está atualizada"
 }
 
 test_update_prompts_before_overwriting_changed_files() {
@@ -97,8 +97,8 @@ test_update_prompts_before_overwriting_changed_files() {
   target="$tmp/skills"
   archive_path=$(create_archive "$tmp" "remote")
   mkdir -p "$target/dist/skills/$FIXTURE_SKILL"
-  printf '%s\n' 'local version' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  printf 'y\n' >"$tmp/tty-input"
+  printf '%s\n' 'local version' > "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf 'y\n' > "$tmp/tty-input"
 
   run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
     AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" \
@@ -106,7 +106,7 @@ test_update_prompts_before_overwriting_changed_files() {
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
   grep -q 'version: remote' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  assert_contains "Atualizacao concluida"
+  assert_contains "Atualização concluída"
 }
 
 test_update_cancels_without_confirmation() {
@@ -115,8 +115,8 @@ test_update_cancels_without_confirmation() {
   target="$tmp/skills"
   archive_path=$(create_archive "$tmp" "remote")
   mkdir -p "$target/dist/skills/$FIXTURE_SKILL"
-  printf '%s\n' 'local version' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  printf 'n\n' >"$tmp/tty-input"
+  printf '%s\n' 'local version' > "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf 'n\n' > "$tmp/tty-input"
 
   if run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" \
     AGENTS_SKILLS_PROMPT_INPUT="$tmp/tty-input" \
@@ -126,7 +126,7 @@ test_update_cancels_without_confirmation() {
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
   grep -qx 'local version' "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
-  assert_contains "Atualizacao cancelada"
+  assert_contains "Atualização cancelada"
 }
 
 test_update_yes_overwrites_without_prompt() {
@@ -135,7 +135,7 @@ test_update_yes_overwrites_without_prompt() {
   target="$tmp/skills"
   archive_path=$(create_archive "$tmp" "remote")
   mkdir -p "$target/dist/skills/$FIXTURE_SKILL"
-  printf '%s\n' 'local version' >"$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
+  printf '%s\n' 'local version' > "$target/dist/skills/$FIXTURE_SKILL/SKILL.md"
 
   run_capture "$tmp/output.log" env AGENTS_SKILLS_ARCHIVE_URL="file://$archive_path" "$UPDATER" --path "$target" --yes < /dev/null
 
@@ -153,7 +153,7 @@ test_update_fails_when_target_does_not_exist() {
   fi
 
   LAST_OUTPUT=$(cat "$tmp/output.log")
-  assert_contains "Destino de update nao existe"
+  assert_contains "Destino de update não existe"
 }
 
 main() {

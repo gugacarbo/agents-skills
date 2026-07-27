@@ -147,7 +147,7 @@ test_bootstrap_missing_command_does_not_loop() {
     fail "expected one bootstrap download, got $download_count"
   fi
 
-  assert_contains "$tmp/output-missing.log" "Comando install nao encontrado"
+  assert_contains "$tmp/output-missing.log" "Comando install não encontrado"
 }
 
 main() {

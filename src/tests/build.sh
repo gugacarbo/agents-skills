@@ -102,6 +102,7 @@ test_build_copies_skills_and_removes_stale_output() {
   printf 'stale\n' > "$target/code-flow/templates/obsolete-template.md"
   mkdir -p "$target/external-skill"
   printf 'external\n' > "$target/external-skill/SKILL.md"
+  printf 'hidden\n' > "$target/.external-config"
 
   AGENTS_SKILLS_BUILD_OUTPUT="$output" \
     AGENTS_SKILLS_BUILD_TARGET="$target" \
@@ -110,7 +111,8 @@ test_build_copies_skills_and_removes_stale_output() {
   assert_exists "$target/code-flow/SKILL.md"
   assert_not_exists "$target/code-toolbox"
   assert_not_exists "$target/code-flow/templates/obsolete-template.md"
-  assert_exists "$target/external-skill/SKILL.md"
+  assert_not_exists "$target/external-skill"
+  assert_not_exists "$target/.external-config"
   assert_not_exists "$target/skill-master/dev"
   assert_not_exists "$target/code-flow/tests"
   assert_not_exists "$target/task-completion-notifier/tests"
@@ -120,9 +122,22 @@ test_build_copies_skills_and_removes_stale_output() {
   assert_not_exists "$target/$fixture_name/__pycache__"
 }
 
+test_build_rejects_output_as_deployment_target() {
+  local tmp output
+  tmp=$(mktemp -d)
+  output="$tmp/skills"
+
+  if AGENTS_SKILLS_BUILD_OUTPUT="$output" \
+    AGENTS_SKILLS_BUILD_TARGET="$output" \
+    sh "$BUILD_SCRIPT" > /dev/null 2>&1; then
+    fail 'build accepted the output directory as its deployment target'
+  fi
+}
+
 main() {
   assert_exists "$BUILD_SCRIPT"
   test_build_copies_skills_and_removes_stale_output
+  test_build_rejects_output_as_deployment_target
 
   printf 'PASS: build.sh\n'
 }
