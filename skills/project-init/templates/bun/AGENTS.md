@@ -2,7 +2,7 @@
 
 ## Runtime
 
-- Use the current stable Bun runtime.
+- Use stable Bun.
 
 ## Package manager
 
@@ -14,12 +14,11 @@
 
 ## Env contract
 
-- Read `Bun.env` only through a centralized environment module.
-- Validate required variables before application startup.
+- Centralize and validate `Bun.env` before startup.
 
 ## Entry point
 
-- Use `src/index.ts` unless the initialized project defines another explicit entry point.
+- Default to `src/index.ts`.
 
 ## Test runner
 
@@ -39,7 +38,7 @@
 
 ## Git hooks
 
-- Husky delegates to scripts that invoke Bun through the resolved package-manager contract.
+- Husky delegates to Bun-aware repository scripts.
 
 ## Commands
 
@@ -55,4 +54,4 @@ bun run knip
 
 ## Project Structure
 
-- Keep source under `src/`, tests under `tests/`, and build output under `dist/`.
+- Use `src/`, `tests/`, and `dist/` for source, tests, and output.

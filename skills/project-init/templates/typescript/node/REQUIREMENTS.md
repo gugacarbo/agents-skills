@@ -2,7 +2,7 @@
 
 ## Core Dependencies
 
-- `typescript` and `@types/node` for the Node.js type boundary.
+- `typescript` and `@types/node`.
 
 ## Dev Dependencies
 

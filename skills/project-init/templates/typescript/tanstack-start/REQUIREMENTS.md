@@ -2,15 +2,13 @@
 
 ## Core Dependencies
 
-- The generator owns React, TanStack Start, TanStack Router, Vite, and SSR integration packages.
+- The generator owns React, TanStack Start, Router, Vite, and SSR packages.
 
 ## Overlay tooling
 
-- The generator owns its selected Biome toolchain.
-- Preserve the generator-owned `biome.json` and lint script.
-- Migrate the generator-owned Biome schema with the installed Biome version.
-- Add only missing `vitest`, `knip`, and `husky` packages after generation.
-- Preserve the generator's reviewed `esbuild` and `lightningcss` build approvals.
+- Preserve the generated Biome config and lint script, then migrate its schema.
+- Add only missing `vitest`, `knip`, and `husky`.
+- Preserve reviewed `esbuild` and `lightningcss` approvals.
 
 ## Generated code
 

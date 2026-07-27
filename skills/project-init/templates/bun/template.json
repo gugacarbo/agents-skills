@@ -1,7 +1,7 @@
 {
 	"id": "bun",
-	"extends": ["_base"],
-	"description": "A Bun application initialized by Bun and overlaid with complete repository tooling.",
+	"extends": ["base"],
+	"description": "Bun application tooling and conventions.",
 	"packageManager": "bun",
 	"requiresFrameworkReady": true,
 	"readiness": {
@@ -64,7 +64,7 @@
 	},
 	"optionalTools": {
 		"cspell": {
-			"description": "Configure spell checking for English and Brazilian Portuguese.",
+			"description": "Add English and Brazilian Portuguese spell checking.",
 			"devDependencies": ["cspell", "@cspell/dict-pt-br"],
 			"packageJson": {
 				"scripts": {
@@ -73,13 +73,13 @@
 			},
 			"files": [
 				{
-					"source": "../_base/optional-tools/cspell/files/cspell.config.yaml",
+					"source": "../base/optional-tools/cspell/files/cspell.config.yaml",
 					"target": "cspell.config.yaml"
 				}
 			]
 		},
 		"lint-staged": {
-			"description": "Configure staged-file formatting and type checking in pre-commit.",
+			"description": "Format and type-check staged files before commit.",
 			"devDependencies": ["lint-staged", "prettier", "tsc-files"],
 			"packageJson": {
 				"scripts": {

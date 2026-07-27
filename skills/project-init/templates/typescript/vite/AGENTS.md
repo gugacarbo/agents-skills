@@ -2,7 +2,7 @@
 
 ## Runtime
 
-- Use Node.js LTS for local tooling and the browser as the client runtime.
+- Use Node.js LTS for tooling and the browser at runtime.
 
 ## Build tool
 
@@ -14,12 +14,12 @@
 
 ## Env contract
 
-- Read `import.meta.env` only through a centralized client environment module.
-- Expose only intentionally public variables and validate them before application use.
+- Centralize and validate `import.meta.env`.
+- Expose only intentional public variables.
 
 ## Entry point
 
-- Follow the generated {{frameworkName}} entry point and keep application code under `src/`.
+- Follow the generated {{frameworkName}} entry point under `src/`.
 
 ## Type checking
 
@@ -40,5 +40,4 @@ pnpm run knip
 
 ## Project Structure
 
-- Preserve generator-owned framework files, `index.html`, `public/`, and `src/`.
-- Apply convention files only after the Vite generator finishes.
+- Preserve generator-owned files and apply the overlay after generation.

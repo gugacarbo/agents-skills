@@ -2,7 +2,7 @@
 
 ## Runtime
 
-- The selected derivative owns the concrete runtime boundary.
+- The selected derivative defines the runtime.
 
 ## Package manager
 
@@ -14,18 +14,17 @@
 
 ## Env contract
 
-- Centralize raw environment reads in one module per application boundary.
-- Validate required variables before serving requests, jobs, or CLI work.
-- Export a typed environment object instead of passing unvalidated strings throughout the codebase.
+- Centralize and validate environment reads before startup.
+- Export typed values to application code.
 
 ## Scripts contract
 
 - Provide `dev`, `build`, `test`, `lint`, `format`, `typecheck`, and `knip` scripts.
-- Add `prepare` when Husky installs hooks after dependency setup.
+- Use `prepare` for Husky.
 
 ## Test runner
 
-- Use Vitest unless the selected runtime provides the project test runner.
+- Use Vitest unless the runtime owns testing.
 
 ## Lint & Format
 
@@ -37,13 +36,11 @@
 
 ## Dead code
 
-- Use Knip with the generic project configuration from the overlay.
-- Add project-specific workspaces and exceptions only when the repository actually needs them.
+- Use Knip; add exceptions only when required.
 
 ## Git hooks
 
-- Husky delegates to repository scripts.
-- Pre-commit runs lint and typecheck; pre-push runs tests.
+- Husky delegates to repository scripts: pre-commit checks code; pre-push runs tests.
 
 ## Commands
 

@@ -2,8 +2,7 @@
 
 ## Runtime
 
-- Use TanStack Start as a full-stack React framework with server-side rendering.
-- Use Node.js LTS for framework tooling and server execution.
+- Use TanStack Start for full-stack React SSR and Node.js LTS for tooling.
 
 ## Build tool
 
@@ -15,12 +14,11 @@
 
 ## Env contract
 
-- Separate server-only environment values from values intentionally exposed to browser code.
-- Validate both boundaries before use.
+- Separate and validate server-only and browser-exposed values.
 
 ## Entry point
 
-- Use file-based routes under `src/routes/` and keep router construction in the generated router module.
+- Use `src/routes/` and the generated router module.
 
 ## Type checking
 
@@ -28,7 +26,7 @@
 
 ## Generated code
 
-- Treat `src/routeTree.gen.ts` as generated code. Do not edit it manually or report it as unused source.
+- Never edit or report `src/routeTree.gen.ts` as unused.
 
 ## Commands
 
@@ -44,5 +42,4 @@ pnpm run knip
 
 ## Project Structure
 
-- Preserve generator-owned routing, Vite, SSR, and server files.
-- Apply the convention overlay only after the TanStack generator finishes.
+- Preserve generator-owned files and apply the overlay after generation.

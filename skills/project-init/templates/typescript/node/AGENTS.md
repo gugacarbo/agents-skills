@@ -2,7 +2,7 @@
 
 ## Runtime
 
-- Target the current Node.js LTS release.
+- Target Node.js LTS.
 
 ## Package manager
 
@@ -14,12 +14,11 @@
 
 ## Env contract
 
-- Read `process.env` only in a centralized module such as `src/env.ts`.
-- Validate and normalize values before exporting them to application code.
+- Centralize, validate, and normalize `process.env`.
 
 ## Entry point
 
-- Use `src/index.ts` as the default application or CLI entry point.
+- Default to `src/index.ts`.
 
 ## Commands
 
@@ -36,4 +35,4 @@ pnpm run knip
 
 ## Project Structure
 
-- Keep source under `src/`, tests under `tests/`, and compiled output under `dist/`.
+- Use `src/`, `tests/`, and `dist/` for source, tests, and output.

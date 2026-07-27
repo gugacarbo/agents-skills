@@ -1,9 +1,7 @@
 {
 	"id": "typescript/tanstack-start",
 	"extends": ["typescript"],
-	"description": "A full-stack React application with TanStack Start, SSR, file routing, and complete repository tooling.",
-	"packageManager": "pnpm",
-	"frameworkName": "TanStack Start React",
+	"description": "TanStack Start full-stack React tooling.",
 	"requiresFrameworkReady": true,
 	"readiness": {
 		"files": ["package.json"],
@@ -36,7 +34,6 @@
 	"commands": {
 		"framework": "pnpm dlx @tanstack/cli@latest create {{targetArg}} --package-manager pnpm --toolchain biome --no-examples --no-intent --yes",
 		"frameworkCwd": "{{targetParent}}",
-		"setup": ["pnpm exec biome migrate --write", "pnpm run prepare"],
-		"typecheck": "pnpm run typecheck"
+		"setup": ["pnpm exec biome migrate --write", "pnpm run prepare"]
 	}
 }

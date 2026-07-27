@@ -2,17 +2,15 @@
 
 ## Core Dependencies
 
-- `bun init` owns TypeScript declarations and the initial project configuration.
+- `bun init` owns TypeScript declarations and initial configuration.
 
 ## Dev Dependencies
 
-- Add `@biomejs/biome`, `knip`, and `husky` after initialization.
+- `@biomejs/biome`, `knip`, and `husky`.
 
 ## Built-in tools
 
-- `bun test` for tests.
-- `bun build` for bundling.
-- `bun --watch` for development watch mode.
+- `bun test`, `bun build`, and `bun --watch`.
 
 ## CI/CD
 
