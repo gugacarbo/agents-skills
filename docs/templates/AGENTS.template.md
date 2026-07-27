@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ```yaml
-casa-repo-id: <nome-canonico-do-repo> # usado em referências cross-repo (repo:ADR-0001)
+casa-repo-id: <nome-canônico-do-repo> # usado em referências cross-repo (repo:ADR-0001)
 casa-tier: T1 # T0 (leve) | T1 (padrão) — STANDARD §3
 casa-version: 1.8 # versão do contrato CASA adotado (promessa do repo, ADR-0010)
 casa-standard-ref: <sha> # versão do casa-standard de origem — o casa-init carimba
@@ -36,13 +36,13 @@ npm run typecheck        # exit 0
 npm test                 # tudo verde
 ```
 
-## Como deployar
+## Como fazer deploy
 
 <!-- Ferramenta/script oficial, ordem, e o que NÃO fazer. -->
 
 ## Git & PRs
 
-<!-- Convenções; quando commitar; se há remote; se o agente abre PR sem ser pedido. -->
+<!-- Convenções; quando fazer commit; se há remote; se o agente abre PR sem ser pedido. -->
 
 ## Gotchas
 

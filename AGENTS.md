@@ -27,9 +27,9 @@ Scripts de build/teste usam Bash, Python e Node conforme a skill.
 ## Artefatos publicados
 
 - `dist/` e um artefato gerado, versionado para que o instalador remoto tenha
-  skills prontas. Nao o leia, pesquise, edite ou use como fonte, salvo pedido
-  explicito do usuario.
-- A fonte de verdade e `skills/*`. Gere `dist/` somente por `pnpm build`; o
+  skills prontas. Não o leia, pesquise, edite ou use como fonte, salvo pedido
+  explícito do usuário.
+- A fonte de verdade é `skills/*`. Gere `dist/` somente por `pnpm build`; o
   hook de pre-push versiona automaticamente o resultado gerado.
 
 ## Infra & ambientes
@@ -54,13 +54,13 @@ pnpm build               # artefatos publicados válidos
 pnpm skills-check        # relações e arquivos publicados das skills válidos
 ```
 
-## Como deployar
+## Como fazer deploy
 
 <!-- Ferramenta/script oficial, ordem, e o que NÃO fazer. -->
 
 ## Git & PRs
 
-<!-- Convenções; quando commitar; se há remote; se o agente abre PR sem ser pedido. -->
+<!-- Convenções; quando fazer commit; se há remote; se o agente abre PR sem ser pedido. -->
 
 ## Gotchas
 
