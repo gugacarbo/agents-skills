@@ -112,14 +112,6 @@ function generateToken() {
 	return crypto.randomBytes(32).toString("hex");
 }
 
-function chmodOwnerOnly(file) {
-	try {
-		fs.chmodSync(file, 0o600);
-	} catch (_e) {
-		/* best effort */
-	}
-}
-
 function initialToken() {
 	if (process.env.SESSION_TOKEN) {
 		return { value: process.env.SESSION_TOKEN, source: "env" };

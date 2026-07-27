@@ -53,15 +53,6 @@ function parseArgs(argv) {
 	return options;
 }
 
-async function exists(filePath) {
-	try {
-		await fs.access(filePath);
-		return true;
-	} catch {
-		return false;
-	}
-}
-
 async function runCommand(command, args, options) {
 	const startedAt = new Date();
 	const started = performance.now();
