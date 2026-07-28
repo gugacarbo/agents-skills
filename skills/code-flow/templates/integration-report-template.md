@@ -6,15 +6,17 @@
 > sources_evidence: <review, PR/NO_CHANGES, rebase, checks e issue>
 > project_guidance: <paths e comandos>
 
+<!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"integrator","event":"integration-result"} -->
+
 ## Resume
 
 <MERGED_AND_CLOSED | CLOSED_NO_CHANGES | REVIEW_REQUIRED | CHANGES_REQUIRED | BLOCKED>
 
 ## Decisão de operação
 
-| Entrada | Operação     | Evidência     |
-| ------- | ------------ | ------------- |
-| `<PR    | NO_CHANGES>` | `<merge+close | close>` | `<prova>` |
+| Entrada         | Operação            | Evidência |
+| --------------- | ------------------- | --------- |
+| PR / NO_CHANGES | merge+close / close | `<prova>` |
 
 ## Verificação de rebase
 

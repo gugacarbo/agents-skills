@@ -13,6 +13,8 @@ Leia [`../runtime.md`](../runtime.md), [`../workflow-states.json`](../workflow-s
 a issue, guidance, código, testes, o template de
 [`nota operacional`](../templates/operational-note-template.md) e
 [`arquitetura`](../templates/architecture-review-template.md).
+Em `mode: worker`, valide o envelope, use `apply-event.sh` e termine após a
+transição confirmada.
 
 1. Valide estado/overlay e publique `activity-start` com run_id e Base SHA antes
    de adicionar `stage:in-progress`.

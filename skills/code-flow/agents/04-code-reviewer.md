@@ -14,6 +14,8 @@ executor. Leia [`../runtime.md`](../runtime.md), registry, issue/guidance,
 artefatos publicados, [`../workflow-states.json`](../workflow-states.json), o
 template de [`nota operacional`](../templates/operational-note-template.md) e
 [`delivery review`](../templates/delivery-review-template.md).
+Em `mode: worker`, `fresh_context` deve ser verdadeiro; valide o envelope e use
+`apply-event.sh`, encerrando a sessão após a confirmação.
 
 1. Publique `activity-start` com run_id novo, fontes e run_ids dos produtores;
    depois adicione overlay e rode `validate-evidence.sh`.
@@ -27,7 +29,8 @@ template de [`nota operacional`](../templates/operational-note-template.md) e
    [`follow-up-issue-template.md`](../templates/follow-up-issue-template.md),
    sem criar issues.
 5. Publique o veredito, faça a transição e confirme:
-   - diff aprovado → `stage:ready-to-merge + needs-human`;
+   - XS/S, sem hard trigger nem concern, diff aprovado → `stage:integration-authorized`;
+   - M+, hard trigger ou concern, diff aprovado → `stage:ready-to-merge + needs-human`;
    - NO_CHANGES aprovado → `stage:integration-authorized`;
    - ajustes/achados bloqueantes → `stage:needs-changes`;
    - dependência externa → `stage:blocked + needs-human`.

@@ -5,6 +5,7 @@
 > state_after: <closed/labels-cleared | destino>
 > sources_evidence: <review, PR/NO_CHANGES, rebase, checks e issue>
 > project_guidance: <paths e comandos>
+<!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"integrator","event":"integration-result"} -->
 
 ## Resume
 
@@ -14,7 +15,7 @@
 
 | Entrada | Operação     | Evidência     |
 | ------- | ------------ | ------------- |
-| `<PR    | NO_CHANGES>` | `<merge+close | close>` | `<prova>` |
+| PR / NO_CHANGES | merge+close / close | `<prova>` |
 
 ## Verificação de rebase
 

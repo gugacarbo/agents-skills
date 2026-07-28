@@ -7,6 +7,7 @@
 > state_after: <destino>
 > sources_evidence: <issue, planejamento/arquitetura, executor e PR/NO_CHANGES>
 > project_guidance: <paths e comandos>
+<!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"code-reviewer","event":"delivery-review"} -->
 
 ## Resume
 
@@ -20,7 +21,7 @@ Veredito: `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
 | Critério     | Evidência | Resultado | Observação |
 | ------------ | --------- | --------- | ---------- |
-| `<critério>` | `<prova>` | `PASS     | FAIL       | Cannot verify` | `<nota>` |
+| `<critério>` | `<prova>` | PASS / FAIL / Cannot verify | `<nota>` |
 
 ## Reconciliação de escopo
 
@@ -32,7 +33,7 @@ Veredito: `APROVAR | APROVAR COM RESSALVAS | AJUSTAR | BLOQUEAR`
 
 | Severidade | Local/prova | Impacto | Ação           | Issue draft |
 | ---------- | ----------- | ------- | -------------- | ----------- |
-| `Critical  | Important   | Minor   | Cannot verify` | `<prova>`   | `<impacto>` | `<ação>` | `<link ou n/a>` |
+| Critical / Important / Minor / Cannot verify | `<prova>` | `<impacto>` | `<ação>` | `<link ou n/a>` |
 
 ## NO_CHANGES
 

@@ -8,6 +8,8 @@
 > sources_evidence: <issue, guidance, código/testes e Base SHA>
 > project_guidance: <paths e comandos>
 
+<!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"architect","event":"architecture-review"} -->
+
 ## Resume
 
 <decisão técnica, spec/ADR, riscos e próximo responsável>

@@ -1,0 +1,44 @@
+{
+	"schema_version": 1,
+	"worker_contract_version": 1,
+	"skill_name": "code-flow",
+	"modes": ["interactive", "worker"],
+	"requirements": {
+		"cli": ["bash", "gh", "git", "iconv", "jq"],
+		"workspace": "git checkout or worktree with GitHub access"
+	},
+	"contracts": {
+		"worker_input": "schemas/worker-input.schema.json",
+		"worker_result": "schemas/worker-result.schema.json",
+		"protocol_event": "schemas/protocol-event.schema.json",
+		"registry": "workflow-states.json"
+	},
+	"roles": {
+		"dispatcher": {
+			"prompt": "agents/01-dispatcher.md",
+			"capabilities": ["read", "github", "edit"]
+		},
+		"architect": {
+			"prompt": "agents/02-architect.md",
+			"capabilities": ["read", "github", "edit"]
+		},
+		"executor": {
+			"prompt": "agents/03-executor.md",
+			"capabilities": ["read", "edit", "terminal", "github"]
+		},
+		"code-reviewer": {
+			"prompt": "agents/04-code-reviewer.md",
+			"capabilities": ["read", "github", "edit"],
+			"fresh_context": true
+		},
+		"integrator": {
+			"prompt": "agents/05-integrator.md",
+			"capabilities": ["read", "terminal", "github"]
+		},
+		"gate": {
+			"prompt": "agents/06-gate.md",
+			"capabilities": ["read", "github", "edit"],
+			"fresh_context": true
+		}
+	}
+}

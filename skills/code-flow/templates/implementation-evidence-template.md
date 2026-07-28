@@ -6,6 +6,8 @@
 > sources_evidence: <issue, Base/Head, código, testes, commits e PR>
 > project_guidance: <paths e comandos>
 
+<!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"executor","event":"implementation-result"} -->
+
 ## Resume
 
 <objetivo ou DONE | DONE_WITH_CONCERNS | NO_CHANGES | BLOCKED>
@@ -30,9 +32,9 @@
 
 ## Critérios e evidências
 
-| Critério     | Evidência         | Resultado |
-| ------------ | ----------------- | --------- |
-| `<critério>` | `<comando/prova>` | `PASS     | FAIL | n/a` |
+| Critério     | Evidência         | Resultado         |
+| ------------ | ----------------- | ----------------- |
+| `<critério>` | `<comando/prova>` | PASS / FAIL / n/a |
 
 ## Reconciliação de escopo
 
@@ -48,6 +50,6 @@ PR publicado: `<URL ou n/a>`
 
 ## Problemas encontrados
 
-| Nível     | Problema  | Solução | Risco          | Issue draft |
-| --------- | --------- | ------- | -------------- | ----------- |
-| `Critical | Important | Minor   | Cannot verify` | `<item>`    | `<ação>` | `<risco>` | `<link ou n/a>` |
+| Nível                                        | Problema | Solução  | Risco     | Issue draft     |
+| -------------------------------------------- | -------- | -------- | --------- | --------------- |
+| Critical / Important / Minor / Cannot verify | `<item>` | `<ação>` | `<risco>` | `<link ou n/a>` |

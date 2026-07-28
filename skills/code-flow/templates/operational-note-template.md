@@ -6,6 +6,8 @@
 > sources_evidence: <fontes, Base/Head e branch/worktree>
 > project_guidance: <paths e comandos>
 
+<!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"<role>","event":"<event>"} -->
+
 ## Resume
 
 <resultado esperado, retomada e próximo responsável>

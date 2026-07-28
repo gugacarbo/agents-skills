@@ -1,24 +1,26 @@
 # code-flow eval fixtures
 
-Os evals de code-flow são baseados em **transcript e comportamento do agente**,
-não em arquivos criados no filesystem. Os cenários assumem issues reais ou
-simuladas no GitHub (acme/demo) acessíveis ao agente durante a execução.
+Os evals de code-flow combinam transcript/comportamento do agente e os
+contratos versionados do worker. O runner de linguagem pode apontar para uma
+issue GitHub descartável; os testes determinísticos usam um `gh` fake em
+`tests/tests.sh` para validar eventos, gates e transições sem rede.
 
 ## Setup por cenário
 
-| Eval | Issue | Estado inicial                                                     | Fixture                                                                      |
-| ---- | ----- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| E1   | #42   | sem labels code-flow                                               | n/a (issue limpa)                                                            |
-| E2   | #43   | `code-flow:active + stage:ready-for-execution + stage:in-progress` | `e2-overlay.json` (mock de issue com overlay)                                |
-| E3   | #44   | `code-flow:active + stage:ready-for-execution + stage:in-progress` | `e3-lease-expired.json` (mock com lease expirado)                            |
-| E4   | #45   | `code-flow:active + stage:needs-delivery-review`                   | `e4-self-authorship.json` (mock com run_id def-456 em dispatcher + executor) |
-| E5   | #46   | `code-flow:active + stage:needs-triage`                            | `e5-agents-md/AGENTS.md` (guidance local)                                    |
+| Eval | Issue | Estado inicial                                                     | Fixture                                   |
+| ---- | ----- | ------------------------------------------------------------------ | ----------------------------------------- |
+| E1   | #42   | sem labels code-flow                                               | n/a (issue limpa)                         |
+| E2   | #43   | `code-flow:active + stage:ready-for-execution + stage:in-progress` | overlay e `run_id` informados no prompt   |
+| E3   | #44   | `code-flow:active + stage:needs-triage`                            | triagem S sem hard trigger                |
+| E4   | #45   | `code-flow:active + stage:needs-delivery-review`                   | `run_ids` produtores informados no prompt |
+| E5   | #46   | `code-flow:active + stage:needs-triage`                            | `e5-agents-md/AGENTS.md` (guidance local) |
 
 ## Mocks
 
-Para rodar os evals sem um repo real acme/demo, use `gh` fake (como em
-`tests/tests.sh`) apontando para os mocks JSON aqui. O `run-evals.mjs` não inclui
-o mock automaticamente; configure `PATH` ou `GH_FAKE_DIR` antes de invocar.
+Para rodar os evals sem um repo real acme/demo, use `gh` fake compatível com o
+de `tests/tests.sh`. O `run-evals.mjs` não instala mock automaticamente;
+configure `PATH` antes de invocar. Lease, heartbeat e TTL pertencem ao runner
+VPS futuro e não são um cenário desta skill.
 
 ## e5-agents-md/
 

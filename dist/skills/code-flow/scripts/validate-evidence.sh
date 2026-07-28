@@ -63,6 +63,19 @@ START_RUN_ID=''
 START_AGENT=''
 START_STATE=''
 
+# Worker comments carry a one-line, hidden protocol event. Keep parsing the
+# legacy Markdown fields below so interactive runs remain compatible, but make
+# an active issue without a v1 event explicitly migratable rather than silently
+# treating it as a trustworthy worker history.
+EVENTS=$(printf '%s' "$ISSUE_JSON" | jq -c '
+  [.comments[] | .body as $body |
+   try ($body | capture("<!-- code-flow:event:v1 (?<event>\\{.*\\}) -->").event | fromjson) catch empty]
+')
+EVENT_COUNT=$(printf '%s' "$EVENTS" | jq 'length')
+if [ "$HAS_ACTIVE" = true ] && [ "$EVENT_COUNT" -eq 0 ]; then
+  ERRORS="$ERRORS\nmigration_required: active issue has no code-flow:event:v1 history"
+fi
+
 # Extract the latest activity-start comment (event: activity-start).
 # Comments are returned oldest-first; pick the last one matching.
 LAST_START_JSON=$(printf '%s' "$ISSUE_JSON" | jq -c --arg activity "$ACTIVITY" '
@@ -98,6 +111,14 @@ else
   fi
 fi
 
+# Structured events are the authoritative worker evidence when present.
+LAST_EVENT_START=$(printf '%s' "$EVENTS" | jq -c '[.[] | select(.event == "activity-start")] | last // empty')
+if [ "$HAS_ACTIVITY" = true ] && [ -n "$LAST_EVENT_START" ] && [ "$LAST_EVENT_START" != null ]; then
+  START_RUN_ID=$(printf '%s' "$LAST_EVENT_START" | jq -r '.run_id // empty')
+  START_AGENT=$(printf '%s' "$LAST_EVENT_START" | jq -r '.role // empty')
+  START_STATE=$(printf '%s' "$LAST_EVENT_START" | jq -r '.state_before // empty')
+fi
+
 # Same GitHub author is allowed; a code-reviewer run ID must be fresh.
 if [ "$HAS_ACTIVITY" = true ] && [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$START_RUN_ID" ]; then
   PRODUCER_COLLISION=$(printf '%s' "$ISSUE_JSON" | jq -r --arg run "$START_RUN_ID" '
@@ -109,12 +130,18 @@ if [ "$HAS_ACTIVITY" = true ] && [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$
   [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$START_RUN_ID' collides with a producer run"
 fi
 
+if [ "$HAS_ACTIVITY" = true ] && [ "$PRIMARY_ACTOR" = code-reviewer ] && [ "$EVENT_COUNT" -gt 0 ]; then
+  PRODUCER_COLLISION=$(printf '%s' "$EVENTS" | jq --arg run "$START_RUN_ID" '[.[] | select(.role | IN("dispatcher", "architect", "executor")) | select(.run_id == $run)] | length')
+  [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$START_RUN_ID' collides with a producer event"
+fi
+
 # Build result.
 if [ "$JSON_OUT" -eq 1 ]; then
-  printf '{"issue":%s,"primary":%s,"has_activity":%s,"errors":%s,"warnings":%s}\n' \
+  printf '{"issue":%s,"primary":%s,"has_activity":%s,"event_count":%s,"errors":%s,"warnings":%s}\n' \
     "$ISSUE_NUMBER" \
     "$(printf '%s' "${PRIMARY:-null}" | jq -R 'if . == "null" then null else . end')" \
     "$HAS_ACTIVITY" \
+    "$EVENT_COUNT" \
     "$(printf '%s' "${ERRORS:-}" | jq -R -s 'rtrimstr("\n") | split("\n") | map(select(length > 0))')" \
     "$(printf '%s' "${WARNINGS:-}" | jq -R -s 'rtrimstr("\n") | split("\n") | map(select(length > 0))')"
   [ -z "$ERRORS" ] || exit 1

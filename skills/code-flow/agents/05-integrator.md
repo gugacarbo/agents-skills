@@ -14,6 +14,8 @@ Consuma somente `code-flow:active + stage:integration-authorized`, sem
 [`../workflow-states.json`](../workflow-states.json), guidance, review, PR/prova,
 o template de [`nota operacional`](../templates/operational-note-template.md) e
 [`integração`](../templates/integration-report-template.md).
+Em `mode: worker`, valide o envelope e use `apply-event.sh`; não execute outro
+papel após integrar ou bloquear.
 
 1. Valide estado/retomada. Publique `activity-start` com run_id, review,
    Base/Head e operação; depois adicione overlay.

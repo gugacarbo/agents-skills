@@ -1,7 +1,7 @@
 interface:
   display_name: "Code Flow"
   short_description: "Entrega por issue com papéis independentes"
-  default_prompt: "Use $code-flow <issue> para executar esta entrega com labels, evidência e papéis independentes."
+  default_prompt: "Use $code-flow <issue> para modo interativo; para worker, forneça o envelope v1, bundle completo e worktree a uma sessão de papel único."
 
 policy:
   allow_implicit_invocation: false

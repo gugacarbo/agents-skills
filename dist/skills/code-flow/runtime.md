@@ -11,7 +11,7 @@ desconhecidas. Se as labels canônicas não existirem, provisione somente as
 ausentes; uma issue inativa e limpa recebe `code-flow:active +
 stage:needs-triage`. Issue ativa é retomada a partir do estado remoto.
 
-O orquestrador relê labels após cada papel e despacha uma instância nova. Pare
+No modo interativo, o orquestrador relê labels após cada papel e despacha uma instância nova. Pare
 em estado humano, blocker, conclusão, overlay incompatível ou após dez papéis;
 no limite, publique handoff e preserve o estado atual.
 
@@ -66,15 +66,16 @@ restaura somente esse estado.
 
 ## Gates e saída
 
-- triage: `approve | adjust | block`;
-- execution: `authorize | adjust | block`;
-- merge: `integrate | adjust | wait`;
+- triage: `approve`, `adjust` ou `block`;
+- execution: `authorize`, `adjust` ou `block`;
+- merge: `integrate`, `adjust` ou `wait`;
 - resume: estado registrado no `Resume`;
 - activity: `reset`.
 
 Gate valida estado, ausência de overlay, evidência, Base/Head e opção; publica
 decisão antes da transição. Merge com diff exige `integrate`; `NO_CHANGES`
-aprovado segue sem gate de merge.
+aprovado segue sem gate de merge. No worker, o gate vem exclusivamente do
+comentário `/code-flow gate DECISION`, com permissão GitHub `write+` validada ao vivo.
 
 `stop` mostra trabalho não integrado e oferece encerrar/manter. Com atividade,
 publique handoff e redefina o overlay antes de `--stop`. Encerrar remove somente

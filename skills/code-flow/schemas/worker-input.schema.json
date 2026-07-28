@@ -1,0 +1,46 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://code-flow.dev/schemas/worker-input/v1",
+	"type": "object",
+	"additionalProperties": false,
+	"required": [
+		"run_id",
+		"attempt",
+		"role",
+		"fresh_context",
+		"trigger",
+		"issue",
+		"skill_root",
+		"bundle_digest",
+		"workspace"
+	],
+	"properties": {
+		"run_id": { "type": "string", "minLength": 1 },
+		"attempt": { "type": "integer", "minimum": 1 },
+		"role": {
+			"enum": [
+				"dispatcher",
+				"architect",
+				"executor",
+				"code-reviewer",
+				"integrator",
+				"gate"
+			]
+		},
+		"fresh_context": { "type": "boolean" },
+		"trigger": { "type": "object", "additionalProperties": true },
+		"issue": {
+			"type": "object",
+			"required": ["number", "url", "labels"],
+			"properties": {
+				"number": { "type": "integer" },
+				"url": { "type": "string" },
+				"labels": { "type": "array", "items": { "type": "string" } }
+			}
+		},
+		"skill_root": { "type": "string" },
+		"bundle_digest": { "type": "string", "minLength": 1 },
+		"workspace": { "type": "string" },
+		"base_sha": { "type": "string" }
+	}
+}

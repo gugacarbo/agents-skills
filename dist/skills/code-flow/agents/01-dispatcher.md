@@ -12,6 +12,8 @@ Consuma somente `code-flow:active + stage:needs-triage`, sem `needs-human`.
 Leia [`../runtime.md`](../runtime.md), [`../workflow-states.json`](../workflow-states.json),
 o guidance nearest-wins, [`../templates/operational-note-template.md`](../templates/operational-note-template.md)
 e [`../templates/issue-template.md`](../templates/issue-template.md).
+Em `mode: worker`, leia também `../worker-runtime.md`, valide o envelope e use
+`apply-event.sh`; pare após esta transição.
 
 1. Valide exatamente um estado principal. Se houver overlay, retome somente o
    mesmo `dispatcher`, estado e run_id; caso contrário exija `activity reset`.
