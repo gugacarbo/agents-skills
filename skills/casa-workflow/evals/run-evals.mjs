@@ -257,12 +257,15 @@ function grade(evalCase, combined, changed) {
 				"Impacto de artefatos",
 				"Ações antes do código",
 				"Obrigações de fechamento",
-				"Efeitos externos",
 				"Aprovar",
 				"Ajustar",
 				"Bloquear",
-			].every((item) => combined.includes(item)),
-			"Checked ordered report fields and choices.",
+			].every((item) => combined.includes(item)) &&
+				!contains(
+					combined,
+					"Efeitos externos\\s*(?:—|:|-)?\\s*(?:nenhum|none|n/?a)",
+				),
+			"Checked compact report fields, omission, and choices.",
 		);
 		add(4, noChanges, `changed=${JSON.stringify(changed)}`);
 	} else if (evalCase.id === 2) {
@@ -338,7 +341,10 @@ function grade(evalCase, combined, changed) {
 		);
 		add(
 			1,
-			contains(combined, "nenhum|não.*necess|no new") &&
+			contains(
+				combined,
+				"nenhum|não.*necess|no new|dispensado|dispensada|dispensados|dispensadas|sem gatilho documental",
+			) &&
 				contains(combined, "ADR") &&
 				contains(combined, "Spec"),
 			"Inspected no-document classification.",

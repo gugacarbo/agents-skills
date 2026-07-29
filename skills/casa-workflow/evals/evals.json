@@ -11,7 +11,7 @@
 				"The output identifies the repository as CASA T1 version 1.8 pinned to 7cdb964.",
 				"The output identifies the accepted SQLite ADR and a structural conflict.",
 				"The output requires a new ADR instead of editing the accepted ADR body.",
-				"The ordered CASA report ends with Aprovar, Ajustar, or Bloquear.",
+				"The compact CASA report contains the core fields, omits an empty external-effects section, and ends with Aprovar, Ajustar, or Bloquear.",
 				"No repository file changes before the gate."
 			],
 			"skill_type": "discipline",

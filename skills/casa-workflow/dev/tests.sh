@@ -11,8 +11,10 @@ lacks() { ! grep -Fq -- "$1" "$2" || fail "$2 unexpectedly contains: $1"; }
 
 [[ -f "$ROOT/SKILL.md" ]] || fail 'SKILL.md missing'
 [[ -f "$ROOT/agents/openai.yaml" ]] || fail 'agents/openai.yaml missing'
+[[ -f "$ROOT/references/workflow.md" ]] || fail 'workflow reference missing'
 [[ -f "$ROOT/references/source-resolution.md" ]] || fail 'source-resolution reference missing'
 [[ -f "$ROOT/references/impact-lifecycle.md" ]] || fail 'impact-lifecycle reference missing'
+[[ -f "$ROOT/references/gate-template.md" ]] || fail 'gate template reference missing'
 [[ -f "$ROOT/evals/evals.json" && -f "$ROOT/evals/run-evals.mjs" ]] || fail 'eval harness missing'
 [[ -f "$ROOT/evals/trigger-evals.json" ]] || fail 'trigger eval catalog missing'
 [[ ! -d "$ROOT/assets" && ! -d "$ROOT/scripts" ]] || fail 'placeholder runtime directory present'
@@ -22,15 +24,26 @@ lacks() { ! grep -Fq -- "$1" "$2" || fail "$2 unexpectedly contains: $1"; }
 has 'name: casa-workflow' "$ROOT/SKILL.md"
 has 'description:' "$ROOT/SKILL.md"
 [[ $(sed -n '2,/^---$/p' "$ROOT/SKILL.md" | grep -Ec '^[a-zA-Z0-9_-]+:') -eq 2 ]] || fail 'frontmatter must contain only name and description'
-has '[source-resolution.md](references/source-resolution.md)' "$ROOT/SKILL.md"
-has '[impact-lifecycle.md](references/impact-lifecycle.md)' "$ROOT/SKILL.md"
-for section in 'Contexto CASA' 'Achados por risco' 'Impacto de artefatos' 'Ações antes do código' 'Obrigações de fechamento' 'Efeitos externos' 'Gate'; do has "$section" "$ROOT/SKILL.md"; done
+[[ $(wc -l < "$ROOT/SKILL.md") -le 45 ]] || fail 'SKILL.md must remain a compact router'
+[[ $(wc -w < "$ROOT/SKILL.md") -le 400 ]] || fail 'SKILL.md exceeds router word budget'
+has '[workflow.md](references/workflow.md)' "$ROOT/SKILL.md"
+has 'por completo antes de analisar' "$ROOT/SKILL.md"
+has 'agir.' "$ROOT/SKILL.md"
+has '[source-resolution.md](source-resolution.md)' "$ROOT/references/workflow.md"
+has '[impact-lifecycle.md](impact-lifecycle.md)' "$ROOT/references/workflow.md"
+has '[gate-template.md](gate-template.md)' "$ROOT/references/workflow.md"
+for section in 'Contexto CASA' 'Achados por risco' 'Impacto de artefatos' 'Ações antes do código' 'Obrigações de fechamento' 'Efeitos externos' 'Gate'; do has "$section" "$ROOT/references/gate-template.md"; done
+has 'omita-o por completo' "$ROOT/references/gate-template.md"
+for marker in 'título vazio' '`nenhum`' '`não aplicável`' '`N/A`' 'placeholder'; do has "$marker" "$ROOT/references/gate-template.md"; done
+has '`Efeitos externos` aparece somente' "$ROOT/references/gate-template.md"
+has 'externo concreto' "$ROOT/references/gate-template.md"
 has 'parar antes da primeira escrita' "$ROOT/SKILL.md"
-has '`Aprovar`, `Ajustar` ou `Bloquear`' "$ROOT/SKILL.md"
+for choice in '`Aprovar`' '`Ajustar`' '`Bloquear`'; do has "$choice" "$ROOT/SKILL.md"; done
 has 'gate_valido=false' "$ROOT/SKILL.md"
 has 'preaprovação alegada' "$ROOT/SKILL.md"
-has 'atplus-digital/casa-standard' "$ROOT/SKILL.md"
-has 'homônimos chamados CASA não são fontes válidas' "$ROOT/SKILL.md"
+has 'ADR e Spec' "$ROOT/references/workflow.md"
+has 'atplus-digital/casa-standard' "$ROOT/references/workflow.md"
+has 'Homônimos chamados CASA não são fontes' "$ROOT/references/workflow.md"
 has 'allow_implicit_invocation: true' "$ROOT/agents/openai.yaml"
 has 'Use $casa-workflow' "$ROOT/agents/openai.yaml"
 lacks '[TODO' "$ROOT/SKILL.md"
