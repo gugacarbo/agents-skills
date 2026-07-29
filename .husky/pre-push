@@ -6,9 +6,9 @@
 # Cobre: git push origin main, git push origin feature:main, git push origin :main, etc.
 # Não cobre: git push --no-verify (use branch protection no GitHub).
 
-should_blocked=0
+should_block=0
 
-if [ "$should_blocked" -eq 1 ]; then
+if [ "$should_block" -eq 1 ]; then
 
   blocked=0
 
