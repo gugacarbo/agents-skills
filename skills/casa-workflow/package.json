@@ -1,0 +1,12 @@
+{
+	"name": "@gugacarbo/skill-casa-workflow",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Development tooling for the casa-workflow skill.",
+	"type": "module",
+	"scripts": {
+		"test": "bash dev/tests.sh",
+		"validate": "bash dev/tests.sh && node --check evals/run-evals.mjs && node -e \"JSON.parse(require('node:fs').readFileSync('evals/evals.json', 'utf8'))\"",
+		"build": "node --check evals/run-evals.mjs"
+	}
+}

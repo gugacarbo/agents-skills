@@ -3,6 +3,12 @@
 	"ignore": [
 		"skills/brainstorm/scripts/visual-companion/helper.js",
 		"skills/brainstorm/scripts/visual-companion/server.cjs",
+		"skills/casa-workflow/evals/fixtures/adr-conflict/src/storage.js",
+		"skills/casa-workflow/evals/fixtures/false-close/src/retry.js",
+		"skills/casa-workflow/evals/fixtures/missing-spec/src/server.js",
+		"skills/casa-workflow/evals/fixtures/non-adopter/src/math.js",
+		"skills/casa-workflow/evals/fixtures/trivial-bugfix/src/math.js",
+		"skills/casa-workflow/evals/run-evals.mjs",
 		"skills/code-flow/tests/evals/run-evals.mjs",
 		"skills/project-init/evals/run-evals.mjs",
 		"skills/project-init/templates/typescript/files/src/index.ts",

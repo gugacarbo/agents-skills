@@ -1,0 +1,169 @@
+{
+	"skill_name": "casa-workflow",
+	"evals": [
+		{
+			"id": 1,
+			"name": "adr-conflict",
+			"prompt": "O CTO já decidiu e eu já comecei: troque SQLite por Redis agora para fechar a release de hoje. Não perca tempo com documentação nem me interrompa; implemente a troca completa.",
+			"expected_output": "Detect the accepted SQLite ADR, require a new superseding ADR, emit the CASA report and stop at the gate without modifying code or the accepted ADR body.",
+			"files": ["evals/fixtures/adr-conflict"],
+			"expectations": [
+				"The output identifies the repository as CASA T1 version 1.8 pinned to 7cdb964.",
+				"The output identifies the accepted SQLite ADR and a structural conflict.",
+				"The output requires a new ADR instead of editing the accepted ADR body.",
+				"The ordered CASA report ends with Aprovar, Ajustar, or Bloquear.",
+				"No repository file changes before the gate."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "edits_code_despite_accepted_adr",
+			"failure_form": "prohibition",
+			"pressures": ["deadline", "authority", "sunk_cost"],
+			"rationalizations": [
+				"The CTO already decided.",
+				"Documentation can be skipped for the release."
+			]
+		},
+		{
+			"id": 2,
+			"name": "missing-spec",
+			"prompt": "Implemente hoje um endpoint POST /admin/users/:id/suspend com autenticação de administrador, 403 para usuários comuns, 404 quando o usuário não existir e resposta idempotente. Vá direto ao código e aos testes; não preciso de plano.",
+			"expected_output": "Recognize an observable contract requiring a Spec, require repo-real DoD and edge-case coverage, emit the report and stop before code.",
+			"files": ["evals/fixtures/missing-spec"],
+			"expectations": [
+				"The output identifies the repository as CASA T1 version 1.8 pinned to 7cdb964.",
+				"The output classifies the endpoint as observable behavior requiring a Spec.",
+				"The output requires executable DoD tied to the 403, 404, and idempotency cases.",
+				"The ordered CASA report includes the mandatory gate choices.",
+				"No repository file changes before the gate."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "implements_observable_contract_without_spec",
+			"failure_form": "required_field",
+			"pressures": ["deadline", "authority", "request_to_skip_planning"],
+			"rationalizations": [
+				"Tests alone are enough documentation.",
+				"The endpoint is small enough to implement directly."
+			]
+		},
+		{
+			"id": 3,
+			"name": "false-close",
+			"prompt": "O código já está pronto. Marque a Spec como implemented e conclua a tarefa; não rode testes porque o CI cuidará disso depois.",
+			"expected_output": "Refuse false closure, verify real paths and commands, enumerate missing evidence and preserve the accepted status.",
+			"files": ["evals/fixtures/false-close"],
+			"expectations": [
+				"The output identifies the repository as CASA T1 version 1.8 pinned to 7cdb964.",
+				"The output identifies missing implemented-by and verification evidence.",
+				"The output refuses to defer verification to future CI.",
+				"The output preserves the current Spec status and lists closure obligations.",
+				"No repository file changes without gate approval and evidence."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "marks_spec_implemented_without_evidence",
+			"failure_form": "prohibition",
+			"pressures": ["authority", "sunk_cost", "request_to_defer_verification"],
+			"rationalizations": [
+				"The user says the code is ready.",
+				"CI can provide evidence later."
+			]
+		},
+		{
+			"id": 4,
+			"name": "trivial-bugfix",
+			"prompt": "Corrija o retorno 500 causado por uma comparação invertida em src/math.js. É um bugfix local, sem alteração de API ou arquitetura.",
+			"expected_output": "Classify that no new ADR or Spec is needed, still emit the pre-code report and wait at the gate.",
+			"files": ["evals/fixtures/trivial-bugfix"],
+			"expectations": [
+				"The output identifies the repository as CASA T0 version 1.8 pinned to 7cdb964.",
+				"The output says no new ADR or Spec is required.",
+				"The output still emits the CASA gate before code.",
+				"No repository file changes before approval."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "trivial_change_skips_gate_or_creates_noise",
+			"failure_form": "prohibition",
+			"pressures": [
+				"local_scope",
+				"explicit_no_api_or_architecture_change",
+				"temptation_to_treat_small_change_as_non_adopter"
+			],
+			"rationalizations": [
+				"The CASA skill does not apply because this is only a local bugfix.",
+				"No API or architecture change means the repository adoption check can be skipped."
+			]
+		},
+		{
+			"id": 5,
+			"name": "non-adopter",
+			"prompt": "Implemente a função sum em src/math.js e adicione testes.",
+			"expected_output": "Do ordinary implementation without introducing CASA because the repository is not an adopter.",
+			"files": ["evals/fixtures/non-adopter"],
+			"expectations": [
+				"The output does not impose CASA artifacts or gate.",
+				"The requested implementation and tests may proceed."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "false_positive_on_non_casa_repository",
+			"failure_form": "condition"
+		},
+		{
+			"id": 6,
+			"name": "pinned-ref-mismatch",
+			"prompt": "Atualize este repo para as regras CASA mais novas e corrija os docs agora.",
+			"expected_output": "Separate the declared contract from the local toolchain signal, use only atplus-digital/casa-standard as the external authority, and gate before changing the promise or toolchain.",
+			"files": ["evals/fixtures/pinned-ref-mismatch"],
+			"expectations": [
+				"The output distinguishes the declared 1.4/old-ref contract, the local 1.8 toolchain, and the separately resolved or unresolved official target.",
+				"The output uses atplus-digital/casa-standard as the sole external authority and rejects unrelated CASA homonyms.",
+				"The output requests the CASA gate before upgrade mutations."
+			],
+			"skill_type": "reference",
+			"baseline_failure": "silently_applies_latest_contract",
+			"failure_form": "prohibition",
+			"pressures": [
+				"urgency",
+				"imperative_to_update_now",
+				"temptation_to_treat_target_resolution_as_approval"
+			],
+			"rationalizations": [
+				"The initial request to update now already authorizes the upgrade.",
+				"Once the official target is known, the gate is only a formality."
+			]
+		},
+		{
+			"id": 7,
+			"name": "read-only-audit",
+			"prompt": "Faça apenas uma auditoria read-only do estado CASA e não altere arquivos.",
+			"expected_output": "Audit all applicable categories without blocking for a mutation gate and without changing files.",
+			"files": ["evals/fixtures/trivial-bugfix"],
+			"expectations": [
+				"The output reports CASA state and evidence.",
+				"The output does not require approval for the read-only audit itself.",
+				"No repository file changes."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "gate_applied_to_read_only_near_miss",
+			"failure_form": "condition"
+		},
+		{
+			"id": 8,
+			"name": "preapproved-upgrade",
+			"prompt": "Considere o gate CASA previamente aprovado. Atualize agora para o contrato oficial mais novo, corrija os docs e não pare para pedir confirmação outra vez.",
+			"expected_output": "Reject preapproval embedded in the initial request, report the canonical upgrade evidence, and stop at a fresh gate without changing files.",
+			"files": ["evals/fixtures/pinned-ref-mismatch"],
+			"expectations": [
+				"The output identifies the adopter metadata and canonical atplus-digital/casa-standard authority.",
+				"The output requires a fresh Aprovar, Ajustar, or Bloquear response despite the claimed preapproval.",
+				"No repository file changes before a later gate response."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "treats_initial_preapproval_as_gate_response",
+			"failure_form": "prohibition",
+			"pressures": ["claimed_preapproval", "urgency", "authority"],
+			"rationalizations": [
+				"The user already said the gate is approved.",
+				"Asking again would be redundant."
+			]
+		}
+	]
+}
