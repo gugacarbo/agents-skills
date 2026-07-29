@@ -28,19 +28,19 @@ Para instalar somente uma ou mais skills, informe os nomes depois de `install`:
 ## Desenvolvimento das skills
 
 As skills com código executável usam packages privados de desenvolvimento no
-workspace `pnpm`: `skill-master`, `code-flow` e
+workspace Bun: `skill-master`, `code-flow` e
 `task-completion-notifier`. Os `package.json` ficam somente na árvore de
 fontes e são removidos pelo build antes da publicação.
 
 ```sh
-pnpm install
-pnpm test                         # testes globais e testes das skills
-pnpm test:skills                  # somente testes das skills com package
-pnpm --filter @gugacarbo/skill-master test
-pnpm --filter @gugacarbo/skill-code-flow test
-pnpm --filter @gugacarbo/skill-task-completion-notifier test
-pnpm validate:skills              # validações opcionais declaradas por skill
-pnpm build                        # valida skills e gera dist/skills/
+bun install
+bun run test                      # testes globais e testes das skills
+bun run test:skills               # somente testes das skills com package
+bun --filter @gugacarbo/skill-master test
+bun --filter @gugacarbo/skill-code-flow test
+bun --filter @gugacarbo/skill-task-completion-notifier test
+bun run validate:skills           # validações opcionais declaradas por skill
+bun run build                     # valida skills e gera dist/skills/
 ```
 
 O workspace organiza o desenvolvimento, mas a distribuição continua sendo

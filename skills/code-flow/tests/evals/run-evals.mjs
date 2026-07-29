@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import { spawn } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const evalsDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 const usage = `Usage:
-  node tests/evals/run-evals.mjs --skill PATH --output PATH [options]
+  bun tests/evals/run-evals.mjs --skill PATH --output PATH [options]
 
 Options:
   --configuration NAME  Result directory label (default: with_skill)

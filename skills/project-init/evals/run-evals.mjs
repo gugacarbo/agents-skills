@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const evalsDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 const usage = `Usage:
-  node evals/run-evals.mjs --skill PATH --output PATH [options]
+  bun evals/run-evals.mjs --skill PATH --output PATH [options]
 
 Options:
   --configuration NAME  Result directory label (default: with_skill)

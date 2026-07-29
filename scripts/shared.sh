@@ -2,15 +2,13 @@
 # scripts/lib/shared.sh — funções compartilhadas entre scripts do repositório.
 # Uso: source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/shared.sh"
 
-# Detecta o gerenciador de pacotes: prefere pnpm, fallback para npm.
-# Define a variável RUNNER com o nome do comando.
+# Detecta o runtime e gerenciador de pacotes suportado pelo workspace.
+# Define a variável BUN_RUNNER com o nome do comando.
 detect_runner() {
-  if command -v pnpm >/dev/null 2>&1; then
-    NODE_ENV_RUNNER="pnpm"
-  elif command -v npm >/dev/null 2>&1; then
-    NODE_ENV_RUNNER="npm"
+  if command -v bun > /dev/null 2>&1; then
+    BUN_RUNNER="bun"
   else
-    echo "Erro: nem pnpm nem npm encontrados." >&2
+    echo "Erro: Bun não encontrado." >&2
     exit 1
   fi
 }

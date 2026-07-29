@@ -778,8 +778,8 @@ Se um baseline já passar:
 Validação focada:
 
 ```bash
-pnpm --dir skills/casa-workflow test
-pnpm --dir skills/casa-workflow validate
+bun --cwd skills/casa-workflow run test
+bun --cwd skills/casa-workflow run validate
 ```
 
 Validação da anatomia:
@@ -794,15 +794,15 @@ Validação da anatomia:
 Testes do workflow de skills:
 
 ```bash
-pnpm --dir skills/skill-master test
+bun --cwd skills/skill-master run test
 ```
 
 DoD global:
 
 ```bash
-pnpm test
-pnpm build
-pnpm skills-check
+bun run test
+bun run build
+bun run skills-check
 ```
 
 Empacotamento, somente depois dos evals:
@@ -824,14 +824,14 @@ destino desse teste.
 - Fonte de verdade: `skills/*`.
 - `dist/` é gerado, versionado e publicado.
 - Não ler, pesquisar ou editar `dist/`.
-- Gerar `dist/` somente com `pnpm build`.
+- Gerar `dist/` somente com `bun run build`.
 - `package.json` dentro de `skills/*` é tooling privado e removido no build.
 - Diretórios `dev/` e `tests/` são removidos do artefato publicado.
 - `scripts/skills-check` valida o grafo de referências.
 - Arquivos de suporte devem ser alcançáveis a partir dos entrypoints ou
   explicitamente tratados pela validação.
 - O pre-commit seleciona testes por skill alterada.
-- O pre-push executa `pnpm verify` e pode criar o commit automático do artefato
+- O pre-push executa `bun run verify` e pode criar o commit automático do artefato
   gerado.
 - Não usar `--no-verify` como atalho.
 

@@ -13,11 +13,11 @@ run_check() {
 }
 
 run_check python3 scripts/docs-check
-run_check pnpm skills-check
-run_check pnpm spellcheck
-run_check pnpm knip
-run_check pnpm biome check
-run_check pnpm typecheck
-run_check pnpm test
-run_check pnpm validate:skills
-run_check pnpm build
+run_check bun run skills-check
+run_check bun run spellcheck
+run_check bun run knip
+run_check bunx biome check
+run_check bun run typecheck
+run_check bun run test
+run_check bun run validate:skills
+run_check bun run build

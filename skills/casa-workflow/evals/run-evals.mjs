@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -31,7 +31,7 @@ const fixtureManifest = [
 ];
 
 const usage = `Usage:
-  node evals/run-evals.mjs --host codex|claude --configuration with_skill|without_skill --output PATH [options]
+  bun evals/run-evals.mjs --host codex|claude --configuration with_skill|without_skill --output PATH [options]
 
 Options:
   --skill PATH       Skill source (default: parent of evals/)

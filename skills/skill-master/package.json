@@ -6,6 +6,6 @@
 	"scripts": {
 		"test": "bash dev/tests.sh",
 		"validate": "python3 scripts/quick_validate.py .",
-		"build": "pnpm run validate && python3 -c 'import ast, pathlib; [ast.parse(path.read_text()) for path in pathlib.Path(\".\").rglob(\"*.py\")]'"
+		"build": "bun run validate && python3 -c 'import ast, pathlib; [ast.parse(path.read_text()) for path in pathlib.Path(\".\").rglob(\"*.py\")]'"
 	}
 }

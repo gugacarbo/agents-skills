@@ -35,7 +35,7 @@ from collections import deque
 
 ENTRY_NAMES = {"SKILL.md", "AGENTS.md", "README.md"}
 WHITELIST = {"package.json", "LICENSE.txt", "VERSION", ".gitignore",
-             "evals.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"}
+             "evals.json", "bun.lock"}
 IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "build",
                 "vendor", "__pycache__", ".next", "target", ".tox",
                 ".mypy_cache", ".pytest_cache", ".ruff_cache", "dev", "tests"}

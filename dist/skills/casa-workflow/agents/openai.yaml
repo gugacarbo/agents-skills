@@ -1,6 +1,0 @@
-interface:
-  display_name: "CASA Workflow"
-  short_description: "Guardrail do ciclo de mudanças CASA"
-  default_prompt: "Use $casa-workflow para avaliar o impacto CASA desta mudança antes de qualquer implementação."
-policy:
-  allow_implicit_invocation: true

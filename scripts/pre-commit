@@ -19,7 +19,7 @@ fi
 python3 "$ROOT/scripts/docs-check"
 python3 "$ROOT/scripts/skills-check"
 
-${NODE_ENV_RUNNER} lint-staged
+${BUN_RUNNER} run lint-staged
 
 mapfile -t STAGED_FILES < <(git diff --cached --name-only --diff-filter=ACMRD)
 RUN_REPOSITORY_TESTS=false
@@ -27,7 +27,7 @@ declare -A SKILL_TEST_DIRECTORIES=()
 
 for staged_file in "${STAGED_FILES[@]}"; do
   case "$staged_file" in
-    src/*|scripts/*|.husky/*|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.lintstagedrc.*|tsconfig*.json|*.sh)
+    src/*|scripts/*|.husky/*|package.json|bun.lock|.lintstagedrc.*|tsconfig*.json|*.sh)
       RUN_REPOSITORY_TESTS=true
       break
       ;;
@@ -44,14 +44,14 @@ done
 
 if [ "$RUN_REPOSITORY_TESTS" = true ]; then
   printf '\nRunning repository tests...\n'
-  ${NODE_ENV_RUNNER} test
+  ${BUN_RUNNER} run test
 elif [ "${#SKILL_TEST_DIRECTORIES[@]}" -gt 0 ]; then
   printf '\nRunning tests for changed skills...\n'
   while IFS= read -r skill_directory; do
-    ${NODE_ENV_RUNNER} --dir "$skill_directory" test
+    ${BUN_RUNNER} --cwd "$skill_directory" run test
   done < <(printf '%s\n' "${!SKILL_TEST_DIRECTORIES[@]}" | sort)
 else
   printf '\nSkipping tests: no staged runtime changes.\n'
 fi
 printf '\nRunning TypeScript staged-file checks...\n'
-${NODE_ENV_RUNNER} tsc-files
+${BUN_RUNNER} x tsc-files

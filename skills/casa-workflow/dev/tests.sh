@@ -55,7 +55,7 @@ has 'allow_implicit_invocation: true' "$ROOT/agents/openai.yaml"
 has 'Use $casa-workflow' "$ROOT/agents/openai.yaml"
 lacks '[TODO' "$ROOT/SKILL.md"
 
-node -e 'const p=require(process.argv[1]); for (const k of ["test","validate","build"]) if (!p.scripts?.[k]) process.exit(1)' "$ROOT/package.json" || fail 'package scripts missing'
+bun -e 'const p=await Bun.file(process.argv[1]).json(); for (const k of ["test","validate","build"]) if (!p.scripts?.[k]) process.exit(1)' "$ROOT/package.json" || fail 'package scripts missing'
 jq -e '.skill_name=="casa-workflow" and (.evals|length>=7)' "$ROOT/evals/evals.json" > /dev/null || fail 'eval catalog invalid'
 jq -e 'length==10 and (map(select(.should_trigger==true))|length)==5 and (map(select(.should_trigger==false))|length)==5' "$ROOT/evals/trigger-evals.json" > /dev/null || fail 'trigger eval catalog invalid'
 

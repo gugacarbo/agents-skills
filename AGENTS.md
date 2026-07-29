@@ -17,7 +17,7 @@ casa-standard-ref: 7cdb964 # versão do casa-standard de origem — o casa-init 
 
 Repositório de skills reutilizáveis para agentes Codex e integrações relacionadas.
 As skills publicadas são pastas com `SKILL.md` e runtime; algumas têm tooling privado de desenvolvimento.
-O workspace usa pnpm para descobrir e executar os packages privados em `skills/*`.
+O workspace usa Bun para descobrir e executar os packages privados em `skills/*`.
 Scripts de build/teste usam Bash, Python e Node conforme a skill.
 
 ## Rules
@@ -29,7 +29,7 @@ Scripts de build/teste usam Bash, Python e Node conforme a skill.
 - `dist/` e um artefato gerado, versionado para que o instalador remoto tenha
   skills prontas. Não o leia, pesquise, edite ou use como fonte, salvo pedido
   explícito do usuário.
-- A fonte de verdade é `skills/*`. Gere `dist/` somente por `pnpm build`; o
+- A fonte de verdade é `skills/*`. Gere `dist/` somente por `bun run build`; o
   hook de pre-push versiona automaticamente o resultado gerado.
 
 ## Infra & ambientes
@@ -41,17 +41,17 @@ Scripts de build/teste usam Bash, Python e Node conforme a skill.
 ## Como rodar localmente
 
 ```bash
-pnpm install
-pnpm test
-pnpm build
+bun install
+bun run test
+bun run build
 ```
 
 ## Como validar (DoD global do repo)
 
 ```bash
-pnpm test                # exit 0
-pnpm build               # artefatos publicados válidos
-pnpm skills-check        # relações e arquivos publicados das skills válidos
+bun run test            # exit 0
+bun run build           # artefatos publicados válidos
+bun run skills-check    # relações e arquivos publicados das skills válidos
 ```
 
 ## Como fazer deploy
@@ -77,11 +77,11 @@ pnpm skills-check        # relações e arquivos publicados das skills válidos
   monorepo build depender de `pip install PyYAML` para passar.
 - Não use `test-staged` no hook: o pacote raiz não expõe um runner
   Jest/Vitest detectável. O `scripts/pre-commit` seleciona testes por escopo:
-  runtime raiz roda `pnpm test`, e mudanças em uma skill rodam somente o teste
+  runtime raiz roda `bun run test`, e mudanças em uma skill rodam somente o teste
   daquela skill.
 - O commit automático de `dist/` no pre-push define
   `AGENTS_SKILLS_GENERATED_ARTIFACT_COMMIT=1`; o pre-commit então não repete
-  checks que o `pnpm verify` já concluiu antes de gerar o artefato.
+  checks que o `bun run verify` já concluiu antes de gerar o artefato.
 
 ## Mapa de contexto
 

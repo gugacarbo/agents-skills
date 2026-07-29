@@ -3,7 +3,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"test": "node --test tests/*.test.mjs",
-		"validate": "node --check scripts/project-init.mjs && node --check evals/run-evals.mjs && node -e \"JSON.parse(require('node:fs').readFileSync('evals/evals.json', 'utf8'))\" && node scripts/project-init.mjs list"
+		"test": "bun test tests/*.test.mjs",
+		"validate": "bun run build && bun -e \"await Bun.file('evals/evals.json').json()\" && bun scripts/project-init.mjs list",
+		"build": "bash -lc 'tmp=$(mktemp -d); trap \"rm -rf \\\"$tmp\\\"\" EXIT; bun build --target=bun scripts/project-init.mjs --outfile \"$tmp/project-init.mjs\" && bun build --target=bun evals/run-evals.mjs --outfile \"$tmp/run-evals.mjs\"'"
 	}
 }

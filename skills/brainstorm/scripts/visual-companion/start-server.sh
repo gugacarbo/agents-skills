@@ -158,7 +158,7 @@ fi
 
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
-  env SESSION_DIR="$SESSION_DIR" SESSION_HOST="$BIND_HOST" SESSION_URL_HOST="$URL_HOST" SESSION_OWNER_PID="$OWNER_PID" node server.cjs "--session-server-id=$SERVER_ID" &
+  env SESSION_DIR="$SESSION_DIR" SESSION_HOST="$BIND_HOST" SESSION_URL_HOST="$URL_HOST" SESSION_OWNER_PID="$OWNER_PID" bun server.cjs "--session-server-id=$SERVER_ID" &
   SERVER_PID=$!
   echo "$SERVER_PID" > "$PID_FILE"
   wait "$SERVER_PID"
@@ -167,7 +167,7 @@ fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env SESSION_DIR="$SESSION_DIR" SESSION_HOST="$BIND_HOST" SESSION_URL_HOST="$URL_HOST" SESSION_OWNER_PID="$OWNER_PID" node server.cjs "--session-server-id=$SERVER_ID" > "$LOG_FILE" 2>&1 &
+nohup env SESSION_DIR="$SESSION_DIR" SESSION_HOST="$BIND_HOST" SESSION_URL_HOST="$URL_HOST" SESSION_OWNER_PID="$OWNER_PID" bun server.cjs "--session-server-id=$SERVER_ID" > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2> /dev/null
 echo "$SERVER_PID" > "$PID_FILE"

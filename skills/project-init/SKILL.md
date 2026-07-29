@@ -13,7 +13,7 @@ Use the bundled executor. Its plan is authoritative for lifecycle, files, packag
 2. Run:
 
    ```sh
-   node <skill-directory>/scripts/project-init.mjs plan --template <id> --target <path> [--variant <id>] [--optional <tool,...>]
+   bun <skill-directory>/scripts/project-init.mjs plan --template <id> --target <path> [--variant <id>] [--optional <tool,...>]
    ```
 
 3. On an error or `"ok": false`, report it and stop. Never mutate the target to bypass a path or symlink error.
@@ -22,7 +22,7 @@ Use the bundled executor. Its plan is authoritative for lifecycle, files, packag
 6. Apply only after readiness and collision approval, using the same arguments and only the approved identifiers:
 
    ```sh
-   node <skill-directory>/scripts/project-init.mjs apply ... --approve <identifier,...>
+   bun <skill-directory>/scripts/project-init.mjs apply ... --approve <identifier,...>
    ```
 
 7. Never run package managers, framework generators, or recommended commands.
@@ -42,7 +42,7 @@ An overwrite is approved only when the user authorizes its exact collision ident
 For missing or invalid templates, discover the registry instead of hardcoding it:
 
 ```sh
-node <skill-directory>/scripts/project-init.mjs list
+bun <skill-directory>/scripts/project-init.mjs list
 ```
 
 ## Output contract

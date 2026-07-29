@@ -31,7 +31,9 @@ test_syntax() {
     [ -f "$f" ] || continue
     sh -n "$f" && pass "syntax: $(basename "$f")" || fail "syntax error in $f"
   done
-  node --check "$SKILL/scripts/visual-companion/server.cjs" && pass 'syntax: server.cjs' || fail 'syntax error in server.cjs'
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' RETURN
+  bun build --target=bun "$SKILL/scripts/visual-companion/server.cjs" --outfile "$tmp/server.cjs" && pass 'syntax: server.cjs' || fail 'syntax error in server.cjs'
 }
 
 test_structure

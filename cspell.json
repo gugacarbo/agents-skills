@@ -4,13 +4,7 @@
 	"language": "en,pt,pt_BR",
 	"useGitignore": true,
 	"import": ["@cspell/dict-pt-br/cspell-ext.json"],
-	"ignorePaths": [
-		"node_modules",
-		"dist",
-		"coverage",
-		".turbo",
-		"pnpm-lock.yaml"
-	],
+	"ignorePaths": ["node_modules", "dist", "coverage", ".turbo", "bun.lock"],
 	"words": [
 		"ACMRD",
 		"CDPATH",

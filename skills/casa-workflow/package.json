@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "bash dev/tests.sh",
-		"validate": "bash dev/tests.sh && node --check evals/run-evals.mjs && node -e \"JSON.parse(require('node:fs').readFileSync('evals/evals.json', 'utf8'))\"",
-		"build": "node --check evals/run-evals.mjs"
+		"validate": "bash dev/tests.sh && bun run build && bun -e \"await Bun.file('evals/evals.json').json()\"",
+		"build": "bash -lc 'tmp=$(mktemp -d); trap \"rm -rf \\\"$tmp\\\"\" EXIT; bun build --target=bun evals/run-evals.mjs --outfile \"$tmp/run-evals.mjs\"'"
 	}
 }
