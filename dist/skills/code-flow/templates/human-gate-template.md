@@ -5,6 +5,7 @@
 > state_after: <estado>
 > sources_evidence: <artefatos, digest/Base e resposta humana>
 > project_guidance: <paths e comandos>
+
 <!-- code-flow:event:v1 {"event_id":"<uuid>","run_id":"<uuid>","role":"gate","event":"gate-decision"} -->
 
 ## Resume
@@ -15,13 +16,13 @@
 
 ## Decisão
 
-| Gate      | Opções               |
-| --------- | -------------------- |
-| triage    | approve / adjust / block |
+| Gate      | Opções                     |
+| --------- | -------------------------- |
+| triage    | approve / adjust / block   |
 | execution | authorize / adjust / block |
-| merge     | integrate / adjust / wait |
-| resume    | `<estado do Resume>` |
-| activity  | reset                 |
+| merge     | integrate / adjust / wait  |
+| resume    | `<estado do Resume>`       |
+| activity  | reset                      |
 
 ## Ação humana
 
