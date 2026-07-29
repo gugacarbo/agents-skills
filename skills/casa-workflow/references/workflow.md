@@ -2,7 +2,7 @@
 
 Leia esta referência por completo quando o router ativar o CASA.
 
-## Preparar o relatório
+## Decidir se há gate
 
 1. Resolva o contrato pinado conforme
    [source-resolution.md](source-resolution.md); não aplique silenciosamente
@@ -11,10 +11,28 @@ Leia esta referência por completo quando o router ativar o CASA.
    artefatos gerados proibidos pelo repo.
 3. Classifique decisão, comportamento, estado atual e regra operacional
    conforme [impact-lifecycle.md](impact-lifecycle.md).
-4. Separe fatos verificáveis de decisões abertas. Alegação não é evidência.
-5. Em mudança sem gatilho documental, declare explicitamente que ADR e Spec
-   estão dispensadas; não crie documentos por cerimônia.
-6. Emita o relatório usando
+4. Defina `gate_required=true` quando houver ao menos um impacto material:
+   ciclo de vida CASA; nova decisão ou contrato observável; migração; risco
+   relevante de dados ou segurança; efeito externo; ou expansão material fora
+   do escopo aprovado.
+5. Defina `gate_required=false` somente quando a mudança for local,
+   reversível, preservar ou restaurar contrato já definido e não tocar ciclo de
+   vida CASA, dados sensíveis, migração ou efeito externo.
+6. Se não houver evidência suficiente para dispensar o gate, use
+   `gate_required=true`.
+
+Quando `gate_required=false`, continue o fluxo original sem relatório CASA e
+sem pedir aprovação. Não crie ADR ou Spec por cerimônia; mencione a dispensa
+somente quando ela for relevante ao fechamento.
+
+## Preparar o relatório
+
+Somente quando `gate_required=true`:
+
+1. Separe fatos verificáveis de decisões abertas. Alegação não é evidência.
+2. Em mudança sem gatilho documental, declare explicitamente que ADR e Spec
+   estão dispensadas.
+3. Emita o relatório usando
    [gate-template.md](gate-template.md) e encerre o turno no gate.
 
 Em upgrade, a toolchain local é somente evidência de divergência. Resolva
@@ -28,8 +46,12 @@ válidas.
 - `Aprovar`: altere somente os artefatos aprovados e use a toolchain local.
 - `Ajustar`: revise o mapa, emita novo relatório e pare novamente.
 - `Bloquear`: não materialize nada.
-- Reabra o gate antes de continuar se surgir nova decisão, contrato, documento,
-  efeito externo ou escopo.
+- A aprovação cobre o source-set, o contrato e as obrigações da unidade de
+  trabalho descrita; novas edições e arquivos dentro desse envelope não exigem
+  outro gate.
+- Reabra antes da próxima escrita somente se surgir impacto material fora do
+  envelope: nova decisão, contrato, documento obrigatório, migração, risco
+  relevante, efeito externo ou expansão material de escopo.
 
 No fechamento, verifique paths, comandos, DoD, estado atual e gotchas. Não
 declare Spec `implemented` sem `implemented-by` real, verificação executada,
@@ -38,8 +60,10 @@ ferramenta.
 
 ## Guardrails
 
-- Mudança trivial ou sem API/arquitetura pode dispensar ADR/Spec, nunca o gate
-  de código em repo adotante.
+- Adoção CASA ativa a classificação; não torna toda escrita material.
+- Quantidade de linhas, arquivos ou edições não define o threshold.
+- Correção local que restaura contrato existente pode ficar abaixo do
+  threshold; comportamento novo ou mudança do contrato não pode.
 - Não edite o corpo de ADR aceita; crie nova ADR e marque a anterior como
   `superseded`.
 - Não implemente contrato observável sem a Spec exigida pelo contrato pinado.

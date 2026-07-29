@@ -334,29 +334,20 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 4) {
 		add(
 			0,
-			contains(combined, "T0") &&
-				contains(combined, "1\\.8") &&
-				contains(combined, "7cdb964"),
-			"Inspected pinned CASA metadata.",
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of a CASA gate.",
 		);
 		add(
 			1,
-			contains(
-				combined,
-				"nenhum|não.*necess|no new|dispensado|dispensada|dispensados|dispensadas|sem gatilho documental",
-			) &&
-				contains(combined, "ADR") &&
-				contains(combined, "Spec"),
-			"Inspected no-document classification.",
+			changed.length === 1 && changed[0] === "src/math.js",
+			`changed=${JSON.stringify(changed)}`,
 		);
 		add(
 			2,
-			contains(combined, "Aprovar") &&
-				contains(combined, "Ajustar") &&
-				contains(combined, "Bloquear"),
-			"Checked gate choices.",
+			contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovado|aprovada|sucesso|exit 0"),
+			"Checked reported test execution.",
 		);
-		add(3, noChanges, `changed=${JSON.stringify(changed)}`);
 	} else if (evalCase.id === 5) {
 		add(
 			0,
@@ -429,6 +420,44 @@ function grade(evalCase, combined, changed) {
 				contains(combined, "Ajustar") &&
 				contains(combined, "Bloquear"),
 			"Checked fresh gate choices despite claimed preapproval.",
+		);
+		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
+	} else if (evalCase.id === 9) {
+		add(
+			0,
+			contains(
+				combined,
+				"^não(?:\\.|\\s)|não.{0,30}(?:reabre|reabrir|reabra)|sem.{0,30}novo gate|continua válida",
+			),
+			"Checked that covered edits do not reopen the gate.",
+		);
+		add(
+			1,
+			contains(combined, "source-set|escopo aprovado|envelope") &&
+				contains(combined, "contrato") &&
+				contains(combined, "obriga"),
+			"Checked approved-envelope boundaries.",
+		);
+		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
+	} else if (evalCase.id === 10) {
+		add(
+			0,
+			contains(combined, "reabre|reabrir|reabra|novo gate|nova aprovação") &&
+				contains(
+					combined,
+					"antes|só.{0,40}(?:após|depois).{0,20}(?:aprovação|gate)",
+				),
+			"Checked gate reopening before writes.",
+		);
+		add(
+			1,
+			contains(combined, "schema") &&
+				contains(combined, "migra") &&
+				contains(
+					combined,
+					"fora|ausente|não.*(?:inclui|incluído|incluída)|novo impacto",
+				),
+			"Checked material impact outside the approved envelope.",
 		);
 		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
 	}

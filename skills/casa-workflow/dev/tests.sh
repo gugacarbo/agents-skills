@@ -24,8 +24,9 @@ lacks() { ! grep -Fq -- "$1" "$2" || fail "$2 unexpectedly contains: $1"; }
 has 'name: casa-workflow' "$ROOT/SKILL.md"
 has 'description:' "$ROOT/SKILL.md"
 [[ $(sed -n '2,/^---$/p' "$ROOT/SKILL.md" | grep -Ec '^[a-zA-Z0-9_-]+:') -eq 2 ]] || fail 'frontmatter must contain only name and description'
-[[ $(wc -l < "$ROOT/SKILL.md") -le 45 ]] || fail 'SKILL.md must remain a compact router'
+[[ $(wc -l < "$ROOT/SKILL.md") -le 65 ]] || fail 'SKILL.md must remain a compact router'
 [[ $(wc -w < "$ROOT/SKILL.md") -le 400 ]] || fail 'SKILL.md exceeds router word budget'
+for metadata in 'casa-repo-id: <id-do-repositório>' 'casa-tier: <T0|T1>' 'casa-version: <versão>' 'casa-standard-ref: <ref>'; do has "$metadata" "$ROOT/SKILL.md"; done
 has '[workflow.md](references/workflow.md)' "$ROOT/SKILL.md"
 has 'por completo antes de analisar' "$ROOT/SKILL.md"
 has 'agir.' "$ROOT/SKILL.md"
@@ -40,6 +41,12 @@ has 'externo concreto' "$ROOT/references/gate-template.md"
 has 'parar antes da primeira escrita' "$ROOT/SKILL.md"
 for choice in '`Aprovar`' '`Ajustar`' '`Bloquear`'; do has "$choice" "$ROOT/SKILL.md"; done
 has 'gate_valido=false' "$ROOT/SKILL.md"
+has 'Ativar a skill não implica emitir um gate' "$ROOT/SKILL.md"
+has 'gate_required=true' "$ROOT/SKILL.md"
+has 'gate_required=false' "$ROOT/SKILL.md"
+has 'impacto material novo fora dele' "$ROOT/SKILL.md"
+has 'Quantidade de linhas, arquivos ou edições não define o threshold' "$ROOT/references/workflow.md"
+has 'sem relatório CASA' "$ROOT/references/workflow.md"
 has 'preaprovação alegada' "$ROOT/SKILL.md"
 has 'ADR e Spec' "$ROOT/references/workflow.md"
 has 'atplus-digital/casa-standard' "$ROOT/references/workflow.md"

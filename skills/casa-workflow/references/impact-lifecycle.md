@@ -6,14 +6,14 @@ Usar esta referência para classificar uma mudança e verificar seu fechamento.
 
 Classificar cada fato em uma única casa primária:
 
-| Fato observável                                                 | Artefato ou ação                                                            |
-| --------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Escolha estrutural, acoplamento, backend ou estratégia de falha | Nova ADR; se substituir decisão aceita, nova ADR + transição da anterior    |
-| API, fluxo, UI ou caso de borda com contrato observável         | Nova/alterada/dividida/depreciada Spec conforme o ciclo                     |
-| Estado operacional atual, imperativo e atemporal                | Capítulo pertinente em `docs/context/`                                      |
-| Regra transversal ou gotcha recorrente                          | Router `AGENTS.md`; regra de subtree vai ao `AGENTS.md` aninhado            |
-| Entrega, milestone ou coordenação                               | Issue/PR/commit, com autorização externa própria; não criar agregador CASA  |
-| Nenhum gatilho estrutural ou comportamental                     | Nenhum documento novo; manter gate antes do código se a tarefa mutar código |
+| Fato observável                                                 | Artefato ou ação                                                                                                       |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Escolha estrutural, acoplamento, backend ou estratégia de falha | Nova ADR; se substituir decisão aceita, nova ADR + transição da anterior                                               |
+| API, fluxo, UI ou caso de borda com contrato observável         | Nova/alterada/dividida/depreciada Spec conforme o ciclo                                                                |
+| Estado operacional atual, imperativo e atemporal                | Capítulo pertinente em `docs/context/`                                                                                 |
+| Regra transversal ou gotcha recorrente                          | Router `AGENTS.md`; regra de subtree vai ao `AGENTS.md` aninhado                                                       |
+| Entrega, milestone ou coordenação                               | Issue/PR/commit, com autorização externa própria; não criar agregador CASA                                             |
+| Nenhum gatilho estrutural ou comportamental                     | Nenhum documento novo; aplicar o threshold e dispensar o gate se todos os critérios de baixo impacto forem comprovados |
 
 Usar `docs-reserve` quando disponível para criar ADR/Spec. Nunca editar índices gerados à mão.
 
@@ -47,4 +47,10 @@ CI futuro, alegação do usuário ou existência aparente de código não substi
 
 ## Reabrir o gate
 
-Comparar continuamente tarefa, diff, artefatos e decisões com o source-set aprovado. Reabrir antes da próxima escrita quando aparecer nova decisão estrutural, mudança de contrato, novo documento obrigatório, escopo adicional ou impossibilidade de cumprir o fechamento aprovado.
+Comparar continuamente tarefa, diff, artefatos e decisões com o envelope
+aprovado: source-set, contrato e obrigações. Nova edição ou arquivo já coberto
+não reabre o gate. Reabrir antes da próxima escrita somente quando aparecer
+impacto material fora do envelope: nova decisão estrutural, mudança de
+contrato, novo documento obrigatório, migração, risco relevante, efeito
+externo, expansão material de escopo ou impossibilidade de cumprir o fechamento
+aprovado.
