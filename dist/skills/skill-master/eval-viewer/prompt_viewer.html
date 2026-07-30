@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eval Prompt Review</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #faf9f5;
+        --surface: #ffffff;
+        --border: #e8e6dc;
+        --text: #141413;
+        --text-muted: #b0aea5;
+        --accent: #d97757;
+        --accent-hover: #c4613f;
+        --danger: #c44;
+        --header-bg: #141413;
+        --header-text: #faf9f5;
+        --radius: 6px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Lora", Georgia, serif;
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        background: var(--header-bg);
+        color: var(--header-text);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .header h1 {
+        font-family: "Poppins", sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .header .instructions {
+        font-size: 0.8rem;
+        opacity: 0.75;
+        margin-top: 0.25rem;
+      }
+
+      .header .progress {
+        text-align: right;
+        font-size: 0.875rem;
+        opacity: 0.85;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      .toolbar-left,
+      .toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .summary {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .btn {
+        font-family: "Poppins", sans-serif;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+      }
+
+      .btn:hover {
+        background: var(--bg);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+      }
+
+      .btn-danger {
+        color: var(--danger);
+      }
+
+      .main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+
+      .section-header {
+        font-family: "Poppins", sans-serif;
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+
+      .section-body {
+        padding: 1rem;
+      }
+
+      .meta-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .meta-badge {
+        display: inline-block;
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: rgba(217, 119, 87, 0.12);
+        color: var(--accent);
+      }
+
+      .meta-note {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .field-label {
+        display: block;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      textarea,
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.75rem;
+        font-family: inherit;
+        font-size: 0.94rem;
+        line-height: 1.5;
+        color: var(--text);
+        background: white;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      textarea:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.12);
+      }
+
+      .prompt-field {
+        min-height: 180px;
+      }
+
+      .expected-field {
+        min-height: 110px;
+      }
+
+      .files-field {
+        min-height: 90px;
+        font-family:
+          "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+          monospace;
+        font-size: 0.84rem;
+      }
+
+      .help-text {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-top: 0.45rem;
+        line-height: 1.45;
+      }
+
+      .status {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        min-height: 1.1em;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        gap: 1rem;
+      }
+
+      .nav-center {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .done-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .done-overlay.visible {
+        display: flex;
+      }
+
+      .done-card {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 2rem 3rem;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 520px;
+      }
+
+      .done-card h2 {
+        margin-bottom: 0.5rem;
+      }
+
+      .done-card p {
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 240px;
+        color: var(--text-muted);
+        font-style: italic;
+      }
+
+      @media (max-width: 720px) {
+        .header,
+        .toolbar,
+        .nav {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+
+        .main {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+
+        .toolbar,
+        .nav,
+        .header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .toolbar-left,
+        .toolbar-right,
+        .nav-center {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h1>Eval Prompt Approval: <span id="skill-name"></span></h1>
+        <div class="instructions">
+          Review and edit the draft eval prompts before any runs start. Approve
+          them only when the set looks realistic and complete.
+        </div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button type="button" class="btn" onclick="addEval()">+ Add Prompt</button>
+        <button type="button" class="btn btn-danger" onclick="deleteCurrentEval()">
+          Delete Current
+        </button>
+      </div>
+      <div class="toolbar-right">
+        <div class="summary" id="summary"></div>
+      </div>
+    </div>
+
+    <div class="main" id="main"></div>
+
+    <div class="nav">
+      <button type="button" class="btn" id="prev-btn" onclick="navigate(-1)">
+        ← Previous
+      </button>
+      <div class="nav-center">
+        <button type="button" class="btn btn-primary" onclick="approvePrompts()">
+          Approve Eval Prompts
+        </button>
+        <div class="status" id="save-status"></div>
+      </div>
+      <button type="button" class="btn" id="next-btn" onclick="navigate(1)">
+        Next →
+      </button>
+    </div>
+
+    <div class="done-overlay" id="done-overlay">
+      <div class="done-card">
+        <h2>Prompt Set Approved</h2>
+        <p>
+          The eval prompt set has been saved. Go back to Claude Code and say
+          that you're done approving the prompts.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      /*__EMBEDDED_DATA__*/
+
+      const evalDoc = JSON.parse(JSON.stringify(EMBEDDED_DATA));
+      let currentIndex = 0;
+      let saveTimeout = null;
+
+      function nextId() {
+        const ids = evalDoc.evals
+          .map((item) => Number(item.id))
+          .filter((id) => Number.isInteger(id));
+        return ids.length ? Math.max(...ids) + 1 : 1;
+      }
+
+      function _addEval() {
+        evalDoc.evals.push({
+          id: nextId(),
+          prompt: "",
+          expected_output: "",
+          files: [],
+          expectations: [],
+        });
+        currentIndex = evalDoc.evals.length - 1;
+        render();
+      }
+
+      function _deleteCurrentEval() {
+        if (evalDoc.evals.length === 0) return;
+        evalDoc.evals.splice(currentIndex, 1);
+        if (currentIndex >= evalDoc.evals.length) {
+          currentIndex = Math.max(0, evalDoc.evals.length - 1);
+        }
+        scheduleSave();
+        render();
+      }
+
+      function navigate(delta) {
+        const next = currentIndex + delta;
+        if (next >= 0 && next < evalDoc.evals.length) {
+          flushInputs();
+          currentIndex = next;
+          render();
+        }
+      }
+
+      function updateField(field, value) {
+        if (!evalDoc.evals[currentIndex]) return;
+        if (field === "files") {
+          evalDoc.evals[currentIndex].files = value
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+        } else if (field === "id") {
+          const parsed = Number(value);
+          evalDoc.evals[currentIndex].id = Number.isInteger(parsed) ? parsed : value;
+        } else {
+          evalDoc.evals[currentIndex][field] = value;
+        }
+        scheduleSave();
+      }
+
+      function flushInputs() {
+        const prompt = document.getElementById("prompt-field");
+        const expected = document.getElementById("expected-field");
+        const files = document.getElementById("files-field");
+        const id = document.getElementById("id-field");
+        if (!prompt || !expected || !files || !id) return;
+        updateField("id", id.value);
+        updateField("prompt", prompt.value);
+        updateField("expected_output", expected.value);
+        updateField("files", files.value);
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimeout);
+        document.getElementById("save-status").textContent = "";
+        saveTimeout = setTimeout(saveDoc, 800);
+      }
+
+      function sanitizedDoc() {
+        return {
+          skill_name: evalDoc.skill_name,
+          evals: evalDoc.evals.map((item, idx) => ({
+            id: Number.isInteger(Number(item.id)) ? Number(item.id) : idx + 1,
+            prompt: item.prompt || "",
+            expected_output: item.expected_output || "",
+            files: Array.isArray(item.files) ? item.files : [],
+            expectations: Array.isArray(item.expectations) ? item.expectations : [],
+          })),
+        };
+      }
+
+      async function saveDoc() {
+        const payload = sanitizedDoc();
+        try {
+          await fetch("/api/evals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload, null, 2),
+          });
+          document.getElementById("save-status").textContent = "Saved";
+        } catch {
+          document.getElementById("save-status").textContent = "Will download on approval";
+        }
+      }
+
+      async function _approvePrompts() {
+        flushInputs();
+        const payload = JSON.stringify(sanitizedDoc(), null, 2);
+        try {
+          await fetch("/api/evals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: payload,
+          });
+          document.getElementById("done-overlay").classList.add("visible");
+        } catch {
+          const blob = new Blob([payload], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "evals.json";
+          a.click();
+          URL.revokeObjectURL(url);
+          document.getElementById("done-overlay").classList.add("visible");
+        }
+      }
+
+      function updateNavButtons() {
+        document.getElementById("prev-btn").disabled = currentIndex === 0;
+        document.getElementById("next-btn").disabled =
+          currentIndex >= evalDoc.evals.length - 1;
+      }
+
+      function render() {
+        document.getElementById("skill-name").textContent = evalDoc.skill_name || "unknown-skill";
+        document.getElementById("summary").textContent =
+          `${evalDoc.evals.length} eval prompt${evalDoc.evals.length === 1 ? "" : "s"}`;
+
+        const progress = document.getElementById("progress");
+        if (evalDoc.evals.length === 0) {
+          progress.textContent = "No prompts";
+          document.getElementById("main").innerHTML =
+            '<div class="section"><div class="empty">No eval prompts yet. Add one to begin.</div></div>';
+          updateNavButtons();
+          return;
+        }
+
+        const item = evalDoc.evals[currentIndex];
+        progress.textContent = `${currentIndex + 1} of ${evalDoc.evals.length}`;
+
+        document.getElementById("main").innerHTML = `
+          <div class="section">
+            <div class="section-header">Eval Metadata</div>
+            <div class="section-body">
+              <div class="meta-row">
+                <span class="meta-badge">Eval ${currentIndex + 1}</span>
+                <span class="meta-note">Review this prompt as if a real user had typed it.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">Prompt</div>
+            <div class="section-body">
+              <label class="field-label" for="prompt-field">User Prompt</label>
+              <textarea
+                id="prompt-field"
+                class="prompt-field"
+                oninput="updateField('prompt', this.value)"
+              >${escapeHtml(item.prompt || "")}</textarea>
+              <div class="help-text">
+                This should sound like something a real user would actually ask.
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">Expected Result</div>
+            <div class="section-body">
+              <label class="field-label" for="expected-field">Expected Output</label>
+              <textarea
+                id="expected-field"
+                class="expected-field"
+                oninput="updateField('expected_output', this.value)"
+              >${escapeHtml(item.expected_output || "")}</textarea>
+              <div class="help-text">
+                Describe what a good result should look like at a high level.
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">Inputs</div>
+            <div class="section-body">
+              <label class="field-label" for="files-field">Input Files</label>
+              <textarea
+                id="files-field"
+                class="files-field"
+                oninput="updateField('files', this.value)"
+              >${escapeHtml((item.files || []).join("\n"))}</textarea>
+              <div class="help-text">
+                One relative file path per line. Leave blank if the prompt has no input files.
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">Identifier</div>
+            <div class="section-body">
+              <label class="field-label" for="id-field">Eval ID</label>
+              <input
+                id="id-field"
+                type="number"
+                value="${escapeHtml(String(item.id ?? currentIndex + 1))}"
+                oninput="updateField('id', this.value)"
+              />
+              <div class="help-text">
+                Keep IDs unique. They are used later to organize eval run folders.
+              </div>
+            </div>
+          </div>
+        `;
+
+        updateNavButtons();
+      }
+
+      function escapeHtml(text) {
+        return String(text)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          navigate(-1);
+        } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          navigate(1);
+        }
+      });
+
+      render();
+    </script>
+  </body>
+</html>

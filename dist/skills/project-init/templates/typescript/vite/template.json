@@ -1,0 +1,72 @@
+{
+	"id": "typescript/vite",
+	"extends": ["typescript"],
+	"description": "Vite client application tooling.",
+	"requiresFrameworkReady": true,
+	"defaultVariant": "vanilla-ts",
+	"variants": {
+		"vanilla-ts": {
+			"frameworkName": "Vite vanilla TypeScript",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "tsc --noEmit"
+				}
+			}
+		},
+		"react-ts": {
+			"frameworkName": "Vite React",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "tsc -b"
+				}
+			},
+			"removePackageJson": ["/devDependencies/oxlint"],
+			"readiness": { "packages": ["react"] }
+		},
+		"vue-ts": {
+			"frameworkName": "Vite Vue",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "vue-tsc -b"
+				}
+			},
+			"devDependencies": ["vue-tsc"],
+			"readiness": { "packages": ["vue"] }
+		},
+		"svelte-ts": {
+			"frameworkName": "Vite Svelte",
+			"packageJson": {
+				"scripts": {
+					"typecheck": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+				}
+			},
+			"devDependencies": ["svelte-check"],
+			"readiness": { "packages": ["svelte"] }
+		}
+	},
+	"readiness": {
+		"files": ["package.json"],
+		"packages": ["vite"]
+	},
+	"omitTargets": ["tsconfig.json", "src/index.ts"],
+	"omitPackageJson": ["/scripts/dev", "/scripts/build"],
+	"documents": {
+		"AGENTS.md": "AGENTS.md",
+		"REQUIREMENTS.md": "REQUIREMENTS.md"
+	},
+	"files": [
+		{
+			"source": "files/vitest.config.ts",
+			"target": "vitest.config.ts"
+		}
+	],
+	"packageJson": {
+		"scripts": {
+			"test": "vitest run --config vitest.config.ts --passWithNoTests"
+		}
+	},
+	"commands": {
+		"framework": "pnpm create vite {{targetArg}} --template {{variantArg}}",
+		"frameworkCwd": "{{targetParent}}"
+	}
+}

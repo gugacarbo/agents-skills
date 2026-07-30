@@ -1,0 +1,42 @@
+[
+	{
+		"query": "Use $casa-workflow para avaliar o impacto desta mudança antes de implementar.",
+		"should_trigger": true
+	},
+	{
+		"query": "Este repo usa CASA; implemente o bugfix e respeite o gate documental.",
+		"should_trigger": true
+	},
+	{
+		"query": "O docs-check está falhando depois que alterei uma Spec aceita; diagnostique o impacto.",
+		"should_trigger": true
+	},
+	{
+		"query": "Precisamos adotar CASA neste repositório legado usando casa-init.",
+		"should_trigger": true
+	},
+	{
+		"query": "Feche a Spec como implemented e confira implemented-by e evidências.",
+		"should_trigger": true
+	},
+	{
+		"query": "Implemente uma função de soma neste repo comum que não usa CASA.",
+		"should_trigger": false
+	},
+	{
+		"query": "Explique academicamente o que é uma ADR, sem analisar nenhum repositório.",
+		"should_trigger": false
+	},
+	{
+		"query": "Escreva uma descrição da minha casa de praia.",
+		"should_trigger": false
+	},
+	{
+		"query": "Formate este Markdown sem mudar conteúdo, decisões ou comportamento.",
+		"should_trigger": false
+	},
+	{
+		"query": "Compare o padrão arc42 com C4 para documentação de arquitetura.",
+		"should_trigger": false
+	}
+]
