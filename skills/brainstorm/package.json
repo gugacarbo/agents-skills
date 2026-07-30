@@ -4,7 +4,7 @@
 	"private": true,
 	"description": "Development tooling for the brainstorm skill.",
 	"scripts": {
-		"test": "bash dev/tests.sh",
+		"test": "bun test dev/tests.test.ts",
 		"build": "bash -lc 'for file in scripts/visual-companion/*.sh; do bash -n \"$file\"; done; tmp=$(mktemp -d); trap \"rm -rf \\\"$tmp\\\"\" EXIT; bun build --target=bun scripts/visual-companion/server.cjs --outfile \"$tmp/server.cjs\"'"
 	}
 }

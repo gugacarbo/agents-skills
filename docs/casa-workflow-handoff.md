@@ -442,7 +442,7 @@ skills/casa-workflow/
 ├── evals/
 │   └── evals.json
 ├── dev/
-│   └── tests.sh
+│   └── tests.test.ts
 └── package.json
 ```
 
@@ -752,7 +752,7 @@ Se um baseline já passar:
 
 ## Testes estáticos pretendidos
 
-`dev/tests.sh` deve verificar pelo menos:
+`dev/tests.test.ts` deve verificar pelo menos:
 
 - existência de `SKILL.md`;
 - frontmatter válido;

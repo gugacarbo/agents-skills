@@ -5,8 +5,8 @@
 	"description": "Development tooling for the casa-workflow skill.",
 	"type": "module",
 	"scripts": {
-		"test": "bash dev/tests.sh",
-		"validate": "bash dev/tests.sh && bun run build && bun -e \"await Bun.file('evals/evals.json').json()\"",
+		"test": "bun test dev/tests.test.ts",
+		"validate": "bun run test && bun run build && bun -e \"await Bun.file('evals/evals.json').json()\"",
 		"build": "bash -lc 'tmp=$(mktemp -d); trap \"rm -rf \\\"$tmp\\\"\" EXIT; bun build --target=bun evals/run-evals.mjs --outfile \"$tmp/run-evals.mjs\"'"
 	}
 }

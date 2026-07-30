@@ -3,7 +3,7 @@
 Os evals de code-flow combinam transcript/comportamento do agente e os
 contratos versionados do worker. O runner de linguagem pode apontar para uma
 issue GitHub descartável; os testes determinísticos usam um `gh` fake em
-`tests/tests.sh` para validar eventos, gates e transições sem rede.
+`tests/tests.test.ts` para validar eventos, gates e transições sem rede.
 
 ## Setup por cenário
 
@@ -18,7 +18,7 @@ issue GitHub descartável; os testes determinísticos usam um `gh` fake em
 ## Mocks
 
 Para rodar os evals sem um repo real acme/demo, use `gh` fake compatível com o
-de `tests/tests.sh`. O `run-evals.mjs` não instala mock automaticamente;
+de `tests/tests.test.ts`. O `run-evals.mjs` não instala mock automaticamente;
 configure `PATH` antes de invocar. Lease, heartbeat e TTL pertencem ao runner
 VPS futuro e não são um cenário desta skill.
 

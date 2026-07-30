@@ -12,7 +12,7 @@
 ```
 skill-master/
 ├── SKILL.md                 # workflow for creating/improving skills
-├── dev/tests.sh             # focused integration checks for the unified workflow
+├── dev/tests.test.ts        # focused integration checks for the unified workflow
 ├── agents/                  # analyzer/comparator/grader prompts
 ├── references/              # authoring, testing, discipline, and eval schemas
 ├── scripts/                 # Python eval, benchmark, packaging, validation helpers
@@ -30,7 +30,7 @@ skill-master/
 | Prompt approval UI    | `eval-viewer/generate_prompt_review.py`                        | Lets the user approve or edit draft eval prompts before execution.                    |
 | Report generation     | `scripts/generate_report.py`, `eval-viewer/generate_review.py` | Produces human-reviewable output.                                                     |
 | Eval schema           | `references/schemas.md`                                        | Read before changing eval JSON shape.                                                 |
-| Integration checks    | `dev/tests.sh`                                                 | Verifies routing references and extended eval metadata.                               |
+| Integration checks    | `dev/tests.test.ts`                                            | Verifies routing references and extended eval metadata.                               |
 
 ## CONVENTIONS
 
@@ -56,5 +56,5 @@ rtk python3 skills/skill-master/scripts/quick_validate.py <skill-path>
 rtk python3 skills/skill-master/eval-viewer/generate_prompt_review.py --help
 rtk python3 skills/skill-master/scripts/run_eval.py --help
 rtk python3 skills/skill-master/eval-viewer/generate_review.py --help
-rtk bash skills/skill-master/dev/tests.sh
+bun test skills/skill-master/dev/tests.test.ts
 ```

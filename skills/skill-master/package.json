@@ -4,7 +4,7 @@
 	"private": true,
 	"description": "Development tooling for the skill-master skill.",
 	"scripts": {
-		"test": "bash dev/tests.sh",
+		"test": "bun test dev/tests.test.ts",
 		"validate": "python3 scripts/quick_validate.py .",
 		"build": "bun run validate && python3 -c 'import ast, pathlib; [ast.parse(path.read_text()) for path in pathlib.Path(\".\").rglob(\"*.py\")]'"
 	}

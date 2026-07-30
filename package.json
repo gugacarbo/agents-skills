@@ -6,7 +6,8 @@
 		"dev": "sh src/dev.sh",
 		"build": "bun run build:skills && sh src/build.sh",
 		"build:skills": "bun run --parallel --if-present --filter '*' build",
-		"test": "bash -lc 'for test_script in src/tests/*.sh; do [ -f \"$test_script\" ] && bash \"$test_script\"; done' && bun run test:skills",
+		"test": "bun run --parallel test:root test:skills",
+		"test:root": "bun test src/tests",
 		"test:skills": "bun run --parallel --if-present --filter '*' test",
 		"validate:skills": "bun run --if-present --filter '*' validate",
 		"lint": "biome check .",
@@ -33,6 +34,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",
 		"@cspell/dict-pt-br": "^2.4.2",
+		"@types/bun": "^1.3.14",
 		"cspell": "^10.0.1",
 		"husky": "^9.1.7",
 		"knip": "^6.27.0",

@@ -4,7 +4,7 @@
 	"private": true,
 	"description": "Development tooling for the code-flow skill.",
 	"scripts": {
-		"test": "bash tests/tests.sh",
+		"test": "bun test tests/tests.test.ts",
 		"build": "bash -lc 'for file in scripts/*.sh; do bash -n \"$file\"; done'"
 	}
 }
