@@ -62,7 +62,7 @@ describe("casa-workflow skill", () => {
 		}
 		for (const expected of [
 			"[workflow.md](references/workflow.md)",
-			"Três decisões independentes",
+			"Três classificações",
 			"`artifact_action`",
 			"`context_suggestion`",
 			"[context-persistence.md](references/context-persistence.md)",
@@ -73,7 +73,9 @@ describe("casa-workflow skill", () => {
 			"gate_valido=false",
 			"gate_required=true",
 			"gate_required=false",
-			"feature T1 já decidida",
+			"criar, atualizar ou depreciar",
+			"mutação direta em documento CASA",
+			"schema, migração, dados, segurança, efeito externo",
 			"Em T0, não exija ADR, Spec nem `docs/context/`",
 			"preaprovação alegada",
 		]) {
@@ -86,14 +88,37 @@ describe("casa-workflow skill", () => {
 			"[impact-lifecycle.md](impact-lifecycle.md)",
 			"[context-persistence.md](context-persistence.md)",
 			"[gate-template.md](gate-template.md)",
-			"Quantidade de linhas, arquivos ou edições não define o threshold",
+			"somente escrita documental aciona o gate",
 			"sem relatório CASA",
-			"Feature T1 decidida",
+			"Feature T1 que cria ou atualiza Spec exige gate",
 			"T0 não herda as camadas documentais de T1",
 			"atplus-digital/casa-standard",
 			"Homônimos chamados CASA não são fontes",
 		]) {
 			expectContains("references/workflow.md", expected);
+		}
+		expect(contents("references/workflow.md")).not.toContain(
+			"migração/schema, dados/segurança, efeito externo, fechamento",
+		);
+		for (const [relativePath, expected] of [
+			[
+				"references/impact-lifecycle.md",
+				"Código, testes, schema, migração e riscos sem escrita",
+			],
+			[
+				"references/impact-lifecycle.md",
+				"Schema persistido, constraint ou migração que define invariante T1",
+			],
+			[
+				"references/context-persistence.md",
+				"criar, editar ou depreciar o documento",
+			],
+			[
+				"references/source-resolution.md",
+				"sem escrita documental, não inventar gate",
+			],
+		] as const) {
+			expectContains(relativePath, expected);
 		}
 	});
 
@@ -116,6 +141,7 @@ describe("casa-workflow skill", () => {
 	test("preserves the complete gate report contract", () => {
 		for (const section of [
 			"Contexto CASA",
+			"Gatilho documental",
 			"Achados por risco",
 			"Impacto de artefatos",
 			"Ações antes do código",
@@ -135,6 +161,7 @@ describe("casa-workflow skill", () => {
 			"`Efeitos externos` aparece somente",
 			"externo concreto",
 			"ref `[casa-standard-ref]`",
+			"esta mutação direta torna `gate_required=true`",
 		]) {
 			expectContains("references/gate-template.md", marker);
 		}
@@ -170,6 +197,14 @@ describe("casa-workflow skill", () => {
 		expect(triggerCatalog.filter((item) => !item.should_trigger)).toHaveLength(
 			5,
 		);
+
+		for (const marker of [
+			'options.configuration !== "without_skill"',
+			"gate_required.{0,30}(?:false|falso)",
+			"(?:criar|editar|deprecia|mutar|mutaç|escrita)",
+		]) {
+			expectContains("evals/run-evals.mjs", marker);
+		}
 	});
 
 	test("fixture paths remain local to the skill", () => {

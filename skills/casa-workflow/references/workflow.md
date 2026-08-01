@@ -13,26 +13,29 @@ Leia esta referência por completo quando o router ativar o CASA.
    - T0: não exigir ADR, Spec nem `docs/context/`; manter `AGENTS.md` e DoD.
    - T1: classificar decisão e comportamento conforme
      [impact-lifecycle.md](impact-lifecycle.md).
-4. Calcule separadamente `artifact_action`, `context_suggestion` e
-   `gate_required`; uma classificação não determina as outras.
+4. Calcule `artifact_action` e `context_suggestion`; derive `gate_required`
+   exclusivamente da existência de mutação direta em documento CASA.
 5. Leia [context-persistence.md](context-persistence.md) se houver intenção ou
    descoberta durável.
-6. Use `gate_required=true` somente para adoção/upgrade, decisão estrutural ou
-   ADR, migração/schema, dados/segurança, efeito externo, fechamento sem
-   evidência ou expansão material fora do envelope.
-7. Use `gate_required=false` para feature decidida, inclusive com Spec
-   obrigatória; T0; restauração de contrato; mudança local/reversível;
-   read-only; e sugestão inferida.
+6. Use `gate_required=true` somente se o source-set criar, atualizar ou
+   depreciar diretamente documento CASA, inclusive transição de status ou
+   substituição. São documentos CASA os routers `AGENTS.md`, a ponte `CLAUDE.md`,
+   ADRs, Specs, capítulos de contexto, backlog, templates e índices CASA.
+7. Use `gate_required=false` quando não houver essa escrita documental, mesmo
+   para decisão estrutural, migração/schema, dados/segurança, efeito externo,
+   mudança T0, auditoria read-only ou sugestão inferida.
 
-Autenticação, autorização, erros ou dados já definidos no contrato da feature
-pertencem à Spec e não acionam gate sozinhos. Risco de segurança/dados exige
-gate quando surgir decisão, exposição ou tratamento sensível além do contrato
-decidido.
+Risco técnico não substitui o predicado documental. Segurança, dados, operação
+destrutiva, efeito remoto e expansão de escopo podem exigir autorização própria
+pelas regras gerais do agente, mas não o relatório CASA sem escrita documental.
+Não use essa regra para pular o mapa de impacto T1: classifique primeiro ADR,
+Spec e contexto obrigatórios; somente então derive o gate da mutação resultante.
 
-Se `gate_required=false`, continue sem relatório CASA. Em T1, crie ou atualize a
-Spec exigida antes do código e conclua documento, implementação e verificação
-na mesma unidade autorizada. Use `docs-reserve` quando existir; sem ele, derive
-o próximo `NNNN` de quatro dígitos dos arquivos locais e preserve o formato
+Se `gate_required=false`, continue sem relatório CASA. Se uma obrigação T1
+exigir criar ou atualizar Spec, ADR ou outro documento CASA,
+`gate_required=true`: emita o relatório e pare antes de qualquer escrita do
+envelope. Após aprovação, use `docs-reserve` quando existir; sem ele, derive o
+próximo `NNNN` de quatro dígitos dos arquivos locais e preserve o formato
 `docs/specs/NNNN-titulo-kebab.md`. Não crie documento por cerimônia.
 
 ## Preparar o relatório
@@ -40,7 +43,8 @@ o próximo `NNNN` de quatro dígitos dos arquivos locais e preserve o formato
 Somente quando `gate_required=true`:
 
 1. Separe fatos verificáveis de decisões abertas. Alegação não é evidência.
-2. Emita o relatório usando
+2. Declare qual criação, atualização ou depreciação documental acionou o gate.
+3. Emita o relatório usando
    [gate-template.md](gate-template.md) e encerre o turno no gate.
 
 Em upgrade, a toolchain local é somente evidência de divergência. Resolva
@@ -58,9 +62,8 @@ confirmado; `main` é fonte de descoberta, não ref pinado.
 - A aprovação cobre o source-set, o contrato e as obrigações da unidade de
   trabalho descrita; novas edições e arquivos dentro desse envelope não exigem
   outro gate.
-- Reabra antes da próxima escrita somente se surgir impacto material fora do
-  envelope: nova decisão, contrato, documento obrigatório, migração, risco
-  relevante, efeito externo ou expansão material de escopo.
+- Reabra antes da próxima escrita somente se surgir mutação direta de documento
+  CASA fora do envelope documental aprovado.
 
 No fechamento, verifique paths, comandos, DoD, estado atual e gotchas. Não
 declare Spec `implemented` sem `implemented-by` real, verificação executada,
@@ -73,17 +76,18 @@ termine a tarefa e só então apresente a sugestão compacta definida em
 
 ## Guardrails
 
-- Adoção CASA ativa a classificação; não torna toda escrita material.
-- Quantidade de linhas, arquivos ou edições não define o threshold.
-- Contrato observável ou documento novo, isoladamente, não exige gate.
-- Feature T1 decidida cria/atualiza sua Spec sem interrupção adicional.
+- Adoção CASA ativa a classificação; somente escrita documental aciona o gate.
+- Quantidade de linhas e risco técnico não definem o threshold.
+- Documento CASA novo, editado, depreciado ou substituído exige gate.
+- Feature T1 que cria ou atualiza Spec exige gate antes da primeira escrita.
 - Correção que restaura contrato existente não altera a Spec.
 - T0 não herda as camadas documentais de T1.
 - Não edite o corpo de ADR aceita; crie nova ADR e marque a anterior como
   `superseded`.
 - Não implemente contrato observável sem a Spec exigida pelo contrato pinado.
 - Não execute `casa-init`, upgrade, issue, PR, label ou outro efeito remoto sem
-  autorização específica; o gate CASA não concede essa autorização.
+  autorização específica; gate CASA existe apenas se também houver mutação
+  documental e não concede autorização remota.
 - Não copie o Standard, edite índice gerado manualmente ou use `dist/` quando o
   repo o proibir.
 - Ao detectar escrita prematura, pare, reporte o desvio e retorne ao gate.

@@ -6,16 +6,17 @@ Usar esta referência para classificar uma mudança e verificar seu fechamento.
 
 Classificar cada fato em uma casa primária e escolher a ação:
 
-| Fato observável | `artifact_action` |
-| --- | --- |
-| Escolha estrutural, acoplamento, backend ou estratégia de falha | Criar ADR; se conflitar com decisão aceita, nova ADR + transição da anterior |
-| Feature com capacidade/contrato novo e decidido | Criar Spec |
-| Mudança do contrato de feature já especificada | Atualizar a Spec existente |
-| Implementação ou restauração de contrato já definido | Dispensar mudança de Spec |
-| Refactor, teste, detalhe interno ou ajuste visual sem mudança contratual | Dispensar documento |
-| Estado atual cuja edição foi pedida explicitamente | Atualizar o capítulo pertinente em `docs/context/` |
-| Intenção durável apenas inferida | Sugerir conforme `context-persistence.md`; não editar |
-| Entrega, milestone ou coordenação | Issue/PR/commit com autorização própria; não criar agregador CASA |
+| Fato observável                                                          | `artifact_action`                                                            |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Escolha estrutural, acoplamento, backend ou estratégia de falha          | Criar ADR; se conflitar com decisão aceita, nova ADR + transição da anterior |
+| Schema persistido, constraint ou migração que define invariante T1       | Criar ADR; o artefato registra a decisão estrutural, não o risco técnico     |
+| Feature com capacidade/contrato novo e decidido                          | Criar Spec                                                                   |
+| Mudança do contrato de feature já especificada                           | Atualizar a Spec existente                                                   |
+| Implementação ou restauração de contrato já definido                     | Dispensar mudança de Spec                                                    |
+| Refactor, teste, detalhe interno ou ajuste visual sem mudança contratual | Dispensar documento                                                          |
+| Estado atual cuja edição foi pedida explicitamente                       | Atualizar o capítulo pertinente em `docs/context/`                           |
+| Intenção durável apenas inferida                                         | Sugerir conforme `context-persistence.md`; não editar                        |
+| Entrega, milestone ou coordenação                                        | Issue/PR/commit com autorização própria; não criar agregador CASA            |
 
 Feature com contrato é uma capacidade coerente para caller ou usuário, com
 inputs, outputs, autorização, erros, fluxo ou casos de borda relevantes. A mera
@@ -28,8 +29,8 @@ Usar `docs-reserve` quando disponível para criar ADR/Spec. Nunca editar índice
 
 Não exigir ADR, Spec nem `docs/context/`. Regra transversal curta pode ser
 sugerida para o `AGENTS.md` raiz; regra de subtree, para o `AGENTS.md` aninhado.
-Migração, dados, segurança e efeito externo ainda podem exigir gate pelo risco,
-sem criar camadas documentais de T1.
+Migração, dados, segurança e efeito externo sem escrita documental não acionam
+gate CASA. Aplicar separadamente autorizações e salvaguardas gerais pertinentes.
 
 ## ADR
 
@@ -59,12 +60,12 @@ Antes de mudar uma Spec para `implemented`, exigir em conjunto:
 
 CI futuro, alegação do usuário ou existência aparente de código não substituem evidência. Se um item faltar, manter o estado atual e listar a lacuna.
 
-## Reabrir o gate
+## Derivar e reabrir o gate
 
-Comparar continuamente tarefa, diff, artefatos e decisões com o envelope
-aprovado: source-set, contrato e obrigações. Nova edição ou arquivo já coberto
-não reabre o gate. Reabrir antes da próxima escrita somente quando aparecer
-impacto material fora do envelope: nova decisão estrutural, mudança de
-contrato, novo documento obrigatório, migração, risco relevante, efeito
-externo, expansão material de escopo ou impossibilidade de cumprir o fechamento
-aprovado.
+Criar, atualizar, depreciar, mudar status ou superseder documento CASA torna
+`gate_required=true`. Código, testes, schema, migração e riscos sem escrita
+documental mantêm `gate_required=false`.
+
+Comparar continuamente o source-set documental com o envelope aprovado. Nova
+edição documental já coberta não reabre o gate. Reabrir antes da próxima escrita
+somente quando aparecer outra mutação direta de documento CASA fora do envelope.

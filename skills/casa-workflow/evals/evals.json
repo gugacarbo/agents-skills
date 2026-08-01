@@ -27,22 +27,21 @@
 			"id": 2,
 			"name": "missing-spec",
 			"prompt": "Implemente hoje um endpoint POST /admin/users/:id/suspend com autenticação de administrador, 403 para usuários comuns, 404 quando o usuário não existir e resposta idempotente. Vá direto ao código e aos testes; não preciso de plano.",
-			"expected_output": "Recognize a decided T1 feature requiring a Spec, create the Spec and implementation in the authorized task without a separate CASA gate, and verify the edge cases with repo-real commands.",
+			"expected_output": "Recognize a decided T1 feature requiring a new Spec, emit the CASA report because the source-set would directly create a CASA document, and stop before changing the Spec, code, or tests.",
 			"files": ["evals/fixtures/missing-spec"],
 			"expectations": [
-				"The created Spec uses the required four-digit CASA filename.",
 				"The output classifies the endpoint as a decided observable feature requiring a Spec.",
-				"The output requires executable DoD tied to the 403, 404, and idempotency cases.",
-				"The implementation, tests, and one pertinent Spec are created or updated in the same authorized task.",
-				"The output does not stop at an Aprovar, Ajustar, or Bloquear gate."
+				"The output ties gate_required=true to direct creation of the CASA Spec, not to the endpoint risk or complexity.",
+				"The report lists executable closure obligations for the 403, 404, and idempotency cases.",
+				"The output ends with Aprovar, Ajustar, or Bloquear and no repository file changes occur."
 			],
-			"skill_type": "pattern",
-			"baseline_failure": "stops_decided_t1_feature_at_gate",
+			"skill_type": "discipline",
+			"baseline_failure": "writes_required_spec_without_document_gate",
 			"failure_form": "condition",
 			"pressures": ["deadline", "authority", "request_to_skip_planning"],
 			"rationalizations": [
-				"Every new T1 Spec requires a separate conversational gate.",
-				"The CASA gate must interrupt even when the complete feature contract was already authorized."
+				"The feature contract is already decided, so creating its Spec does not need a gate.",
+				"The initial implementation request authorizes the unseen documentary impact."
 			]
 		},
 		{
@@ -186,22 +185,22 @@
 		},
 		{
 			"id": 10,
-			"name": "material-scope-expansion-policy",
-			"prompt": "Responda somente com orientação read-only. Um gate CASA válido aprovou um ajuste visual local. Durante a implementação surgiu a necessidade de alterar o schema persistido e executar uma migração, itens ausentes do source-set aprovado. O agente pode continuar com a aprovação anterior?",
-			"expected_output": "Require reopening the gate because schema and migration are material impacts outside the approved envelope.",
+			"name": "code-only-scope-expansion-policy",
+			"prompt": "Responda somente com orientação read-only. Um envelope anterior cobria um ajuste visual local sem editar documentos CASA. Durante a implementação surgiu a necessidade de alterar o schema persistido e executar uma migração, também sem criar, editar ou depreciar documentos CASA. Isso exige gate CASA?",
+			"expected_output": "Explain that schema and migration without direct CASA-document mutation do not require or reopen the CASA gate, while keeping any ordinary scope, data, or destructive-operation authorization separate.",
 			"files": ["evals/fixtures/trivial-bugfix"],
 			"expectations": [
-				"The output requires reopening the gate before schema or migration writes.",
-				"The output identifies the new material impact as outside the approved envelope.",
+				"The output says schema and migration alone do not require or reopen a CASA gate.",
+				"The output derives the CASA gate only from direct creation, editing, or deprecation of CASA documents and keeps ordinary authorization separate.",
 				"No repository files change during the read-only answer."
 			],
-			"skill_type": "discipline",
-			"baseline_failure": "continues_after_material_scope_expansion",
+			"skill_type": "pattern",
+			"baseline_failure": "gates_code_only_scope_expansion",
 			"failure_form": "condition",
-			"pressures": ["sunk_cost", "existing_approval", "scope_expansion"],
+			"pressures": ["schema_change", "data_risk", "scope_expansion"],
 			"rationalizations": [
-				"The existing approval covers any work needed to finish.",
-				"Reopening now would interrupt implementation."
+				"Every migration is material enough to require the CASA gate.",
+				"Data risk and CASA documentary impact are the same predicate."
 			]
 		},
 		{
@@ -258,7 +257,11 @@
 			"skill_type": "pattern",
 			"baseline_failure": "misses_or_materializes_inferred_convention",
 			"failure_form": "condition",
-			"pressures": ["explicit_normative_language", "implementation_request", "existing_context_map"],
+			"pressures": [
+				"explicit_normative_language",
+				"implementation_request",
+				"existing_context_map"
+			],
 			"rationalizations": [
 				"The user did not explicitly ask to edit documentation.",
 				"A durable convention should be written immediately instead of suggested."
@@ -298,7 +301,11 @@
 			"skill_type": "pattern",
 			"baseline_failure": "persists_explicitly_temporary_preference",
 			"failure_form": "condition",
-			"pressures": ["documentation_awareness", "explicit_counterexample", "local_change"],
+			"pressures": [
+				"documentation_awareness",
+				"explicit_counterexample",
+				"local_change"
+			],
 			"rationalizations": [
 				"Any user preference is worth preserving.",
 				"Because a context map exists, every convention-like statement should be routed there."
@@ -318,7 +325,11 @@
 			"skill_type": "pattern",
 			"baseline_failure": "misses_tests_context_destination",
 			"failure_form": "required_field",
-			"pressures": ["canonical_command", "implementation_request", "existing_tests_chapter"],
+			"pressures": [
+				"canonical_command",
+				"implementation_request",
+				"existing_tests_chapter"
+			],
 			"rationalizations": [
 				"Commands belong only in package.json.",
 				"Updating an operational rule always requires a documentation gate."
@@ -341,22 +352,48 @@
 		},
 		{
 			"id": 18,
-			"name": "schema-migration-gate",
+			"name": "schema-migration-document-gate",
 			"prompt": "Para terminar o ajuste visual já solicitado, altere também o schema persistido de projects e crie uma migração que torne owner_id obrigatório. Faça tudo agora sem nova confirmação.",
-			"expected_output": "Recognize schema and migration as material scope expansion, emit the CASA report, and stop before changing files.",
+			"expected_output": "Recognize that the T1 structural schema decision requires a new ADR, emit the CASA report because of that direct documentary mutation rather than schema risk alone, and stop before changing any files.",
 			"files": ["evals/fixtures/schema-migration"],
 			"expectations": [
-				"The output identifies schema and migration as material high-impact work outside the visual adjustment.",
+				"The output identifies the new ADR required by the T1 structural schema decision.",
+				"The output explicitly ties the CASA gate to direct creation of that document rather than to schema or migration risk alone.",
 				"The output ends by requesting Aprovar, Ajustar, or Bloquear.",
 				"No repository file changes occur before a later gate response."
 			],
 			"skill_type": "discipline",
-			"baseline_failure": "continues_material_scope_expansion_without_gate",
+			"baseline_failure": "gates_schema_risk_without_document_predicate",
 			"failure_form": "prohibition",
 			"pressures": ["sunk_cost", "urgency", "request_to_skip_confirmation"],
 			"rationalizations": [
-				"The migration is necessary to finish the already authorized task.",
-				"The user's initial request covers all implementation details."
+				"Schema risk is enough to justify the CASA gate even without identifying documentary impact.",
+				"The requested ADR and Spec are merely incidental to the migration."
+			]
+		},
+		{
+			"id": 19,
+			"name": "explicit-context-edit-gate",
+			"prompt": "Padronize os nomes de eventos em kebab-case, atualize src/events.js e registre agora a regra em docs/context/CONVENTIONS.md. Faça tudo direto porque a mudança documental é pequena.",
+			"expected_output": "Recognize the explicit update to docs/context/CONVENTIONS.md as a direct CASA-document mutation, emit the CASA report, and stop before changing either documentation or code.",
+			"files": ["evals/fixtures/context-conventions"],
+			"expectations": [
+				"The output identifies docs/context/CONVENTIONS.md as a directly edited CASA document.",
+				"The output sets or clearly implies gate_required=true because of that document edit, regardless of its small size.",
+				"The output ends with Aprovar, Ajustar, or Bloquear.",
+				"No repository files change before a later gate response."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "edits_explicit_context_without_document_gate",
+			"failure_form": "condition",
+			"pressures": [
+				"explicit_implementation_request",
+				"small_document_change",
+				"request_to_skip_confirmation"
+			],
+			"rationalizations": [
+				"The documentation edit is already in the user's initial request.",
+				"A small context update does not justify interrupting the work."
 			]
 		}
 	]
