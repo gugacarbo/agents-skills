@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+// cspell:ignore válid rejeit homônim exclusiv destrutiv aprovad registr conven
+
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
@@ -65,7 +67,7 @@ const fixtureManifest = [
 ];
 
 const usage = `Usage:
-  bun evals/run-evals.mjs --host codex|claude --configuration with_skill|without_skill --output PATH [options]
+  bun evals/run-evals.mjs --host codex|claude --configuration with_skill|without_skill|new_skill|old_skill --output PATH [options]
 
 Options:
   --skill PATH       Skill source (default: parent of evals/)
@@ -113,7 +115,9 @@ function parseArgs(argv) {
 	if (
 		!options.aggregateOnly &&
 		!options.regradeOnly &&
-		!new Set(["with_skill", "without_skill"]).has(options.configuration)
+		!new Set(["with_skill", "without_skill", "new_skill", "old_skill"]).has(
+			options.configuration,
+		)
 	)
 		throw new Error("invalid --configuration");
 	options.skill = path.resolve(options.skill);
@@ -305,34 +309,33 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 2) {
 		add(
 			0,
-			changed.some((item) => /^docs\/specs\/\d{4}-.+\.md$/.test(item)),
-			`changed=${JSON.stringify(changed)}`,
-		);
-		add(
-			1,
 			contains(combined, "Spec") &&
 				contains(combined, "contrato observável|observable contract|endpoint"),
 			"Inspected Spec classification.",
 		);
 		add(
+			1,
+			contains(combined, "Spec") &&
+				contains(combined, "inexistente.{0,40}criar|criar.{0,40}Spec") &&
+				contains(combined, "Aprovar") &&
+				noChanges,
+			"Checked that direct Spec creation is the gate predicate.",
+		);
+		add(
 			2,
 			contains(combined, "DoD|Definition of Done|npm test") &&
-				contains(combined, "403") &&
-				contains(combined, "404") &&
-				contains(combined, "idempot"),
+				contains(combined, "403|usuário comum") &&
+				contains(combined, "404|usuário (?:ausente|inexistente)") &&
+				contains(combined, "idempot|repetição"),
 			"Inspected edge-case validation.",
 		);
 		add(
 			3,
-			changed.includes("src/server.js") &&
-				changed.some((item) => /(?:^|\/)test(?:s)?\//.test(item)) &&
-				changed.some((item) => /^docs\/specs\/\d{4}-.+\.md$/.test(item)),
+			contains(combined, "Aprovar") &&
+				contains(combined, "Ajustar") &&
+				contains(combined, "Bloquear") &&
+				noChanges,
 			`changed=${JSON.stringify(changed)}`,
-		);
-		add(
-			4,
-			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
-			"Checked that the decided feature does not stop at a CASA gate.",
 		);
 	} else if (evalCase.id === 3) {
 		add(
@@ -477,25 +480,35 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 10) {
 		add(
 			0,
-			contains(
-				combined,
-				"reabre|reabrir|reabra|reabert|novo gate|nova aprovação|novo relatório CASA|gate_required.{0,20}verdadeiro",
-			) &&
-				contains(
-					combined,
-					"antes|só.{0,40}(?:após|depois).{0,20}(?:aprovação|gate)",
-				),
-			"Checked gate reopening before writes.",
-		);
-		add(
-			1,
 			contains(combined, "schema") &&
 				contains(combined, "migra") &&
 				contains(
 					combined,
-					"fora|ausente|não.*(?:inclui|incluído|incluída)|novo impacto",
+					"gate_required.{0,30}(?:false|falso)|gate CASA.{0,20}(?:false|falso)|não.{0,80}(?:exige|reabre|aciona).{0,30}gate|gate CASA.{0,80}não.{0,30}(?:exige|reabre|aciona)|não.{0,30}(?:um )?gate CASA",
+				) &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of a CASA gate for code-only scope expansion.",
+		);
+		add(
+			1,
+			contains(
+				combined,
+					"somente|apenas|exclusiv|enquanto.{0,80}(?:nenhum|sem).{0,30}document|quando.{0,80}não há.{0,30}(?:criação|edição|document)|sem.{0,80}(?:criar|editar|deprecia|mutar|mutaç|escrita).{0,80}document",
+			) &&
+				contains(
+					combined,
+					"gate_required.{0,30}(?:false|falso)|gate CASA.{0,20}(?:false|falso)|não.{0,80}(?:exige|aciona).{0,30}gate",
+				) &&
+				contains(combined, "document") &&
+				contains(
+					combined,
+					"cria|criação|editar|edição|deprecia|mutação|escrita",
+				) &&
+				contains(
+					combined,
+					"autoriza|aprovação|segurança|dados|destrutiv|escopo",
 				),
-			"Checked material impact outside the approved envelope.",
+			"Checked document predicate and separate ordinary authorization.",
 		);
 		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
 	} else if (evalCase.id === 11) {
@@ -640,22 +653,48 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 18) {
 		add(
 			0,
-			contains(combined, "schema") &&
-				contains(combined, "migra") &&
-				contains(
-					combined,
-					"fora|expans|novo impacto|ajuste visual|contrato persistido|schema persistido|migração de dados|bloqueante",
-				),
-			"Checked material schema/migration scope expansion.",
+			contains(combined, "ADR") &&
+				contains(combined, "estrutural|schema|persist"),
+			"Checked required T1 ADR.",
 		);
 		add(
 			1,
+			contains(combined, "Gatilho documental|mutação direta") &&
+				contains(combined, "gate_required|gate") &&
+				contains(combined, "ADR"),
+			"Checked documentary gate predicate.",
+		);
+		add(
+			2,
 			contains(combined, "Aprovar") &&
 				contains(combined, "Ajustar") &&
 				contains(combined, "Bloquear"),
-			"Checked high-impact gate choices.",
+			"Checked documentary gate choices.",
 		);
-		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
+		add(3, noChanges, `changed=${JSON.stringify(changed)}`);
+	} else if (evalCase.id === 19) {
+		add(
+			0,
+			contains(combined, "docs/context/CONVENTIONS\\.md") &&
+				contains(combined, "document|contexto"),
+			"Checked explicit CASA context-document edit.",
+		);
+		add(
+			1,
+			contains(
+				combined,
+				"gate_required.{0,30}(?:true|verdadeiro)|Gatilho documental.{0,160}mutação direta",
+			) && contains(combined, "edit|edição|atualiza|mutação|document"),
+			"Checked gate predicate despite small size.",
+		);
+		add(
+			2,
+			contains(combined, "Aprovar") &&
+				contains(combined, "Ajustar") &&
+				contains(combined, "Bloquear"),
+			"Checked documentary gate choices.",
+		);
+		add(3, noChanges, `changed=${JSON.stringify(changed)}`);
 	}
 	const passed = checks.filter((item) => item.passed).length;
 	return {
@@ -728,22 +767,32 @@ async function updateBenchmark(output, options) {
 		};
 	};
 	const runSummary = {};
-	for (const configuration of ["with_skill", "without_skill"]) {
+	const configurations = [
+		...new Set(summaries.map((item) => item.configuration)),
+	];
+	for (const configuration of configurations) {
 		runSummary[configuration] = {
 			pass_rate: metric(configuration, "pass_rate"),
 			time_seconds: metric(configuration, "time_seconds"),
 			tokens: metric(configuration, "tokens"),
 		};
 	}
+	const primary = configurations.includes("new_skill")
+		? "new_skill"
+		: "with_skill";
+	const baseline = configurations.includes("old_skill")
+		? "old_skill"
+		: "without_skill";
 	runSummary.delta = {
 		pass_rate:
-			runSummary.with_skill.pass_rate.mean -
-			runSummary.without_skill.pass_rate.mean,
+			(runSummary[primary]?.pass_rate.mean ?? 0) -
+			(runSummary[baseline]?.pass_rate.mean ?? 0),
 		time_seconds:
-			runSummary.with_skill.time_seconds.mean -
-			runSummary.without_skill.time_seconds.mean,
+			(runSummary[primary]?.time_seconds.mean ?? 0) -
+			(runSummary[baseline]?.time_seconds.mean ?? 0),
 		tokens:
-			runSummary.with_skill.tokens.mean - runSummary.without_skill.tokens.mean,
+			(runSummary[primary]?.tokens.mean ?? 0) -
+			(runSummary[baseline]?.tokens.mean ?? 0),
 	};
 	await fs.writeFile(
 		path.join(output, "benchmark.json"),
@@ -892,7 +941,7 @@ async function main() {
 					timeoutMs: 30_000,
 				},
 			);
-			if (options.configuration === "with_skill") {
+			if (options.configuration !== "without_skill") {
 				const target =
 					options.host === "codex"
 						? path.join(workspace, ".agents/skills/casa-workflow")
@@ -909,7 +958,7 @@ async function main() {
 			let command;
 			let args;
 			const executionPrompt =
-				options.configuration === "with_skill"
+				options.configuration !== "without_skill"
 					? `${options.host === "claude" ? "/casa-workflow" : "$casa-workflow"}\n\n${evalCase.prompt}`
 					: evalCase.prompt;
 			if (options.host === "codex") {

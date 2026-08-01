@@ -8,8 +8,8 @@ subseção ou seção condicional não for necessário, omita-o por completo: n�
 imprima título vazio, `nenhum`, `não aplicável`, `N/A` ou placeholder.
 Preserve a ordem relativa das seções que forem renderizadas.
 
-`Contexto CASA`, `Achados por risco`, `Impacto de artefatos` e `Gate` são
-obrigatórios sempre que o gate for aplicável. `Ações antes do código` e
+`Contexto CASA`, `Gatilho documental`, `Achados por risco`, `Impacto de
+artefatos` e `Gate` são obrigatórios sempre que o gate for aplicável. `Ações antes do código` e
 `Obrigações de fechamento` aparecem quando houver ação ou validação
 correspondente. `Efeitos externos` aparece somente quando existir um efeito
 externo concreto; sua ausência não autoriza efeitos externos.
@@ -24,6 +24,9 @@ externo concreto; sua ausência não autoriza efeitos externos.
 **Avaliação:** [resumo do que está sendo avaliado]
 
 **Fontes:** [somente fontes realmente consultadas]
+
+**Gatilho documental:** [documento CASA]: [estado atual] → [criar, atualizar ou
+depreciar]; esta mutação direta torna `gate_required=true`.
 
 ## Achados por risco
 

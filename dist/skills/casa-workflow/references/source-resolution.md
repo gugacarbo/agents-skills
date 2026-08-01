@@ -29,7 +29,10 @@ Antes de propor a versão/ref alvo ou alterações em metadados e `docs-check`:
 2. identificar a versão alvo e o ref oficial correspondente;
 3. separar o contrato declarado, a toolchain local e o alvo oficial confirmado no relatório.
 
-Se as fontes oficiais não estiverem disponíveis, declarar versão/ref alvo como não resolvidas. Manter o gate, não escolher a versão da toolchain como alvo por inferência e não prometer quais arquivos serão alinhados ao novo contrato.
+Se as fontes oficiais não estiverem disponíveis, declarar versão/ref alvo como
+não resolvidas. Não escolher a versão da toolchain como alvo por inferência nem
+prometer quais arquivos serão alinhados. Se o envelope mutar documentos CASA,
+manter o gate documental; sem escrita documental, não inventar gate.
 
 Nomear literalmente `atplus-digital/casa-standard` no relatório. A branch
 `main` serve para descobrir o estado vigente, mas não substitui um commit ou tag
@@ -40,8 +43,8 @@ parcialmente não resolvido.
 
 - **Adotante válido:** metadados presentes e ref resolvível. Aplicar o contrato pinado.
 - **Metadados/toolchain divergentes:** reportar a divergência e seu sentido; não alterar `casa-version` automaticamente nem inferir dela o alvo do upgrade.
-- **Ref indisponível:** declarar a incerteza, usar metadados e toolchain locais como evidência limitada e manter o gate.
-- **Não adotante:** não inferir regras CASA para trabalho comum. Se o pedido for adoção/auditoria, orientar o bootstrap oficial e pedir gate antes de executar `casa-init`.
+- **Ref indisponível:** declarar a incerteza e usar metadados e toolchain locais como evidência limitada; gate somente se houver mutação documental CASA.
+- **Não adotante:** não inferir regras CASA para trabalho comum. Em adoção, pedir gate antes de `casa-init` quando ele criar ou atualizar documentos CASA; auditoria read-only não aciona gate.
 - **Contrato local incompleto:** tratar como achado, não preencher lacunas com a versão mais recente.
 
 ## Limites

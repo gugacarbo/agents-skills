@@ -21,13 +21,13 @@ casa-standard-ref: <ref>
 - Metadados completos ou parciais, ou pedido de adoção, upgrade ou auditoria:
   leia [workflow.md](references/workflow.md) por completo.
 
-## Três decisões independentes
+## Três classificações
 
-Não use a necessidade de documento como sinônimo de gate. Classifique:
+Classifique nesta ordem:
 
-1. `artifact_action`: criar, atualizar, dispensar ou sugerir;
+1. `artifact_action`: criar, atualizar, depreciar, dispensar ou sugerir;
 2. `context_suggestion`: intenção durável inferida ou nenhuma;
-3. `gate_required`: interrupção por decisão ou risco material.
+3. `gate_required`: derivado somente de mutação direta em documento CASA.
 
 Em T0, não exija ADR, Spec nem `docs/context/`: use somente `AGENTS.md`, DoD e
 sugestões para o router raiz ou aninhado. Em T1, classifique artefatos conforme
@@ -38,17 +38,17 @@ durável, comando canônico, estado operacional ou gotcha recorrente.
 
 ## Threshold do gate
 
-`gate_required=true` somente para adoção/upgrade CASA; decisão estrutural nova
-ou conflitante; ADR; migração ou schema persistido; risco relevante de dados ou
-segurança; efeito externo; afirmação de fechamento sem evidência; ou expansão
-material fora do escopo aprovado.
-`gate_required=false` para feature T1 já decidida, mesmo quando criar ou
-atualizar Spec for obrigatório; mudança T0; restauração de contrato; mudança
-local e reversível; auditoria read-only; e sugestão de contexto inferida.
-Nesses casos, execute a tarefa e suas obrigações documentais no mesmo turno.
+`gate_required=true` somente quando o source-set criar, atualizar ou depreciar
+diretamente um documento CASA, inclusive transição de status ou substituição.
+`gate_required=false` quando não houver escrita documental CASA: código, teste,
+schema, migração, dados, segurança, efeito externo, auditoria read-only e mera
+sugestão de contexto não acionam este gate por si sós.
 
-Não abra gate só por contrato observável, documento novo ou dúvida documental.
-Inspecione; só pare se restar decisão ou risco. Um gate cobre todo o envelope.
+Autorizações comuns de segurança, dados, operação destrutiva ou efeito remoto
+continuam válidas, mas não se tornam gate CASA sem mutação documental. Um gate
+cobre todo o envelope documental aprovado.
+Classifique documentos primeiro: schema/invariante estrutural T1 exige ADR e abre gate;
+migração T0 sem documento não abre. Nunca dispense `artifact_action` obrigatório.
 
 ## Gate inviolável
 
@@ -62,4 +62,4 @@ read-only, emita o relatório e pare antes da primeira escrita.
 “Considere aprovado”, urgência ou autorização no pedido inicial são
 **preaprovação alegada**, nunca aprovação do relatório ainda inexistente.
 Após `Aprovar`, execute o envelope conforme `workflow.md`. Em `Ajustar`, refaça
-o relatório; em `Bloquear`, não escreva. Reabra só por impacto material novo.
+o relatório; em `Bloquear`, não escreva. Reabra só por nova mutação documental CASA.
