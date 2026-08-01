@@ -1,137 +1,76 @@
-# Commit Changes — Fluxo de Execução
+# commit-changes
 
-Diagrama Mermaid com todas as decisões e ações do agente ao executar a skill `commit-changes`.
+Cria commits Git pequenos e revisáveis a partir das alterações locais, usando
+mensagens no padrão Conventional Commits.
 
-```mermaid
-flowchart TD
-    Start([Usuário faz request de commit]) --> CheckSkill{Skill aplicável?}
+## Comportamento
 
-    CheckSkill -->|não: git log, rebase, squash, cherry-pick, revert, merge-conflict sem commit, DB transaction, pergunta educacional| StopSkill[Não carregar skill]
+A skill:
 
-    CheckSkill -->|sim| Parse[1. Parse Intent & Scope]
+1. resolve o escopo pedido;
+2. inspeciona alterações staged e unstaged;
+3. separa assuntos independentes quando os limites entre arquivos são seguros;
+4. verifica se a mudança exige sincronizar o `AGENTS.md` mais próximo;
+5. apresenta o plano;
+6. executa e verifica cada commit sequencialmente.
 
-    Parse --> ParseA{Explicitamente pediu commit?}
-    ParseA -->|não| StopNoCommit[Parar: não é request de commit]
-    ParseA -->|sim| ParseB{Nomeou paths?}
+Um pedido explícito de commit já autoriza a execução. A skill só pausa diante
+de risco ou ambiguidade reais.
 
-    ParseB -->|sim| ScopePath[Escopo = paths nomeados]
-    ParseB -->|não| ParseC{Optou por worktree inteira?<br/>all, --all, tudo, worktree inteira}
-    ParseC -->|sim| ScopeAll[Escopo = todos arquivos modificados]
-    ParseC -->|não, mas conversa aponta execução| ScopeConv[Escopo = arquivos da execução recente]
-    ParseC -->|não, sem contexto claro| ScopeAllDefault[Escopo = worktree inteira por default]
+## Escopo
 
-    ScopePath --> CheckPathExists{Path existe e tem mudanças?}
-    CheckPathExists -->|não| StopNoChanges[Parar: No changes found]
-    CheckPathExists -->|sim| Inspect
-    ScopeAll --> Inspect
-    ScopeConv --> Inspect
-    ScopeAllDefault --> Inspect
+| Pedido | Escopo |
+| --- | --- |
+| caminhos nomeados | somente esses caminhos |
+| `all`, `--all`, `tudo` ou equivalente | worktree inteira |
+| `commit isso` após uma implementação | arquivos do trabalho recente |
+| nenhum contexto utilizável | worktree inteira |
 
-    Inspect[2. Inspect Working Tree<br/>git status --short<br/>git diff --stat HEAD<br/>git diff HEAD -- scope] --> CheckState{Estado do repo ok?}
+Alterações alheias ao escopo permanecem intactas.
 
-    CheckState -->|merge conflict / rebase / cherry-pick / merge em andamento| StopConflict[Parar e escalar]
-    CheckState -->|sem mudanças no escopo| StopEmpty[Parar: nenhum commit a fazer]
-    CheckState -->|ok| DelegateFlag{User passou flag<br/>--sub / --subagent / --delegate<br/>ou similares?}
+## Limites de segurança
 
-    DelegateFlag -->|sim| Delegate{Subagent disponível?<br/>e plataforma permite?}
-    DelegateFlag -->|não| Inline[Continuar inline]
+A execução para quando encontra:
 
-    Delegate -->|sim| Subagent[Delegar análise a subagent<br/>model mais barato, reasoning low<br/>inspect tree, propor grupos, draft messages, identificar AGENTS updates]
-    Delegate -->|não| Inline
-    Subagent --> Groups
-    Inline --> Groups
+- conflito, merge, rebase ou cherry-pick em andamento;
+- nenhum arquivo alterado no escopo;
+- staging existente incompatível com o grupo planejado;
+- assuntos misturados no mesmo arquivo que exigiriam decisão semântica de
+  hunks;
+- identidade Git ausente;
+- falha de hook que exige decisão de produto ou refatoração não óbvia.
 
-    Groups[3. Decide Commit Groups<br/>agrupar por concern lógico] --> SplitDecision{Conseguir separar por<br/>file boundaries?}
+A skill não descarta mudanças do usuário, não inventa identidade Git e não
+ignora hooks por conveniência.
 
-    SplitDecision -->|sim, separado por arquivos| Multi{Mais de um grupo?}
-    SplitDecision -->|não, misturado no mesmo arquivo| MixedFile{Oferecer git add -p<br/>como opção ao usuário?}
+## Mensagens
 
-    MixedFile -->|sim, usuário pode dirigir| PauseAddP[Pausar e sugerir git add -p]
-    MixedFile -->|não, decisão semântica necessária| PauseSemantic[Pausar: split inseguro]
+Formato:
 
-    Multi -->|sim| MultiCommit[Plano multi-commit]
-    Multi -->|não| SingleCommit[Plano single-commit]
-
-    SingleCommit --> Message
-    MultiCommit --> Message
-
-    Message[4. Build Commit Message<br/>Conventional Commits<br/>type scope: subject] --> TypeCheck{Escolher menor type honesto}
-    TypeCheck --> MessageReady[Mensagem pronta]
-
-    MessageReady --> Agents[5. Check AGENTS.md Impact]
-    Agents --> AgentsCheck{Diff muda como agentes<br/>devem trabalhar?}
-    AgentsCheck -->|sim, e user não pediu skip| AgentsUpdate[Atualizar AGENTS.md mais próximo<br/>ler, atualizar seção, preservar markers,<br/>atualizar timestamp, incluir no stage]
-    AgentsCheck -->|não| AgentsNone[Anotar: nenhum update AGENTS necessário]
-    AgentsCheck -->|user pediu skip AGENTS| AgentsSkip[Pular AGENTS update]
-
-    AgentsUpdate --> Plan
-    AgentsNone --> Plan
-    AgentsSkip --> Plan
-
-    Plan[6. Present Execution Plan<br/>mostrar plano conciso] --> RiskCheck{Há risco real ou ambiguidade?}
-
-    RiskCheck -->|sim: agrupamento ambíguo, conflito com staged, split precisa git add -p, fix muda behavior| PauseRisk[Pausar e perguntar]
-    RiskCheck -->|não| Execute[7. Execute the Plan]
-
-    Execute --> Loop{Próximo commit?}
-    Loop -->|sim| StageCommit[Adicionar ao stage apenas arquivos do commit<br/>incluir AGENTS updates se pertencem<br/>git add files]
-    StageCommit --> DoCommit[git commit -m message<br/>-m body se necessário]
-    DoCommit --> Verify[Verificar commit<br/>git show --stat --oneline HEAD]
-    Verify --> Refresh[Refresh git status --short]
-    Refresh --> Loop
-
-    Loop -->|não, todos feitos| Done([Fim: commits criados])
-
-    DoCommit --> HookFail{Hook falhou?}
-    HookFail -->|não| Verify
-    HookFail -->|sim| HookRead[Ler erro]
-    HookRead --> HookType{Falha determinística?}
-    HookType -->|sim: formatting, import order, unused imports, type annotations| HookFix[Auto-fix direto]
-    HookFix --> HookRetry[Re-rodar verificação mínima]
-    HookRetry --> DoCommit
-    HookType -->|decisão de produto, API contract, refactor não óbvio| HookPause[Pausar e perguntar]
-    HookType -->|user pediu --no-verify| NoVerifyCheck[Confirmar com user implicações]
-    NoVerifyCheck -->|confirmado| DoCommitNoVerify[git commit --no-verify]
-    NoVerifyCheck -->|não confirmado| HookFix
-
-    DoCommit --> IdentityFail{user.name/user.email<br/>não configurado?}
-    IdentityFail -->|sim| StopIdentity[Parar, não inventar identidade<br/>sugerir git config local<br/>pedir valores ao user]
-    IdentityFail -->|não| Verify
-
-    style Start fill:#006400
-    style Done fill:#006400
-    style StopSkill fill:#8B0000
-    style StopNoCommit fill:#8B0000
-    style StopNoChanges fill:#8B0000
-    style StopConflict fill:#8B0000
-    style StopEmpty fill:#8B0000
-    style StopIdentity fill:#8B0000
-    style PauseAddP fill:#8B7500
-    style PauseSemantic fill:#8B7500
-    style PauseRisk fill:#8B7500
-    style HookPause fill:#8B7500
-    style DoCommitNoVerify fill:#8B4500
+```text
+<type>(<scope>): <assunto imperativo>
 ```
 
-## Legenda
+Exemplos:
 
-| Cor                | Significado                                |
-| ------------------ | ------------------------------------------ |
-| 🟢 Verde escuro    | Início / Fim                               |
-| 🔴 Vermelho escuro | Parada (não executar)                      |
-| 🟡 Amarelo escuro  | Pausa para o usuário                       |
-| 🟠 Laranja escuro  | Caminho `--no-verify` (exceção controlada) |
+```text
+feat(auth): add token refresh flow
+fix(api): handle missing user avatar
+docs: update local setup steps
+```
 
-## Etapas do Fluxo
+## Validação comportamental
 
-1. **Filtro de ativação** — decide se a skill se aplica (exclui `git log`, rebase, squash, cherry-pick, revert, merge-conflict sem commit, transações de DB, perguntas educacionais).
-2. **Parse de intenção e escopo** — 4 caminhos: paths nomeados, worktree inteira, escopo por conversa, escopo ambíguo.
-3. **Inspeção do working tree** — 3 condições de parada (conflito/rebase em andamento, escopo sem mudanças, path inexistente).
-4. **Delegação para subagent** vs continuação inline.
-5. **Decisão de grupos** — split por arquivo vs arquivo misturado (oferecer `git add -p` ou pausar).
-6. **Construção da mensagem** — Conventional Commits, menor type honesto.
-7. **Verificação de AGENTS.md** — 3 caminhos: atualizar, nenhum, skip.
-8. **Plano e checagem de risco** — pausar se houver risco real.
-9. **Loop de execução sequencial** — stage → commit → verify → refresh.
-10. **Tratamento de hook failures** — auto-fix determinístico, pausar para decisões de produto, `--no-verify` apenas com confirmação.
-11. **Contingência de identidade git ausente** — parar e pedir valores ao usuário.
+Os evals comparam a versão anterior e a candidata em repositórios temporários:
+
+```bash
+bun evals/run-evals.mjs \
+  --configuration candidate \
+  --skill . \
+  --output /tmp/commit-changes-evals \
+  --model gpt-5.4-mini \
+  --reasoning medium
+```
+
+Os cenários ficam em `evals/evals.json`; resultados, transcrições e estado Git
+são gravados fora do repositório no caminho informado por `--output`.

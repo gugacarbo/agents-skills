@@ -19,7 +19,7 @@ externo concreto; sua ausência não autoriza efeitos externos.
 
 ## Contexto CASA
 
-**[adoção] · [tier] · CASA [versão] · `docs-check`: [estado]**
+**[adoção] · [tier] · CASA [versão] · ref `[casa-standard-ref]` · `docs-check`: [estado]**
 
 **Avaliação:** [resumo do que está sendo avaliado]
 
