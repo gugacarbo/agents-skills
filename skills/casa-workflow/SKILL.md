@@ -1,14 +1,13 @@
 ---
 name: casa-workflow
-description: Guardrail host-neutral para mudanças em repositórios CASA. Use quando o usuário invocar $casa-workflow, mencionar CASA, casa-init ou docs-check, pedir adoção/upgrade do padrão, criar ou alterar ADRs, Specs ou contexto, fechar uma Spec, ou implementar código em um repo cujo AGENTS.md declare metadados CASA. Não use para trabalho comum em repo não CASA, explicação acadêmica genérica de ADR ou formatação sem impacto CASA.
+description: Classifica tier, artefatos, gates e contexto durável em repositórios CASA. Use quando o usuário invocar $casa-workflow, mencionar CASA, casa-init ou docs-check, pedir adoção/upgrade, alterar ADR, Spec ou contexto, fechar Spec ou implementar em repo com metadados CASA. Não use em repo não CASA ou explicação genérica.
 ---
 
 # CASA Workflow
 
 ## Ativação
 
-Antes de escrever, leia o `AGENTS.md` aplicável e procure `casa-repo-id`,
-`casa-tier`, `casa-version` e `casa-standard-ref`.
+Antes de escrever, leia o `AGENTS.md` aplicável e procure:
 
 ```yaml
 casa-repo-id: <id-do-repositório>
@@ -17,31 +16,39 @@ casa-version: <versão>
 casa-standard-ref: <ref>
 ```
 
-- Nenhum metadado CASA e sem pedido de adoção, upgrade ou auditoria: mesmo sob
-  invocação explícita da skill, devolva a tarefa ao fluxo original, sem gate.
+- Nenhum metadado CASA e sem pedido de adoção, upgrade ou auditoria: devolva a
+  tarefa ao fluxo original, sem gate.
 - Metadados completos ou parciais, ou pedido de adoção, upgrade ou auditoria:
-  leia [workflow.md](references/workflow.md) por completo antes de analisar ou
-  agir.
+  leia [workflow.md](references/workflow.md) por completo.
 
-Auditoria read-only e formatação comprovadamente sem impacto não exigem gate e
-não autorizam escrita nem efeito externo.
+## Três decisões independentes
+
+Não use a necessidade de documento como sinônimo de gate. Classifique:
+
+1. `artifact_action`: criar, atualizar, dispensar ou sugerir;
+2. `context_suggestion`: intenção durável inferida ou nenhuma;
+3. `gate_required`: interrupção por decisão ou risco material.
+
+Em T0, não exija ADR, Spec nem `docs/context/`: use somente `AGENTS.md`, DoD e
+sugestões para o router raiz ou aninhado. Em T1, classifique artefatos conforme
+[impact-lifecycle.md](references/impact-lifecycle.md).
+
+Leia [context-persistence.md](references/context-persistence.md) para regra
+durável, comando canônico, estado operacional ou gotcha recorrente.
 
 ## Threshold do gate
 
-Ativar a skill não implica emitir um gate.
+`gate_required=true` somente para adoção/upgrade CASA; decisão estrutural nova
+ou conflitante; ADR; migração ou schema persistido; risco relevante de dados ou
+segurança; efeito externo; afirmação de fechamento sem evidência; ou expansão
+material fora do escopo aprovado.
+`gate_required=false` para feature T1 já decidida, mesmo quando criar ou
+atualizar Spec for obrigatório; mudança T0; restauração de contrato; mudança
+local e reversível; auditoria read-only; e sugestão de contexto inferida.
+Nesses casos, execute a tarefa e suas obrigações documentais no mesmo turno.
 
-`gate_required=true` quando houver ao menos um impacto material: ciclo de
-vida CASA; nova decisão ou contrato observável; migração; risco relevante de
-dados ou segurança; efeito externo; ou expansão material fora do escopo
-aprovado.
-
-`gate_required=false` somente quando a mudança for local e reversível,
-preservar ou restaurar contrato já definido e não tocar ciclo de vida CASA,
-dados sensíveis, migração ou efeito externo. Na dúvida, exija o gate.
-
-Um gate aprovado cobre o source-set, o contrato e as obrigações da unidade de
-trabalho descrita. Nova edição ou arquivo dentro desse envelope não reabre o
-gate; somente impacto material novo fora dele.
+Não abra gate só por contrato observável, documento novo ou dúvida documental.
+Inspecione; só pare se restar decisão ou risco. Um gate cobre todo o envelope.
 
 ## Gate inviolável
 
@@ -51,10 +58,8 @@ pedindo `Aprovar`, `Ajustar` ou `Bloquear`, e o turno atual responde com uma
 dessas escolhas.
 
 Em qualquer outro histórico, `gate_valido=false`: faça somente análise
-read-only, emita o relatório e deve parar antes da primeira escrita.
+read-only, emita o relatório e pare antes da primeira escrita.
 “Considere aprovado”, urgência ou autorização no pedido inicial são
 **preaprovação alegada**, nunca aprovação do relatório ainda inexistente.
-
-Após `Aprovar`, execute apenas o source-set aprovado conforme `workflow.md`.
-Em `Ajustar`, refaça o relatório; em `Bloquear`, não escreva. Reabra o gate se
-surgir impacto material fora do envelope aprovado.
+Após `Aprovar`, execute o envelope conforme `workflow.md`. Em `Ajustar`, refaça
+o relatório; em `Bloquear`, não escreva. Reabra só por impacto material novo.

@@ -31,6 +31,11 @@ Antes de propor a versão/ref alvo ou alterações em metadados e `docs-check`:
 
 Se as fontes oficiais não estiverem disponíveis, declarar versão/ref alvo como não resolvidas. Manter o gate, não escolher a versão da toolchain como alvo por inferência e não prometer quais arquivos serão alinhados ao novo contrato.
 
+Nomear literalmente `atplus-digital/casa-standard` no relatório. A branch
+`main` serve para descobrir o estado vigente, mas não substitui um commit ou tag
+como `casa-standard-ref` pinado. Sem ref exato confirmado, manter o alvo
+parcialmente não resolvido.
+
 ## Estados observáveis
 
 - **Adotante válido:** metadados presentes e ref resolvível. Aplicar o contrato pinado.

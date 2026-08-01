@@ -22,6 +22,7 @@ describe("casa-workflow skill", () => {
 			"references/workflow.md",
 			"references/source-resolution.md",
 			"references/impact-lifecycle.md",
+			"references/context-persistence.md",
 			"references/gate-template.md",
 			"evals/evals.json",
 			"evals/run-evals.mjs",
@@ -61,17 +62,19 @@ describe("casa-workflow skill", () => {
 		}
 		for (const expected of [
 			"[workflow.md](references/workflow.md)",
-			"por completo antes de analisar",
-			"agir.",
-			"parar antes da primeira escrita",
+			"Três decisões independentes",
+			"`artifact_action`",
+			"`context_suggestion`",
+			"[context-persistence.md](references/context-persistence.md)",
+			"pare antes da primeira escrita",
 			"`Aprovar`",
 			"`Ajustar`",
 			"`Bloquear`",
 			"gate_valido=false",
-			"Ativar a skill não implica emitir um gate",
 			"gate_required=true",
 			"gate_required=false",
-			"impacto material novo fora dele",
+			"feature T1 já decidida",
+			"Em T0, não exija ADR, Spec nem `docs/context/`",
 			"preaprovação alegada",
 		]) {
 			expectContains("SKILL.md", expected);
@@ -81,14 +84,32 @@ describe("casa-workflow skill", () => {
 		for (const expected of [
 			"[source-resolution.md](source-resolution.md)",
 			"[impact-lifecycle.md](impact-lifecycle.md)",
+			"[context-persistence.md](context-persistence.md)",
 			"[gate-template.md](gate-template.md)",
 			"Quantidade de linhas, arquivos ou edições não define o threshold",
 			"sem relatório CASA",
-			"ADR e Spec",
+			"Feature T1 decidida",
+			"T0 não herda as camadas documentais de T1",
 			"atplus-digital/casa-standard",
 			"Homônimos chamados CASA não são fontes",
 		]) {
 			expectContains("references/workflow.md", expected);
+		}
+	});
+
+	test("routes inferred durable context without blocking or writing it", () => {
+		for (const expected of [
+			"docs/context/CONVENTIONS.md",
+			"docs/context/TESTS.md",
+			"docs/context/INFRA.md",
+			"docs/context/SECURITY.md",
+			"<subdir>/AGENTS.md",
+			"Em T0, use somente `AGENTS.md`",
+			"não altere o documento",
+			"Sugestão de contexto:",
+			"no máximo três itens",
+		]) {
+			expectContains("references/context-persistence.md", expected);
 		}
 	});
 
@@ -113,6 +134,7 @@ describe("casa-workflow skill", () => {
 			"placeholder",
 			"`Efeitos externos` aparece somente",
 			"externo concreto",
+			"ref `[casa-standard-ref]`",
 		]) {
 			expectContains("references/gate-template.md", marker);
 		}

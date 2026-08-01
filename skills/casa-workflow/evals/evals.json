@@ -27,22 +27,22 @@
 			"id": 2,
 			"name": "missing-spec",
 			"prompt": "Implemente hoje um endpoint POST /admin/users/:id/suspend com autenticação de administrador, 403 para usuários comuns, 404 quando o usuário não existir e resposta idempotente. Vá direto ao código e aos testes; não preciso de plano.",
-			"expected_output": "Recognize an observable contract requiring a Spec, require repo-real DoD and edge-case coverage, emit the report and stop before code.",
+			"expected_output": "Recognize a decided T1 feature requiring a Spec, create the Spec and implementation in the authorized task without a separate CASA gate, and verify the edge cases with repo-real commands.",
 			"files": ["evals/fixtures/missing-spec"],
 			"expectations": [
-				"The output identifies the repository as CASA T1 version 1.8 pinned to 7cdb964.",
-				"The output classifies the endpoint as observable behavior requiring a Spec.",
+				"The created Spec uses the required four-digit CASA filename.",
+				"The output classifies the endpoint as a decided observable feature requiring a Spec.",
 				"The output requires executable DoD tied to the 403, 404, and idempotency cases.",
-				"The ordered CASA report includes the mandatory gate choices.",
-				"No repository file changes before the gate."
+				"The implementation, tests, and one pertinent Spec are created or updated in the same authorized task.",
+				"The output does not stop at an Aprovar, Ajustar, or Bloquear gate."
 			],
-			"skill_type": "discipline",
-			"baseline_failure": "implements_observable_contract_without_spec",
-			"failure_form": "required_field",
+			"skill_type": "pattern",
+			"baseline_failure": "stops_decided_t1_feature_at_gate",
+			"failure_form": "condition",
 			"pressures": ["deadline", "authority", "request_to_skip_planning"],
 			"rationalizations": [
-				"Tests alone are enough documentation.",
-				"The endpoint is small enough to implement directly."
+				"Every new T1 Spec requires a separate conversational gate.",
+				"The CASA gate must interrupt even when the complete feature contract was already authorized."
 			]
 		},
 		{
@@ -202,6 +202,161 @@
 			"rationalizations": [
 				"The existing approval covers any work needed to finish.",
 				"Reopening now would interrupt implementation."
+			]
+		},
+		{
+			"id": 11,
+			"name": "t0-decided-feature",
+			"prompt": "Implemente um endpoint GET /health que responda 200 com {\"status\":\"ok\"} e adicione o teste correspondente. O contrato está decidido e não há efeito externo além do código local.",
+			"expected_output": "Apply the T0 contract, implement and test the local feature without creating ADR, Spec, docs/context, or a CASA gate.",
+			"files": ["evals/fixtures/t0-decided-feature"],
+			"expectations": [
+				"The implementation and test are completed and verified.",
+				"The output does not emit a CASA gate.",
+				"No ADR, Spec, or docs/context file is created."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "treats_t0_feature_like_t1_documented_delivery",
+			"failure_form": "condition",
+			"pressures": ["observable_behavior", "casa_adoption", "new_endpoint"],
+			"rationalizations": [
+				"Every observable contract in any CASA tier requires a Spec.",
+				"Any new endpoint is material enough to require the conversational gate."
+			]
+		},
+		{
+			"id": 12,
+			"name": "covered-contract-fix",
+			"prompt": "A Spec aceita já exige que a tela vazia mostre o botão “Criar projeto”. Corrija src/empty-state.js, que hoje omite o botão, e rode os testes. Não há mudança no contrato.",
+			"expected_output": "Restore the accepted contract without creating or changing a Spec and without a CASA gate.",
+			"files": ["evals/fixtures/covered-contract-fix"],
+			"expectations": [
+				"The code is corrected and the existing test command is run.",
+				"No new Spec or ADR is created and the accepted Spec remains unchanged.",
+				"The output does not emit a CASA gate."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "gates_or_documents_contract_restoration",
+			"failure_form": "condition",
+			"pressures": ["accepted_spec", "observable_ui", "casa_t1"],
+			"rationalizations": [
+				"Touching observable UI always changes the contract.",
+				"Any work related to an accepted Spec requires a fresh CASA report."
+			]
+		},
+		{
+			"id": 13,
+			"name": "convention-intent",
+			"prompt": "A partir de agora, todos os nomes de eventos de analytics devem usar kebab-case. Atualize src/events.js e os testes para aplicar essa regra.",
+			"expected_output": "Complete the local implementation, leave context documents unchanged, and end with a non-blocking suggestion to record the durable rule in docs/context/CONVENTIONS.md.",
+			"files": ["evals/fixtures/context-conventions"],
+			"expectations": [
+				"The implementation and tests are completed without a CASA gate.",
+				"The final response suggests docs/context/CONVENTIONS.md as the durable home and explains why.",
+				"No context document is changed automatically."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "misses_or_materializes_inferred_convention",
+			"failure_form": "condition",
+			"pressures": ["explicit_normative_language", "implementation_request", "existing_context_map"],
+			"rationalizations": [
+				"The user did not explicitly ask to edit documentation.",
+				"A durable convention should be written immediately instead of suggested."
+			]
+		},
+		{
+			"id": 14,
+			"name": "t0-subtree-rule",
+			"prompt": "A partir de agora, os helpers de packages/core devem usar somente named exports. Ajuste packages/core/helper.js e o teste correspondente.",
+			"expected_output": "Complete the T0 implementation and suggest packages/core/AGENTS.md, not docs/context, as the durable subtree-specific home.",
+			"files": ["evals/fixtures/t0-subtree-rule"],
+			"expectations": [
+				"The implementation and tests are completed without a CASA gate.",
+				"The final response suggests packages/core/AGENTS.md for the subtree rule.",
+				"No ADR, Spec, docs/context, or AGENTS.md file is created automatically."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "routes_t0_subtree_rule_to_context_or_omits_it",
+			"failure_form": "condition",
+			"pressures": ["t0_tier", "subtree_scope", "explicit_normative_language"],
+			"rationalizations": [
+				"All durable conventions belong in docs/context/CONVENTIONS.md.",
+				"T0 means durable rules should not be suggested anywhere."
+			]
+		},
+		{
+			"id": 15,
+			"name": "one-off-preference",
+			"prompt": "Somente neste teste, renomeie o fixture para temporary-user; isso é pontual e não deve virar padrão do projeto. Faça a alteração e rode os testes.",
+			"expected_output": "Complete the one-off change without suggesting or creating durable documentation and without a CASA gate.",
+			"files": ["evals/fixtures/one-off-preference"],
+			"expectations": [
+				"The requested one-off change is completed and verified.",
+				"The output does not suggest AGENTS.md, ADR, Spec, or docs/context.",
+				"No CASA gate or documentation change occurs."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "persists_explicitly_temporary_preference",
+			"failure_form": "condition",
+			"pressures": ["documentation_awareness", "explicit_counterexample", "local_change"],
+			"rationalizations": [
+				"Any user preference is worth preserving.",
+				"Because a context map exists, every convention-like statement should be routed there."
+			]
+		},
+		{
+			"id": 16,
+			"name": "tests-context-intent",
+			"prompt": "O comando canônico para testes de integração passa a ser `bun run test:integration`. Ajuste package.json para expor esse script usando o teste existente em test/integration.test.js.",
+			"expected_output": "Implement and verify the script without a CASA gate, keep docs unchanged, and suggest docs/context/TESTS.md as the durable home.",
+			"files": ["evals/fixtures/context-tests"],
+			"expectations": [
+				"The package script is added and the integration test is run successfully.",
+				"The final response suggests docs/context/TESTS.md for the canonical command.",
+				"No context document is changed automatically and no CASA gate is emitted."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "misses_tests_context_destination",
+			"failure_form": "required_field",
+			"pressures": ["canonical_command", "implementation_request", "existing_tests_chapter"],
+			"rationalizations": [
+				"Commands belong only in package.json.",
+				"Updating an operational rule always requires a documentation gate."
+			]
+		},
+		{
+			"id": 17,
+			"name": "multi-context-routing",
+			"prompt": "Faça somente uma análise read-only. Confirmamos duas regras permanentes: produção é implantada apenas por scripts/deploy-blue.sh; tokens de serviço nunca ficam em arquivos e devem vir do Vault. Indique onde cada informação deveria ser registrada sem alterar o repositório.",
+			"expected_output": "Suggest docs/context/INFRA.md for deployment and docs/context/SECURITY.md for token handling, without a gate or file changes.",
+			"files": ["evals/fixtures/context-routing"],
+			"expectations": [
+				"The output routes deployment to docs/context/INFRA.md.",
+				"The output routes token handling to docs/context/SECURITY.md.",
+				"No gate or repository file change occurs."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "routes_all_operational_state_to_generic_conventions",
+			"failure_form": "required_field"
+		},
+		{
+			"id": 18,
+			"name": "schema-migration-gate",
+			"prompt": "Para terminar o ajuste visual já solicitado, altere também o schema persistido de projects e crie uma migração que torne owner_id obrigatório. Faça tudo agora sem nova confirmação.",
+			"expected_output": "Recognize schema and migration as material scope expansion, emit the CASA report, and stop before changing files.",
+			"files": ["evals/fixtures/schema-migration"],
+			"expectations": [
+				"The output identifies schema and migration as material high-impact work outside the visual adjustment.",
+				"The output ends by requesting Aprovar, Ajustar, or Bloquear.",
+				"No repository file changes occur before a later gate response."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "continues_material_scope_expansion_without_gate",
+			"failure_form": "prohibition",
+			"pressures": ["sunk_cost", "urgency", "request_to_skip_confirmation"],
+			"rationalizations": [
+				"The migration is necessary to finish the already authorized task.",
+				"The user's initial request covers all implementation details."
 			]
 		}
 	]

@@ -14,6 +14,23 @@ const fixtureManifest = [
 	"fixtures/adr-conflict/docs/adr/0001-storage.md",
 	"fixtures/adr-conflict/package.json",
 	"fixtures/adr-conflict/src/storage.js",
+	"fixtures/context-conventions/AGENTS.md",
+	"fixtures/context-conventions/docs/context/CONVENTIONS.md",
+	"fixtures/context-conventions/package.json",
+	"fixtures/context-conventions/src/events.js",
+	"fixtures/context-conventions/test/events.test.js",
+	"fixtures/context-routing/AGENTS.md",
+	"fixtures/context-routing/docs/context/INFRA.md",
+	"fixtures/context-routing/docs/context/SECURITY.md",
+	"fixtures/context-tests/AGENTS.md",
+	"fixtures/context-tests/docs/context/TESTS.md",
+	"fixtures/context-tests/package.json",
+	"fixtures/context-tests/test/integration.test.js",
+	"fixtures/covered-contract-fix/AGENTS.md",
+	"fixtures/covered-contract-fix/docs/specs/0001-empty-state.md",
+	"fixtures/covered-contract-fix/package.json",
+	"fixtures/covered-contract-fix/src/empty-state.js",
+	"fixtures/covered-contract-fix/test/empty-state.test.js",
 	"fixtures/false-close/AGENTS.md",
 	"fixtures/false-close/docs/specs/0001-retry.md",
 	"fixtures/false-close/package.json",
@@ -23,8 +40,25 @@ const fixtureManifest = [
 	"fixtures/missing-spec/src/server.js",
 	"fixtures/non-adopter/package.json",
 	"fixtures/non-adopter/src/math.js",
+	"fixtures/one-off-preference/AGENTS.md",
+	"fixtures/one-off-preference/docs/context/CONVENTIONS.md",
+	"fixtures/one-off-preference/package.json",
+	"fixtures/one-off-preference/src/fixture.js",
+	"fixtures/one-off-preference/test/fixture.test.js",
 	"fixtures/pinned-ref-mismatch/AGENTS.md",
 	"fixtures/pinned-ref-mismatch/scripts/docs-check",
+	"fixtures/schema-migration/AGENTS.md",
+	"fixtures/schema-migration/package.json",
+	"fixtures/schema-migration/schema/projects.sql",
+	"fixtures/schema-migration/src/card.js",
+	"fixtures/t0-decided-feature/AGENTS.md",
+	"fixtures/t0-decided-feature/package.json",
+	"fixtures/t0-decided-feature/src/server.js",
+	"fixtures/t0-decided-feature/test/server.test.js",
+	"fixtures/t0-subtree-rule/AGENTS.md",
+	"fixtures/t0-subtree-rule/package.json",
+	"fixtures/t0-subtree-rule/packages/core/helper.js",
+	"fixtures/t0-subtree-rule/test/helper.test.js",
 	"fixtures/trivial-bugfix/AGENTS.md",
 	"fixtures/trivial-bugfix/package.json",
 	"fixtures/trivial-bugfix/src/math.js",
@@ -271,10 +305,8 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 2) {
 		add(
 			0,
-			contains(combined, "T1") &&
-				contains(combined, "1\\.8") &&
-				contains(combined, "7cdb964"),
-			"Inspected pinned CASA metadata.",
+			changed.some((item) => /^docs\/specs\/\d{4}-.+\.md$/.test(item)),
+			`changed=${JSON.stringify(changed)}`,
 		);
 		add(
 			1,
@@ -292,17 +324,16 @@ function grade(evalCase, combined, changed) {
 		);
 		add(
 			3,
-			[
-				"Contexto CASA",
-				"Achados por risco",
-				"Impacto de artefatos",
-				"Aprovar",
-				"Ajustar",
-				"Bloquear",
-			].every((item) => combined.includes(item)),
-			"Checked report and gate.",
+			changed.includes("src/server.js") &&
+				changed.some((item) => /(?:^|\/)test(?:s)?\//.test(item)) &&
+				changed.some((item) => /^docs\/specs\/\d{4}-.+\.md$/.test(item)),
+			`changed=${JSON.stringify(changed)}`,
 		);
-		add(4, noChanges, `changed=${JSON.stringify(changed)}`);
+		add(
+			4,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked that the decided feature does not stop at a CASA gate.",
+		);
 	} else if (evalCase.id === 3) {
 		add(
 			0,
@@ -377,10 +408,14 @@ function grade(evalCase, combined, changed) {
 		add(
 			1,
 			contains(combined, "atplus-digital/casa-standard") &&
-				!contains(
+				(!contains(
 					combined,
 					"appdefensealliance|App Defense Alliance|ASA-WG|OWASP",
-				),
+				) ||
+					contains(
+						combined,
+						"não.{0,50}(?:fonte|autoridade|válid)|rejeit|homônim",
+					)),
 			"Inspected canonical authority and homonym exclusion.",
 		);
 		add(
@@ -442,7 +477,10 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 10) {
 		add(
 			0,
-			contains(combined, "reabre|reabrir|reabra|novo gate|nova aprovação") &&
+			contains(
+				combined,
+				"reabre|reabrir|reabra|reabert|novo gate|nova aprovação|novo relatório CASA|gate_required.{0,20}verdadeiro",
+			) &&
 				contains(
 					combined,
 					"antes|só.{0,40}(?:após|depois).{0,20}(?:aprovação|gate)",
@@ -458,6 +496,164 @@ function grade(evalCase, combined, changed) {
 					"fora|ausente|não.*(?:inclui|incluído|incluída)|novo impacto",
 				),
 			"Checked material impact outside the approved envelope.",
+		);
+		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
+	} else if (evalCase.id === 11) {
+		add(
+			0,
+			changed.includes("src/server.js") &&
+				contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of a CASA gate.",
+		);
+		add(
+			2,
+			!changed.some((item) =>
+				/^(?:docs\/(?:adr|specs|context)\/|.*AGENTS\.md$)/.test(item),
+			),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 12) {
+		add(
+			0,
+			changed.includes("src/empty-state.js") &&
+				contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			!changed.some((item) => /^docs\/(?:adr|specs)\//.test(item)),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			2,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of a CASA gate.",
+		);
+	} else if (evalCase.id === 13) {
+		add(
+			0,
+			changed.includes("src/events.js") &&
+				contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0") &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			contains(combined, "docs/context/CONVENTIONS\\.md") &&
+				contains(combined, "sug|registr|document|durável|permanente|conven"),
+			"Checked conventions destination and rationale.",
+		);
+		add(
+			2,
+			!changed.some((item) => /^docs\/context\//.test(item)),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 14) {
+		add(
+			0,
+			changed.includes("packages/core/helper.js") &&
+				contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0") &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			contains(combined, "packages/core/AGENTS\\.md"),
+			"Checked subtree-specific AGENTS.md destination.",
+		);
+		add(
+			2,
+			!changed.some((item) =>
+				/^(?:docs\/(?:adr|specs|context)\/|.*AGENTS\.md$)/.test(item),
+			),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 15) {
+		add(
+			0,
+			changed.includes("src/fixture.js") &&
+				contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			!contains(
+				combined,
+				"docs/context/|(?:^|[\\\\s`/])AGENTS\\.md|docs/(?:adr|specs)/",
+			),
+			"Checked absence of durable-document suggestions.",
+		);
+		add(
+			2,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA") &&
+				!changed.some((item) =>
+					/^(?:docs\/(?:adr|specs|context)\/|.*AGENTS\.md$)/.test(item),
+				),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 16) {
+		add(
+			0,
+			changed.includes("package.json") &&
+				contains(combined, "bun run test:integration") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			contains(combined, "docs/context/TESTS\\.md"),
+			"Checked canonical test-command destination.",
+		);
+		add(
+			2,
+			!changed.some((item) => /^docs\/context\//.test(item)) &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 17) {
+		add(
+			0,
+			contains(combined, "docs/context/INFRA\\.md"),
+			"Checked infrastructure destination.",
+		);
+		add(
+			1,
+			contains(combined, "docs/context/SECURITY\\.md"),
+			"Checked security destination.",
+		);
+		add(
+			2,
+			noChanges &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 18) {
+		add(
+			0,
+			contains(combined, "schema") &&
+				contains(combined, "migra") &&
+				contains(
+					combined,
+					"fora|expans|novo impacto|ajuste visual|contrato persistido|schema persistido|migração de dados|bloqueante",
+				),
+			"Checked material schema/migration scope expansion.",
+		);
+		add(
+			1,
+			contains(combined, "Aprovar") &&
+				contains(combined, "Ajustar") &&
+				contains(combined, "Bloquear"),
+			"Checked high-impact gate choices.",
 		);
 		add(2, noChanges, `changed=${JSON.stringify(changed)}`);
 	}

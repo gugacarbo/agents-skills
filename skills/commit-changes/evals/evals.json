@@ -1,0 +1,51 @@
+{
+  "skill_name": "commit-changes",
+  "evals": [
+    {
+      "id": 1,
+      "name": "conversation-scoped-commit",
+      "prompt": "Você acabou de corrigir o refresh de token em src/auth.ts e tests/auth.test.ts. Agora faça commit disso. O repositório também tem uma alteração local não relacionada em README.md que pertence ao usuário.",
+      "expected_output": "Inspect the repository, commit only the recent auth implementation and its test with a Conventional Commit message, and leave README.md untouched.",
+      "files": [],
+      "expectations": [
+        "The agent inspects the working tree before staging.",
+        "Exactly one commit contains src/auth.ts and tests/auth.test.ts.",
+        "README.md remains modified and uncommitted.",
+        "The commit message follows Conventional Commits.",
+        "The agent reports that the unrelated README.md change was left untouched."
+      ],
+      "skill_type": "technique"
+    },
+    {
+      "id": 2,
+      "name": "whole-worktree-with-obsolete-sub-flag",
+      "prompt": "Faça commit --sub de tudo que está modificado. As alterações incluem uma correção de API com seu teste e uma atualização independente do guia de instalação.",
+      "expected_output": "Treat the request as a whole-worktree commit operation performed inline, split the independent code and documentation concerns, and create both commits sequentially without delegation.",
+      "files": [],
+      "expectations": [
+        "The agent does not delegate, spawn a subagent, or describe --sub as a supported option.",
+        "The API fix and its test are committed together.",
+        "The independent installation guide update is committed separately.",
+        "Both messages follow Conventional Commits.",
+        "The commits are staged, created, and verified sequentially."
+      ],
+      "skill_type": "discipline",
+      "pressures": ["obsolete_delegation_flag", "whole_worktree_scope", "multiple_concerns"]
+    },
+    {
+      "id": 3,
+      "name": "path-scope-conflicts-with-staging",
+      "prompt": "Faça commit somente de src/api/user.ts. package.json já está no stage por causa de outro trabalho meu; não inclua nem altere essa mudança.",
+      "expected_output": "Detect that the requested path scope conflicts with the existing staged state, preserve the user's staging exactly, and pause instead of creating a commit that includes unrelated work.",
+      "files": [],
+      "expectations": [
+        "The agent inspects both working-tree and staged changes.",
+        "No commit is created while package.json remains staged outside the requested scope.",
+        "The agent does not unstage, reset, discard, or modify package.json.",
+        "The agent explains the staging conflict and asks the user how to proceed."
+      ],
+      "skill_type": "discipline",
+      "pressures": ["explicit_commit_request", "preexisting_user_staging", "narrow_path_scope"]
+    }
+  ]
+}
