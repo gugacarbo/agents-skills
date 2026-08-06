@@ -1,8 +1,12 @@
-# `<Título>`
+<!-- code-flow:issue-header:start -->
 
 > type: <issue | bug | feature | docs | epic>
 > Complexity: <XS | S | M | L | XL>
 > project_guidance: <paths e comandos consultados>
+
+<!-- code-flow:issue-header:end -->
+
+# `<Título>`
 
 <!-- Descreva o contrato da entrega, não a solução técnica. -->
 

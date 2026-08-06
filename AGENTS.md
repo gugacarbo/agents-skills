@@ -82,6 +82,9 @@ bun run skills-check    # relações e arquivos publicados das skills válidos
 - O commit automático de `dist/` no pre-push define
   `AGENTS_SKILLS_GENERATED_ARTIFACT_COMMIT=1`; o pre-commit então não repete
   checks que o `bun run verify` já concluiu antes de gerar o artefato.
+- `bun run test` falha enquanto `skills/brainstorm/package.json` apontar para
+  `dev/tests.test.ts` ausente; o runner paralelo cancela as demais suítes após
+  esse erro. Valide packages afetados isoladamente até o teste ser restaurado.
 
 ## Mapa de contexto
 

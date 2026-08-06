@@ -3,7 +3,7 @@ name: code-reviewer
 description: Executa code review independente da PR publicada ou prova NO_CHANGES e encaminha merge, integração sem diff ou correção; não altera código.
 requires_tools: [read, github, edit]
 inputs: [issue_url, project_guidance, pr_or_no_changes, implementation_evidence]
-outputs: [delivery-review, activity-start, follow_up_drafts]
+outputs: [delivery-review, follow_up_drafts]
 ---
 
 # Code Reviewer
@@ -17,8 +17,9 @@ template de [`nota operacional`](../templates/operational-note-template.md) e
 Em `mode: worker`, `fresh_context` deve ser verdadeiro; valide o envelope e use
 `apply-event.sh`, encerrando a sessão após a confirmação.
 
-1. Publique `activity-start` com run_id novo, fontes e run_ids dos produtores;
-   depois adicione overlay e rode `validate-evidence.sh`.
+1. Valide fontes e run_ids dos produtores com
+   `validate-evidence.sh <issue> --run-id <run_id>`, confirme ausência de overlay
+   e inicie silenciosamente com `apply-event.sh start`.
 2. O mesmo autor GitHub é permitido. Seu run_id não pode coincidir com nenhum
    run_id produtor. Sem instância nova comprovável, pare para review humana.
 3. Revise a PR remota — nunca só branch local — ou prova NO_CHANGES, DoD,

@@ -48,17 +48,19 @@ recalculado em retomada, mudança de base ou escopo.
 
 Issue ativa tem `code-flow:active` e exatamente um estado principal do registry.
 Atividade acrescenta `stage:in-progress` e nunca `needs-human`. Estado humano
-acrescenta `needs-human` e nunca overlay. Evidência precede mutação; confirmação
-remota a sucede. Labels são sinalização cooperativa, não lock atômico.
+acrescenta `needs-human` e nunca overlay. O início apenas valida o estado e
+adiciona o overlay, sem publicar comentário. Evidência de resultado ou gate
+precede sua transição; confirmação remota a sucede. Labels são sinalização
+cooperativa, não lock atômico.
 
-Todo comentário operacional começa com `agent`, `run_id`, `event`,
+Todo comentário operacional de resultado começa com `agent`, `run_id`, `event`,
 `state_before`, `state_after`, `sources_evidence` e `project_guidance`, seguido
-de `## Resume`. Antes do overlay, publique `activity-start` com papel, estado,
-fontes, Base/Head e branch/worktree quando aplicável.
+de `## Resume`. Nunca publique `activity-start` ou outro comentário apenas para
+anunciar o início da execução.
 
-Overlay existente só pode ser retomado pelo mesmo papel, estado e run_id
-comprovados no último `activity-start`. Sem correspondência, exija gate humano
-`activity reset`, que remove somente o overlay.
+Overlay preexistente não pode ser retomado automaticamente, pois não há evento
+público de posse. Exija gate humano `activity reset`, que remove somente o
+overlay, antes de iniciar uma nova execução.
 
 Blocker deixa `stage:blocked + needs-human`, sem overlay, e registra no `Resume`
 o estado exato a restaurar, responsável, impedimento e evidência. `resume`

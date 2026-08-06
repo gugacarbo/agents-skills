@@ -202,6 +202,20 @@ describe("code-flow skill", () => {
 		});
 	}
 
+	test("architect review renders as Markdown and ends with a final verdict", () => {
+		const template = contents("templates/architecture-review-template.md");
+		expect(template).toContain("Não use blocos de código cercados");
+		expect(template).toMatch(/^## Veredito final$/m);
+		expect(template).toMatch(/^Veredito: `/m);
+		expect(template).toMatch(/^Destino: `stage:/m);
+		expect(template.indexOf("## Veredito final")).toBeLessThan(
+			template.indexOf("<!-- code-flow:architect-review:end -->"),
+		);
+		expect(template.trim()).toEndWith(
+			"<!-- code-flow:architect-review:end -->",
+		);
+	});
+
 	test("source-set digest canonicalizes line endings and rejects invalid UTF-8", () => {
 		const temporaryRoot = makeTempDir("code-flow-digest-test");
 		const digestScript = join(skillRoot, "scripts", "source-set-digest.sh");
@@ -243,6 +257,7 @@ describe("code-flow skill", () => {
 		const statePath = join(temporaryRoot, "state.json");
 		const statusPath = join(temporaryRoot, "state.status");
 		const repositoryLabelsPath = join(temporaryRoot, "repo-labels");
+		const commentsPath = join(temporaryRoot, "comments");
 		const bin = join(temporaryRoot, "bin");
 		const fakeGh = join(bin, "gh");
 		const transition = join(skillRoot, "scripts", "transition-issue.sh");
@@ -264,12 +279,14 @@ describe("code-flow skill", () => {
 			setLabels([]);
 			write(statusPath, "OPEN\n");
 			write(repositoryLabelsPath, "");
+			write(commentsPath, "");
 			write(
 				fakeGh,
 				String.raw`#!/usr/bin/env sh
 state=${JSON.stringify(statePath)}
 status=${JSON.stringify(statusPath)}
 repo_labels=${JSON.stringify(repositoryLabelsPath)}
+comments=${JSON.stringify(commentsPath)}
 case "$1 $2" in
   'issue view')
     printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","labels":%s,"comments":[]}\n' "$(cat "$status")" "$(cat "$state")"
@@ -284,6 +301,7 @@ case "$1 $2" in
       esac
     done
     ;;
+  'issue comment') printf '%s\n' "$*" >>"$comments" ;;
   'label view') grep -Fxq -- "$3" "$repo_labels" ;;
   'label create') grep -Fxq -- "$3" "$repo_labels" || printf '%s\n' "$3" >>"$repo_labels" ;;
   'auth status'|'repo view') exit 0 ;;
@@ -340,7 +358,7 @@ esac
 				"stage:in-progress",
 			]);
 			expectFailure(runTransition(["--stop"]));
-			expectFailure(
+			expectSuccess(
 				run([validateEvidence, "42", "--json"], { env: environment }),
 			);
 
@@ -376,6 +394,7 @@ esac
 				confirmed_state: "stage:ready-for-execution",
 			});
 			expect(labels()).toContain("stage:in-progress");
+			expect(read(commentsPath)).toBe("");
 
 			const gateEventPath = join(temporaryRoot, "gate-event.json");
 			setLabels([
@@ -454,6 +473,68 @@ esac
 			expect(JSON.parse(migrated.stdout)).toMatchObject({
 				confirmed_state: "stage:ready-for-execution",
 			});
+		} finally {
+			cleanup(temporaryRoot);
+		}
+	});
+
+	test("dispatcher prepends an idempotent header only to non-empty issue bodies", () => {
+		const temporaryRoot = makeTempDir("code-flow-issue-header-test");
+		const bodyPath = join(temporaryRoot, "body.md");
+		const bin = join(temporaryRoot, "bin");
+		const fakeGh = join(bin, "gh");
+		const updateHeader = join(skillRoot, "scripts", "update-issue-header.sh");
+		const environment = { PATH: `${bin}:${Bun.env.PATH}` };
+		const invoke = () =>
+			run(
+				[
+					updateHeader,
+					"42",
+					"--type",
+					"feature",
+					"--complexity",
+					"S",
+					"--project-guidance",
+					"AGENTS.md; bun test",
+				],
+				{ env: environment },
+			);
+
+		try {
+			write(bodyPath, "## Existing request\n\nKeep this text.\n");
+			write(
+				fakeGh,
+				String.raw`#!/usr/bin/env sh
+body=${JSON.stringify(bodyPath)}
+case "$1 $2" in
+  'issue view') jq -n --rawfile body "$body" '{number:42,url:"https://github.com/acme/demo/issues/42",body:$body}' ;;
+  'issue edit')
+    shift 3
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --body-file) cp "$2" "$body"; shift 2 ;;
+        *) shift ;;
+      esac
+    done
+    ;;
+esac
+`,
+			);
+			chmodSync(fakeGh, 0o755);
+
+			expectSuccess(invoke());
+			const firstBody = read(bodyPath);
+			expect(firstBody).toStartWith(
+				"<!-- code-flow:issue-header:start -->\n> type: feature\n> Complexity: S\n> project_guidance: AGENTS.md; bun test\n<!-- code-flow:issue-header:end -->",
+			);
+			expect(firstBody).toContain("## Existing request\n\nKeep this text.");
+
+			expectSuccess(invoke());
+			expect(read(bodyPath)).toBe(firstBody);
+
+			write(bodyPath, "  \n\n");
+			expectSuccess(invoke());
+			expect(read(bodyPath)).toBe("  \n\n");
 		} finally {
 			cleanup(temporaryRoot);
 		}

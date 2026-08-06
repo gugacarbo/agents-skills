@@ -2,16 +2,16 @@
 set -eu
 
 # Validate code-flow evidence against the current issue state.
-# Checks: activity-start comment exists when stage:in-progress is present;
-# run_id/agent/state_before in the comment match the current labels; and a
-# code-reviewer run ID does not collide with producer runs.
+# Checks protocol history and, when supplied, ensures a code-reviewer run ID
+# does not collide with producer runs. Activity starts are intentionally silent.
 
-USAGE='Usage: validate-evidence.sh <N|URL> [--json]'
+USAGE='Usage: validate-evidence.sh <N|URL> [--run-id RUN_ID] [--json]'
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 STATES_FILE="$SCRIPT_DIR/../workflow-states.json"
 
 ISSUE=""
 JSON_OUT=0
+RUN_ID=''
 
 die() {
   printf '%s\n' "$1" >&2
@@ -23,6 +23,11 @@ while [ "$#" -gt 0 ]; do
     --json)
       JSON_OUT=1
       shift
+      ;;
+    --run-id)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      RUN_ID="$2"
+      shift 2
       ;;
     --help | -h)
       printf '%s\n' "$USAGE"
@@ -59,10 +64,6 @@ PRIMARY_ACTOR=$(jq -r --arg label "$PRIMARY" '.states[] | select(.label == $labe
 
 WARNINGS=''
 ERRORS=''
-START_RUN_ID=''
-START_AGENT=''
-START_STATE=''
-
 # Worker comments carry a one-line, hidden protocol event. Keep parsing the
 # legacy Markdown fields below so interactive runs remain compatible, but make
 # an active issue without a v1 event explicitly migratable rather than silently
@@ -72,67 +73,24 @@ EVENTS=$(printf '%s' "$ISSUE_JSON" | jq -c '
    try ($body | capture("<!-- code-flow:event:v1 (?<event>\\{.*\\}) -->").event | fromjson) catch empty]
 ')
 EVENT_COUNT=$(printf '%s' "$EVENTS" | jq 'length')
-if [ "$HAS_ACTIVE" = true ] && [ "$EVENT_COUNT" -eq 0 ]; then
+if [ "$HAS_ACTIVE" = true ] && [ "$HAS_ACTIVITY" = false ] && [ "$EVENT_COUNT" -eq 0 ]; then
   ERRORS="$ERRORS\nmigration_required: active issue has no code-flow:event:v1 history"
 fi
 
-# Extract the latest activity-start comment (event: activity-start).
-# Comments are returned oldest-first; pick the last one matching.
-LAST_START_JSON=$(printf '%s' "$ISSUE_JSON" | jq -c --arg activity "$ACTIVITY" '
-  [.comments[] | select(.body | test("event:\\s*activity-start"))] | last // empty
-')
-
-if [ "$HAS_ACTIVITY" = true ]; then
-  if [ -z "$LAST_START_JSON" ] || [ "$LAST_START_JSON" = "null" ]; then
-    ERRORS="$ERRORS\noverlay stage:in-progress present but no activity-start comment found"
-  else
-    START_RUN_ID=$(printf '%s' "$LAST_START_JSON" | jq -r '.body | try capture("run_id:\\s*(?<value>\\S+)").value catch empty' 2> /dev/null || printf '')
-    START_AGENT=$(printf '%s' "$LAST_START_JSON" | jq -r '.body | try capture("agent:\\s*(?<value>\\S+)").value catch empty' 2> /dev/null || printf '')
-    START_STATE=$(printf '%s' "$LAST_START_JSON" | jq -r '.body | try capture("state_before:\\s*(?<value>\\S+)").value catch empty' 2> /dev/null || printf '')
-
-    [ -n "$START_RUN_ID" ] || ERRORS="$ERRORS\nactivity-start missing run_id"
-    [ -n "$START_AGENT" ] || ERRORS="$ERRORS\nactivity-start missing agent"
-    [ -n "$START_STATE" ] || ERRORS="$ERRORS\nactivity-start missing state_before"
-
-    # Validate agent matches the actor of the current primary state.
-    if [ -n "$PRIMARY_ACTOR" ] && [ -n "$START_AGENT" ] && [ "$START_AGENT" != "$PRIMARY_ACTOR" ]; then
-      ERRORS="$ERRORS\nactivity-start agent '$START_AGENT' does not match primary state actor '$PRIMARY_ACTOR'"
-    fi
-
-    # Validate state_before matches current primary (overlay preserves primary).
-    if [ -n "$PRIMARY" ] && [ -n "$START_STATE" ] && [ "$START_STATE" != "$PRIMARY" ]; then
-      ERRORS="$ERRORS\nactivity-start state_before '$START_STATE' does not match current primary '$PRIMARY'"
-    fi
-
-  fi
-else
-  if [ -n "$LAST_START_JSON" ] && [ "$LAST_START_JSON" != "null" ]; then
-    WARNINGS="$WARNINGS\nactivity-start comment exists but stage:in-progress is absent (stale evidence)"
-  fi
-fi
-
-# Structured events are the authoritative worker evidence when present.
-LAST_EVENT_START=$(printf '%s' "$EVENTS" | jq -c '[.[] | select(.event == "activity-start")] | last // empty')
-if [ "$HAS_ACTIVITY" = true ] && [ -n "$LAST_EVENT_START" ] && [ "$LAST_EVENT_START" != null ]; then
-  START_RUN_ID=$(printf '%s' "$LAST_EVENT_START" | jq -r '.run_id // empty')
-  START_AGENT=$(printf '%s' "$LAST_EVENT_START" | jq -r '.role // empty')
-  START_STATE=$(printf '%s' "$LAST_EVENT_START" | jq -r '.state_before // empty')
-fi
-
 # Same GitHub author is allowed; a code-reviewer run ID must be fresh.
-if [ "$HAS_ACTIVITY" = true ] && [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$START_RUN_ID" ]; then
-  PRODUCER_COLLISION=$(printf '%s' "$ISSUE_JSON" | jq -r --arg run "$START_RUN_ID" '
+if [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$RUN_ID" ]; then
+  PRODUCER_COLLISION=$(printf '%s' "$ISSUE_JSON" | jq -r --arg run "$RUN_ID" '
     [.comments[]
      | select(.body | test("agent:\\s*(dispatcher|architect|executor)"))
      | select(.body | test("run_id:\\s*" + $run + "([[:space:]]|$)"))]
      | length
   ' 2> /dev/null || printf '0')
-  [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$START_RUN_ID' collides with a producer run"
+  [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$RUN_ID' collides with a producer run"
 fi
 
-if [ "$HAS_ACTIVITY" = true ] && [ "$PRIMARY_ACTOR" = code-reviewer ] && [ "$EVENT_COUNT" -gt 0 ]; then
-  PRODUCER_COLLISION=$(printf '%s' "$EVENTS" | jq --arg run "$START_RUN_ID" '[.[] | select(.role | IN("dispatcher", "architect", "executor")) | select(.run_id == $run)] | length')
-  [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$START_RUN_ID' collides with a producer event"
+if [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$RUN_ID" ] && [ "$EVENT_COUNT" -gt 0 ]; then
+  PRODUCER_COLLISION=$(printf '%s' "$EVENTS" | jq --arg run "$RUN_ID" '[.[] | select(.role | IN("dispatcher", "architect", "executor")) | select(.run_id == $run)] | length')
+  [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$RUN_ID' collides with a producer event"
 fi
 
 # Build result.

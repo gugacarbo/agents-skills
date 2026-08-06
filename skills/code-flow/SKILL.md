@@ -29,11 +29,12 @@ No worker, leia também [`worker-runtime.md`](worker-runtime.md) e
 | `stage:needs-delivery-review`                      | [`code-reviewer`](agents/04-code-reviewer.md) |
 | `stage:integration-authorized`                     | [`integrator`](agents/05-integrator.md)       |
 
-Publique evidência antes de labels e confirme o estado remoto depois. Atividade
-usa `stage:in-progress`; gate usa `needs-human`; nunca ambos. Cada papel lê seu
+Inícios são silenciosos: valide o estado, adicione `stage:in-progress` e não
+publique comentário. Resultados e gates precedem suas transições e o estado
+remoto é confirmado depois. Gate usa `needs-human`; nunca combine ambos. Cada papel lê seu
 próprio prompt, runtime, registry e templates, sem memória do papel anterior.
-Use `scripts/transition-issue.sh`, `scripts/validate-evidence.sh` e
-`scripts/source-set-digest.sh` para operações determinísticas.
+Use `scripts/transition-issue.sh`, `scripts/validate-evidence.sh`,
+`scripts/update-issue-header.sh` e `scripts/source-set-digest.sh` para operações determinísticas.
 Workers usam `scripts/apply-event.sh`; comentários de gate têm sintaxe
 `/code-flow gate DECISION` e são tratados por [`gate`](agents/06-gate.md).
 Comentários seguem [`evidence-template.md`](templates/evidence-template.md);

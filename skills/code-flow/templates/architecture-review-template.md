@@ -1,4 +1,9 @@
-<!-- Preencha os campos; mantenha exatamente um par de marcadores. -->
+<!--
+Preencha os campos e mantenha exatamente um par de marcadores.
+Publique como Markdown cru. Não use blocos de código cercados para envolver o
+relatório; headings, listas e linhas de tabela começam na coluna 1. Se houver
+um exemplo de código ou diff, encerre-o antes do heading seguinte.
+-->
 
 > agent: architect
 > run_id: <uuid>
@@ -39,5 +44,12 @@ Base SHA: `<sha>`
 | Item     | Evidência | Ação     |
 | -------- | --------- | -------- |
 | `<item>` | `<prova>` | `<ação>` |
+
+## Veredito final
+
+Veredito: `EXECUÇÃO DIRETA | REQUER APROVAÇÃO HUMANA | BLOQUEADO`
+Destino: `stage:ready-for-execution | stage:awaiting-execution-approval | stage:blocked`
+Justificativa: <síntese baseada em complexidade, hard triggers, spec/ADR e blockers>
+Próximo responsável: `<executor | gate | architect após desbloqueio>`
 
 <!-- code-flow:architect-review:end -->

@@ -20,11 +20,12 @@ registry, prompt do papel e guidance nearest-wins podem alterar o procedimento.
 
 ## Eventos, mutação e gates
 
-Antes de mutar labels, valide e publique um evento conforme
-`schemas/protocol-event.schema.json`. O comentário inclui JSON de uma linha em
-`<!-- code-flow:event:v1 ... -->` e resumo Markdown. Use `apply-event.sh` para
-`start`, `finish`, `gate` e `complete`; ele relê a issue, confirma a transição e
-retorna JSON. Não chame `transition-issue.sh` diretamente no modo worker.
+Antes de qualquer mutação, valide um evento conforme
+`schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` adiciona o
+overlay sem publicar comentário. Em `finish`, `gate` e `complete`, o comentário
+inclui JSON de uma linha em `<!-- code-flow:event:v1 ... -->` e resumo Markdown
+antes da transição. O script relê a issue, confirma a transição e retorna JSON.
+Não chame `transition-issue.sh` diretamente no modo worker.
 
 Gates chegam como comentário exatamente `/code-flow gate DECISION`. O papel
 `gate` valida a permissão GitHub atual do autor (`write`, `maintain` ou `admin`),

@@ -94,9 +94,13 @@ if [ "$OPERATION" = gate ]; then
   case "$PERMISSION" in write | maintain | admin) ;; *) die "Error: gate author '$AUTHOR' lacks write permission" ;; esac
 fi
 
-SUMMARY=$(printf '%s' "$EVENT" | jq -r '.result.summary')
-BODY=$(printf '### code-flow %s\n\n%s\n\n<!-- code-flow:event:v1 %s -->' "$OPERATION" "$SUMMARY" "$EVENT")
-gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --body "$BODY" > /dev/null
+# Starting work only acquires the activity overlay. Results, gates, and
+# completion remain public protocol events; starts intentionally stay silent.
+if [ "$OPERATION" != start ]; then
+  SUMMARY=$(printf '%s' "$EVENT" | jq -r '.result.summary')
+  BODY=$(printf '### code-flow %s\n\n%s\n\n<!-- code-flow:event:v1 %s -->' "$OPERATION" "$SUMMARY" "$EVENT")
+  gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --body "$BODY" > /dev/null
+fi
 
 case "$OPERATION" in
   start)

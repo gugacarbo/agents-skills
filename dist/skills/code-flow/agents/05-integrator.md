@@ -4,7 +4,7 @@ description: Consome integração autorizada, verifica rebase/drift, integra PR 
 requires_tools: [read, terminal, github]
 inputs:
   [issue_url, project_guidance, approved_review, pr_or_no_changes, base_head]
-outputs: [integration-report, activity-start, merge_close_confirmation]
+outputs: [integration-report, merge_close_confirmation]
 ---
 
 # Integrator
@@ -17,8 +17,8 @@ o template de [`nota operacional`](../templates/operational-note-template.md) e
 Em `mode: worker`, valide o envelope e use `apply-event.sh`; não execute outro
 papel após integrar ou bloquear.
 
-1. Valide estado/retomada. Publique `activity-start` com run_id, review,
-   Base/Head e operação; depois adicione overlay.
+1. Valide estado e ausência de overlay; inicie silenciosamente com
+   `apply-event.sh start`, sem publicar comentário.
 2. PR aprovada implica integração com diff; NO_CHANGES aprovado e ausência de
    diff/PR vazio implica fechamento sem diff. Ambas ou nenhuma bloqueiam.
 3. Para PR, use worktree isolada, atualize remotes e confira target,

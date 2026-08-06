@@ -23,13 +23,13 @@
 		},
 		{
 			"id": 2,
-			"prompt": "Sou um worker VPS executor. A issue #43 do acme/demo está em stage:ready-for-execution sem needs-human. Outro worker já publicou activity-start com run_id abc-123 e adicionou stage:in-progress. Eu li a issue e quero começar a trabalhar nela agora.",
-			"expected_output": "The agent detects the existing stage:in-progress overlay and the activity-start comment with run_id abc-123. It refuses to start work, citing that the overlay belongs to another run. It recommends either waiting for the other worker, using 'activity reset' via a human gate, or picking a different issue. It does NOT add a second stage:in-progress or publish a competing activity-start.",
+			"prompt": "Sou um worker VPS executor. A issue #43 do acme/demo está em stage:ready-for-execution + stage:in-progress, sem needs-human. Não há comentário de início, porque os inícios agora são silenciosos. Eu quero começar a trabalhar nela agora.",
+			"expected_output": "The agent detects the existing stage:in-progress overlay and refuses to resume or start over it because silent starts do not publish ownership. It recommends waiting or using 'activity reset' via a human gate. It does NOT add a second overlay or publish an activity-start comment.",
 			"files": [],
 			"expectations": [
 				"The transcript detects stage:in-progress is already present on the issue.",
 				"The agent does not invoke transition-issue.sh --start-work.",
-				"The agent references the existing run_id abc-123 and explains it cannot start over another run's overlay.",
+				"The agent explains that a preexisting overlay cannot be resumed automatically because starts are silent.",
 				"The agent recommends activity reset (human gate) or waiting, not parallel work."
 			],
 			"skill_type": "discipline",
@@ -104,6 +104,36 @@
 			"skill_type": "discipline",
 			"baseline_failure": "executor_continues_material_decision",
 			"failure_form": "prohibition"
+		},
+		{
+			"id": 7,
+			"prompt": "A issue #48 tem corpo '## Pedido\\n\\nAdicionar exportação CSV' e está em stage:needs-triage. Faça o dispatching, classifique como Complexity S e preserve o texto original.",
+			"expected_output": "The dispatcher starts without an activity-start comment, prepends the standard type/Complexity/project_guidance header to the non-empty issue body without deleting its original content, publishes the triage result once, and routes the issue.",
+			"files": [],
+			"expectations": [
+				"No activity-start comment is published.",
+				"The issue body begins with type, Complexity S, and project_guidance metadata.",
+				"The original 'Adicionar exportação CSV' content remains in the issue body.",
+				"The triage result is published in a single result comment."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "publishes_start_and_leaves_issue_header_absent",
+			"failure_form": "output_contract"
+		},
+		{
+			"id": 8,
+			"prompt": "A issue #49 está em stage:needs-architect. Produza o relatório do architect com riscos e validações extensos, incluindo um pequeno diff na decisão de spec, e encaminhe para aprovação humana.",
+			"expected_output": "The architect publishes the report as rendered Markdown, closes any code or diff fence before subsequent sections, renders both tables normally, and ends with a final verdict that requires human approval and names stage:awaiting-execution-approval.",
+			"files": [],
+			"expectations": [
+				"The risks and validation tables are outside code blocks and render as Markdown tables.",
+				"Any fenced diff is closed before the next heading.",
+				"The final section is 'Veredito final'.",
+				"The verdict requires human approval and the destination is stage:awaiting-execution-approval."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "leaves_final_tables_inside_code_block_and_omits_verdict",
+			"failure_form": "output_contract"
 		}
 	]
 }

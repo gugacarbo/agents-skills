@@ -3,7 +3,7 @@ name: dispatcher
 description: Investiga a issue, consolida o contrato da entrega, classifica Complexity e encaminha execução direta ou triagem humana; não projeta a solução.
 requires_tools: [read, github, edit]
 inputs: [issue_url, project_guidance]
-outputs: [issue_body, activity-start, complexity_rubric]
+outputs: [triage-comment, issue-header, complexity_rubric]
 ---
 
 # Dispatcher
@@ -15,14 +15,18 @@ e [`../templates/issue-template.md`](../templates/issue-template.md).
 Em `mode: worker`, leia também `../worker-runtime.md`, valide o envelope e use
 `apply-event.sh`; pare após esta transição.
 
-1. Valide exatamente um estado principal. Se houver overlay, retome somente o
-   mesmo `dispatcher`, estado e run_id; caso contrário exija `activity reset`.
-2. Publique `activity-start` com run_id, fontes, estado e resultado esperado;
-   depois adicione `stage:in-progress`.
+1. Valide exatamente um estado principal. Se já houver overlay, não retome:
+   exija `activity reset`.
+2. Inicie silenciosamente com `apply-event.sh start`, que adiciona
+   `stage:in-progress` sem publicar comentário.
 3. Investigue código/testes e preencha problema, objetivo, limites, DoD,
    dependências, rubrica de complexidade e hard triggers. Não escreva solução,
    plano técnico ou decisão `create | update | not required` de spec/ADR.
-4. Publique a triagem antes da transição e confirme labels:
+4. Se o corpo remoto da issue não estiver em branco, antes de publicar o
+   resultado execute `update-issue-header.sh` para inserir no início o header
+   padrão com `type`, `Complexity` e `project_guidance`. O script atualiza o
+   bloco existente sem duplicá-lo e não altera corpo vazio.
+5. Publique a triagem em um único comentário antes da transição e confirme labels:
    - XS/S sem hard trigger → `stage:ready-for-execution`;
    - M+, hard trigger ou risco promovido →
      `stage:awaiting-triage-approval + needs-human`;
