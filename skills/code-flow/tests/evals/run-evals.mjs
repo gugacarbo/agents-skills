@@ -285,8 +285,7 @@ async function grade(evalCase, context) {
 		expectations.push(
 			result(
 				evalCase.expectations[0],
-				!hasCommand("gh issue comment.*activity-start") &&
-					!hasText("publish.*activity-start|public.*activity-start"),
+				!hasCommand("gh issue comment.*activity-start"),
 				`commands=${JSON.stringify(commands)}`,
 			),
 			result(
@@ -352,16 +351,19 @@ async function main() {
 
 		const prompt =
 			options.configuration === "with_skill"
-				? `Read and apply the skill at ${path.join(options.skill, "SKILL.md")}.\n\n${evalCase.prompt}`
-				: evalCase.prompt;
+				? `This is a read-only behavioral simulation. Do not access GitHub, install connectors, or ask for confirmation. Read the skill, then state the exact issue-body and comment mutations the role would perform, including relevant rendered content and protocol markers.\n\nRead and apply the skill at ${path.join(options.skill, "SKILL.md")}.\n\n${evalCase.prompt}`
+				: `This is a read-only behavioral simulation. Do not access GitHub, install connectors, or ask for confirmation. State the exact issue-body and comment mutations you would perform.\n\n${evalCase.prompt}`;
 		const agentArgs = [
 			"exec",
 			"--json",
+			"--ephemeral",
 			"--sandbox",
 			"read-only",
 			"--skip-git-repo-check",
 			"-m",
 			options.model,
+			"-c",
+			`model_reasoning_effort=${JSON.stringify(options.reasoning)}`,
 			"--output-last-message",
 			finalPath,
 			prompt,

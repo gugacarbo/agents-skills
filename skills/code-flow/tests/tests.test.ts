@@ -679,6 +679,7 @@ esac
 		expect(evalCatalog.skill_name).toBe("code-flow");
 		expect(evalCatalog.evals.length).toBeGreaterThanOrEqual(5);
 		expectExists(join(skillRoot, "tests", "evals", "run-evals.mjs"));
+		expectContains("tests/evals/run-evals.mjs", "model_reasoning_effort");
 		expectExists(
 			join(
 				skillRoot,
