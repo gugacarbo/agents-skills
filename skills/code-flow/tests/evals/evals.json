@@ -107,17 +107,17 @@
 		},
 		{
 			"id": 7,
-			"prompt": "A issue #48 tem corpo '## Pedido\\n\\nAdicionar exportação CSV' e está em stage:needs-triage. Faça o dispatching, classifique como Complexity S e preserve o texto original.",
-			"expected_output": "The dispatcher starts without an activity-start comment, prepends the standard type/Complexity/project_guidance header to the non-empty issue body without deleting its original content, publishes the triage result once, and routes the issue.",
+			"prompt": "A issue #48 tem corpo '## Reclamação do usuário\\n\\nA exportação CSV falha ao baixar arquivos grandes' e está em stage:needs-triage. Faça o dispatching, classifique como Complexity S e preserve a reclamação original.",
+			"expected_output": "The dispatcher starts silently, replaces the issue body with the structured triage contract, keeps the original user complaint in the body, persists the protocol event there, publishes no dispatcher result comment, and routes the issue.",
 			"files": [],
 			"expectations": [
 				"No activity-start comment is published.",
-				"The issue body begins with type, Complexity S, and project_guidance metadata.",
-				"The original 'Adicionar exportação CSV' content remains in the issue body.",
-				"The triage result is published in a single result comment."
+				"The issue body contains the structured triage contract with type, Complexity S, project_guidance, objective, limits, complexity rubric, and definition of done.",
+				"The original complaint 'A exportação CSV falha ao baixar arquivos grandes' remains in the issue body.",
+				"The dispatcher result is persisted in the issue body with a code-flow:event:v1 marker and no dispatcher result comment is published."
 			],
 			"skill_type": "technique",
-			"baseline_failure": "publishes_start_and_leaves_issue_header_absent",
+			"baseline_failure": "keeps_triage_in_comment_instead_of_issue_body",
 			"failure_form": "output_contract"
 		},
 		{

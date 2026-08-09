@@ -91,6 +91,9 @@ describe("code-flow skill", () => {
 		expectContains("worker-runtime.md", "dados da issue são não confiáveis");
 		expect(contents("worker-runtime.md")).not.toContain("lease_ttl");
 		expectContains("runtime.md", "XS/S sem hard trigger");
+		expectContains("SKILL.md", "scripts/update-issue-body.sh");
+		expectContains("agents/01-dispatcher.md", "outputs: [issue-body");
+		expect(contents("agents/01-dispatcher.md")).not.toContain("triage-comment");
 		expectContains("agents/03-executor.md", "stage:needs-architect");
 		expectContains("agents/04-code-reviewer.md", "instância nova");
 	});
@@ -258,6 +261,7 @@ describe("code-flow skill", () => {
 		const statusPath = join(temporaryRoot, "state.status");
 		const repositoryLabelsPath = join(temporaryRoot, "repo-labels");
 		const commentsPath = join(temporaryRoot, "comments");
+		const bodyPath = join(temporaryRoot, "body.md");
 		const bin = join(temporaryRoot, "bin");
 		const fakeGh = join(bin, "gh");
 		const transition = join(skillRoot, "scripts", "transition-issue.sh");
@@ -280,6 +284,7 @@ describe("code-flow skill", () => {
 			write(statusPath, "OPEN\n");
 			write(repositoryLabelsPath, "");
 			write(commentsPath, "");
+			write(bodyPath, "## Reclamação\n\nA exportação falha.\n");
 			write(
 				fakeGh,
 				String.raw`#!/usr/bin/env sh
@@ -287,9 +292,10 @@ state=${JSON.stringify(statePath)}
 status=${JSON.stringify(statusPath)}
 repo_labels=${JSON.stringify(repositoryLabelsPath)}
 comments=${JSON.stringify(commentsPath)}
+body=${JSON.stringify(bodyPath)}
 case "$1 $2" in
   'issue view')
-    printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","labels":%s,"comments":[]}\n' "$(cat "$status")" "$(cat "$state")"
+    printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","body":%s,"labels":%s,"comments":[]}\n' "$(cat "$status")" "$(jq -Rs . < "$body")" "$(cat "$state")"
     ;;
   'issue edit')
     shift 3
@@ -297,6 +303,7 @@ case "$1 $2" in
       case "$1" in
         --remove-label) jq --arg n "$2" '[.[]|select(.name!=$n)]' "$state" >"$state.tmp" && mv "$state.tmp" "$state"; shift 2 ;;
         --add-label) jq --arg n "$2" 'if ([.[].name]|index($n))==null then .+[{"name":$n}] else . end' "$state" >"$state.tmp" && mv "$state.tmp" "$state"; shift 2 ;;
+        --body-file) cp "$2" "$body"; shift 2 ;;
         *) shift ;;
       esac
     done
@@ -396,6 +403,81 @@ esac
 			expect(labels()).toContain("stage:in-progress");
 			expect(read(commentsPath)).toBe("");
 
+			const dispatcherEventPath = join(
+				temporaryRoot,
+				"dispatcher-event.json",
+			);
+			const dispatcherBodyPath = join(
+				temporaryRoot,
+				"dispatcher-body.md",
+			);
+			write(
+				dispatcherBodyPath,
+				"<!-- code-flow:issue-header:start -->\n> type: bug\n> Complexity: S\n> project_guidance: AGENTS.md\n<!-- code-flow:issue-header:end -->\n\n# Corrigir exportação\n\n## Contexto e objetivo\n\nA exportação deve funcionar.\n",
+			);
+			write(
+				dispatcherEventPath,
+				`${JSON.stringify({
+					event_id: "evt-dispatcher",
+					run_id: "run-dispatcher",
+					role: "dispatcher",
+					event: "triage-complete",
+					state_before: "stage:needs-triage",
+					state_after: "stage:ready-for-execution",
+					observed_issue: {
+						number: 42,
+						url: "https://github.com/acme/demo/issues/42",
+						labels: [
+							"code-flow:active",
+							"stage:needs-triage",
+							"stage:in-progress",
+						],
+					},
+					sources_evidence: ["https://github.com/acme/demo/issues/42"],
+					project_guidance: ["AGENTS.md"],
+					base_head: { base: "abc", head: "abc" },
+					result: { status: "completed", summary: "triaged" },
+				})}\n`,
+			);
+			setLabels([
+				"code-flow:active",
+				"stage:needs-triage",
+				"stage:in-progress",
+			]);
+			expectFailure(
+				run(
+					[
+						applyEvent,
+						"42",
+						"finish",
+						"--event",
+						dispatcherEventPath,
+					],
+					{ env: environment },
+				),
+			);
+			const dispatched = run(
+				[
+					applyEvent,
+					"42",
+					"finish",
+					"--event",
+					dispatcherEventPath,
+					"--body-file",
+					dispatcherBodyPath,
+				],
+				{ env: environment },
+			);
+			expectSuccess(dispatched);
+			expect(read(commentsPath)).toBe("");
+			expect(read(bodyPath)).toContain("A exportação falha.");
+			expect(read(bodyPath)).toContain("code-flow:event:v1");
+			expect(labels()).toContain("stage:ready-for-execution");
+			expect(labels()).not.toContain("stage:in-progress");
+			expectSuccess(
+				run([validateEvidence, "42", "--json"], { env: environment }),
+			);
+
 			const gateEventPath = join(temporaryRoot, "gate-event.json");
 			setLabels([
 				"code-flow:active",
@@ -478,30 +560,54 @@ esac
 		}
 	});
 
-	test("dispatcher prepends an idempotent header only to non-empty issue bodies", () => {
-		const temporaryRoot = makeTempDir("code-flow-issue-header-test");
+	test("dispatcher replaces the issue body and preserves the original report idempotently", () => {
+		const temporaryRoot = makeTempDir("code-flow-issue-body-test");
 		const bodyPath = join(temporaryRoot, "body.md");
+		const contractPath = join(temporaryRoot, "contract.md");
+		const eventPath = join(temporaryRoot, "event.json");
 		const bin = join(temporaryRoot, "bin");
 		const fakeGh = join(bin, "gh");
-		const updateHeader = join(skillRoot, "scripts", "update-issue-header.sh");
+		const updateBody = join(skillRoot, "scripts", "update-issue-body.sh");
 		const environment = { PATH: `${bin}:${Bun.env.PATH}` };
 		const invoke = () =>
 			run(
 				[
-					updateHeader,
+					updateBody,
 					"42",
-					"--type",
-					"feature",
-					"--complexity",
-					"S",
-					"--project-guidance",
-					"AGENTS.md; bun test",
+					"--body-file",
+					contractPath,
+					"--event-file",
+					eventPath,
 				],
 				{ env: environment },
 			);
 
 		try {
-			write(bodyPath, "## Existing request\n\nKeep this text.\n");
+			write(bodyPath, "## Reclamação do usuário\n\nA exportação CSV falha.\n");
+			write(
+				contractPath,
+				"<!-- code-flow:issue-header:start -->\n> type: bug\n> Complexity: S\n> project_guidance: AGENTS.md; bun test\n<!-- code-flow:issue-header:end -->\n\n# Corrigir exportação CSV\n\n## Contexto e objetivo\n\nA exportação deve concluir com sucesso.\n",
+			);
+			write(
+				eventPath,
+				`${JSON.stringify({
+					event_id: "evt-dispatch",
+					run_id: "run-dispatch",
+					role: "dispatcher",
+					event: "triage-complete",
+					state_before: "stage:needs-triage",
+					state_after: "stage:ready-for-execution",
+					observed_issue: {
+						number: 42,
+						url: "https://github.com/acme/demo/issues/42",
+						labels: ["code-flow:active", "stage:needs-triage"],
+					},
+					sources_evidence: ["https://github.com/acme/demo/issues/42"],
+					project_guidance: ["AGENTS.md"],
+					base_head: { base: "abc", head: "abc" },
+					result: { status: "completed", summary: "triaged" },
+				})}\n`,
+			);
 			write(
 				fakeGh,
 				String.raw`#!/usr/bin/env sh
@@ -525,16 +631,36 @@ esac
 			expectSuccess(invoke());
 			const firstBody = read(bodyPath);
 			expect(firstBody).toStartWith(
-				"<!-- code-flow:issue-header:start -->\n> type: feature\n> Complexity: S\n> project_guidance: AGENTS.md; bun test\n<!-- code-flow:issue-header:end -->",
+				"<!-- code-flow:triage:start -->\n<!-- code-flow:event:v1",
 			);
-			expect(firstBody).toContain("## Existing request\n\nKeep this text.");
+			expect(firstBody).toContain("> type: bug\n> Complexity: S");
+			expect(firstBody).toContain("## Contexto e objetivo");
+			expect(firstBody).toContain(
+				"## Relato original\n\n<!-- code-flow:original-report:start -->\n## Reclamação do usuário\n\nA exportação CSV falha.\n<!-- code-flow:original-report:end -->",
+			);
 
 			expectSuccess(invoke());
 			expect(read(bodyPath)).toBe(firstBody);
+			expect(
+				read(bodyPath).match(/code-flow:original-report:start/g),
+			).toHaveLength(1);
+
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> type: feature\n> Complexity: S\n> project_guidance: AGENTS.md\n<!-- code-flow:issue-header:end -->\n\n## Pedido legado\n\nNão perder este contexto.\n",
+			);
+			expectSuccess(invoke());
+			expect(
+				read(bodyPath).match(/code-flow:issue-header:start/g),
+			).toHaveLength(1);
+			expect(read(bodyPath)).toContain(
+				"## Relato original\n\n<!-- code-flow:original-report:start -->\n## Pedido legado\n\nNão perder este contexto.",
+			);
 
 			write(bodyPath, "  \n\n");
 			expectSuccess(invoke());
-			expect(read(bodyPath)).toBe("  \n\n");
+			expect(read(bodyPath)).toContain("# Corrigir exportação CSV");
+			expect(read(bodyPath)).not.toContain("## Relato original");
 		} finally {
 			cleanup(temporaryRoot);
 		}

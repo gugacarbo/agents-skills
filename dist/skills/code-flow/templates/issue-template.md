@@ -36,6 +36,12 @@
 | -------------------- | --------------------- |
 | `<resultado>`        | `<prova>`             |
 
+## Encaminhamento
+
+<estado de destino, motivo e próximo responsável; em blocker, como retomar>
+
+<!-- O helper acrescenta o Relato original relevante e o evento do protocolo. -->
+
 <!-- Para type: epic, mantenha a seção abaixo; caso contrário, remova-a. -->
 
 ## Entregas coordenadas

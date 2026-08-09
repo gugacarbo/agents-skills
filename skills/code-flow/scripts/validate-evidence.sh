@@ -51,7 +51,7 @@ command -v jq > /dev/null 2>&1 || die 'Error: jq is required'
 ACTIVATION=$(jq -r '.activation_label' "$STATES_FILE")
 ACTIVITY=$(jq -r '.activity_label' "$STATES_FILE")
 
-ISSUE_JSON=$(gh issue view "$ISSUE" --json number,url,labels,comments)
+ISSUE_JSON=$(gh issue view "$ISSUE" --json number,url,body,labels,comments)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
 ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
 [ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != null ] || die "Error: could not resolve issue: $ISSUE"
@@ -64,12 +64,11 @@ PRIMARY_ACTOR=$(jq -r --arg label "$PRIMARY" '.states[] | select(.label == $labe
 
 WARNINGS=''
 ERRORS=''
-# Worker comments carry a one-line, hidden protocol event. Keep parsing the
-# legacy Markdown fields below so interactive runs remain compatible, but make
-# an active issue without a v1 event explicitly migratable rather than silently
-# treating it as a trustworthy worker history.
+# Dispatcher bodies and worker comments carry a one-line, hidden protocol
+# event. Keep parsing legacy Markdown fields so interactive runs remain
+# compatible, but require v1 history for active issues outside an activity.
 EVENTS=$(printf '%s' "$ISSUE_JSON" | jq -c '
-  [.comments[] | .body as $body |
+  [(.body // ""), (.comments[] | .body) | . as $body |
    try ($body | capture("<!-- code-flow:event:v1 (?<event>\\{.*\\}) -->").event | fromjson) catch empty]
 ')
 EVENT_COUNT=$(printf '%s' "$EVENTS" | jq 'length')
@@ -80,9 +79,9 @@ fi
 # Same GitHub author is allowed; a code-reviewer run ID must be fresh.
 if [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$RUN_ID" ]; then
   PRODUCER_COLLISION=$(printf '%s' "$ISSUE_JSON" | jq -r --arg run "$RUN_ID" '
-    [.comments[]
-     | select(.body | test("agent:\\s*(dispatcher|architect|executor)"))
-     | select(.body | test("run_id:\\s*" + $run + "([[:space:]]|$)"))]
+    [(.body // ""), (.comments[] | .body)
+     | select(test("agent:\\s*(dispatcher|architect|executor)"))
+     | select(test("run_id:\\s*" + $run + "([[:space:]]|$)"))]
      | length
   ' 2> /dev/null || printf '0')
   [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$RUN_ID' collides with a producer run"

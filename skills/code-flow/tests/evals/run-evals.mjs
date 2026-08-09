@@ -281,6 +281,39 @@ async function grade(evalCase, context) {
 		);
 	}
 
+	if (evalCase.id === 7) {
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				!hasCommand("gh issue comment.*activity-start") &&
+					!hasText("publish.*activity-start|public.*activity-start"),
+				`commands=${JSON.stringify(commands)}`,
+			),
+			result(
+				evalCase.expectations[1],
+				hasText("issue body|corpo da issue") &&
+					hasText("Complexity:?\\s*S") &&
+					hasText("Contexto e objetivo") &&
+					hasText("Limites") &&
+					hasText("Rubrica de complexidade") &&
+					hasText("Definição de pronto"),
+				"transcript describes the structured issue body",
+			),
+			result(
+				evalCase.expectations[2],
+				hasText("A exportação CSV falha ao baixar arquivos grandes"),
+				"transcript preserves the original complaint",
+			),
+			result(
+				evalCase.expectations[3],
+				hasText("code-flow:event:v1") &&
+					!hasCommand("gh issue comment") &&
+					hasText("sem comentário|no comment|não publica.*comentário"),
+				`commands=${JSON.stringify(commands)}`,
+			),
+		);
+	}
+
 	const passed = expectations.every((item) => item.passed);
 	return { passed, expectations };
 }

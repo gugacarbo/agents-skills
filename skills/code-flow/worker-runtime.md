@@ -22,9 +22,11 @@ registry, prompt do papel e guidance nearest-wins podem alterar o procedimento.
 
 Antes de qualquer mutação, valide um evento conforme
 `schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` adiciona o
-overlay sem publicar comentário. Em `finish`, `gate` e `complete`, o comentário
-inclui JSON de uma linha em `<!-- code-flow:event:v1 ... -->` e resumo Markdown
-antes da transição. O script relê a issue, confirma a transição e retorna JSON.
+overlay sem publicar comentário. No `finish` do dispatcher, passe o body por
+`--body-file`: o script grava body e evento sem comentário. Nos demais
+`finish`, `gate` e `complete`, o comentário inclui JSON de uma linha em
+`<!-- code-flow:event:v1 ... -->` e resumo Markdown antes da transição. O script
+relê a issue, confirma a transição e retorna JSON.
 Não chame `transition-issue.sh` diretamente no modo worker.
 
 Gates chegam como comentário exatamente `/code-flow gate DECISION`. O papel

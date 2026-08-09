@@ -3,15 +3,14 @@ name: dispatcher
 description: Investiga a issue, consolida o contrato da entrega, classifica Complexity e encaminha execução direta ou triagem humana; não projeta a solução.
 requires_tools: [read, github, edit]
 inputs: [issue_url, project_guidance]
-outputs: [triage-comment, issue-header, complexity_rubric]
+outputs: [issue-body, complexity_rubric, routing-result]
 ---
 
 # Dispatcher
 
 Consuma somente `code-flow:active + stage:needs-triage`, sem `needs-human`.
 Leia [`../runtime.md`](../runtime.md), [`../workflow-states.json`](../workflow-states.json),
-o guidance nearest-wins, [`../templates/operational-note-template.md`](../templates/operational-note-template.md)
-e [`../templates/issue-template.md`](../templates/issue-template.md).
+o guidance nearest-wins e [`../templates/issue-template.md`](../templates/issue-template.md).
 Em `mode: worker`, leia também `../worker-runtime.md`, valide o envelope e use
 `apply-event.sh`; pare após esta transição.
 
@@ -22,11 +21,13 @@ Em `mode: worker`, leia também `../worker-runtime.md`, valide o envelope e use
 3. Investigue código/testes e preencha problema, objetivo, limites, DoD,
    dependências, rubrica de complexidade e hard triggers. Não escreva solução,
    plano técnico ou decisão `create | update | not required` de spec/ADR.
-4. Se o corpo remoto da issue não estiver em branco, antes de publicar o
-   resultado execute `update-issue-header.sh` para inserir no início o header
-   padrão com `type`, `Complexity` e `project_guidance`. O script atualiza o
-   bloco existente sem duplicá-lo e não altera corpo vazio.
-5. Publique a triagem em um único comentário antes da transição e confirme labels:
+4. Renderize um novo body completo conforme `issue-template.md`; não acrescente
+   somente um header. Incorpore nos campos estruturados os fatos relevantes do
+   texto anterior e preserve o relato original do usuário quando houver. O
+   helper mantém esse relato verbatim em `## Relato original` sem duplicá-lo.
+5. Persista body e evento antes da transição, sem comentário de dispatcher. No
+   worker, use `apply-event.sh finish --body-file BODY`; no modo interativo, use
+   `update-issue-body.sh --body-file BODY --event-file EVENT` antes de transicionar:
    - XS/S sem hard trigger → `stage:ready-for-execution`;
    - M+, hard trigger ou risco promovido →
      `stage:awaiting-triage-approval + needs-human`;

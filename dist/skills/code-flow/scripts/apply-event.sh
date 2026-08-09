@@ -1,12 +1,13 @@
 #!/usr/bin/env sh
 set -eu
 
-USAGE='Usage: apply-event.sh <N|URL> <start|finish|gate|complete> --event FILE [--provision-labels]'
+USAGE='Usage: apply-event.sh <N|URL> <start|finish|gate|complete> --event FILE [--body-file FILE] [--provision-labels]'
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 STATES_FILE="$SCRIPT_DIR/../workflow-states.json"
 ISSUE=''
 OPERATION=''
 EVENT_FILE=''
+BODY_FILE=''
 PROVISION=0
 
 die() {
@@ -19,6 +20,11 @@ while [ "$#" -gt 0 ]; do
     --event)
       [ "$#" -ge 2 ] || die "$USAGE"
       EVENT_FILE="$2"
+      shift 2
+      ;;
+    --body-file)
+      [ "$#" -ge 2 ] || die "$USAGE"
+      BODY_FILE="$2"
       shift 2
       ;;
     --provision-labels)
@@ -59,6 +65,12 @@ jq -e '
   (.base_head.base|type == "string") and (.base_head.head|type == "string") and
   (.result.status|IN("completed","waiting_human","blocked","retryable_failure","invalid_state"))
 ' "$EVENT_FILE" > /dev/null || die 'Error: invalid protocol event v1'
+ROLE=$(printf '%s' "$EVENT" | jq -r '.role')
+if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
+  [ -n "$BODY_FILE" ] && [ -f "$BODY_FILE" ] || die 'Error: dispatcher finish requires --body-file'
+elif [ -n "$BODY_FILE" ]; then
+  die 'Error: --body-file is only valid for dispatcher finish'
+fi
 
 ISSUE_JSON=$(gh issue view "$ISSUE" --json number,url,labels,state,updatedAt)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
@@ -94,9 +106,11 @@ if [ "$OPERATION" = gate ]; then
   case "$PERMISSION" in write | maintain | admin) ;; *) die "Error: gate author '$AUTHOR' lacks write permission" ;; esac
 fi
 
-# Starting work only acquires the activity overlay. Results, gates, and
-# completion remain public protocol events; starts intentionally stay silent.
-if [ "$OPERATION" != start ]; then
+# Starting work only acquires the activity overlay. Dispatcher results replace
+# the issue body; other results, gates, and completion remain comments.
+if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
+  "$SCRIPT_DIR/update-issue-body.sh" "$ISSUE_NUMBER" --body-file "$BODY_FILE" --event-file "$EVENT_FILE" > /dev/null
+elif [ "$OPERATION" != start ]; then
   SUMMARY=$(printf '%s' "$EVENT" | jq -r '.result.summary')
   BODY=$(printf '### code-flow %s\n\n%s\n\n<!-- code-flow:event:v1 %s -->' "$OPERATION" "$SUMMARY" "$EVENT")
   gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --body "$BODY" > /dev/null
@@ -104,7 +118,6 @@ fi
 
 case "$OPERATION" in
   start)
-    ROLE=$(printf '%s' "$EVENT" | jq -r '.role')
     ARGS="--start-work --role $ROLE --require-from $CURRENT"
     ;;
   finish)

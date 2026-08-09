@@ -49,11 +49,12 @@ recalculado em retomada, mudança de base ou escopo.
 Issue ativa tem `code-flow:active` e exatamente um estado principal do registry.
 Atividade acrescenta `stage:in-progress` e nunca `needs-human`. Estado humano
 acrescenta `needs-human` e nunca overlay. O início apenas valida o estado e
-adiciona o overlay, sem publicar comentário. Evidência de resultado ou gate
-precede sua transição; confirmação remota a sucede. Labels são sinalização
+adiciona o overlay, sem publicar comentário. O dispatcher persiste triagem e
+evento no body; os demais resultados e gates usam comentários. A evidência
+precede sua transição e a confirmação remota a sucede. Labels são sinalização
 cooperativa, não lock atômico.
 
-Todo comentário operacional de resultado começa com `agent`, `run_id`, `event`,
+Todo comentário operacional de resultado dos demais papéis começa com `agent`, `run_id`, `event`,
 `state_before`, `state_after`, `sources_evidence` e `project_guidance`, seguido
 de `## Resume`. Nunca publique `activity-start` ou outro comentário apenas para
 anunciar o início da execução.
@@ -63,8 +64,9 @@ público de posse. Exija gate humano `activity reset`, que remove somente o
 overlay, antes de iniciar uma nova execução.
 
 Blocker deixa `stage:blocked + needs-human`, sem overlay, e registra no `Resume`
-o estado exato a restaurar, responsável, impedimento e evidência. `resume`
-restaura somente esse estado.
+do comentário ou no `Encaminhamento` do body do dispatcher o estado exato a
+restaurar, responsável, impedimento e evidência. `resume` restaura somente esse
+estado.
 
 ## Gates e saída
 
