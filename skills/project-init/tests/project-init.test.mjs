@@ -67,12 +67,38 @@ test("lists templates with inherited complete optional tools", () => {
 			"typescript/vite",
 		],
 	);
+	const base = result.templates.find((template) => template.id === "base");
+	assert.deepEqual(
+		base.optionalTools.map((tool) => tool.id),
+		["ci-github-actions"],
+	);
 	const node = result.templates.find(
 		(template) => template.id === "typescript/node",
 	);
 	assert.deepEqual(
 		node.optionalTools.map((tool) => tool.id),
-		["cspell", "lint-staged"],
+		[
+			"ci-github-actions",
+			"cspell",
+			"env",
+			"secrets",
+			"format",
+			"lint-staged",
+			"docker",
+		],
+	);
+	const bun = result.templates.find((template) => template.id === "bun");
+	assert.deepEqual(
+		bun.optionalTools.map((tool) => tool.id),
+		[
+			"ci-github-actions",
+			"cspell",
+			"env",
+			"secrets",
+			"format",
+			"docker",
+			"lint-staged",
+		],
 	);
 });
 
@@ -548,6 +574,277 @@ test("rejects manifest targets that escape the destination", async (t) => {
 			.catch(() => false),
 		false,
 	);
+});
+
+test("plans and applies a Node overlay with docker, env, secrets, and ci-github-actions", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "service");
+	const args = [
+		"--template",
+		"typescript/node",
+		"--target",
+		target,
+		"--optional",
+		"docker,env,secrets,ci-github-actions",
+	];
+	const plan = run(["plan", ...args], directory);
+	assert.deepEqual(plan.collisions, []);
+	for (const optional of ["docker", "env", "secrets", "ci-github-actions"]) {
+		assert.equal(plan.selectedOptionalTools.includes(optional), true, optional);
+	}
+	assert.equal(
+		plan.files.some((file) => file.target === "Dockerfile"),
+		true,
+		"Dockerfile planned",
+	);
+	assert.equal(
+		plan.files.some((file) => file.target === ".dockerignore"),
+		true,
+		".dockerignore planned",
+	);
+	assert.equal(
+		plan.files.some((file) => file.target === ".env.example"),
+		true,
+		".env.example planned",
+	);
+	assert.equal(
+		plan.files.some((file) => file.target === "scripts/gitleaks-check"),
+		true,
+		"gitleaks-check planned",
+	);
+	assert.equal(
+		plan.files.some((file) => file.target === ".github/workflows/CI.yaml"),
+		true,
+		"CI workflow planned",
+	);
+	assert.match(plan.commands.optional.join("\n"), /@t3-oss\/env-core/);
+	assert.match(plan.commands.optional.join("\n"), /zod/);
+	assert.match(
+		plan.notes.join("\n"),
+		/@t3-oss\/env-core/,
+		"env planNote present",
+	);
+
+	const applied = run(["apply", ...args], directory);
+	assert.equal(applied.applied, true);
+	for (const file of [
+		"Dockerfile",
+		".dockerignore",
+		".env.example",
+		"scripts/gitleaks-check",
+		".github/workflows/CI.yaml",
+	]) {
+		assert.equal((await stat(path.join(target, file))).isFile(), true, file);
+	}
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.equal(
+		packageJson.scripts["secrets:check"],
+		"sh scripts/gitleaks-check",
+	);
+	const gitleaksCheck = await readFile(
+		path.join(target, "scripts/gitleaks-check"),
+		"utf8",
+	);
+	assert.match(gitleaksCheck, /gitleaks protect/);
+	assert.match(gitleaksCheck, /AVISO/);
+	const preCommit = await readFile(
+		path.join(target, "scripts/pre-commit"),
+		"utf8",
+	);
+	assert.match(preCommit, /scripts\/gitleaks-check/);
+	assert.match(preCommit, /run_pm run secrets:check/);
+	const dockerfile = await readFile(path.join(target, "Dockerfile"), "utf8");
+	assert.match(dockerfile, /node:22-alpine/);
+	assert.match(dockerfile, /USER node/);
+});
+
+test("plans a Bun service with the Bun-specific Dockerfile", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "bun-service");
+	const plan = run(
+		["plan", "--template", "bun", "--target", target, "--optional", "docker"],
+		directory,
+	);
+	assert.equal(plan.lifecycle.frameworkReady, false);
+	assert.equal(
+		plan.files.some((file) => file.target === "Dockerfile"),
+		true,
+	);
+});
+
+test("plans the static-serving Vite Dockerfile", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "web");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "web",
+		private: true,
+		type: "module",
+		dependencies: { vite: "latest", react: "latest" },
+	});
+	const plan = run(
+		[
+			"plan",
+			"--template",
+			"typescript/vite",
+			"--target",
+			target,
+			"--variant",
+			"react-ts",
+			"--optional",
+			"docker",
+		],
+		directory,
+	);
+	assert.equal(
+		plan.files.some((file) => file.target === "Dockerfile"),
+		true,
+	);
+	const dockerfileOutput = plan.files.find((f) => f.target === "Dockerfile");
+	assert.equal(dockerfileOutput.origin, "typescript/vite");
+});
+
+test("the Vite vitest config ships v8 coverage thresholds", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "web-ui");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "web-ui",
+		private: true,
+		type: "module",
+		dependencies: { vite: "latest", react: "latest" },
+	});
+	const plan = run(
+		[
+			"plan",
+			"--template",
+			"typescript/vite",
+			"--target",
+			target,
+			"--variant",
+			"react-ts",
+		],
+		directory,
+	);
+	assert.equal(plan.lifecycle.frameworkReady, true);
+	const vitest = await readFile(
+		path.join(
+			skillDirectory,
+			"templates",
+			"typescript",
+			"vite",
+			"files",
+			"vitest.config.ts",
+		),
+		"utf8",
+	);
+	assert.match(vitest, /provider: "v8"/);
+	assert.match(vitest, /lines: 90/);
+	assert.match(vitest, /pool: "threads"/);
+	assert.match(vitest, /environment: "node"/);
+});
+
+test("the format tool overlays Markdown/shell formatting onto the base format script", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "fmt-app");
+	const args = [
+		"--template",
+		"typescript/node",
+		"--target",
+		target,
+		"--optional",
+		"format",
+	];
+	const plan = run(["plan", ...args], directory);
+	assert.deepEqual(plan.collisions, []);
+	assert.match(
+		plan.packageChanges.find((change) => change.pointer === "/scripts/format")
+			.after,
+		/biome format --write/,
+	);
+	assert.match(plan.commands.optional.join("\n"), /prettier-plugin-sh/);
+	const applied = run(["apply", ...args], directory);
+	assert.equal(applied.applied, true);
+	assert.equal(applied.created.includes("package.json"), true);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.equal(typeof packageJson.scripts["format:md"], "string");
+	assert.equal(typeof packageJson.scripts["format:sh"], "string");
+	assert.match(packageJson.scripts.format, /format:md/);
+	assert.match(packageJson.scripts.format, /format:sh/);
+});
+
+test("the format tool requires approval when an existing format script conflicts", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "fmt-existing");
+	await mkdir(target);
+	await writeJson(path.join(target, "package.json"), {
+		name: "fmt-existing",
+		private: true,
+		type: "module",
+		scripts: { format: "custom-formatter" },
+	});
+	const args = [
+		"--template",
+		"typescript/node",
+		"--target",
+		target,
+		"--optional",
+		"format",
+	];
+	const plan = run(["plan", ...args], directory);
+	assert.equal(plan.collisions.includes("package.json#/scripts/format"), true);
+	const applied = run(
+		[
+			"apply",
+			...args,
+			"--approve",
+			plan.collisions
+				.filter((collision) => collision.startsWith("package.json#/scripts/"))
+				.join(","),
+		],
+		directory,
+	);
+	assert.equal(applied.applied, true);
+	const packageJson = JSON.parse(
+		await readFile(path.join(target, "package.json"), "utf8"),
+	);
+	assert.doesNotMatch(
+		packageJson.scripts.format,
+		/custom-formatter/,
+		"existing format script was replaced",
+	);
+});
+
+test("the lint-staged tool adds test-staged and keeps a single pre-commit hook", async (t) => {
+	const directory = await temporaryDirectory(t);
+	const target = path.join(directory, "ls-app");
+	const args = [
+		"--template",
+		"typescript/node",
+		"--target",
+		target,
+		"--optional",
+		"lint-staged",
+	];
+	const plan = run(["plan", ...args], directory);
+	assert.match(plan.commands.optional.join("\n"), /test-staged/);
+	const applied = run(["apply", ...args], directory);
+	assert.equal(applied.applied, true);
+	const lintStagedRc = await readFile(
+		path.join(target, ".lintstagedrc.js"),
+		"utf8",
+	);
+	assert.match(lintStagedRc, /test-staged/);
+	const preCommit = await readFile(
+		path.join(target, "scripts/pre-commit"),
+		"utf8",
+	);
+	assert.match(preCommit, /\.lintstagedrc\.js/);
+	assert.match(preCommit, /run_pm run lint-staged/);
 });
 
 test("applies Bun tooling only after Bun readiness and renders Bun commands", async (t) => {

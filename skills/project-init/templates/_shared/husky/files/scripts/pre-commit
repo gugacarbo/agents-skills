@@ -4,5 +4,15 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 . "$SCRIPT_DIR/lib/shared.sh"
 cd "$(repo_root)"
 
+# Secret scanning — somente se o gate existir (optional-tool "secrets").
+if [ -f "scripts/gitleaks-check" ]; then
+	run_pm run secrets:check
+fi
+
+# Staged formatting/typecheck/test — somente se o lint-staged estiver configurado.
+if [ -f ".lintstagedrc.js" ] || [ -f "lint-staged.config.js" ] || [ -f ".lintstagedrc.json" ]; then
+	run_pm run lint-staged
+fi
+
 run_pm run lint
 run_pm run typecheck

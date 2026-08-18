@@ -9,5 +9,19 @@
 	"files": [
 		{ "source": "files/.editorconfig", "target": ".editorconfig" },
 		{ "source": "files/.gitignore", "target": ".gitignore" }
-	]
+	],
+	"optionalTools": {
+		"ci-github-actions": {
+			"description": "Add a GitHub Actions CI workflow that scans for leaked secrets with gitleaks.",
+			"files": [
+				{
+					"source": "../_shared/optional-tools/ci-github-actions/files/.github/workflows/CI.yaml",
+					"target": ".github/workflows/CI.yaml"
+				}
+			],
+			"notes": [
+				"The workflow runs gitleaks on push and pull request; it complements the local pre-commit gate from the secrets tool."
+			]
+		}
+	}
 }

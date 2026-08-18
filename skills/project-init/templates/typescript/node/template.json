@@ -13,5 +13,23 @@
 			"start": "node dist/index.js"
 		}
 	},
-	"devDependencies": ["@types/node", "tsx"]
+	"devDependencies": ["@types/node", "tsx"],
+	"optionalTools": {
+		"docker": {
+			"description": "Add a multi-stage Dockerfile (Node runtime, non-root user) and .dockerignore for containerized deployments.",
+			"files": [
+				{
+					"source": "optional-tools/docker/files/Dockerfile",
+					"target": "Dockerfile"
+				},
+				{
+					"source": "optional-tools/docker/files/.dockerignore",
+					"target": ".dockerignore"
+				}
+			],
+			"notes": [
+				"The Dockerfile builds with tsc and runs as the non-root `node` user. Adjust the entrypoint if the build output path differs from dist/."
+			]
+		}
+	}
 }

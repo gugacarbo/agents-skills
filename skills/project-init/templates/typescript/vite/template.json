@@ -68,5 +68,23 @@
 	"commands": {
 		"framework": "pnpm create vite {{targetArg}} --template {{variantArg}}",
 		"frameworkCwd": "{{targetParent}}"
+	},
+	"optionalTools": {
+		"docker": {
+			"description": "Add a multi-stage Dockerfile (build then nginx static serving) and .dockerignore for containerized deployments.",
+			"files": [
+				{
+					"source": "optional-tools/docker/files/Dockerfile",
+					"target": "Dockerfile"
+				},
+				{
+					"source": "optional-tools/docker/files/.dockerignore",
+					"target": ".dockerignore"
+				}
+			],
+			"notes": [
+				"The Dockerfile builds the Vite app and serves the static output from dist/ with nginx on port 80."
+			]
+		}
 	}
 }
