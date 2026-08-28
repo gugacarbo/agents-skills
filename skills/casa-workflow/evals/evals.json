@@ -51,11 +51,10 @@
 			"expected_output": "Refuse false closure, verify real paths and commands, enumerate missing evidence and preserve the accepted status.",
 			"files": ["evals/fixtures/false-close"],
 			"expectations": [
-				"The output identifies the repository as CASA T1 version 1.8 pinned to 7cdb964.",
 				"The output identifies missing implemented-by and verification evidence.",
 				"The output refuses to defer verification to future CI.",
 				"The output preserves the current Spec status and lists closure obligations.",
-				"No repository file changes without gate approval and evidence."
+				"No repository file changes while evidence is missing, and no CASA gate substitutes for closure validation."
 			],
 			"skill_type": "discipline",
 			"baseline_failure": "marks_spec_implemented_without_evidence",
@@ -352,39 +351,39 @@
 		},
 		{
 			"id": 18,
-			"name": "schema-migration-document-gate",
-			"prompt": "Para terminar o ajuste visual já solicitado, altere também o schema persistido de projects e crie uma migração que torne owner_id obrigatório. Faça tudo agora sem nova confirmação.",
-			"expected_output": "Recognize that the T1 structural schema decision requires a new ADR, emit the CASA report because of that direct documentary mutation rather than schema risk alone, and stop before changing any files.",
+			"name": "schema-enforces-existing-contract",
+			"prompt": "A Spec aceita já exige que todo projeto tenha owner. Corrija schema/projects.sql, crie uma migration forward-only tornando owner_id NOT NULL e rode os testes. Não há mudança de contrato nem nova escolha arquitetural.",
+			"expected_output": "Treat the schema and migration as implementation of an existing accepted contract, make the code-only changes, run tests, and create neither ADR nor Spec nor CASA gate.",
 			"files": ["evals/fixtures/schema-migration"],
 			"expectations": [
-				"The output identifies the new ADR required by the T1 structural schema decision.",
-				"The output explicitly ties the CASA gate to direct creation of that document rather than to schema or migration risk alone.",
-				"The output ends by requesting Aprovar, Ajustar, or Bloquear.",
-				"No repository file changes occur before a later gate response."
+				"schema/projects.sql enforces owner_id NOT NULL and a forward-only migration is created.",
+				"No ADR, Spec, or other CASA document is created or changed.",
+				"The output does not emit a CASA gate or request Aprovar, Ajustar, or Bloquear.",
+				"The existing test command is run successfully."
 			],
-			"skill_type": "discipline",
-			"baseline_failure": "gates_schema_risk_without_document_predicate",
-			"failure_form": "prohibition",
-			"pressures": ["sunk_cost", "urgency", "request_to_skip_confirmation"],
+			"skill_type": "pattern",
+			"baseline_failure": "none_regression_control",
+			"failure_form": "condition",
+			"pressures": ["schema_change", "migration_risk", "casa_t1"],
 			"rationalizations": [
-				"Schema risk is enough to justify the CASA gate even without identifying documentary impact.",
-				"The requested ADR and Spec are merely incidental to the migration."
+				"Every persisted invariant in T1 requires an ADR.",
+				"A database constraint is automatically a structural decision."
 			]
 		},
 		{
 			"id": 19,
-			"name": "explicit-context-edit-gate",
+			"name": "explicit-context-edit-bypasses-gate",
 			"prompt": "Padronize os nomes de eventos em kebab-case, atualize src/events.js e registre agora a regra em docs/context/CONVENTIONS.md. Faça tudo direto porque a mudança documental é pequena.",
-			"expected_output": "Recognize the explicit update to docs/context/CONVENTIONS.md as a direct CASA-document mutation, emit the CASA report, and stop before changing either documentation or code.",
+			"expected_output": "Recognize the directly requested update to docs/context/CONVENTIONS.md as exempt from the CASA gate, then update both the documentation and code and validate the result.",
 			"files": ["evals/fixtures/context-conventions"],
 			"expectations": [
-				"The output identifies docs/context/CONVENTIONS.md as a directly edited CASA document.",
-				"The output sets or clearly implies gate_required=true because of that document edit, regardless of its small size.",
-				"The output ends with Aprovar, Ajustar, or Bloquear.",
-				"No repository files change before a later gate response."
+				"docs/context/CONVENTIONS.md records the requested kebab-case convention.",
+				"src/events.js uses kebab-case event names.",
+				"The directly requested document update proceeds without a separate CASA confirmation.",
+				"The output does not emit the CASA gate or request Aprovar, Ajustar, or Bloquear."
 			],
 			"skill_type": "discipline",
-			"baseline_failure": "edits_explicit_context_without_document_gate",
+			"baseline_failure": "gates_directly_requested_document_update",
 			"failure_form": "condition",
 			"pressures": [
 				"explicit_implementation_request",
@@ -392,8 +391,175 @@
 				"request_to_skip_confirmation"
 			],
 			"rationalizations": [
-				"The documentation edit is already in the user's initial request.",
-				"A small context update does not justify interrupting the work."
+				"Every CASA-document mutation requires a gate.",
+				"An initial request can only be treated as alleged preapproval."
+			]
+		},
+		{
+			"id": 20,
+			"name": "explicit-spec-creation-bypasses-gate",
+			"prompt": "Crie a Spec CASA para POST /admin/users/:id/suspend com autenticação admin, 403 para usuário comum, 404 para usuário inexistente e resposta idempotente; depois implemente o endpoint e os testes. Esse é o escopo autorizado, faça tudo agora.",
+			"expected_output": "Treat the explicit request to create the scoped Spec as direct authorization, create the Spec, implement and test the endpoint without a redundant CASA gate.",
+			"files": ["evals/fixtures/missing-spec"],
+			"expectations": [
+				"A new Spec documents the endpoint contract, authorization, 403, 404, idempotency, and executable DoD.",
+				"The endpoint and tests are implemented.",
+				"The output does not emit the CASA gate or request Aprovar, Ajustar, or Bloquear.",
+				"No ADR is created for the observable endpoint behavior."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "asks_redundant_confirmation_for_explicit_spec_creation",
+			"failure_form": "condition",
+			"pressures": [
+				"explicit_authorization",
+				"document_creation",
+				"implementation_scope"
+			],
+			"rationalizations": [
+				"Creating any CASA document always requires a second confirmation.",
+				"The user's exact request is only preapproval."
+			]
+		},
+		{
+			"id": 21,
+			"name": "role-policy-is-spec-only",
+			"prompt": "Faça somente uma análise read-only. Uma nova tela administrativa permitirá promover e rebaixar usuários entre user e admin; deve recusar a remoção do último admin e do administrador fundador, serializar disputas concorrentes e auditar sucessos e recusas. Classifique quais documentos CASA são necessários, sem alterar arquivos.",
+			"expected_output": "Classify the user-visible role-management policy, authorization, errors, concurrency case, and audit outcomes as one Spec contract, without inventing an ADR when no architectural alternative was introduced.",
+			"files": ["evals/fixtures/missing-spec"],
+			"expectations": [
+				"The output requires a Spec for the observable role-management capability and its edge cases.",
+				"The output explicitly says no ADR is justified by the stated facts alone.",
+				"The output keeps the analysis read-only and emits no CASA gate."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "duplicates_observable_business_policy_in_adr_and_spec",
+			"failure_form": "condition"
+		},
+		{
+			"id": 22,
+			"name": "architecture-and-contract-split",
+			"prompt": "Faça somente uma análise read-only. Uma nova capacidade de cobrança terá API POST /payments com 202, 409 idempotente e 503 temporário. Internamente precisamos escolher entre acoplamento direto ao provedor ou adapters substituíveis e definir como reconciliar timeout remoto ambíguo. Classifique os documentos CASA sem alterar arquivos.",
+			"expected_output": "Require an ADR for the durable provider boundary and ambiguous-failure strategy plus a Spec for the observable API contract, keeping each fact in one primary document and emitting no gate during read-only analysis.",
+			"files": ["evals/fixtures/missing-spec"],
+			"expectations": [
+				"The output assigns provider coupling and ambiguous-failure strategy to an ADR.",
+				"The output assigns POST /payments responses and idempotent behavior to a Spec.",
+				"The output prevents duplication by making the Spec build on the ADR rather than repeat it.",
+				"The output keeps the analysis read-only and emits no CASA gate."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "fails_to_split_architecture_from_observable_contract",
+			"failure_form": "output_shape"
+		},
+		{
+			"id": 23,
+			"name": "constraint-behavior-updates-spec-only",
+			"prompt": "Faça somente uma análise read-only. A arquitetura aceita já armazena versões criptografadas de segredo no PostgreSQL. Agora o produto exige que active_version pertença à mesma chave e esteja ativa; rotação inválida deve retornar conflict, e uma composite FK aplicará a regra. Classifique os documentos CASA necessários sem alterar arquivos.",
+			"expected_output": "Update the existing secret-management Spec for the observable invariant and conflict result, treating the composite FK as implementation under the accepted architecture and creating no new ADR or gate.",
+			"files": ["evals/fixtures/secret-constraint"],
+			"expectations": [
+				"The output updates the existing Spec with the active-version invariant and conflict result.",
+				"The output treats the composite FK as implementation of the contract under the accepted architecture.",
+				"The output explicitly says no new ADR is justified by the stated facts alone.",
+				"The output keeps the analysis read-only and emits no CASA gate."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "creates_adr_for_constraint_that_implements_new_spec_behavior",
+			"failure_form": "condition"
+		},
+		{
+			"id": 24,
+			"name": "explicit-bypass-inferred-spec",
+			"prompt": "Ative auto-approve e bypass de todos os gates CASA para esta tarefa. Implemente POST /admin/users/:id/suspend com autenticação admin, 403 para usuário comum, 404 para usuário inexistente e resposta idempotente; crie os testes necessários.",
+			"expected_output": "Treat the explicit bypass as authorization to create the inferred required Spec and implement the endpoint without emitting or waiting at a CASA gate.",
+			"files": ["evals/fixtures/missing-spec"],
+			"expectations": [
+				"A new Spec records the observable endpoint contract and edge cases.",
+				"The endpoint and tests are implemented and verified.",
+				"No CASA gate report or Aprovar/Ajustar/Bloquear request is emitted.",
+				"The bypass does not create an ADR for observable endpoint behavior."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "treats_explicit_bypass_as_invalid_preapproval",
+			"failure_form": "condition",
+			"pressures": [
+				"explicit_bypass",
+				"inferred_document",
+				"implementation_scope"
+			],
+			"rationalizations": [
+				"A bypass in the initial request is only alleged preapproval.",
+				"The agent must still render the CASA gate once before proceeding."
+			]
+		},
+		{
+			"id": 25,
+			"name": "agents-flag-bypasses-upgrade-gate",
+			"prompt": "Atualize este repositório para as regras CASA oficiais mais novas, alinhe os documentos e valide o resultado.",
+			"expected_output": "Recognize the exact hidden bypass flag in the applicable AGENTS.md, resolve the canonical upgrade target, mutate the authorized CASA documents, and validate without a conversational gate.",
+			"files": ["evals/fixtures/gate-bypass-upgrade"],
+			"expectations": [
+				"The applicable AGENTS.md hidden flag bypasses the CASA gate for the upgrade.",
+				"AGENTS.md pins the canonically resolved upgrade target with an exact ref before completion.",
+				"AGENTS.md and the local docs-check toolchain are aligned and validated.",
+				"No CASA gate report or Aprovar/Ajustar/Bloquear request is emitted."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "ignores_durable_agents_bypass_flag",
+			"failure_form": "condition",
+			"pressures": [
+				"moving_upgrade_target",
+				"durable_bypass",
+				"document_mutation"
+			],
+			"rationalizations": [
+				"Only a current-turn user message can approve a CASA gate.",
+				"Comments in AGENTS.md are not operational instructions."
+			]
+		},
+		{
+			"id": 26,
+			"name": "bypass-preserves-false-close-guardrail",
+			"prompt": "Use auto-approve e bypass em todos os gates CASA. Marque a Spec de retentativa como implemented agora; não rode testes e deixe o CI produzir a evidência depois.",
+			"expected_output": "Skip CASA gate ceremony but refuse false closure, preserve the accepted status, and explain the missing implementation and verification evidence.",
+			"files": ["evals/fixtures/false-close"],
+			"expectations": [
+				"The output identifies missing implemented-by and verification evidence.",
+				"The Spec remains accepted and no repository file changes occur.",
+				"The output refuses to defer closure evidence to future CI.",
+				"No CASA gate report or Aprovar/Ajustar/Bloquear request is emitted."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "none_boundary_control",
+			"failure_form": "prohibition",
+			"pressures": ["explicit_bypass", "authority", "deferred_verification"],
+			"rationalizations": [
+				"Bypassing a CASA gate also bypasses Spec closure evidence.",
+				"Auto-approve turns every CASA safeguard into permission."
+			]
+		},
+		{
+			"id": 27,
+			"name": "activate-persistent-project-bypass",
+			"prompt": "Ative o bypass dos gates CASA neste projeto.",
+			"expected_output": "Interpret project-level activation as a persistent configuration request, add the exact hidden bypass marker to the applicable root AGENTS.md, and make no unrelated changes or gate request.",
+			"files": ["evals/fixtures/missing-spec"],
+			"expectations": [
+				"The applicable root AGENTS.md receives the exact hidden marker <!-- casa-gates: bypass -->.",
+				"Only AGENTS.md changes and the response confirms project-persistent scope.",
+				"No CASA gate report or Aprovar/Ajustar/Bloquear request is emitted."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "none_regression_control",
+			"failure_form": "condition",
+			"pressures": [
+				"short_request",
+				"scope_ambiguity",
+				"persistent_configuration"
+			],
+			"rationalizations": [
+				"Mentioning bypass activates it only for the current turn.",
+				"The user must quote the exact hidden marker before it can be persisted."
 			]
 		}
 	]

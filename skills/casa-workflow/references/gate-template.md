@@ -8,11 +8,10 @@ subseção ou seção condicional não for necessário, omita-o por completo: n�
 imprima título vazio, `nenhum`, `não aplicável`, `N/A` ou placeholder.
 Preserve a ordem relativa das seções que forem renderizadas.
 
-`Contexto CASA`, `Gatilho documental`, `Achados por risco`, `Impacto de
-artefatos` e `Gate` são obrigatórios sempre que o gate for aplicável. `Ações antes do código` e
-`Obrigações de fechamento` aparecem quando houver ação ou validação
-correspondente. `Efeitos externos` aparece somente quando existir um efeito
-externo concreto; sua ausência não autoriza efeitos externos.
+`Contexto CASA`, `Gatilho documental`, `Impacto de artefatos` e `Gate` são
+obrigatórios sempre que o gate for aplicável. `Decisão necessária`, `Obrigações
+de fechamento` e `Efeitos externos` aparecem somente quando tiverem conteúdo
+concreto. O relatório é um pedido de autorização, não uma auditoria completa.
 
 ```markdown
 # Gate CASA
@@ -25,28 +24,16 @@ externo concreto; sua ausência não autoriza efeitos externos.
 
 **Fontes:** [somente fontes realmente consultadas]
 
-**Gatilho documental:** [documento CASA]: [estado atual] → [criar, atualizar ou
-depreciar]; esta mutação direta torna `gate_required=true`.
-
-## Achados por risco
-
-**[bloqueante ou síntese de risco]**
-
-[impactos e limites relevantes]
+**Gatilho documental:** [documento CASA]: [estado atual] → [ação inferida ou fora
+do escopo autorizado]; motivo: [evidência ou decisão ainda aberta].
 
 ## Impacto de artefatos
 
-### Docs
-
 - [artefato]: [estado atual] → [transição]; evidência: [fonte].
 
-### Código
+## Decisão necessária
 
-- [artefato ou área]: [estado atual] → [transição]; evidência: [fonte].
-
-## Ações antes do código
-
-[ações necessárias antes da implementação]
+[somente a escolha material que o usuário precisa resolver]
 
 ## Obrigações de fechamento
 
@@ -58,8 +45,8 @@ depreciar]; esta mutação direta torna `gate_required=true`.
 
 ## Gate
 
-Responda: **Aprovar**, **Ajustar** ou **Bloquear**.
+Responda: **Aprovado**, **Ajustar** ou **Bloquear**.
 ```
 
-As subseções `Docs` e `Código` também são condicionais: renderize apenas as
-categorias que tiverem ao menos um artefato impactado.
+Se houver impactos documentais e de código, rotule os itens inline como `Docs`
+e `Código`; não crie subseções vazias.

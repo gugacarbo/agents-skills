@@ -47,8 +47,8 @@ describe("casa-workflow skill", () => {
 		expect(frontmatter).toHaveLength(2);
 		expect(frontmatter[0]).toStartWith("name: casa-workflow");
 		expect(frontmatter[1]).toStartWith("description:");
-		expect(skill.match(/\n/g)?.length ?? 0).toBeLessThanOrEqual(65);
-		expect(skill.trim().split(/\s+/).length).toBeLessThanOrEqual(400);
+		expect(skill.match(/\n/g)?.length ?? 0).toBeLessThanOrEqual(70);
+		expect(skill.trim().split(/\s+/).length).toBeLessThanOrEqual(430);
 	});
 
 	test("preserves routing, gate, and source-resolution guidance", () => {
@@ -62,22 +62,28 @@ describe("casa-workflow skill", () => {
 		}
 		for (const expected of [
 			"[workflow.md](references/workflow.md)",
-			"Três classificações",
+			"Cinco classificações",
 			"`artifact_action`",
 			"`context_suggestion`",
+			"`authorization_basis`",
+			"`gate_bypass`",
 			"[context-persistence.md](references/context-persistence.md)",
-			"pare antes da primeira escrita",
+			"não emita relatório nem peça confirmação",
 			"`Aprovar`",
 			"`Ajustar`",
 			"`Bloquear`",
-			"gate_valido=false",
 			"gate_required=true",
 			"gate_required=false",
-			"criar, atualizar ou depreciar",
-			"mutação direta em documento CASA",
-			"schema, migração, dados, segurança, efeito externo",
+			"fora do escopo autorizado",
+			"escopo semântico identificável",
+			"alvo móvel/não resolvido",
+			"schema, migração",
+			"segurança, dados, operação destrutiva ou efeito remoto",
 			"Em T0, não exija ADR, Spec nem `docs/context/`",
-			"preaprovação alegada",
+			"<!-- casa-gates: bypass -->",
+			"Ativar no projeto",
+			"O bypass não muda classificação",
+			"crie ADR/Spec obrigatória antes do código",
 		]) {
 			expectContains("SKILL.md", expected);
 		}
@@ -88,12 +94,19 @@ describe("casa-workflow skill", () => {
 			"[impact-lifecycle.md](impact-lifecycle.md)",
 			"[context-persistence.md](context-persistence.md)",
 			"[gate-template.md](gate-template.md)",
-			"somente escrita documental aciona o gate",
+			"criar, atualizar, depreciar ou fechar",
 			"sem relatório CASA",
-			"Feature T1 que cria ou atualiza Spec exige gate",
+			"Auditoria read-only nunca abre gate",
 			"T0 não herda as camadas documentais de T1",
 			"atplus-digital/casa-standard",
 			"Homônimos chamados CASA não são fontes",
+			"mais novo” não é",
+			"## Resolver bypass",
+			"qualquer `AGENTS.md` aplicável",
+			"Não infira bypass",
+			"Distinga duração pelo pedido",
+			"Ativação persistente é uma edição diretamente pedida",
+			"Spec obrigatória",
 		]) {
 			expectContains("references/workflow.md", expected);
 		}
@@ -103,20 +116,14 @@ describe("casa-workflow skill", () => {
 		for (const [relativePath, expected] of [
 			[
 				"references/impact-lifecycle.md",
-				"Código, testes, schema, migração e riscos sem escrita",
+				"Código, testes, schema, migration, auditoria read-only e riscos sem escrita",
 			],
 			[
 				"references/impact-lifecycle.md",
-				"Schema persistido, constraint ou migração que define invariante T1",
+				"Schema, constraint, índice e migration → implementação por padrão",
 			],
-			[
-				"references/context-persistence.md",
-				"criar, editar ou depreciar o documento",
-			],
-			[
-				"references/source-resolution.md",
-				"sem escrita documental, não inventar gate",
-			],
+			["references/context-persistence.md", "continue sem gate CASA"],
+			["references/source-resolution.md", "alvo móvel/não resolvido"],
 		] as const) {
 			expectContains(relativePath, expected);
 		}
@@ -142,9 +149,8 @@ describe("casa-workflow skill", () => {
 		for (const section of [
 			"Contexto CASA",
 			"Gatilho documental",
-			"Achados por risco",
 			"Impacto de artefatos",
-			"Ações antes do código",
+			"Decisão necessária",
 			"Obrigações de fechamento",
 			"Efeitos externos",
 			"Gate",
@@ -158,10 +164,10 @@ describe("casa-workflow skill", () => {
 			"`não aplicável`",
 			"`N/A`",
 			"placeholder",
-			"`Efeitos externos` aparece somente",
-			"externo concreto",
+			"`Efeitos externos` aparecem somente",
+			"efeito remoto concreto",
 			"ref `[casa-standard-ref]`",
-			"esta mutação direta torna `gate_required=true`",
+			"ação inferida ou fora",
 		]) {
 			expectContains("references/gate-template.md", marker);
 		}

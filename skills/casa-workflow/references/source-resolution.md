@@ -29,6 +29,17 @@ Antes de propor a versão/ref alvo ou alterações em metadados e `docs-check`:
 2. identificar a versão alvo e o ref oficial correspondente;
 3. separar o contrato declarado, a toolchain local e o alvo oficial confirmado no relatório.
 
+Um pedido como “adote/atualize para as regras mais novas” autoriza a análise,
+mas não pré-autoriza um envelope ainda desconhecido. Mesmo depois de resolver o
+upstream, apresente versão, ref e source-set exatos no gate antes da primeira
+mutação. Só dispense essa confirmação quando o pedido inicial já identificar o
+alvo exato e os artefatos documentais autorizados.
+
+Bypass CASA explícito ou `<!-- casa-gates: bypass -->` no `AGENTS.md` aplicável
+também dispensa o relatório. Ainda resolva versão, ref e source-set antes da
+mutação: bypass remove a confirmação, não a resolução da fonte. Preserve o
+marker durante o upgrade.
+
 Se as fontes oficiais não estiverem disponíveis, declarar versão/ref alvo como
 não resolvidas. Não escolher a versão da toolchain como alvo por inferência nem
 prometer quais arquivos serão alinhados. Se o envelope mutar documentos CASA,
@@ -44,7 +55,10 @@ parcialmente não resolvido.
 - **Adotante válido:** metadados presentes e ref resolvível. Aplicar o contrato pinado.
 - **Metadados/toolchain divergentes:** reportar a divergência e seu sentido; não alterar `casa-version` automaticamente nem inferir dela o alvo do upgrade.
 - **Ref indisponível:** declarar a incerteza e usar metadados e toolchain locais como evidência limitada; gate somente se houver mutação documental CASA.
-- **Não adotante:** não inferir regras CASA para trabalho comum. Em adoção, pedir gate antes de `casa-init` quando ele criar ou atualizar documentos CASA; auditoria read-only não aciona gate.
+- **Não adotante:** não inferir regras CASA para trabalho comum. Pedido direto de
+  adoção com alvo e source-set exatos autoriza o `casa-init` sem confirmação
+  CASA redundante; alvo móvel/não resolvido ou adoção apenas inferida abre gate
+  antes da escrita. Auditoria read-only não aciona gate.
 - **Contrato local incompleto:** tratar como achado, não preencher lacunas com a versão mais recente.
 
 ## Limites

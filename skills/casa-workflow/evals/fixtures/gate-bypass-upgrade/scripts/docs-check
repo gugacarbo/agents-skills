@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+declared="$(sed -n 's/^casa-version: //p' AGENTS.md | head -1)"
+if [[ "$declared" != "1.8" ]]; then
+  echo "warning: local toolchain 1.8 differs from declared CASA $declared"
+  exit 1
+fi
+echo "OK: casa-version $declared aligned with toolchain 1.8"

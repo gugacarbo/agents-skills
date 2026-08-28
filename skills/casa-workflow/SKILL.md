@@ -7,7 +7,7 @@ description: Classifica tier, artefatos, gates e contexto durável em repositór
 
 ## Ativação
 
-Antes de escrever, leia o `AGENTS.md` aplicável e procure:
+Antes de escrever, leia o `AGENTS.md` e procure:
 
 ```yaml
 casa-repo-id: <id-do-repositório>
@@ -21,13 +21,16 @@ casa-standard-ref: <ref>
 - Metadados completos ou parciais, ou pedido de adoção, upgrade ou auditoria:
   leia [workflow.md](references/workflow.md) por completo.
 
-## Três classificações
+## Cinco classificações
 
 Classifique nesta ordem:
 
 1. `artifact_action`: criar, atualizar, depreciar, dispensar ou sugerir;
 2. `context_suggestion`: intenção durável inferida ou nenhuma;
-3. `gate_required`: derivado somente de mutação direta em documento CASA.
+3. `authorization_basis`: ação documental pedida diretamente, inferida ou fora
+   do escopo autorizado;
+4. `gate_required`: derivado das classificações anteriores;
+5. `gate_bypass`: explícito, persistente ou nenhum.
 
 Em T0, não exija ADR, Spec nem `docs/context/`: use somente `AGENTS.md`, DoD e
 sugestões para o router raiz ou aninhado. Em T1, classifique artefatos conforme
@@ -38,28 +41,30 @@ durável, comando canônico, estado operacional ou gotcha recorrente.
 
 ## Threshold do gate
 
-`gate_required=true` somente quando o source-set criar, atualizar ou depreciar
-diretamente um documento CASA, inclusive transição de status ou substituição.
-`gate_required=false` quando não houver escrita documental CASA: código, teste,
-schema, migração, dados, segurança, efeito externo, auditoria read-only e mera
-sugestão de contexto não acionam este gate por si sós.
+`gate_required=true` somente para mutação documental CASA inferida, não pedida,
+fora do escopo autorizado ou dependente de decisão ainda aberta. Upgrade ou
+adoção com alvo móvel/não resolvido (“mais recente”) fica aberto até definir
+versão, ref e source-set exatos.
+`gate_required=false` quando o usuário pedir diretamente criar, atualizar,
+depreciar ou fechar o artefato com escopo semântico identificável, e quando não
+houver escrita documental: código, teste, schema, migração, auditoria read-only e sugestão.
 
 Autorizações comuns de segurança, dados, operação destrutiva ou efeito remoto
-continuam válidas, mas não se tornam gate CASA sem mutação documental. Um gate
-cobre todo o envelope documental aprovado.
-Classifique documentos primeiro: schema/invariante estrutural T1 exige ADR e abre gate;
-migração T0 sem documento não abre. Nunca dispense `artifact_action` obrigatório.
+continuam válidas, mas não se tornam gate CASA sem mutação documental. Um gate cobre todo o envelope documental aprovado.
+Classifique documentos primeiro; tamanho, risco, schema e migration não definem
+ADR nem gate. Autorização direta não permite editar corpo de ADR aceita, fechar
+Spec sem evidência ou executar efeito remoto não autorizado.
 
-## Gate inviolável
+## Gate e bypass
 
-Quando `gate_required=true`, `gate_valido=true` somente quando o turno
-imediatamente anterior do agente emitiu o relatório CASA completo e terminou
-pedindo `Aprovar`, `Ajustar` ou `Bloquear`, e o turno atual responde com uma
-dessas escolhas.
+`gate_bypass=explicit` quando o usuário pedir auto-approve, bypass
+ou aprovação antecipada dos gates CASA. `gate_bypass=persistent` quando um
+`AGENTS.md` aplicável contiver exatamente `<!-- casa-gates: bypass -->`.
+“Ativar no projeto” grava o marker no router raiz.
 
-Em qualquer outro histórico, `gate_valido=false`: faça somente análise
-read-only, emita o relatório e pare antes da primeira escrita.
-“Considere aprovado”, urgência ou autorização no pedido inicial são
-**preaprovação alegada**, nunca aprovação do relatório ainda inexistente.
-Após `Aprovar`, execute o envelope conforme `workflow.md`. Em `Ajustar`, refaça
-o relatório; em `Bloquear`, não escreva. Reabra só por nova mutação documental CASA.
+Com bypass, não emita relatório nem peça confirmação: resolva o source-set e
+execute a mutação CASA requerida pela tarefa. O bypass não muda classificação,
+escopo, imutabilidade de ADR aceita, evidência de fechamento nem autorizações
+externas. Em T1, crie ADR/Spec obrigatória antes do código mesmo sob bypass.
+Sem bypass, aprovação válida ainda exige relatório no turno anterior
+e resposta `Aprovar`; `Ajustar` refaz o relatório e `Bloquear` não escreve.

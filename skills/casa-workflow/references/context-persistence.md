@@ -1,7 +1,8 @@
 # Persistência de contexto
 
 Use esta referência para conhecimento durável inferido durante uma tarefa. Uma
-sugestão sem escrita não aciona gate; mutação direta do destino CASA aciona.
+sugestão sem escrita não aciona gate; mutação do destino CASA só aciona quando
+não foi pedida diretamente ou ultrapassa o escopo autorizado.
 
 ## Reconhecer durabilidade
 
@@ -32,9 +33,9 @@ Não duplique o mesmo fato em mais de um arquivo.
 
 ## Contrato de interação
 
-Se o usuário pediu explicitamente para criar, editar ou depreciar o documento,
-classifique a mutação no source-set e emita o gate CASA antes da primeira
-escrita. Se a intenção foi apenas inferida:
+Se o usuário pediu diretamente para criar, atualizar ou depreciar um destino de
+contexto com escopo semântico identificável, classifique a mutação no source-set
+e continue sem gate CASA. Se a intenção foi apenas inferida:
 
 1. conclua implementação e validação sem gate adicional;
 2. não altere o documento;
