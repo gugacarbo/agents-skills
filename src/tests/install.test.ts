@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { lstatSync, readlinkSync } from "node:fs";
 import { join } from "node:path";
 import {
 	buildRuntimeRepo,
@@ -78,13 +79,13 @@ describe("skill installer", () => {
 		}
 	});
 
-	test("offers a Claude installation after the primary destination", () => {
+	test("uses symlinks for the Claude installation by default", () => {
 		const temporaryRoot = makeTempDir("install-claude-test");
 		try {
 			const primary = join(temporaryRoot, "custom-skills");
 			const claudeTarget = join(temporaryRoot, "home", ".claude", "skills");
 			const promptInput = join(temporaryRoot, "tty-input");
-			write(promptInput, "y\n");
+			write(promptInput, "y\n\n");
 			const result = runInstaller(["--path", primary], {
 				env: {
 					HOME: join(temporaryRoot, "home"),
@@ -94,9 +95,40 @@ describe("skill installer", () => {
 			expectSuccess(result);
 			expectExists(join(primary, fixtureSkill, "SKILL.md"));
 			expectExists(join(claudeTarget, fixtureSkill, "SKILL.md"));
+			expect(lstatSync(join(claudeTarget, fixtureSkill)).isSymbolicLink()).toBe(
+				true,
+			);
+			expect(readlinkSync(join(claudeTarget, fixtureSkill))).toBe(
+				join(primary, fixtureSkill),
+			);
 			expect(result.output).toContain(
 				`Também deseja instalar as skills em ${claudeTarget}`,
 			);
+			expect(result.output).toContain("Usar symlinks");
+		} finally {
+			cleanup(temporaryRoot);
+		}
+	});
+
+	test("copies the Claude installation when symlinks are declined", () => {
+		const temporaryRoot = makeTempDir("install-claude-copy-test");
+		try {
+			const primary = join(temporaryRoot, "custom-skills");
+			const claudeTarget = join(temporaryRoot, "home", ".claude", "skills");
+			const promptInput = join(temporaryRoot, "tty-input");
+			write(promptInput, "y\nn\n");
+			const result = runInstaller(["--path", primary], {
+				env: {
+					HOME: join(temporaryRoot, "home"),
+					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
+				},
+			});
+			expectSuccess(result);
+			expectExists(join(claudeTarget, fixtureSkill, "SKILL.md"));
+			expect(lstatSync(join(claudeTarget, fixtureSkill)).isSymbolicLink()).toBe(
+				false,
+			);
+			expect(result.output).toContain("Instalação concluída com 3 skill(s)");
 		} finally {
 			cleanup(temporaryRoot);
 		}

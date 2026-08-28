@@ -22,6 +22,7 @@ USE_INSTRUCTIONS=0
 USE_FRESH=0
 TARGET_PATH=''
 SELECTED_SKILLS=''
+PROMPT_INPUT_FD_STATE=0
 
 if [ -t 1 ] && [ -z "${NO_COLOR-}" ]; then
   USE_COLOR=1
@@ -65,7 +66,16 @@ error() {
 }
 
 read_reply_from() {
-  IFS= read -r reply < "$1"
+  if [ "$PROMPT_INPUT_FD_STATE" -eq 0 ]; then
+    if exec 9< "$1" 2> /dev/null; then
+      PROMPT_INPUT_FD_STATE=1
+    else
+      PROMPT_INPUT_FD_STATE=-1
+    fi
+  fi
+
+  [ "$PROMPT_INPUT_FD_STATE" -eq 1 ] || return 1
+  IFS= read -r reply <&9
 }
 
 usage() {
@@ -145,6 +155,28 @@ confirm() {
       ;;
     *)
       return 1
+      ;;
+  esac
+}
+
+confirm_default_yes() {
+  prompt_message=$1
+  prompt_input=${AGENTS_SKILLS_PROMPT_INPUT:-/dev/tty}
+
+  printf '%s %s [Y/n]: ' "$(color 36 '[PROMPT]')" "$prompt_message"
+
+  if read_reply_from "$prompt_input" 2> /dev/null; then
+    :
+  elif ! IFS= read -r reply; then
+    reply=''
+  fi
+
+  case "$reply" in
+    n | N | no | NO | No)
+      return 1
+      ;;
+    *)
+      return 0
       ;;
   esac
 }
@@ -229,6 +261,62 @@ copy_skills() {
   fi
 
   success "Instalação concluída com $copied_count skill(s)"
+}
+
+link_skill_dir() {
+  source_skill_dir=$1
+  destination=$2
+  skill_name=${source_skill_dir##*/}
+  destination_skill_dir=$destination/$skill_name
+
+  if [ -L "$destination_skill_dir" ] && same_path "$source_skill_dir" "$destination_skill_dir"; then
+    linked_count=$((linked_count + 1))
+    info "Symlink já existente: $skill_name"
+    return 0
+  fi
+
+  if [ -e "$destination_skill_dir" ] || [ -L "$destination_skill_dir" ]; then
+    linked_count=$((linked_count + 1))
+    warn "Skill já existe em $destination; mantendo $skill_name sem substituir"
+    return 0
+  fi
+
+  ln -s "$source_skill_dir" "$destination_skill_dir"
+  linked_count=$((linked_count + 1))
+  success "Symlink criado: $skill_name"
+}
+
+link_skills() {
+  destination=$1
+  linked_count=0
+
+  mkdir -p "$destination"
+  info "Criando symlinks das skills em $destination"
+
+  if [ -n "$SELECTED_SKILLS" ]; then
+    for skill_name in $SELECTED_SKILLS; do
+      source_skill_dir=$INSTALL_TARGET/$skill_name
+      [ -d "$source_skill_dir" ] && [ -f "$source_skill_dir/SKILL.md" ] || die "Skill instalada não encontrada: $skill_name"
+      link_skill_dir "$source_skill_dir" "$destination"
+    done
+  else
+    for source_skill in "$SKILLS_SOURCE_DIR"/*; do
+      [ -d "$source_skill" ] || continue
+      [ -f "$source_skill/SKILL.md" ] || continue
+
+      skill_name=${source_skill##*/}
+      source_skill_dir=$INSTALL_TARGET/$skill_name
+      [ -d "$source_skill_dir" ] && [ -f "$source_skill_dir/SKILL.md" ] || die "Skill instalada não encontrada: $skill_name"
+
+      link_skill_dir "$source_skill_dir" "$destination"
+    done
+  fi
+
+  if [ "$linked_count" -eq 0 ]; then
+    die "Nenhuma skill elegível foi encontrada para criar symlinks"
+  fi
+
+  success "Instalação por symlink concluída com $linked_count skill(s)"
 }
 
 remove_installed_skills() {
@@ -472,7 +560,11 @@ if [ "$USE_INIT" -eq 0 ] && ! same_path "$INSTALL_TARGET" "$CLAUDE_TARGET"; then
       remove_installed_skills "$CLAUDE_TARGET"
     fi
 
-    copy_skills "$CLAUDE_TARGET"
+    if confirm_default_yes "Usar symlinks apontando para as skills instaladas em $INSTALL_TARGET?"; then
+      link_skills "$CLAUDE_TARGET"
+    else
+      copy_skills "$CLAUDE_TARGET"
+    fi
   else
     info "Instalação em $CLAUDE_TARGET não solicitada"
   fi

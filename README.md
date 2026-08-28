@@ -190,6 +190,8 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 O comando `./skills.sh install` copia as skills de `dist/skills/` diretamente
 para o destino escolhido. Nomes posicionais limitam a cópia às skills
 selecionadas. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de
-publicar alterações. Depois da instalação, o comando oferece copiar a mesma
+publicar alterações. Depois da instalação, o comando oferece instalar a mesma
 seleção para `~/.claude/skills`; a pergunta não aparece quando esse já é o
-destino principal.
+destino principal. Ao aceitar, o instalador pergunta se deve criar symlinks
+apontando para o destino principal (padrão); respondendo `n`, ele faz uma cópia
+independente.
