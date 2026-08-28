@@ -79,9 +79,58 @@
 				}
 			]
 		},
+		"env": {
+			"description": "Add a typed environment-variable contract (.env.example plus validation dependencies).",
+			"devDependencies": ["@t3-oss/env-core", "zod"],
+			"files": [
+				{
+					"source": "../_shared/optional-tools/env/files/.env.example",
+					"target": ".env.example"
+				}
+			],
+			"notes": [
+				"Centralize and validate environment reads before startup (e.g. @t3-oss/env-core + zod): export typed values from a single module and consume them across the app. .env is gitignored; .env.example documents the contract."
+			]
+		},
+		"secrets": {
+			"description": "Add a local gitleaks secret-scanning gate wired into the pre-commit hook.",
+			"packageJson": {
+				"scripts": {
+					"secrets:check": "sh scripts/gitleaks-check"
+				}
+			},
+			"files": [
+				{
+					"source": "../_shared/optional-tools/secrets/files/scripts/gitleaks-check",
+					"target": "scripts/gitleaks-check"
+				}
+			],
+			"notes": [
+				"gitleaks is an external binary: when missing, the gate is skipped with a warning and CI covers the whole repository. Install it to enable local scanning."
+			]
+		},
+		"format": {
+			"description": "Add Prettier-based formatting for Markdown and shell scripts alongside Biome.",
+			"devDependencies": ["prettier", "prettier-plugin-sh"],
+			"packageJson": {
+				"scripts": {
+					"format:md": "{{pmExec}} prettier --write \"**/*.{md,mdx}\" --no-error-on-unmatched-pattern --cache",
+					"format:sh": "{{pmExec}} prettier --write \"**/*.sh\" --plugin=prettier-plugin-sh --no-error-on-unmatched-pattern --cache",
+					"format": "biome format --write . && {{packageManager}} run format:md && {{packageManager}} run format:sh"
+				}
+			},
+			"notes": [
+				"This tool replaces the base `format` script with one that also formats Markdown and shell files via Prettier; approve the package.json#/scripts/format collision to apply."
+			]
+		},
 		"lint-staged": {
-			"description": "Format and type-check staged files before commit.",
-			"devDependencies": ["lint-staged", "prettier", "tsc-files"],
+			"description": "Format, type-check, and test only staged files before commit.",
+			"devDependencies": [
+				"lint-staged",
+				"prettier",
+				"tsc-files",
+				"test-staged"
+			],
 			"packageJson": {
 				"scripts": {
 					"lint-staged": "lint-staged"
@@ -91,11 +140,10 @@
 				{
 					"source": "optional-tools/lint-staged/files/.lintstagedrc.js",
 					"target": ".lintstagedrc.js"
-				},
-				{
-					"source": "../_shared/optional-tools/lint-staged/files/scripts/pre-commit",
-					"target": "scripts/pre-commit"
 				}
+			],
+			"notes": [
+				"The pre-commit hook detects .lintstagedrc.js and runs lint-staged automatically; no separate hook script is needed."
 			]
 		}
 	}

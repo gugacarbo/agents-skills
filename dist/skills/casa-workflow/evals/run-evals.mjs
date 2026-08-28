@@ -37,6 +37,8 @@ const fixtureManifest = [
 	"fixtures/false-close/docs/specs/0001-retry.md",
 	"fixtures/false-close/package.json",
 	"fixtures/false-close/src/retry.js",
+	"fixtures/gate-bypass-upgrade/AGENTS.md",
+	"fixtures/gate-bypass-upgrade/scripts/docs-check",
 	"fixtures/missing-spec/AGENTS.md",
 	"fixtures/missing-spec/package.json",
 	"fixtures/missing-spec/src/server.js",
@@ -51,8 +53,14 @@ const fixtureManifest = [
 	"fixtures/pinned-ref-mismatch/scripts/docs-check",
 	"fixtures/schema-migration/AGENTS.md",
 	"fixtures/schema-migration/package.json",
+	"fixtures/schema-migration/docs/specs/0001-project-ownership.md",
 	"fixtures/schema-migration/schema/projects.sql",
 	"fixtures/schema-migration/src/card.js",
+	"fixtures/schema-migration/test/schema.test.js",
+	"fixtures/secret-constraint/AGENTS.md",
+	"fixtures/secret-constraint/docs/adr/0001-store-encrypted-secret-versions.md",
+	"fixtures/secret-constraint/docs/specs/0001-manage-secrets.md",
+	"fixtures/secret-constraint/package.json",
 	"fixtures/t0-decided-feature/AGENTS.md",
 	"fixtures/t0-decided-feature/package.json",
 	"fixtures/t0-decided-feature/src/server.js",
@@ -237,6 +245,19 @@ function contains(text, pattern) {
 	return new RegExp(pattern, "i").test(text);
 }
 
+async function collectChangedText(workspace, changed) {
+	const chunks = [];
+	for (const relative of changed) {
+		if (/^(?:\.agents|\.claude)\//.test(relative)) continue;
+		const target = path.join(workspace, relative);
+		const stat = await fs.stat(target).catch(() => null);
+		if (!stat?.isFile() || stat.size > 200_000) continue;
+		const content = await fs.readFile(target, "utf8").catch(() => "");
+		if (content) chunks.push(`\nFILE ${relative}\n${content}`);
+	}
+	return chunks.join("\n");
+}
+
 function lastNonEmptyAgentMessage(transcript) {
 	let last = "";
 	for (const line of transcript.split("\n")) {
@@ -291,10 +312,8 @@ function grade(evalCase, combined, changed) {
 			3,
 			[
 				"Contexto CASA",
-				"Achados por risco",
+				"Gatilho documental",
 				"Impacto de artefatos",
-				"Ações antes do código",
-				"Obrigações de fechamento",
 				"Aprovar",
 				"Ajustar",
 				"Bloquear",
@@ -340,31 +359,29 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 3) {
 		add(
 			0,
-			contains(combined, "T1") &&
-				contains(combined, "1\\.8") &&
-				contains(combined, "7cdb964"),
-			"Inspected pinned CASA metadata.",
-		);
-		add(
-			1,
 			contains(combined, "implemented-by") &&
 				contains(combined, "Verifica|evidência|evidence"),
 			"Inspected closure gaps.",
 		);
 		add(
-			2,
+			1,
 			contains(combined, "CI") && contains(combined, "não|not|insuf|futur"),
 			"Inspected future-CI refusal.",
 		);
 		add(
-			3,
+			2,
 			contains(
 				combined,
 				"accepted|manter|preserv|não.*implemented|not.*implemented",
 			) && contains(combined, "fechamento|closure|lacuna"),
 			"Inspected status preservation and obligations.",
 		);
-		add(4, noChanges, `changed=${JSON.stringify(changed)}`);
+		add(
+			3,
+			noChanges &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
 	} else if (evalCase.id === 4) {
 		add(
 			0,
@@ -404,7 +421,7 @@ function grade(evalCase, combined, changed) {
 				contains(combined, "1\\.8") &&
 				contains(
 					combined,
-					"alvo|target|contrato oficial|versão oficial|ref oficial|não resolvid|não confirm|a confirmar|indispon|incert|unresolved|unknown",
+					"alvo|target|contrato oficial|versão oficial|ref oficial|commit oficial|upstream confirma|ref pinado|não resolvid|não confirm|a confirmar|indispon|incert|unresolved|unknown",
 				),
 			"Inspected separation of declared, local, and official targets.",
 		);
@@ -434,7 +451,7 @@ function grade(evalCase, combined, changed) {
 			0,
 			contains(combined, "CASA") &&
 				contains(combined, "T0") &&
-				contains(combined, "1\\.8"),
+				contains(combined, "AGENTS\\.md|DoD|npm test|evidência"),
 			"Inspected audit context.",
 		);
 		add(
@@ -493,7 +510,7 @@ function grade(evalCase, combined, changed) {
 			1,
 			contains(
 				combined,
-					"somente|apenas|exclusiv|enquanto.{0,80}(?:nenhum|sem).{0,30}document|quando.{0,80}não há.{0,30}(?:criação|edição|document)|sem.{0,80}(?:criar|editar|deprecia|mutar|mutaç|escrita).{0,80}document",
+				"somente|apenas|exclusiv|enquanto.{0,80}(?:nenhum|sem).{0,30}document|quando.{0,80}não há.{0,30}(?:criação|edição|document)|sem.{0,80}(?:criar|editar|deprecia|mutar|mutaç|escrita).{0,80}document",
 			) &&
 				contains(
 					combined,
@@ -653,48 +670,254 @@ function grade(evalCase, combined, changed) {
 	} else if (evalCase.id === 18) {
 		add(
 			0,
-			contains(combined, "ADR") &&
-				contains(combined, "estrutural|schema|persist"),
-			"Checked required T1 ADR.",
+			changed.includes("schema/projects.sql") &&
+				changed.some((item) => /^migrations\//.test(item)),
+			`changed=${JSON.stringify(changed)}`,
 		);
 		add(
 			1,
-			contains(combined, "Gatilho documental|mutação direta") &&
-				contains(combined, "gate_required|gate") &&
-				contains(combined, "ADR"),
-			"Checked documentary gate predicate.",
+			!changed.some((item) =>
+				/^(?:AGENTS\.md|CLAUDE\.md|docs\/(?:adr|specs|context)\/)/.test(item),
+			),
+			`changed=${JSON.stringify(changed)}`,
 		);
 		add(
 			2,
-			contains(combined, "Aprovar") &&
-				contains(combined, "Ajustar") &&
-				contains(combined, "Bloquear"),
-			"Checked documentary gate choices.",
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of a CASA gate.",
 		);
-		add(3, noChanges, `changed=${JSON.stringify(changed)}`);
+		add(
+			3,
+			contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0|✅"),
+			"Checked reported test execution.",
+		);
 	} else if (evalCase.id === 19) {
 		add(
 			0,
-			contains(combined, "docs/context/CONVENTIONS\\.md") &&
-				contains(combined, "document|contexto"),
-			"Checked explicit CASA context-document edit.",
+			changed.includes("docs/context/CONVENTIONS.md"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			changed.includes("src/events.js"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			2,
+			changed.includes("docs/context/CONVENTIONS.md") &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked direct-request update proceeded without a CASA gate.",
+		);
+		add(
+			3,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of CASA gate report.",
+		);
+	} else if (evalCase.id === 20) {
+		add(
+			0,
+			changed.some((item) => /^docs\/specs\/\d{4}-.+\.md$/.test(item)) &&
+				contains(combined, "403") &&
+				contains(combined, "404") &&
+				contains(combined, "idempot"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			changed.includes("src/server.js") &&
+				changed.some((item) => /(?:^|\/)test(?:s)?\//.test(item)),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			2,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked absence of redundant CASA gate.",
+		);
+		add(
+			3,
+			!changed.some((item) => /^docs\/adr\//.test(item)),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 21) {
+		add(
+			0,
+			contains(combined, "Spec") &&
+				contains(combined, "último admin|administrador fundador|pap[eé]is") &&
+				contains(combined, "concorr|audit"),
+			"Checked observable role-policy classification.",
 		);
 		add(
 			1,
 			contains(
 				combined,
-				"gate_required.{0,30}(?:true|verdadeiro)|Gatilho documental.{0,160}mutação direta",
-			) && contains(combined, "edit|edição|atualiza|mutação|document"),
-			"Checked gate predicate despite small size.",
+				"(?:não|sem).{0,50}ADR|ADR.{0,50}(?:não (?:é )?(?:necessária|exigida|justificada)|dispensar)",
+			),
+			"Checked explicit ADR dismissal.",
 		);
 		add(
 			2,
-			contains(combined, "Aprovar") &&
-				contains(combined, "Ajustar") &&
-				contains(combined, "Bloquear"),
-			"Checked documentary gate choices.",
+			noChanges &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
 		);
-		add(3, noChanges, `changed=${JSON.stringify(changed)}`);
+	} else if (evalCase.id === 22) {
+		add(
+			0,
+			contains(combined, "ADR") &&
+				contains(combined, "adapter|acoplamento|provedor") &&
+				contains(combined, "timeout|ambígu|reconcil"),
+			"Checked structural ADR classification.",
+		);
+		add(
+			1,
+			contains(combined, "Spec") &&
+				contains(combined, "POST /payments|202") &&
+				contains(combined, "409") &&
+				contains(combined, "503"),
+			"Checked observable Spec classification.",
+		);
+		add(
+			2,
+			contains(combined, "builds-on|referenc|sem duplic|um (?:fato|fact)"),
+			"Checked one-fact-one-home relationship.",
+		);
+		add(
+			3,
+			noChanges &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 23) {
+		add(
+			0,
+			contains(combined, "Spec") &&
+				contains(combined, "atualiz|update") &&
+				contains(combined, "active_version|versão ativa") &&
+				contains(combined, "conflict"),
+			"Checked existing Spec update classification.",
+		);
+		add(
+			1,
+			contains(combined, "FK|constraint|banco") &&
+				contains(combined, "implement|aplica|enforce|cumpr"),
+			"Checked constraint as implementation evidence.",
+		);
+		add(
+			2,
+			contains(
+				combined,
+				"(?:não|sem).{0,50}(?:nova )?ADR|ADR.{0,50}(?:não (?:é )?(?:necessária|exigida|justificada)|dispensar)",
+			),
+			"Checked explicit ADR dismissal.",
+		);
+		add(
+			3,
+			noChanges &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 24) {
+		add(
+			0,
+			changed.some((item) => /^docs\/specs\/\d{4}-.+\.md$/.test(item)) &&
+				contains(combined, "403") &&
+				contains(combined, "404") &&
+				contains(combined, "idempot"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			changed.includes("src/server.js") &&
+				changed.some((item) =>
+					/(?:^|\/)(?:test(?:s)?\/|[^/]+\.(?:test|spec)\.)/.test(item),
+				) &&
+				contains(combined, "npm test") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0|✅"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			2,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked explicit bypass without CASA gate ceremony.",
+		);
+		add(
+			3,
+			!changed.some((item) => /^docs\/adr\//.test(item)),
+			`changed=${JSON.stringify(changed)}`,
+		);
+	} else if (evalCase.id === 25) {
+		add(
+			0,
+			changed.includes("AGENTS.md") &&
+				!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			contains(combined, "casa-version: 1\\.8|CASA 1\\.8") &&
+				contains(combined, "casa-standard-ref: [0-9a-f]{40}|[0-9a-f]{40}"),
+			"Checked canonical target resolution.",
+		);
+		add(
+			2,
+			changed.includes("AGENTS.md") &&
+				contains(combined, "casa-version: 1\\.8|CASA 1\\.8") &&
+				contains(combined, "casa-gates: bypass") &&
+				contains(combined, "scripts/docs-check") &&
+				contains(combined, "pass|passou|aprovad|sucesso|exit 0|OK|✅"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			3,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked persistent bypass without CASA gate ceremony.",
+		);
+	} else if (evalCase.id === 26) {
+		add(
+			0,
+			contains(combined, "implemented-by") &&
+				contains(combined, "Verifica|evidência|evidence"),
+			"Checked closure evidence gaps.",
+		);
+		add(
+			1,
+			noChanges &&
+				contains(
+					combined,
+					"accepted|manter|preserv|não.*implemented|not.*implemented",
+				),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			2,
+			contains(combined, "CI") && contains(combined, "não|not|insuf|futur"),
+			"Checked refusal to defer evidence.",
+		);
+		add(
+			3,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked bypass does not add gate ceremony.",
+		);
+	} else if (evalCase.id === 27) {
+		add(
+			0,
+			changed.includes("AGENTS.md") &&
+				contains(combined, "<!-- casa-gates: bypass -->"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			1,
+			changed.length === 1 &&
+				changed[0] === "AGENTS.md" &&
+				contains(combined, "persist|projeto|próxim|raiz|durável"),
+			`changed=${JSON.stringify(changed)}`,
+		);
+		add(
+			2,
+			!contains(combined, "Aprovar.*Ajustar.*Bloquear|# Gate CASA"),
+			"Checked persistent activation without CASA gate ceremony.",
+		);
 	}
 	const passed = checks.filter((item) => item.passed).length;
 	return {
@@ -855,7 +1078,12 @@ async function regradeExisting(output, catalog, options) {
 			finalText = lastNonEmptyAgentMessage(transcript);
 			if (finalText) await fs.writeFile(finalPath, finalText);
 		}
-		const grading = grade(evalCase, finalText, summary.changedFiles ?? []);
+		const changed = summary.changedFiles ?? [];
+		const artifactText = await collectChangedText(
+			path.join(runDir, "repo"),
+			changed,
+		);
+		const grading = grade(evalCase, `${finalText}\n${artifactText}`, changed);
 		summary.grading = grading;
 		await fs.writeFile(
 			path.join(runDir, "grading.json"),
@@ -1052,7 +1280,8 @@ async function main() {
 					timeoutMs: 30_000,
 				},
 			);
-			const grading = grade(evalCase, finalText, changed);
+			const artifactText = await collectChangedText(workspace, changed);
+			const grading = grade(evalCase, `${finalText}\n${artifactText}`, changed);
 			const summary = {
 				evalId: evalCase.id,
 				evalName: evalCase.name,
