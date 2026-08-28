@@ -1,8 +1,11 @@
-# Handoff — criação da skill `casa-workflow`
+# Handoff histórico — criação da skill `casa-workflow` (obsoleto)
 
-> Documento de continuidade, não normativo.
+> ⚠️ **OBSOLETO — não use este arquivo como instrução de runtime.** Ele preserva
+> decisões e resultados da criação inicial, inclusive um gate anterior que foi
+> substituído. A fonte vigente é `skills/casa-workflow/SKILL.md` e suas
+> referências; novos ajustes devem ser feitos e avaliados ali.
 >
-> Este arquivo preserva o brainstorming aprovado, as descobertas técnicas e o
+> Documento histórico e não normativo. Ele preserva o brainstorming aprovado, as descobertas técnicas e o
 > plano de criação da skill para retomada em outro workspace. Ele não é uma ADR,
 > uma Spec nem um capítulo de `docs/context/`, e não substitui o
 > [CASA Standard](https://github.com/atplus-digital/casa-standard).
