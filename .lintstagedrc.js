@@ -21,5 +21,15 @@ export default {
 		`bunx prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --log-level=warn --cache`,
 	"*.sh": (files) =>
 		`bunx prettier --write ${files.map((file) => JSON.stringify(file)).join(" ")} --plugin=prettier-plugin-sh --log-level=warn --cache`,
-	"*.{js,ts,jsx,tsx}": "tsc-files --noEmit",
+	"*.{js,ts,jsx,tsx}": (files) => {
+		const matched = files.filter(
+			(file) =>
+				file.endsWith(".ts") ||
+				file.endsWith(".tsx") ||
+				file === ".lintstagedrc.js",
+		);
+		return matched.length
+			? `tsc-files --noEmit ${matched.map((file) => JSON.stringify(file)).join(" ")}`
+			: [];
+	},
 };
