@@ -14,7 +14,12 @@ Execute a plan with fresh implementer subagents. Run tasks in a parallel wave on
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are the four named below, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+**Continuous execution:** After the required Implementation Configuration Gate
+below is approved, do not pause to check in with your human partner between
+tasks. Execute all tasks from the plan without stopping. The only reasons to
+stop are the four named below, a change to the approved model configuration,
+or all tasks complete. "Should I continue?" prompts and progress summaries
+waste their time — they asked you to execute the plan, so execute it.
 
 **Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
 ambiguities, plan defects, a cap you would have asked to exceed — decide
@@ -88,10 +93,10 @@ digraph process {
 
     "Setup: worktree, ledger check, read plan, pre-flight review" [shape=box];
     "More tasks remain?" [shape=diamond];
-    "Dispatch final code reviewer (references/requesting-code-review/code-reviewer.md)" [shape=box];
+    "Dispatch final code reviewer (references/code-reviewer.md)" [shape=box];
     "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals" [shape=box];
     "Final review clean: delete this plan's workspace" [shape=box];
-    "Follow local branch-finishing guidance (references/finishing-a-development-branch/SKILL.md)" [shape=box style=filled fillcolor=lightgreen];
+    "Follow local branch-finishing guidance (references/finishing-a-development-branch.md)" [shape=box style=filled fillcolor=lightgreen];
 
     "Setup: worktree, ledger check, read plan, pre-flight review" -> "Select next sequential task or parallel-safe wave";
     "Select next sequential task or parallel-safe wave" -> "Dispatch implementer(s) (./implementer-prompt.md)";
@@ -119,10 +124,10 @@ digraph process {
     "Park findings in ledger with rulings" -> "Append completion to ledger, mark todo complete";
     "Append completion to ledger, mark todo complete" -> "More tasks remain?";
     "More tasks remain?" -> "Select next sequential task or parallel-safe wave" [label="yes"];
-    "More tasks remain?" -> "Dispatch final code reviewer (references/requesting-code-review/code-reviewer.md)" [label="no"];
-    "Dispatch final code reviewer (references/requesting-code-review/code-reviewer.md)" -> "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals";
+    "More tasks remain?" -> "Dispatch final code reviewer (references/code-reviewer.md)" [label="no"];
+    "Dispatch final code reviewer (references/code-reviewer.md)" -> "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals";
     "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals" -> "Final review clean: delete this plan's workspace";
-    "Final review clean: delete this plan's workspace" -> "Follow local branch-finishing guidance (references/finishing-a-development-branch/SKILL.md)";
+    "Final review clean: delete this plan's workspace" -> "Follow local branch-finishing guidance (references/finishing-a-development-branch.md)";
 }
 ```
 
@@ -157,6 +162,103 @@ a ledger file, not only in todos.
   trust the ledger and `git log` over your own recollection.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch); if
   that happens, recover from `git log`.
+
+## Implementation Configuration Gate
+
+After completing the plan reading, preflight scan, and model selection below —
+but before dispatching an implementer, reviewer, or fixer, and therefore
+before any task implementation starts — prepare the complete implementation
+configuration, write it to the ledger, show it to the human partner, and wait
+for explicit approval. This is a configuration approval, not a progress
+check-in. Do not dispatch implementation work until it is approved.
+
+The confirmation must contain every decision needed to audit the planned work:
+
+- plan path, reachable spec (or its absence), Global Constraints, integration
+  worktree and branch, MERGE_BASE, and the plan's validation commands;
+- every task/batch in plan order: name, dependencies, expected write set,
+  shared interfaces/resources, proposed sequential task or parallel wave, and
+  the evidence for that classification;
+- the selected explicit model for each task's implementer, task reviewer, and
+  scoped re-reviewer, with a short rationale; the named model for fix rounds
+  1-3; and the named, higher-tier replacement model for rounds 4-5;
+- the explicit models for the final whole-branch reviewer, its one final-fix
+  implementer, and its scoped re-reviewer;
+- the variables section recorded in the ledger, including paths or commit SHAs
+  already known and `pending` for values that are allocated only at dispatch or
+  integration time.
+
+Ask for approval of this configuration in one concise message. A reply that
+approves it authorizes dispatches using exactly the recorded models. If a
+BLOCKED result, model availability, or new task classification requires a
+different model, update the ledger with the reason and obtain explicit approval
+of the changed model configuration before dispatching that agent. The
+pre-approved round 4-5 replacement model does not need another approval when
+the normal escalation rule selects it.
+
+Create this section immediately after the ledger identity with `Status:
+drafting`; populate it after the preflight and model selection, then present
+it for approval:
+
+```markdown
+## Implementation configuration
+
+### Approval
+
+- Status: drafting | pending approval | approved
+- Approved at: <timestamp or pending>
+- Approved configuration revision: <integer>
+
+### Scope and validation
+
+- PLAN_FILE: <absolute path>
+- SPEC_FILE: <absolute path | none reachable>
+- GLOBAL_CONSTRAINTS: <verbatim constraints or none>
+- INTEGRATION_WORKTREE: <absolute path>
+- INTEGRATION_BRANCH: <branch>
+- MERGE_BASE: <SHA | pending>
+- VALIDATION_COMMANDS: <commands from plan/repo>
+
+### Planned execution and models
+
+| Unit | Dependencies / write-set evidence | Mode | Role | MODEL | Why |
+| --- | --- | --- | --- | --- | --- |
+| Task <N> | <summary> | sequential / wave <W> | implementer | <explicit model> | <rationale> |
+| Task <N> | <summary> | sequential / wave <W> | task reviewer | <explicit model> | <rationale> |
+| Task <N> | <summary> | sequential / wave <W> | re-reviewer and fix rounds 1-3 | <explicit model> | <rationale> |
+| Task <N> | <summary> | sequential / wave <W> | fix rounds 4-5 | <explicit higher-tier model> | escalation |
+| Final branch | <whole branch> | sequential | reviewer / final fixer / re-reviewer | <explicit models> | <rationale> |
+
+### Variables
+
+| Scope | Variable | Value |
+| --- | --- | --- |
+| plan | PLAN_FILE | <absolute path> |
+| plan | WORKSPACE | <absolute path> |
+| plan | N | <task number / pending> |
+| integration | MERGE_BASE | <SHA / pending> |
+| task | MODEL | <role-specific approved model> |
+| task | BRIEF_FILE | <absolute path / pending> |
+| task | REPORT_FILE | <absolute path / pending> |
+| task | WORKTREE | <absolute path / pending> |
+| task | TASK_BRANCH | <branch / pending> |
+| task | WRITE_SET | <paths / pending> |
+| task | GLOBAL_CONSTRAINTS | <verbatim constraints / none> |
+| task | BASE_SHA | <SHA / pending> |
+| wave | WAVE_BASE | <SHA / pending> |
+| integration | INTEGRATION_BASE | <SHA / pending> |
+| review | HEAD_SHA | <SHA / pending> |
+| fix | FIX_BASE_SHA | <SHA / pending> |
+| fix | FINDINGS | <verbatim findings / pending> |
+| review | DIFF_FILE | <absolute path / pending> |
+| fix | R | <round number / pending> |
+```
+
+Keep this section complete throughout the run: append the resolved value and
+its relevant scope whenever a pending variable is allocated, a model is
+dispatched, a commit boundary changes, or findings are opened. Never replace
+the approved configuration silently; record revisions so recovery after
+compaction can reconstruct both the chosen models and every dispatch boundary.
 
 Read the plan once, note its context and Global Constraints, and create a
 todo per task. If the plan names a Spec, read that too: the spec is the
@@ -223,6 +325,10 @@ the implementer that got stuck.
 omitted model inherits your session's model — often the most capable and
 most expensive — which silently defeats this section.
 
+Select these exact model names during preflight and include them in the
+Implementation Configuration Gate. A selected model is not authorized for
+dispatch until that gate is approved and recorded in the ledger.
+
 **Turn count beats token price.** Wall-clock and context cost scale with how
 many turns a subagent takes, and the cheapest models routinely take 2-3× the
 turns on multi-step work — costing more overall. Use a mid-tier model as the
@@ -286,6 +392,14 @@ For a sequential task, record BASE (`git rev-parse HEAD`) before dispatching.
 For a parallel wave, record WAVE_BASE before dispatch and record a fresh
 INTEGRATION_BASE immediately before integrating each task. Review and fix diffs
 depend on these exact boundaries.
+
+Before every dispatch, update the ledger's Variables table with the exact
+values in scope: `N`, `MODEL`, `BRIEF_FILE`, `REPORT_FILE`, `WORKTREE`,
+`TASK_BRANCH`, `WRITE_SET`, `GLOBAL_CONSTRAINTS`, and `BASE_SHA` or
+`WAVE_BASE`. When integrating or reviewing, append the resolved
+`INTEGRATION_BASE`, `HEAD_SHA`, `FIX_BASE_SHA`, `FINDINGS`, `DIFF_FILE`, and
+`R`. The ledger must contain the value actually used, not only the planned
+placeholder, before the corresponding agent is dispatched.
 
 - **Task brief:** before dispatching an implementer, run this skill's
   `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a
@@ -521,8 +635,8 @@ branch started from, e.g. `git merge-base main HEAD`) and include the
 printed path in the final review dispatch, so the final reviewer reads
 one file instead of re-deriving the branch diff with git commands. Dispatch
 on the most capable available model (see Model Selection), following the local
-[code-review guidance](references/requesting-code-review/SKILL.md) and its
-[reviewer template](references/requesting-code-review/code-reviewer.md). Point
+[code-review guidance](references/requesting-code-review.md) and its
+[reviewer template](references/code-reviewer.md). Point
 it at the ledger's deferred-minor and parked lines so it can triage which must
 be fixed before merge.
 
@@ -557,7 +671,7 @@ git history is the record now. Sibling directories belong to other plans;
 leave them alone.
 
 Follow the local
-[branch-finishing guidance](references/finishing-a-development-branch/SKILL.md).
+[branch-finishing guidance](references/finishing-a-development-branch.md).
 
 ## Common Rationalizations
 

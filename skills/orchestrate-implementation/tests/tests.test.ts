@@ -61,3 +61,34 @@ describe("orchestrate-implementation parallel waves", () => {
 		expect(catalog.evals).toHaveLength(4);
 	});
 });
+
+describe("orchestrate-implementation implementation configuration", () => {
+	test("requires model confirmation before implementation and persists dispatch variables", () => {
+		const skill = read("SKILL.md");
+
+		expect(skill).toContain("## Implementation Configuration Gate");
+		expect(skill).toContain("wait\nfor explicit approval");
+		expect(skill).toContain("## Implementation configuration");
+		for (const variable of [
+			"PLAN_FILE",
+			"WORKSPACE",
+			"MERGE_BASE",
+			"MODEL",
+			"BRIEF_FILE",
+			"REPORT_FILE",
+			"WORKTREE",
+			"TASK_BRANCH",
+			"WRITE_SET",
+			"GLOBAL_CONSTRAINTS",
+			"BASE_SHA",
+			"HEAD_SHA",
+			"WAVE_BASE",
+			"INTEGRATION_BASE",
+			"FIX_BASE_SHA",
+			"DIFF_FILE",
+			"FINDINGS",
+		]) {
+			expect(skill).toContain(variable);
+		}
+	});
+});
