@@ -17,6 +17,7 @@ AGENTS_SKILLS_REPO_URL=${AGENTS_SKILLS_REPO_URL:-https://github.com/$AGENTS_SKIL
 
 YES=0
 USE_GLOBAL=0
+COPY_PRESERVE_EXISTING=0
 USE_INIT=0
 USE_INSTRUCTIONS=0
 USE_FRESH=0
@@ -229,6 +230,12 @@ copy_skill_dir() {
     return 0
   fi
 
+  if [ "$COPY_PRESERVE_EXISTING" -eq 1 ] && { [ -e "$destination_skill_dir" ] || [ -L "$destination_skill_dir" ]; }; then
+    copied_count=$((copied_count + 1))
+    warn "Skill já existe em $destination; mantendo $skill_name sem substituir"
+    return 0
+  fi
+
   cp -R "$source_skill_dir" "$destination/"
   copied_count=$((copied_count + 1))
   success "Skill copiada: $skill_name"
@@ -352,6 +359,23 @@ remove_installed_skills() {
   fi
 
   info "--fresh removeu $removed_count skill(s) existente(s) de $destination"
+}
+
+secondary_destination_label() {
+  case "$1" in
+    */.claude/*)
+      printf 'Claude'
+      ;;
+    */.gemini/*)
+      printf 'Gemini'
+      ;;
+    */.codex/*)
+      printf 'Codex'
+      ;;
+    *)
+      printf '%s' "$(basename "$(dirname "$1")")"
+      ;;
+  esac
 }
 
 copy_instructions() {
@@ -500,6 +524,11 @@ validate_selected_skills
 
 GLOBAL_TARGET=$(expand_path "~/.agents/skills")
 CLAUDE_TARGET=$(expand_path "~/.claude/skills")
+GEMINI_TARGET=$(expand_path "~/.gemini/skills")
+CODEX_TARGET=$(expand_path "~/.codex/skills")
+SECONDARY_AGENT_TARGETS="$CLAUDE_TARGET
+$GEMINI_TARGET
+$CODEX_TARGET"
 CURRENT_DIR=$PWD
 CURRENT_DIR_NAME=${CURRENT_DIR##*/}
 INSTALL_TARGET=''
@@ -554,18 +583,46 @@ if [ "$USE_INSTRUCTIONS" -eq 1 ]; then
   copy_instructions "$INSTALL_TARGET"
 fi
 
-if [ "$USE_INIT" -eq 0 ] && ! same_path "$INSTALL_TARGET" "$CLAUDE_TARGET"; then
-  if confirm "Também deseja instalar as skills em $CLAUDE_TARGET para uso pelo Claude?"; then
-    if [ "$USE_FRESH" -eq 1 ]; then
-      remove_installed_skills "$CLAUDE_TARGET"
+if [ "$USE_INIT" -eq 0 ]; then
+  SECONDARY_OFFER_TARGETS=''
+  secondary_offer_lines=''
+
+  for secondary_target in $SECONDARY_AGENT_TARGETS; do
+    same_path "$INSTALL_TARGET" "$secondary_target" && continue
+    secondary_label=$(secondary_destination_label "$secondary_target")
+
+    if [ -z "$SECONDARY_OFFER_TARGETS" ]; then
+      SECONDARY_OFFER_TARGETS=$secondary_target
+      secondary_offer_lines="em $secondary_target (para uso pelo $secondary_label)"
+    else
+      SECONDARY_OFFER_TARGETS="$SECONDARY_OFFER_TARGETS
+$secondary_target"
+      secondary_offer_lines="$secondary_offer_lines
+  e em $secondary_target (para uso pelo $secondary_label)"
     fi
+  done
+
+  if [ -n "$SECONDARY_OFFER_TARGETS" ] && confirm "Também deseja instalar as skills $secondary_offer_lines?"; then
+    for secondary_target in $SECONDARY_OFFER_TARGETS; do
+      if [ "$USE_FRESH" -eq 1 ]; then
+        remove_installed_skills "$secondary_target"
+      fi
+    done
 
     if confirm_default_yes "Usar symlinks apontando para as skills instaladas em $INSTALL_TARGET?"; then
-      link_skills "$CLAUDE_TARGET"
+      for secondary_target in $SECONDARY_OFFER_TARGETS; do
+        link_skills "$secondary_target"
+      done
     else
-      copy_skills "$CLAUDE_TARGET"
+      COPY_PRESERVE_EXISTING=1
+      for secondary_target in $SECONDARY_OFFER_TARGETS; do
+        copy_skills "$secondary_target"
+      done
+      COPY_PRESERVE_EXISTING=0
     fi
-  else
-    info "Instalação em $CLAUDE_TARGET não solicitada"
+  elif [ -n "$SECONDARY_OFFER_TARGETS" ]; then
+    for secondary_target in $SECONDARY_OFFER_TARGETS; do
+      info "Instalação em $secondary_target não solicitada"
+    done
   fi
 fi

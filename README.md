@@ -191,7 +191,8 @@ O comando `./skills.sh install` copia as skills de `dist/skills/` diretamente
 para o destino escolhido. Nomes posicionais limitam a cópia às skills
 selecionadas. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de
 publicar alterações. Depois da instalação, o comando oferece instalar a mesma
-seleção para `~/.claude/skills`; a pergunta não aparece quando esse já é o
-destino principal. Ao aceitar, o instalador pergunta se deve criar symlinks
-apontando para o destino principal (padrão); respondendo `n`, ele faz uma cópia
-independente.
+seleção para `~/.claude/skills`, `~/.gemini/skills` e `~/.codex/skills`; cada
+destino já usado como principal não entra na pergunta. Ao aceitar, o
+instalador pergunta se deve criar symlinks apontando para o destino principal
+(padrão); respondendo `n`, ele faz uma cópia independente que preserva skills
+já existentes em cada destino.

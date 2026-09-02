@@ -79,95 +79,194 @@ describe("skill installer", () => {
 		}
 	});
 
-	test("uses symlinks for the Claude installation by default", () => {
+	test("uses symlinks for all secondary agent installations by default", () => {
 		const temporaryRoot = makeTempDir("install-claude-test");
 		try {
 			const primary = join(temporaryRoot, "custom-skills");
-			const claudeTarget = join(temporaryRoot, "home", ".claude", "skills");
+			const home = join(temporaryRoot, "home");
+			const claudeTarget = join(home, ".claude", "skills");
+			const geminiTarget = join(home, ".gemini", "skills");
 			const promptInput = join(temporaryRoot, "tty-input");
 			write(promptInput, "y\n\n");
 			const result = runInstaller(["--path", primary], {
 				env: {
-					HOME: join(temporaryRoot, "home"),
+					HOME: home,
 					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
 				},
 			});
 			expectSuccess(result);
 			expectExists(join(primary, fixtureSkill, "SKILL.md"));
-			expectExists(join(claudeTarget, fixtureSkill, "SKILL.md"));
-			expect(lstatSync(join(claudeTarget, fixtureSkill)).isSymbolicLink()).toBe(
-				true,
-			);
-			expect(readlinkSync(join(claudeTarget, fixtureSkill))).toBe(
-				join(primary, fixtureSkill),
+			expect(result.output).toContain(
+				`Também deseja instalar as skills em ${claudeTarget} (para uso pelo Claude)`,
 			);
 			expect(result.output).toContain(
-				`Também deseja instalar as skills em ${claudeTarget}`,
+				`e em ${geminiTarget} (para uso pelo Gemini)`,
+			);
+			expect(result.output).toContain(
+				`e em ${join(home, ".codex", "skills")} (para uso pelo Codex)`,
 			);
 			expect(result.output).toContain("Usar symlinks");
+
+			for (const target of [claudeTarget, geminiTarget]) {
+				expectExists(join(target, fixtureSkill, "SKILL.md"));
+				expect(lstatSync(join(target, fixtureSkill)).isSymbolicLink()).toBe(
+					true,
+				);
+				expect(readlinkSync(join(target, fixtureSkill))).toBe(
+					join(primary, fixtureSkill),
+				);
+			}
 		} finally {
 			cleanup(temporaryRoot);
 		}
 	});
 
-	test("copies the Claude installation when symlinks are declined", () => {
+	test("copies the secondary installations when symlinks are declined", () => {
 		const temporaryRoot = makeTempDir("install-claude-copy-test");
 		try {
 			const primary = join(temporaryRoot, "custom-skills");
-			const claudeTarget = join(temporaryRoot, "home", ".claude", "skills");
+			const home = join(temporaryRoot, "home");
+			const claudeTarget = join(home, ".claude", "skills");
+			const geminiTarget = join(home, ".gemini", "skills");
+			const codexTarget = join(home, ".codex", "skills");
 			const promptInput = join(temporaryRoot, "tty-input");
 			write(promptInput, "y\nn\n");
 			const result = runInstaller(["--path", primary], {
 				env: {
-					HOME: join(temporaryRoot, "home"),
+					HOME: home,
 					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
 				},
 			});
 			expectSuccess(result);
-			expectExists(join(claudeTarget, fixtureSkill, "SKILL.md"));
-			expect(lstatSync(join(claudeTarget, fixtureSkill)).isSymbolicLink()).toBe(
-				false,
-			);
+
+			for (const target of [claudeTarget, geminiTarget, codexTarget]) {
+				expectExists(join(target, fixtureSkill, "SKILL.md"));
+				expect(lstatSync(join(target, fixtureSkill)).isSymbolicLink()).toBe(
+					false,
+				);
+			}
 			expect(result.output).toContain("Instalação concluída com 3 skill(s)");
 		} finally {
 			cleanup(temporaryRoot);
 		}
 	});
 
-	test("preserves the primary destination when Claude installation is declined", () => {
-		const temporaryRoot = makeTempDir("install-decline-claude-test");
+	test("preserves existing skills when copying into secondary destinations", () => {
+		const temporaryRoot = makeTempDir("install-secondaries-preserve-test");
 		try {
 			const primary = join(temporaryRoot, "custom-skills");
-			const claudeTarget = join(temporaryRoot, "home", ".claude", "skills");
+			const home = join(temporaryRoot, "home");
+			const geminiTarget = join(home, ".gemini", "skills");
+			write(join(geminiTarget, "my-own-skill", "SKILL.md"), "mine\n");
+			write(
+				join(geminiTarget, "commit-changes", "SKILL.md"),
+				"local override\n",
+			);
 			const promptInput = join(temporaryRoot, "tty-input");
-			write(promptInput, "n\n");
+			write(promptInput, "y\nn\n");
 			const result = runInstaller(["--path", primary], {
 				env: {
-					HOME: join(temporaryRoot, "home"),
+					HOME: home,
 					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
 				},
 			});
 			expectSuccess(result);
-			expectExists(join(primary, fixtureSkill, "SKILL.md"));
-			expectAbsent(claudeTarget);
-			expect(result.output).toContain(
-				`Instalação em ${claudeTarget} não solicitada`,
+			expect(read(join(geminiTarget, "my-own-skill", "SKILL.md"))).toBe(
+				"mine\n",
 			);
+			expect(read(join(geminiTarget, "commit-changes", "SKILL.md"))).toBe(
+				"local override\n",
+			);
+			expectExists(join(geminiTarget, fixtureSkill, "SKILL.md"));
+			expect(lstatSync(join(geminiTarget, fixtureSkill)).isSymbolicLink()).toBe(
+				false,
+			);
+			expect(result.output).toContain(`mantendo commit-changes sem substituir`);
 		} finally {
 			cleanup(temporaryRoot);
 		}
 	});
 
-	test("does not offer Claude when it is the primary destination", () => {
+	test("--fresh removes existing secondary skills before symlink installation", () => {
+		const temporaryRoot = makeTempDir("install-secondaries-fresh-test");
+		try {
+			const primary = join(temporaryRoot, "custom-skills");
+			const home = join(temporaryRoot, "home");
+			const claudeTarget = join(home, ".claude", "skills");
+			write(join(claudeTarget, "old-skill", "SKILL.md"), "old\n");
+			const promptInput = join(temporaryRoot, "tty-input");
+			write(promptInput, "y\ny\n");
+			const result = runInstaller(["--fresh", "--path", primary], {
+				env: {
+					HOME: home,
+					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
+				},
+			});
+			expectSuccess(result);
+			expectAbsent(join(claudeTarget, "old-skill"));
+			expect(lstatSync(join(claudeTarget, fixtureSkill)).isSymbolicLink()).toBe(
+				true,
+			);
+			expect(result.output).toContain("--fresh removeu 1 skill(s)");
+		} finally {
+			cleanup(temporaryRoot);
+		}
+	});
+
+	test("preserves the primary destination when secondary installations are declined", () => {
+		const temporaryRoot = makeTempDir("install-decline-claude-test");
+		try {
+			const primary = join(temporaryRoot, "custom-skills");
+			const home = join(temporaryRoot, "home");
+			const claudeTarget = join(home, ".claude", "skills");
+			const geminiTarget = join(home, ".gemini", "skills");
+			const codexTarget = join(home, ".codex", "skills");
+			const promptInput = join(temporaryRoot, "tty-input");
+			write(promptInput, "n\n");
+			const result = runInstaller(["--path", primary], {
+				env: {
+					HOME: home,
+					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
+				},
+			});
+			expectSuccess(result);
+			expectExists(join(primary, fixtureSkill, "SKILL.md"));
+			for (const target of [claudeTarget, geminiTarget, codexTarget]) {
+				expectAbsent(target);
+				expect(result.output).toContain(
+					`Instalação em ${target} não solicitada`,
+				);
+			}
+		} finally {
+			cleanup(temporaryRoot);
+		}
+	});
+
+	test("does not offer a secondary agent when it is the primary destination", () => {
 		const temporaryRoot = makeTempDir("install-primary-claude-test");
 		try {
-			const claudeTarget = join(temporaryRoot, "home", ".claude", "skills");
+			const home = join(temporaryRoot, "home");
+			const claudeTarget = join(home, ".claude", "skills");
+			const promptInput = join(temporaryRoot, "tty-input");
+			write(promptInput, "n\n");
 			const result = runInstaller(["--path", claudeTarget], {
-				env: { HOME: join(temporaryRoot, "home") },
+				env: {
+					HOME: home,
+					AGENTS_SKILLS_PROMPT_INPUT: promptInput,
+				},
 			});
 			expectSuccess(result);
 			expectExists(join(claudeTarget, fixtureSkill, "SKILL.md"));
-			expect(result.output).not.toContain("Também deseja instalar as skills");
+			expect(result.output).not.toContain(
+				`em ${claudeTarget} (para uso pelo Claude)`,
+			);
+			expect(result.output).toContain(
+				`em ${join(home, ".gemini", "skills")} (para uso pelo Gemini)`,
+			);
+			expect(result.output).toContain(
+				`em ${join(home, ".codex", "skills")} (para uso pelo Codex)`,
+			);
+			expect(result.output).toContain("não solicitada");
 		} finally {
 			cleanup(temporaryRoot);
 		}
