@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees
-description: Use when needed isolation from current workspace - ensures an isolated workspace exists via native tools or git worktree fallback
+description: Ensures work happens in an isolated workspace via native worktree tools or a git worktree fallback. Use ONLY when the user explicitly requests workspace isolation, for example by saying use a worktree or isolate this work, or by invoking $using-git-worktrees or /using-git-worktrees. Do not activate, trigger, or suggest this skill on its own; never initiate merely because isolation would be convenient, and never use it for ordinary in-place work.
 ---
 
 # Using Git Worktrees
