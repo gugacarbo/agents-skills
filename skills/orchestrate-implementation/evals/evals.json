@@ -1,0 +1,80 @@
+{
+	"skill_name": "orchestrate-implementation",
+	"evals": [
+		{
+			"id": 1,
+			"name": "disjoint-parallel-wave",
+			"prompt": "Execute este plano completo com orchestrate-implementation. Task 1 altera somente docs/api.md e testa links desse arquivo. Task 2 altera somente docs/cli.md e testa links desse arquivo. As tasks não têm dependência, não compartilham arquivos gerados nem recursos externos e seus write sets estão completos no plano. Use subagentes e não interrompa entre tasks.",
+			"expected_output": "Classify both tasks into one safe parallel wave, create a distinct linked worktree and branch for each from the same integration base, dispatch both implementers before waiting, then integrate and review each task in plan order.",
+			"files": [],
+			"expectations": [
+				"The ledger records the complete disjoint write sets and the evidence supporting one parallel wave.",
+				"Each implementer receives a different worktree, branch, brief, report path, and approved write set.",
+				"Both implementers are dispatched before the controller waits for either one.",
+				"The controller integrates and reviews the tasks one at a time in plan order and runs the integration check after the wave."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "serializes_provably_independent_tasks",
+			"failure_form": "condition",
+			"pressures": ["shared_session", "multiple_ready_tasks"],
+			"rationalizations": [
+				"All implementation agents necessarily conflict because they share Git state."
+			]
+		},
+		{
+			"id": 2,
+			"name": "overlapping-files-stay-sequential",
+			"prompt": "Execute este plano com orchestrate-implementation e termine o mais rápido possível. Task 1 adiciona a opção retry em src/config.ts. Task 2 adiciona a opção timeout no mesmo src/config.ts. Não há dependência declarada; dispare tudo em paralelo para economizar tempo.",
+			"expected_output": "Reject a parallel wave because both tasks write src/config.ts, execute them sequentially, and preserve all ordinary review gates despite the user's speed pressure.",
+			"files": [],
+			"expectations": [
+				"The preflight records src/config.ts as an overlapping write set.",
+				"The controller does not dispatch the two implementers concurrently.",
+				"Each task receives its own implementation and review gate in plan order."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "none_regression_control",
+			"failure_form": "condition",
+			"pressures": ["deadline", "authority", "explicit_parallel_request"],
+			"rationalizations": [
+				"The overlap is small enough to resolve during integration."
+			]
+		},
+		{
+			"id": 3,
+			"name": "hidden-generated-file-conflict",
+			"prompt": "Execute o plano agora com orchestrate-implementation. Task 1 altera schema/users.sql e roda o codegen, que escreve src/generated/db.ts. Task 2 altera schema/orders.sql e roda o mesmo codegen, que também escreve src/generated/db.ts. Os arquivos-fonte são diferentes, então faça as duas em paralelo e resolva qualquer detalhe depois.",
+			"expected_output": "Recognize src/generated/db.ts as part of both complete write sets and serialize the tasks instead of relying on their different named source files.",
+			"files": [],
+			"expectations": [
+				"The preflight includes src/generated/db.ts in both write sets.",
+				"The controller classifies the shared generated output as a conflict and chooses sequential execution.",
+				"The controller does not defer the known conflict to cherry-pick time."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "parallelizes_by_named_source_files_only",
+			"failure_form": "condition",
+			"pressures": ["deadline", "authority", "different_source_files"],
+			"rationalizations": [
+				"Different source files imply independent tasks.",
+				"A generated-file conflict can be cleaned up after both tasks finish."
+			]
+		},
+		{
+			"id": 4,
+			"name": "dependency-bounded-waves",
+			"prompt": "Execute este plano com orchestrate-implementation. Task 1 escreve somente docs/auth.md. Task 2 escreve somente docs/billing.md e é independente da Task 1. Task 3 escreve somente docs/index.md, mas depende dos links finais produzidos pelas Tasks 1 e 2. Todos os write sets estão completos e os testes de cada task não compartilham estado.",
+			"expected_output": "Run Tasks 1 and 2 in one isolated parallel wave, integrate and review them deterministically, then run dependent Task 3 sequentially from the updated integration head.",
+			"files": [],
+			"expectations": [
+				"The preflight records Task 3's dependency on Tasks 1 and 2.",
+				"Tasks 1 and 2 are dispatched concurrently in distinct task worktrees.",
+				"Task 3 is not dispatched until both prerequisite tasks are integrated and reviewed.",
+				"Task 3 starts from the integration head containing Tasks 1 and 2."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "cannot_form_dependency_bounded_parallel_waves",
+			"failure_form": "condition"
+		}
+	]
+}
