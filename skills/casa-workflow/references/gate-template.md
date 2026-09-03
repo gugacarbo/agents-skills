@@ -1,43 +1,54 @@
 # Template do gate CASA
 
-Use este formato para o relatório pré-escrita. Escreva frases curtas e
-escaneáveis; em `Impacto de artefatos`, prefira `estado atual → transição`.
+Use este formato para o relatório pré-escrita. Ele é um pedido de autorização,
+não uma auditoria: mostre primeiro, e com destaque, **quais documentos serão
+criados, alterados ou removidos**.
 
-Renderize somente informações sustentadas por evidência. Se um campo,
-subseção ou seção condicional não for necessário, omita-o por completo: não
-imprima título vazio, `nenhum`, `não aplicável`, `N/A` ou placeholder.
-Preserve a ordem relativa das seções que forem renderizadas.
+Renderize somente informações sustentadas por evidência. Omita por completo
+qualquer seção, grupo ou campo sem conteúdo; não use título vazio, `nenhum`,
+`não aplicável`, `N/A` ou placeholder. Mantenha as seções na ordem abaixo.
 
-`Contexto CASA`, `Gatilho documental`, `Impacto de artefatos` e `Gate` são
-obrigatórios sempre que o gate for aplicável. `Decisão necessária`, `Obrigações
-de fechamento` e `Efeitos externos` aparecem somente quando tiverem conteúdo
-concreto. O relatório é um pedido de autorização, não uma auditoria completa.
+`Aprovação necessária`, `Documentos no envelope` e `Gate` são obrigatórios. Os
+grupos `Criar`, `Alterar` e `Remover` são condicionais: renderize só os que
+tiverem documentos. `Escopo incluído`, `Decisão necessária`, `Fechamento` e
+`Efeitos externos` são opcionais.
 
 ```markdown
 # Gate CASA
 
-## Contexto CASA
+**Aprovação necessária:** [mutação documental inferida, fora do escopo autorizado
+ou decisão aberta que exige o gate].
 
-**[adoção] · [tier] · CASA [versão] · ref `[casa-standard-ref]` · `docs-check`: [estado]**
+**CASA:** [adoção, se relevante] · [tier] · versão [casa-version] · ref
+`[casa-standard-ref]` · `docs-check`: [estado, se consultado]
 
-**Avaliação:** [resumo do que está sendo avaliado]
+## Documentos no envelope
 
-**Fontes:** [somente fontes realmente consultadas]
+### Criar
 
-**Gatilho documental:** [documento CASA]: [estado atual] → [ação inferida ou fora
-do escopo autorizado]; motivo: [evidência ou decisão ainda aberta].
+- `caminho/do/documento.md` — [finalidade]. **Status inicial:** `[status]`.
 
-## Impacto de artefatos
+### Alterar
 
-- [artefato]: [estado atual] → [transição]; evidência: [fonte].
+- `caminho/do/documento.md` — [alteração objetiva]. **Status:** `[atual]` →
+  `[novo]`. <!-- Inclua Status somente quando ele mudar. -->
+
+### Remover
+
+- `caminho/do/documento.md` — [motivo e destino, se houver].
+
+## Escopo incluído
+
+- **Código:** [mudanças locais cobertas pelo envelope].
+- **Verificação:** [comandos ou evidência esperada].
 
 ## Decisão necessária
 
-[somente a escolha material que o usuário precisa resolver]
+[a única escolha material ainda aberta]
 
-## Obrigações de fechamento
+## Fechamento
 
-[comandos, verificações e revisão humana exigidos]
+[obrigação concreta para concluir a unidade]
 
 ## Efeitos externos
 
@@ -45,8 +56,11 @@ do escopo autorizado]; motivo: [evidência ou decisão ainda aberta].
 
 ## Gate
 
-Responda: **Aprovado**, **Ajustar** ou **Bloquear**.
+Responda: **Aprovar**, **Ajustar** ou **Bloquear**.
 ```
 
-Se houver impactos documentais e de código, rotule os itens inline como `Docs`
-e `Código`; não crie subseções vazias.
+Liste cada documento uma única vez, no grupo que descreve sua ação principal.
+Quando uma alteração também mudar seu status, mantenha-o em `Alterar` e use a
+linha **Status:**; não duplique o documento. Use caminhos completos entre
+crases e descreva somente a mudança aprovada, não o histórico nem alternativas
+já descartadas.

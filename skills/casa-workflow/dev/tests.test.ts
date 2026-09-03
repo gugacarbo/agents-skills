@@ -145,29 +145,36 @@ describe("casa-workflow skill", () => {
 		}
 	});
 
-	test("preserves the complete gate report contract", () => {
+	test("keeps the gate report focused on document mutations", () => {
 		for (const section of [
-			"Contexto CASA",
-			"Gatilho documental",
-			"Impacto de artefatos",
+			"Aprovação necessária",
+			"Documentos no envelope",
+			"Criar",
+			"Alterar",
+			"Remover",
+			"Escopo incluído",
 			"Decisão necessária",
-			"Obrigações de fechamento",
+			"Fechamento",
 			"Efeitos externos",
 			"Gate",
 		]) {
 			expectContains("references/gate-template.md", section);
 		}
 		for (const marker of [
-			"omita-o por completo",
+			"quais documentos serão\ncriados, alterados ou removidos",
+			"**Status inicial:**",
+			"**Status:** `[atual]` →",
+			"Liste cada documento uma única vez",
+			"não duplique o documento",
+			"Omita por completo",
 			"título vazio",
 			"`nenhum`",
 			"`não aplicável`",
 			"`N/A`",
 			"placeholder",
-			"`Efeitos externos` aparecem somente",
 			"efeito remoto concreto",
-			"ref `[casa-standard-ref]`",
-			"ação inferida ou fora",
+			"ref\n`[casa-standard-ref]`",
+			"mutação documental inferida, fora do escopo autorizado",
 		]) {
 			expectContains("references/gate-template.md", marker);
 		}
