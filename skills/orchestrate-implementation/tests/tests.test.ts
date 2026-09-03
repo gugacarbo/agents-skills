@@ -92,3 +92,16 @@ describe("orchestrate-implementation implementation configuration", () => {
 		}
 	});
 });
+
+describe("orchestrate-implementation activation", () => {
+	test("requires an explicit user invocation", () => {
+		const skill = read("SKILL.md");
+
+		expect(skill).toContain(
+			"Use only when the user explicitly invokes `$orchestrate-implementation`",
+		);
+		expect(skill).toContain(
+			"Do not activate automatically for ordinary implementation requests or plans.",
+		);
+	});
+});

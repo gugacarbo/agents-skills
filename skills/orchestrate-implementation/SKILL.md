@@ -1,6 +1,6 @@
 ---
 name: orchestrate-implementation
-description: Use when executing multi-task implementation plans in the current session, including safe parallel waves for tasks with disjoint writes and sequential execution for dependent or conflicting work
+description: Use only when the user explicitly invokes `$orchestrate-implementation` to execute a multi-task implementation plan in the current session. Do not activate automatically for ordinary implementation requests or plans.
 ---
 
 # Orchestrate Implementation
