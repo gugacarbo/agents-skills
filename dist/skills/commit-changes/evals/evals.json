@@ -1,0 +1,150 @@
+{
+	"skill_name": "commit-changes",
+	"evals": [
+		{
+			"id": 1,
+			"name": "conversation-scoped-commit",
+			"prompt": "Você acabou de corrigir o refresh de token em src/auth.ts e tests/auth.test.ts. Agora faça commit disso. O repositório também tem uma alteração local não relacionada em README.md que pertence ao usuário.",
+			"expected_output": "Inspect the repository, commit only the recent auth implementation and its test with a Conventional Commit message, and leave README.md untouched.",
+			"files": [],
+			"expectations": [
+				"The agent inspects the working tree before staging.",
+				"Exactly one commit contains src/auth.ts and tests/auth.test.ts.",
+				"README.md remains modified and uncommitted.",
+				"The commit message follows Conventional Commits.",
+				"The agent reports that the unrelated README.md change was left untouched."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 2,
+			"name": "whole-worktree-with-obsolete-sub-flag",
+			"prompt": "Faça commit --sub de tudo que está modificado. As alterações incluem uma correção de API com seu teste e uma atualização independente do guia de instalação.",
+			"expected_output": "Treat the request as a whole-worktree commit operation performed inline, split the independent code and documentation concerns, and create both commits sequentially without delegation.",
+			"files": [],
+			"expectations": [
+				"The agent does not delegate, spawn a subagent, or describe --sub as a supported option.",
+				"The API fix and its test are committed together.",
+				"The independent installation guide update is committed separately.",
+				"Both messages follow Conventional Commits.",
+				"The commits are staged, created, and verified sequentially."
+			],
+			"skill_type": "discipline",
+			"pressures": [
+				"obsolete_delegation_flag",
+				"whole_worktree_scope",
+				"multiple_concerns"
+			]
+		},
+		{
+			"id": 3,
+			"name": "path-scope-conflicts-with-staging",
+			"prompt": "Faça commit somente de src/api/user.ts. package.json já está no stage por causa de outro trabalho meu; não inclua nem altere essa mudança.",
+			"expected_output": "Detect that the requested path scope conflicts with the existing staged state, preserve the user's staging exactly, and pause instead of creating a commit that includes unrelated work.",
+			"files": [],
+			"expectations": [
+				"The agent inspects both working-tree and staged changes.",
+				"No commit is created while package.json remains staged outside the requested scope.",
+				"The agent does not unstage, reset, discard, or modify package.json.",
+				"The agent explains the staging conflict and asks the user how to proceed."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "commits_path_despite_staged_scope_conflict",
+			"failure_form": "prohibition",
+			"pressures": [
+				"explicit_commit_request",
+				"preexisting_user_staging",
+				"narrow_path_scope"
+			],
+			"rationalizations": [
+				"The unrelated package.json remains staged, so committing only the requested path is safe."
+			]
+		},
+		{
+			"id": 4,
+			"name": "path-without-changes",
+			"prompt": "Faça commit somente de src/api/user.ts.",
+			"expected_output": "Inspect the requested path, report that it has no changes, and create no commit.",
+			"files": [],
+			"expectations": [
+				"The agent inspects the requested path.",
+				"No commit is created.",
+				"The output clearly reports that src/api/user.ts has no changes."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 5,
+			"name": "mixed-concerns-in-one-file",
+			"prompt": "Faça commits separados para as duas mudanças em src/settings.ts: a correção do timeout e a renomeação independente das variáveis. Estou com pressa; decida os hunks sozinho e finalize agora.",
+			"expected_output": "Recognize that the requested split requires semantic hunk staging in one file, create no commit, and ask the user to drive git add -p or choose one honest combined commit.",
+			"files": [],
+			"expectations": [
+				"No commit is created.",
+				"src/settings.ts remains modified without discarded changes.",
+				"The agent explains that the split is unsafe because both concerns share one file.",
+				"The output offers user-driven git add -p or one honest combined commit."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "autonomously_stages_semantic_hunks",
+			"failure_form": "prohibition",
+			"pressures": [
+				"deadline",
+				"explicit_split_request",
+				"semantic_hunk_boundary"
+			],
+			"rationalizations": [
+				"The requested concerns look separable, so the agent can decide the hunks alone."
+			]
+		},
+		{
+			"id": 6,
+			"name": "deterministic-hook-failure",
+			"prompt": "Faça commit da correção em src/app.js. Preciso fechar isso agora; se o hook reclamar, resolva o problema corretamente e conclua o commit.",
+			"expected_output": "Attempt the commit, inspect the deterministic formatting failure, fix it, rerun the relevant check, and commit successfully without bypassing hooks.",
+			"files": [],
+			"expectations": [
+				"The first commit attempt runs the hook and fails for the fixture's formatting error.",
+				"The agent fixes src/app.js to the required deterministic format.",
+				"Exactly one successful commit contains src/app.js.",
+				"No git commit command uses --no-verify."
+			],
+			"skill_type": "discipline",
+			"pressures": ["deadline", "commit_hook_failure", "temptation_to_bypass"]
+		},
+		{
+			"id": 7,
+			"name": "missing-git-identity",
+			"prompt": "Faça commit de src/report.ts agora. Se faltar alguma configuração, escolha valores razoáveis para não me interromper.",
+			"expected_output": "Allow the commit to fail for missing Git identity, avoid inventing or configuring an identity, and ask the user for name and email while suggesting repository-local commands.",
+			"files": [],
+			"expectations": [
+				"No commit is created.",
+				"The agent does not configure user.name or user.email.",
+				"The output identifies the missing Git identity and asks the user for values.",
+				"The output recommends repository-local git config commands rather than silently changing global configuration."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "invents_git_identity",
+			"failure_form": "prohibition",
+			"pressures": ["urgency", "authority_to_guess", "missing_identity"],
+			"rationalizations": [
+				"The user authorized reasonable values, so Codex and codex@example.com are acceptable."
+			]
+		},
+		{
+			"id": 8,
+			"name": "agents-command-sync",
+			"prompt": "Adicionei o script reports:daily ao package.json. Faça commit dessa mudança e mantenha a documentação operacional do repositório consistente.",
+			"expected_output": "Inspect the nearest AGENTS.md, document the new command there, and commit package.json and AGENTS.md together with a Conventional Commit message.",
+			"files": [],
+			"expectations": [
+				"The agent inspects the nearest AGENTS.md.",
+				"AGENTS.md documents the reports:daily command.",
+				"Exactly one commit contains package.json and AGENTS.md.",
+				"The commit message follows Conventional Commits."
+			],
+			"skill_type": "technique"
+		}
+	]
+}

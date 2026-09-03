@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Resolve and ensure the working-tree directory this skill uses for one
+# plan's short-lived artifacts: task briefs, implementer reports, review
+# packages, and the progress ledger. Print the plan directory's absolute path.
+#
+# One directory per plan (.orchestrate-implementation/<plan-basename>/) keeps
+# a follow-up plan in the same working tree from reading or overwriting another
+# plan's artifacts. A stale ledger misread as current progress can make a
+# controller skip whole task sequences, so artifacts are scoped by plan.
+#
+# The workspace lives in the working tree (not under .git/) so implementers can
+# write their report files. A self-ignoring .gitignore keeps every plan
+# workspace out of `git status` and accidental commits without modifying a
+# tracked file.
+#
+# This is the single source of truth for the workspace location, so task-brief
+# and review-package cannot drift to different directories.
+#
+# Usage: plan-workspace PLAN_FILE
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "usage: plan-workspace PLAN_FILE" >&2
+  exit 2
+fi
+
+plan=$1
+[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
+
+slug=$(basename "$plan" .md)
+[ -n "$slug" ] && [ "$slug" != "." ] && [ "$slug" != ".." ] \
+  || { echo "cannot derive a workspace name from: $plan" >&2; exit 2; }
+
+root=$(git rev-parse --show-toplevel)
+base="$root/.orchestrate-implementation"
+dir="$base/$slug"
+mkdir -p "$dir"
+printf '*\n' > "$base/.gitignore"
+cd "$dir" && pwd
