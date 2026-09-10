@@ -229,37 +229,37 @@ it for approval:
 
 ### Planned execution and models
 
-| Unit | Dependencies / write-set evidence | Mode | Role | MODEL | Why |
-| --- | --- | --- | --- | --- | --- |
-| Task <N> | <summary> | sequential / wave <W> | implementer | <explicit model> | <rationale> |
-| Task <N> | <summary> | sequential / wave <W> | task reviewer | <explicit model> | <rationale> |
-| Task <N> | <summary> | sequential / wave <W> | re-reviewer and fix rounds 1-3 | <explicit model> | <rationale> |
-| Task <N> | <summary> | sequential / wave <W> | fix rounds 4-5 | <explicit higher-tier model> | escalation |
-| Final branch | <whole branch> | sequential | reviewer / final fixer / re-reviewer | <explicit models> | <rationale> |
+| Unit         | Dependencies / write-set evidence | Mode                  | Role                                 | MODEL                        | Why         |
+| ------------ | --------------------------------- | --------------------- | ------------------------------------ | ---------------------------- | ----------- |
+| Task <N>     | <summary>                         | sequential / wave <W> | implementer                          | <explicit model>             | <rationale> |
+| Task <N>     | <summary>                         | sequential / wave <W> | task reviewer                        | <explicit model>             | <rationale> |
+| Task <N>     | <summary>                         | sequential / wave <W> | re-reviewer and fix rounds 1-3       | <explicit model>             | <rationale> |
+| Task <N>     | <summary>                         | sequential / wave <W> | fix rounds 4-5                       | <explicit higher-tier model> | escalation  |
+| Final branch | <whole branch>                    | sequential            | reviewer / final fixer / re-reviewer | <explicit models>            | <rationale> |
 
 ### Variables
 
-| Scope | Variable | Value |
-| --- | --- | --- |
-| plan | PLAN_FILE | <absolute path> |
-| plan | WORKSPACE | <absolute path> |
-| plan | N | <task number / pending> |
-| integration | MERGE_BASE | <SHA / pending> |
-| task | MODEL | <role-specific approved model> |
-| task | BRIEF_FILE | <absolute path / pending> |
-| task | REPORT_FILE | <absolute path / pending> |
-| task | WORKTREE | <absolute path / pending> |
-| task | TASK_BRANCH | <branch / pending> |
-| task | WRITE_SET | <paths / pending> |
-| task | GLOBAL_CONSTRAINTS | <verbatim constraints / none> |
-| task | BASE_SHA | <SHA / pending> |
-| wave | WAVE_BASE | <SHA / pending> |
-| integration | INTEGRATION_BASE | <SHA / pending> |
-| review | HEAD_SHA | <SHA / pending> |
-| fix | FIX_BASE_SHA | <SHA / pending> |
-| fix | FINDINGS | <verbatim findings / pending> |
-| review | DIFF_FILE | <absolute path / pending> |
-| fix | R | <round number / pending> |
+| Scope       | Variable           | Value                          |
+| ----------- | ------------------ | ------------------------------ |
+| plan        | PLAN_FILE          | <absolute path>                |
+| plan        | WORKSPACE          | <absolute path>                |
+| plan        | N                  | <task number / pending>        |
+| integration | MERGE_BASE         | <SHA / pending>                |
+| task        | MODEL              | <role-specific approved model> |
+| task        | BRIEF_FILE         | <absolute path / pending>      |
+| task        | REPORT_FILE        | <absolute path / pending>      |
+| task        | WORKTREE           | <absolute path / pending>      |
+| task        | TASK_BRANCH        | <branch / pending>             |
+| task        | WRITE_SET          | <paths / pending>              |
+| task        | GLOBAL_CONSTRAINTS | <verbatim constraints / none>  |
+| task        | BASE_SHA           | <SHA / pending>                |
+| wave        | WAVE_BASE          | <SHA / pending>                |
+| integration | INTEGRATION_BASE   | <SHA / pending>                |
+| review      | HEAD_SHA           | <SHA / pending>                |
+| fix         | FIX_BASE_SHA       | <SHA / pending>                |
+| fix         | FINDINGS           | <verbatim findings / pending>  |
+| review      | DIFF_FILE          | <absolute path / pending>      |
+| fix         | R                  | <round number / pending>       |
 ```
 
 Keep this section complete throughout the run: append the resolved value and
