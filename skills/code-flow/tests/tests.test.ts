@@ -403,14 +403,8 @@ esac
 			expect(labels()).toContain("stage:in-progress");
 			expect(read(commentsPath)).toBe("");
 
-			const dispatcherEventPath = join(
-				temporaryRoot,
-				"dispatcher-event.json",
-			);
-			const dispatcherBodyPath = join(
-				temporaryRoot,
-				"dispatcher-body.md",
-			);
+			const dispatcherEventPath = join(temporaryRoot, "dispatcher-event.json");
+			const dispatcherBodyPath = join(temporaryRoot, "dispatcher-body.md");
 			write(
 				dispatcherBodyPath,
 				"<!-- code-flow:issue-header:start -->\n> type: bug\n> Complexity: S\n> project_guidance: AGENTS.md\n<!-- code-flow:issue-header:end -->\n\n# Corrigir exportação\n\n## Contexto e objetivo\n\nA exportação deve funcionar.\n",
@@ -445,16 +439,9 @@ esac
 				"stage:in-progress",
 			]);
 			expectFailure(
-				run(
-					[
-						applyEvent,
-						"42",
-						"finish",
-						"--event",
-						dispatcherEventPath,
-					],
-					{ env: environment },
-				),
+				run([applyEvent, "42", "finish", "--event", dispatcherEventPath], {
+					env: environment,
+				}),
 			);
 			const dispatched = run(
 				[
@@ -610,7 +597,7 @@ esac
 			);
 			write(
 				fakeGh,
-				String.raw`#!/usr/bin/env sh
+				`#!/usr/bin/env sh
 body=${JSON.stringify(bodyPath)}
 case "$1 $2" in
   'issue view') jq -n --rawfile body "$body" '{number:42,url:"https://github.com/acme/demo/issues/42",body:$body}' ;;
