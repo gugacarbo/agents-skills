@@ -1,2 +1,0 @@
-#!/usr/bin/env sh
-printf '%s\n' 'AVISO: casa-version 1.4 diverge da toolchain 1.8'
