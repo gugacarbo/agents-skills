@@ -5,8 +5,8 @@ Use this template when dispatching an implementer subagent.
 ```
 Subagent (general-purpose):
   description: "Implement Task N: [task name]"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+  model: [MODEL — REQUIRED: concrete model explicitly approved by the user;
+         an omitted model or `model: inherit` is prohibited]
   prompt: |
     You are implementing Task N: [task name]
 
@@ -58,8 +58,13 @@ Subagent (general-purpose):
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
 
-    While iterating, run the focused test for what you're changing; run the
-    full suite once before committing, not after every edit.
+    While iterating, run the focused test for what you're changing; run every
+    test or validation command explicitly requested by the user, plan, or spec
+    before reporting DONE; run the full suite once before committing, not after
+    every edit. If any requested command fails, errors, or cannot run, stop
+    immediately and report BLOCKED with the exact command and complete output.
+    Do not retry, fix, or continue: the controller must return that error to
+    the user first.
 
     ## You Do Not Dispatch Subagents
 

@@ -120,10 +120,10 @@ uses, mark those pending results stale and re-run them sequentially from the
 new integration head.
 
 After every task in the wave passes its own gate, run the plan's integration or
-full-suite command once on the combined integration branch. Treat a failure
-that appears only after combination as one integration problem: dispatch one
-sequential diagnosis/fix task with the involved task reports and combined diff.
-Do not dispatch competing speculative fixers.
+full-suite command once on the combined integration branch. If that requested
+command fails, errors, or cannot run, stop and return its complete output to the
+user before any diagnosis, retry, or fixer dispatch. Do not dispatch competing
+speculative fixers.
 
 ## Cleanup
 

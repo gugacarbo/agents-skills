@@ -91,6 +91,39 @@ describe("orchestrate-implementation implementation configuration", () => {
 			expect(skill).toContain(variable);
 		}
 	});
+
+	test("requires user-approved concrete models and returns test failures to the user", () => {
+		const skill = read("SKILL.md");
+		const implementerPrompt = read("implementer-prompt.md");
+		const taskReviewerPrompt = read("task-reviewer-prompt.md");
+		const reReviewPrompt = read("re-review-prompt.md");
+		const branchReviewerPrompt = read("references/code-reviewer.md");
+
+		expect(skill).toContain(
+			"Never dispatch a subagent with an omitted model or `model: inherit`.",
+		);
+		expect(skill).toContain(
+			"Never dispatch, replace, or otherwise use a model that the user has not explicitly approved.",
+		);
+		expect(skill).toContain(
+			"Run every test or validation command explicitly requested by the user, plan, or spec.",
+		);
+		expect(skill).toContain(
+			"return the error and its command output to the user before any retry, fix, reassignment, or further dispatch.",
+		);
+		expect(skill).not.toContain("the four named below");
+
+		for (const prompt of [
+			implementerPrompt,
+			taskReviewerPrompt,
+			reReviewPrompt,
+			branchReviewerPrompt,
+		]) {
+			expect(prompt).toContain("model: [MODEL");
+			expect(prompt).toContain("explicitly approved by the");
+			expect(prompt).toContain("`model: inherit`");
+		}
+	});
 });
 
 describe("orchestrate-implementation activation", () => {

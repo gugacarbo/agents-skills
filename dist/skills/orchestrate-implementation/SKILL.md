@@ -11,14 +11,21 @@ Execute a plan with fresh implementer subagents. Run tasks in a parallel wave on
 
 **Core principle:** Prove independence, isolate every concurrent writer, integrate deterministically, review each task, then review the whole branch.
 
+## Non-negotiable dispatch and validation contract
+
+- Never dispatch, replace, or otherwise use a model that the user has not explicitly approved. The approved implementation configuration must name the exact model for every role before its dispatch.
+- Never dispatch a subagent with an omitted model or `model: inherit`. Every dispatch must set `model:` to the concrete, user-approved model recorded in the ledger.
+- Run every test or validation command explicitly requested by the user, plan, or spec. Do not claim a task or the plan is complete until the requested commands have run successfully on the relevant result.
+- If a requested test or validation command fails, errors, or cannot run, stop the orchestration, record the command and complete output in the ledger, and return the error and its command output to the user before any retry, fix, reassignment, or further dispatch. Do not make a ruling that bypasses a requested validation failure.
+
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
 **Continuous execution:** After the required Implementation Configuration Gate
 below is approved, do not pause to check in with your human partner between
 tasks. Execute all tasks from the plan without stopping. The only reasons to
-stop are the four named below, a change to the approved model configuration,
-or all tasks complete. "Should I continue?" prompts and progress summaries
+stop are the five named below, a requested validation error or failure, a change
+to the approved model configuration, or all tasks complete. "Should I continue?" prompts and progress summaries
 waste their time — they asked you to execute the plan, so execute it.
 
 **Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
@@ -29,11 +36,11 @@ judgment settles what neither answers. Record every decision in the ledger as
 going. A wrong ruling costs rework your human partner can see and undo; a
 session parked on a question costs their whole day and buys nothing.
 
-Four things stop you, and only these: an irreversible or destructive
-operation; a security-sensitive action; a side effect outside this worktree
-that norms say you ask about first (a merge, a push to a shared branch, a
-publish); and a plan so broken that every path forward is a guess. For those,
-stop and ask.
+Five things stop you, and only these: an irreversible or destructive operation;
+a security-sensitive action; a side effect outside this worktree that norms say
+you ask about first (a merge, a push to a shared branch, a publish); a plan so
+broken that every path forward is a guess; and any requested validation error,
+failure, or inability to run. For any of these, stop and return to the user.
 
 ## When to Use
 
@@ -189,7 +196,8 @@ The confirmation must contain every decision needed to audit the planned work:
   integration time.
 
 Ask for approval of this configuration in one concise message. A reply that
-approves it authorizes dispatches using exactly the recorded models. If a
+approves it authorizes dispatches using exactly the recorded models. `inherit`
+is not a model approval and is never valid for a dispatch. If a
 BLOCKED result, model availability, or new task classification requires a
 different model, update the ledger with the reason and obtain explicit approval
 of the changed model configuration before dispatching that agent. The
@@ -321,9 +329,12 @@ small fix diffs take a cheap-to-mid tier.
 **Fix-loop escalation (rounds 4-5)**: use a model at least one tier above
 the implementer that got stuck.
 
-**Always specify the model explicitly when dispatching a subagent.** An
-omitted model inherits your session's model — often the most capable and
-most expensive — which silently defeats this section.
+**Always specify a concrete, user-approved model explicitly when dispatching a
+subagent.** Never dispatch a subagent with an omitted model or `model: inherit`.
+An omitted model silently inherits your session's model — often the most capable
+and most expensive — while `inherit` has the same unauditable outcome. Never
+dispatch, replace, or otherwise use a model that the user has not explicitly
+approved in the configuration gate.
 
 Select these exact model names during preflight and include them in the
 Implementation Configuration Gate. A selected model is not authorized for
@@ -456,7 +467,7 @@ Dispatch the task reviewer with the printed path.
 
 **DONE_WITH_CONCERNS:** The implementer completed the work but flagged doubts. Read the concerns before proceeding. If the concerns are about correctness or scope, address them before review. If they're observations (e.g., "this file is getting large"), note them and proceed to review.
 
-**NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
+**NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch only with the already user-approved model. Any changed model requires a new explicit user approval.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
 
@@ -466,6 +477,11 @@ Dispatch the task reviewer with the printed path.
 4. If the plan itself is wrong, rule on the correction, ledger it, and re-dispatch with the ruling carried in the dispatch
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+
+**Requested-test error or failure:** This is not a normal `BLOCKED` result.
+Stop the orchestration and return the failing command and its complete output to
+the user. Do not fix, retry, re-dispatch, or choose another model unless the
+user explicitly instructs you to proceed after seeing the error.
 
 If the implementer asks questions — before starting or mid-task — answer
 clearly and completely, provide additional context if needed, and don't
@@ -649,7 +665,7 @@ Then run exactly one scoped re-review of the fix wave
 [re-review-prompt.md](re-review-prompt.md)).
 Adjudicate any residual findings as in the task loop's breaker: park with
 rulings, or rule on the load-bearing ones and ledger what you decided. Only
-the four classes above stop you here. There is no second fix wave —
+the five classes above stop you here. There is no second fix wave —
 residual load-bearing findings surface to your human partner when
 finishing-a-development-branch presents the options.
 
