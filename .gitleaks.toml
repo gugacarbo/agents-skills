@@ -1,0 +1,20 @@
+# Gerado por project-init (security/gitleaks).
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "fixtures, testes e lockfiles"
+paths = [
+  '''(^|/)(fixtures?|tests?|__tests__|__mocks__)(/|$)''',
+  '''.*\.lock$''',
+  '''pnpm-lock\.yaml$''',
+  '''bun\.lockb?$''',
+]
+
+[[allowlists]]
+description = "artefatos gerados e cache de dependências versionado historicamente"
+paths = [
+  '''(^|/)dist/''',
+  '''(^|/)\$HOME/\.local/share/pnpm/store/''',
+  '''^skills/skill-master/scripts/quick_validate\.py$''',
+]

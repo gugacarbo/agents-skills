@@ -16,6 +16,8 @@ if [ "${AGENTS_SKILLS_GENERATED_ARTIFACT_COMMIT:-}" = "1" ]; then
   exit 0
 fi
 
+gitleaks git --pre-commit --staged --redact --verbose
+
 python3 "$ROOT/scripts/docs-check"
 python3 "$ROOT/scripts/skills-check"
 

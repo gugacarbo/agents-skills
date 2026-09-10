@@ -1,0 +1,2 @@
+# Gerado por project-init (git/husky). Valida Conventional Commits.
+bunx commitlint --edit "$1"
