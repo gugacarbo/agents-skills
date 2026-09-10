@@ -1,0 +1,11 @@
+{
+	"name": "@gugacarbo/skill-ui-ux-audit-superset",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Development tooling for the ui-ux-audit-superset skill.",
+	"scripts": {
+		"test": "bun test tests/tests.test.ts",
+		"validate": "python3 ../skill-master/scripts/quick_validate.py .",
+		"build": "bun run test"
+	}
+}

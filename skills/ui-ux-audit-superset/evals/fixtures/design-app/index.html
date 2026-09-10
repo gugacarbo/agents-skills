@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deployment Request</title>
+  <style>
+    :root {
+      --action-primary: #075ab5;
+      --action-primary-hover: #04499a;
+      --action-danger: #a4262c;
+      --surface: #ffffff;
+      --text: #17202a;
+      --border: #5b6875;
+      --focus: #b35c00;
+    }
+    body { background: var(--surface); color: var(--text); font: 16px/1.5 system-ui, sans-serif; margin: 0; }
+    main { max-width: 640px; padding: 24px; }
+    h1 { font-size: 1.75rem; margin: 0 0 20px; }
+    section { border: 1px solid var(--border); border-radius: 6px; padding: 20px; }
+    label { display: block; font-weight: 650; margin-bottom: 6px; }
+    input, select { border: 1px solid var(--border); border-radius: 6px; font: inherit; height: 40px; min-width: 0; padding: 0 8px; width: 100%; }
+    button { border: 0; border-radius: 6px; font: inherit; height: 40px; padding: 0 16px; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .primary { background: var(--action-primary); color: white; }
+    .primary:hover { background: var(--action-primary-hover); }
+    .secondary { background: transparent; border: 1px solid var(--action-primary); color: var(--action-primary); }
+    /* Accidental drift: local promotional treatment bypasses semantic tokens. */
+    .promo { background: #7c3aed; border-radius: 10px; box-shadow: 0 4px 12px #4c1d95; color: white; height: 46px; }
+    .row-action { height: 32px; }
+    .actions { display: flex; gap: 12px; margin-top: 20px; }
+    .error { color: var(--action-danger); font-weight: 650; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border-top: 1px solid #d9e0e8; padding: 8px; text-align: left; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Request production deployment</h1>
+    <section aria-labelledby="form-title">
+      <h2 id="form-title">Deployment details</h2>
+      <form>
+        <p>
+          <label for="service">Service (required)</label>
+          <input id="service" name="service" autocomplete="off" required>
+        </p>
+        <p>
+          <label for="environment">Environment</label>
+          <select id="environment" name="environment">
+            <option value="production">Production</option>
+            <option value="staging">Staging</option>
+          </select>
+        </p>
+        <p class="actions">
+          <button class="primary" type="submit">Request deployment</button>
+          <button class="secondary" type="button">Cancel</button>
+        </p>
+        <p class="error" hidden id="service-error">Enter the service name.</p>
+      </form>
+    </section>
+    <section>
+      <h2>Recent requests</h2>
+      <table>
+        <thead><tr><th>Service</th><th>Environment</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">checkout</th><td>production</td><td><button class="row-action" type="button">Cancel</button></td></tr>
+          <tr><th scope="row">billing-api</th><td>staging</td><td><button class="row-action" type="button">Cancel</button></td></tr>
+        </tbody>
+      </table>
+      <p><button class="promo" type="button">Try accelerated rollout</button></p>
+    </section>
+  </main>
+</body>
+</html>

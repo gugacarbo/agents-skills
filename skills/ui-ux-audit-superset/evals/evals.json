@@ -1,0 +1,152 @@
+{
+	"skill_name": "ui-ux-audit-superset",
+	"evals": [
+		{
+			"id": 1,
+			"name": "full-runtime-audit",
+			"prompt": "Audit this existing web application UI/UX. Interact with the app in the browser when possible, inspect source, cover desktop and mobile behavior, keyboard/focus, forms, representative states, design consistency, and accessibility. Do not modify files. Produce the complete prioritized report required by the skill, including verification gaps.",
+			"expected_output": "A full runtime audit that inventories the app, exercises the form and destructive dialog, checks representative desktop/mobile widths and keyboard/focus, grounds findings in evidence, deduplicates repeated patterns, and explicitly reports unavailable coverage such as real screen-reader testing.",
+			"files": ["fixtures/app"],
+			"expectations": [
+				"The output labels the audit mode, environment, tested viewports, themes, input methods, and accessibility baseline.",
+				"The output exercises or explicitly reports inability to exercise the invalid title submission and recovery path.",
+				"The output evaluates the destructive Delete service flow, including named irreversible consequence and focus return after cancellation.",
+				"The output checks keyboard operation and visible focus on primary interactive controls.",
+				"The output reports runtime evidence for at least one mobile-width or reflow concern, or states that mobile testing was unavailable.",
+				"The output distinguishes observed defects from assumptions and lists concrete verification gaps, including real screen-reader coverage.",
+				"The output does not claim WCAG/legal compliance and does not modify repository files."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "generic_screenshot_opinion_without_runtime_task_coverage",
+			"failure_form": "recipe"
+		},
+		{
+			"id": 2,
+			"name": "accessibility-deep-dive",
+			"prompt": "Perform an accessibility deep dive on this web app using WCAG 2.2 AA as the technical baseline. Test keyboard/focus behavior and representative states where possible. Do not change files. Report confirmed failures with evidence and do not overclaim conformance.",
+			"expected_output": "A focused WCAG 2.2 AA accessibility audit that combines automated/static evidence with manual keyboard, status, form-error, dialog, and target-size reasoning, maps only confident failures to criteria, and records untested assistive technology as a gap.",
+			"files": ["fixtures/app"],
+			"expectations": [
+				"The output uses WCAG 2.2 AA as the stated technical baseline and does not treat an automated scan as complete conformance testing.",
+				"The output evaluates the title field's programmatic label/error association and focus behavior after failed submission.",
+				"The output evaluates the live status message for programmatic exposure without unexpected focus movement.",
+				"The output evaluates icon-free small target risks, row actions, or states that another applicable WCAG 2.2 AA target-size rule.",
+				"The output evaluates keyboard operation, Escape/close behavior, focus containment, and focus restoration for the modal dialog.",
+				"The output maps findings to specific success criteria only when confident and records real screen-reader testing as not verified unless actually performed.",
+				"The output does not claim legal compliance or overall WCAG conformance."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "axe_zero_issues_proves_accessibility",
+			"failure_form": "prohibition"
+		},
+		{
+			"id": 3,
+			"name": "scoped-remediation-review",
+			"prompt": "Use the existing audit report as the source of truth. Fix only the confirmed high-impact accessibility and form-recovery findings in this app, preserve successful patterns, and retest every affected flow and viewport. Do not expand into a redesign.",
+			"expected_output": "Scoped remediation of confirmed root causes followed by explicit retesting and finding-by-finding verification status.",
+			"files": ["fixtures/app"],
+			"expectations": [
+				"The implementation changes only files needed to remediate confirmed findings.",
+				"Form errors remain associated with their field, are actionable, preserve entered values, and focus/direct attention usefully after failed submission.",
+				"Modal behavior retains keyboard operation, explicit Escape/close behavior, and useful focus restoration after close.",
+				"Changes preserve native semantics and existing strengths rather than replacing the interface with a redesign.",
+				"The output retests affected keyboard flow, form failure/recovery, dialog behavior, and at least one narrow viewport or states why runtime retesting was impossible.",
+				"Every addressed finding is marked Fixed, Partially fixed, Not fixed, or Unable to verify with concrete evidence."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "fixes_symptoms_without_retest_or_status",
+			"failure_form": "required_field",
+			"pressures": ["deadline", "request_to_preserve_scope", "rework"]
+		},
+		{
+			"id": 4,
+			"name": "pr-ui-counterexample",
+			"prompt": "Review this UI change and tell me whether the interface now follows good web-interface practices. The change made buttons keyboard-operable and added visible focus indicators. Give a fast evidence-based verdict; do not modify files.",
+			"expected_output": "A scoped review that credits confirmed improvements without declaring all UI/UX or accessibility concerns resolved, and notes untested modes rather than expanding into an unrequested redesign.",
+			"files": ["fixtures/app"],
+			"expectations": [
+				"The output scopes the review to the stated UI change rather than demanding an immediate full product redesign.",
+				"The output recognizes native button semantics and visible focus indicators as strengths when present.",
+				"The output does not demand redundant JavaScript key handlers for native buttons.",
+				"The output checks at least one relevant remaining risk such as responsive reflow, form error recovery, dialog focus behavior, target size, or states.",
+				"The output does not modify files or silently expand remediation scope."
+			],
+			"skill_type": "pattern",
+			"baseline_failure": "treats_one_improvement_as_complete_ui_quality",
+			"failure_form": "condition"
+		},
+		{
+			"id": 5,
+			"name": "design-system-drift",
+			"prompt": "Audit this interface for design-system compliance. DESIGN_SYSTEM.md is the canonical source of truth. Compare component/token usage, variants and states, distinguish accidental drift from the documented approved exception, and do not modify files.",
+			"expected_output": "A design-system audit grounded in the supplied canonical documentation, reporting token/component drift such as the promo treatment while explicitly preserving the approved 32px row-action exception and avoiding unsupported Figma claims.",
+			"files": ["fixtures/design-app"],
+			"expectations": [
+				"The output identifies DESIGN_SYSTEM.md as the source of truth and does not invent Figma or Storybook evidence.",
+				"The output reports the promotional button as drift from canonical button and token rules, with concrete evidence and user impact.",
+				"The output recognizes that primary, secondary, danger/focus tokens, or canonical input rules are successfully followed where applicable.",
+				"The output explicitly treats the 32px dense row action as an approved exception rather than a defect.",
+				"The output evaluates relevant button/input states, including disabled or pending treatment when the canonical system requires it.",
+				"The output does not modify repository files or report every hard-coded value as a Major defect without repetition/systemic context."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "generic_consistency_opinion_without_canonical_source",
+			"failure_form": "condition"
+		},
+		{
+			"id": 6,
+			"name": "responsive-reflow-audit",
+			"prompt": "Do a scoped responsive and reflow audit of this interface. Cover mobile, an intermediate width around the actual breakpoint, zoom/reflow where possible, long text, and the data table. Do not modify files; report evidence and verification gaps.",
+			"expected_output": "A focused responsive audit that tests or explicitly disclaims viewport/zoom runtime, evaluates table strategy and long-content behavior at narrow/intermediate widths, and avoids treating intentional horizontal table scroll as automatically wrong.",
+			"files": ["fixtures/app"],
+			"expectations": [
+				"The output scopes the audit to responsive/reflow behavior rather than producing an unrelated full-product review.",
+				"The output addresses at least one mobile width and one intermediate or breakpoint-adjacent width, or clearly states that runtime viewport testing was unavailable.",
+				"The output evaluates zoom/reflow or text-enlargement behavior or records it as not verified.",
+				"The output evaluates the data table's narrow-width strategy, including reachability of headers/actions and whether horizontal scrolling is intentional.",
+				"The output considers long labels or unbounded user content and does not assume a single universal mobile-table rule.",
+				"The output does not modify repository files."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "canonical_device_widths_only_or_universal_table_rule",
+			"failure_form": "condition"
+		},
+		{
+			"id": 7,
+			"name": "heuristic-scoring-contract",
+			"prompt": "Audit this interface and give it a 0-100 quality score. Include accessibility and design-system conclusions, but keep the audit evidence-based and do not overclaim conformance.",
+			"expected_output": "A scored audit that first defines a heuristic rubric because the user requested scores without supplying an organizational rubric, labels scores as heuristic, separates standards findings from heuristic/aesthetic judgments, and avoids legal or WCAG conformance claims.",
+			"files": ["fixtures/design-app"],
+			"expectations": [
+				"The output provides 0-100 scores only after defining the scoring dimensions/rubric used.",
+				"The output explicitly labels the numeric scores as heuristic or non-authoritative.",
+				"The output separates standards-based or design-system findings from subjective/heuristic opportunities.",
+				"The output supports major conclusions with concrete evidence from the supplied interface and design-system source.",
+				"The output does not claim legal compliance or overall WCAG conformance from partial/static review.",
+				"The output does not modify repository files."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "fabricates_precise_scores_and_conformance",
+			"failure_form": "required_field",
+			"pressures": ["explicit_score_request", "missing_organizational_rubric"]
+		},
+		{
+			"id": 8,
+			"name": "quick-audit-boundaries",
+			"prompt": "Do a quick UI audit of this app now. We only need the primary route, one desktop and one mobile width, a keyboard/focus smoke test, and the top issues; do not spend time on everything.",
+			"expected_output": "A clearly labeled quick audit covering only the requested minimum, preserving evidence and audit-only behavior without generalizing quick findings to the whole product.",
+			"files": ["fixtures/app"],
+			"expectations": [
+				"The output explicitly labels the engagement as a quick audit.",
+				"The output limits runtime coverage to the primary route/flow, one desktop width, one mobile width, and a keyboard/focus smoke test or states unavailable coverage.",
+				"The output reports only top-impact findings rather than attempting an exhaustive full-product inventory.",
+				"The output does not claim that the quick pass proves the whole product is accessible, compliant, or high quality.",
+				"The output does not modify repository files."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "expands_quick_request_into_unbounded_review_or_overgeneralizes",
+			"failure_form": "condition",
+			"pressures": ["deadline", "explicit_scope_reduction"]
+		}
+	]
+}

@@ -1,0 +1,58 @@
+[
+	{
+		"query": "Audit this existing web app's UI/UX across accessibility, forms, responsive behavior, and design-system consistency, and give me prioritized evidence-based findings.",
+		"should_trigger": true
+	},
+	{
+		"query": "Do a WCAG 2.2 AA accessibility review of this dashboard and test keyboard/focus and dialog behavior.",
+		"should_trigger": true
+	},
+	{
+		"query": "Review this UI pull request for semantics, states, responsive regressions, and implementation anti-patterns.",
+		"should_trigger": true
+	},
+	{
+		"query": "Check whether our checkout flow is efficient, recoverable, and usable on mobile; identify blockers and systemic causes.",
+		"should_trigger": true
+	},
+	{
+		"query": "Compare our implementation with Figma, Storybook, and design tokens; report drift and missing states.",
+		"should_trigger": true
+	},
+	{
+		"query": "Quality-check this existing customer portal interface and produce a severity-ranked audit report with verification gaps.",
+		"should_trigger": true
+	},
+	{
+		"query": "Create a distinctive new marketing page from scratch using brand imagery and expressive typography.",
+		"should_trigger": false
+	},
+	{
+		"query": "Implement the accessibility fixes and scoped UI remediation requested in the approved report, then retest affected flows.",
+		"should_trigger": true
+	},
+	{
+		"query": "Review this backend API's error handling and database transaction boundaries.",
+		"should_trigger": false
+	},
+	{
+		"query": "Audit our dark theme, high-contrast mode, and color-only status indicators across the settings screens.",
+		"should_trigger": true
+	},
+	{
+		"query": "Review this dashboard for mobile reflow, zoom, table overflow, and safe-area behavior.",
+		"should_trigger": true
+	},
+	{
+		"query": "Check our UI copy, date formatting, long translated labels, and RTL layout behavior.",
+		"should_trigger": true
+	},
+	{
+		"query": "Compare Figma and Storybook academically without inspecting any implementation or interface.",
+		"should_trigger": false
+	},
+	{
+		"query": "Explain WCAG 2.2 academically without inspecting any interface.",
+		"should_trigger": false
+	}
+]

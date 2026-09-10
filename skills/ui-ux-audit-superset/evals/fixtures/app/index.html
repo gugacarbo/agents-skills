@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operations Console</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; background: #fff; color: #17202a; }
+    body { margin: 0; }
+    header { display: flex; gap: 24px; align-items: center; padding: 16px 24px; border-bottom: 1px solid #d9e0e8; }
+    .brand { font-weight: 700; }
+    nav { display: flex; gap: 16px; }
+    nav a { color: #075ab5; }
+    nav a[aria-current="page"] { font-weight: 700; text-decoration: none; }
+    main { max-width: 960px; padding: 24px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .primary { background: #075ab5; border: 0; border-radius: 6px; color: white; min-height: 40px; padding: 0 16px; }
+    .primary:active { background: #043c86; }
+    .primary:focus-visible, input:focus-visible { outline: 3px solid #b35c00; outline-offset: 2px; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input { border: 1px solid #5b6875; border-radius: 4px; font: inherit; min-height: 40px; padding: 0 8px; }
+    .field { margin: 16px 0; min-width: 0; }
+    .error { color: #a4262c; font-weight: 600; }
+    .status { font-style: italic; }
+    table { border-collapse: collapse; margin-top: 24px; min-width: 720px; width: 100%; }
+    th, td { border-bottom: 1px solid #d9e0e8; padding: 12px 8px; text-align: left; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .table-wrap { overflow-x: auto; }
+    .danger { background: #a4262c; border: 0; border-radius: 6px; color: white; min-height: 40px; padding: 0 12px; }
+    dialog { border: 1px solid #5b6875; border-radius: 8px; max-width: 420px; }
+    @media (max-width: 700px) {
+      header { align-items: flex-start; flex-direction: column; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .toolbar .primary { width: 100%; }
+      form { max-width: 100%; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .primary, dialog { transition: transform 120ms ease, opacity 120ms ease; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Operations Console</div>
+    <nav aria-label="Primary">
+      <a href="#incidents" aria-current="page">Incidents</a>
+      <a href="#services">Services</a>
+      <a href="#settings">Settings</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Incidents</h1>
+    <section class="toolbar" aria-labelledby="page-actions">
+      <h2 id="page-actions" class="sr-only">Page actions</h2>
+      <label for="search">Search incidents</label>
+      <input id="search" name="search" type="search" autocomplete="off">
+      <button class="primary" id="new-incident" type="button">New incident</button>
+    </section>
+    <p id="live-status" class="status" role="status">Loaded 3 open incidents</p>
+    <form novalidate>
+      <div class="field">
+        <label for="title">Title (required)</label>
+        <input id="title" name="title" autocomplete="off" required aria-describedby="title-help title-error">
+        <p id="title-help">Example: Checkout latency in us-east-1</p>
+        <p class="error" id="title-error" hidden>Error: Title is required. Enter a concise summary before saving.</p>
+      </div>
+      <div class="field">
+        <label for="severity">Severity</label>
+        <select id="severity" name="severity">
+          <option value="sev1">SEV1 — critical</option>
+          <option value="sev2">SEV2 — major</option>
+          <option value="sev3">SEV3 — minor</option>
+        </select>
+      </div>
+      <button class="primary" id="save" type="submit">Save incident</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <caption>Currently open incidents</caption>
+        <thead>
+          <tr><th scope="col">Incident</th><th scope="col">Service</th><th scope="col" class="num">Age (hours)</th><th scope="col">Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Checkout latency</th><td>checkout</td><td class="num">2.1</td><td><button type="button">Acknowledge</button></td></tr>
+          <tr><th scope="row">Webhook failures</th><td>billing-api</td><td class="num">18.4</td><td><button type="button">Acknowledge</button></td></tr>
+          <tr><th scope="row">Queue backlog</th><td>worker</td><td class="num">0.7</td><td><button type="button">Acknowledge</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h2>Danger zone</h2>
+    <button class="danger" id="delete-service" type="button">Delete service</button>
+  </main>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+    <h2 id="confirm-title">Delete service?</h2>
+    <p>This permanently deletes <strong>checkout</strong>, its alerts, and its incident history.</p>
+    <button class="danger" id="confirm-delete" type="button">Delete permanently</button>
+    <button id="cancel-delete" type="button">Cancel</button>
+  </dialog>
+  <script>
+    const form = document.querySelector('form');
+    const title = document.querySelector('#title');
+    const titleError = document.querySelector('#title-error');
+    const dialog = document.querySelector('#confirm-dialog');
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!title.value.trim()) {
+        title.setAttribute('aria-invalid', 'true');
+        titleError.hidden = false;
+        title.focus();
+        return;
+      }
+      title.removeAttribute('aria-invalid');
+      titleError.hidden = true;
+      document.querySelector('#live-status').textContent = 'Saving incident…';
+      setTimeout(() => { document.querySelector('#live-status').textContent = 'Incident saved.'; }, 400);
+    });
+    document.querySelector('#delete-service').addEventListener('click', () => {
+      dialog.querySelector('#confirm-title').focus();
+      dialog.showModal();
+    });
+    dialog.addEventListener('close', () => document.querySelector('#delete-service').focus());
+    document.querySelector('#cancel-delete').addEventListener('click', () => dialog.close());
+  </script>
+</body>
+</html>

@@ -9,8 +9,9 @@
 		"skills/commit-changes/evals/run-evals.mjs",
 		"skills/project-init/evals/run-evals.mjs",
 		"skills/project-init/templates/typescript/files/src/index.ts",
+		"skills/project-init/templates/typescript/optional-tools/lint-staged/files/.lintstagedrc.js",
 		"skills/project-init/templates/typescript/vite/files/vitest.config.ts",
-		"skills/project-init/templates/typescript/optional-tools/lint-staged/files/.lintstagedrc.js"
+		"skills/ui-ux-audit-superset/evals/run-evals.mjs"
 	],
 	"ignoreDependencies": ["prettier-plugin-sh", "tsc-files"]
 }
