@@ -39,6 +39,8 @@ WHITELIST = {"package.json", "LICENSE.txt", "VERSION", ".gitignore",
 IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "build",
                 "vendor", "__pycache__", ".next", "target", ".tox",
                 ".mypy_cache", ".pytest_cache", ".ruff_cache", "dev", "tests"}
+EVAL_PRIVATE_DIRS = {"fixtures", "results"}
+
 PARSE_EXTS = {".md", ".sh", ".py", ".html", ".js", ".cjs", ".mjs"}
 
 EXIT_ORPHAN, EXIT_BROKEN, EXIT_CIRCULAR, EXIT_CROSS_SKILL, EXIT_DEPTH = 1, 2, 4, 8, 16
@@ -101,7 +103,11 @@ def collect_tree(root):
     if not skills_dir.is_dir():
         return files, paths
     for dirpath, dirnames, filenames in os.walk(skills_dir):
-        dirnames[:] = sorted(d for d in dirnames if d not in IGNORED_DIRS)
+        parent = Path(dirpath).relative_to(root / "skills").as_posix()
+        ignored = set(IGNORED_DIRS)
+        if PurePosixPath(parent).name == "evals":
+            ignored.update({"fixtures", "results"})
+        dirnames[:] = sorted(d for d in dirnames if d not in ignored)
         rel_dir = Path(dirpath).relative_to(root).as_posix()
         paths.add(rel_dir)
         for fn in sorted(filenames):

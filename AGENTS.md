@@ -84,6 +84,9 @@ bun run skills-check    # relações e arquivos publicados das skills válidos
   checks que o `bun run verify` já concluiu antes de gerar o artefato.
 - `skills/brainstorm/package.json` aponta para `tests/tests.test.ts`
   conforme a convenção das suítes de teste.
+- `skills/*/evals` é tooling privado de avaliação: o build remove o diretório;
+  o `skills-check` considera catálogos/runners, mas ignora `evals/fixtures` e
+  `evals/results`.
 
 ## Mapa de contexto
 

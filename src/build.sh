@@ -44,6 +44,7 @@ remove_ignored_artifacts() {
 
   find "$build_dir" -type d \( \
     -name node_modules -o \
+    -name evals -o \
     -name .pnpm-store -o \
     -name build -o \
     -name out -o \
