@@ -5,6 +5,7 @@ Use this module when a component library, Storybook, Figma library, token system
 ## 1. Establish the source of truth
 
 Identify:
+
 - Figma library;
 - Dev Mode specs;
 - Storybook;
@@ -18,6 +19,7 @@ If sources disagree, record the conflict rather than guessing which is canonical
 ## 2. Component reuse
 
 For each reviewed pattern:
+
 1. check whether a canonical component exists;
 2. verify the implementation uses it when appropriate;
 3. verify correct variant/size/state;
@@ -29,6 +31,7 @@ Do not force a canonical component when it cannot meet the product requirement.
 ## 3. Tokens
 
 Inspect use of:
+
 - color;
 - typography;
 - spacing;
@@ -46,6 +49,7 @@ A single hard-coded value is not automatically a Major issue. Consider intent, r
 ## 4. Semantic tokens
 
 Prefer semantic concepts such as:
+
 - surface;
 - foreground;
 - muted;
@@ -62,6 +66,7 @@ over component-specific raw colors when the design system supports them.
 ## 5. Variants and states
 
 Compare:
+
 - default;
 - hover;
 - focus;
@@ -80,6 +85,7 @@ Look for a component that visually matches but behaves differently from the cano
 ## 6. Figma alignment
 
 When Figma Dev Mode/specs are available, compare:
+
 - spacing;
 - measurements;
 - typography;
@@ -93,6 +99,7 @@ Do not rely on visual approximation when exact specs are available.
 ## 7. Exceptions
 
 When implementation deviates from the system:
+
 - determine whether the deviation is intentional;
 - identify why the existing system cannot express the requirement;
 - recommend documenting the exception;
@@ -101,6 +108,7 @@ When implementation deviates from the system:
 ## 8. Missing component workflow
 
 If no canonical component exists:
+
 1. check whether an existing primitive can be composed safely;
 2. avoid inventing a new one-off pattern when reuse is possible;
 3. if genuinely new, define the required states/accessibility/responsive behavior;
@@ -109,6 +117,7 @@ If no canonical component exists:
 ## 9. Drift detection
 
 Look for:
+
 - multiple “primary button” implementations;
 - parallel form controls;
 - competing modal components;
@@ -123,6 +132,7 @@ Report the root system drift once with representative affected surfaces.
 ## 10. Design-system accessibility
 
 Verify canonical components actually provide:
+
 - correct semantics;
 - keyboard support;
 - focus-visible treatment;

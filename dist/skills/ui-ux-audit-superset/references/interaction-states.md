@@ -3,6 +3,7 @@
 ## 1. Native semantics first
 
 Use:
+
 - button for actions;
 - link for navigation;
 - native input/select/textarea when suitable.
@@ -28,6 +29,7 @@ Ensure sticky/fixed overlays do not hide focused controls.
 Interactive controls should provide understandable state feedback.
 
 Check:
+
 - hover when hover is available;
 - active/pressed;
 - selected/current;
@@ -41,6 +43,7 @@ State contrast should generally become clearer, not more ambiguous.
 ## 4. Dialogs and drawers
 
 Check:
+
 - clear trigger;
 - useful title;
 - focus enters appropriately;
@@ -55,6 +58,7 @@ Check:
 ## 5. Popovers, menus, tooltips
 
 Check:
+
 - keyboard operation;
 - dismissal;
 - focus behavior;
@@ -67,6 +71,7 @@ Check:
 Never make a high-risk destructive action fire immediately if a reasonable confirmation or undo is needed.
 
 Use proportional friction:
+
 - low-risk reversible: undo may be enough;
 - high-risk irreversible: clear confirmation;
 - very high-risk: stronger verification may be justified.
@@ -76,6 +81,7 @@ Confirmation copy should name the consequence and affected object.
 ## 7. Touch
 
 Inspect:
+
 - target size and spacing;
 - accidental activation risk;
 - gesture alternatives;
@@ -89,6 +95,7 @@ Set tap highlight behavior intentionally if customizing it.
 ## 8. Drag and gesture interactions
 
 During custom drag:
+
 - avoid accidental text selection;
 - prevent unrelated interactive descendants from firing;
 - make dragged state understandable;
@@ -101,9 +108,11 @@ Do not make swipe/pinch/path gestures the only way to perform an action unless e
 Use autofocus sparingly.
 
 Good candidates:
+
 - one obvious desktop task with a single primary input.
 
 Risks:
+
 - mobile keyboard opens unexpectedly;
 - screen-reader context is skipped;
 - focus steals control from users.
@@ -113,6 +122,7 @@ Avoid autofocus without clear task justification.
 ## 10. Loading and pending
 
 Check:
+
 - immediate acknowledgment;
 - localized loading instead of blocking the entire app unnecessarily;
 - no duplicate activation;
@@ -123,12 +133,14 @@ Check:
 ## 11. Empty states
 
 Distinguish:
+
 - no data exists yet;
 - filters returned zero results;
 - permission prevents visibility;
 - network failed.
 
 A useful empty state answers:
+
 - what happened;
 - whether it is expected;
 - what the user can do next.
@@ -136,6 +148,7 @@ A useful empty state answers:
 ## 12. Errors and warnings
 
 Differentiate:
+
 - validation;
 - transient network failure;
 - permission failure;
@@ -149,6 +162,7 @@ Provide recovery when possible.
 ## 13. Success states
 
 Success should:
+
 - be visible long enough;
 - not rely solely on a disappearing toast for critical confirmation;
 - update the underlying UI so users can see the result.
@@ -162,6 +176,7 @@ Prefer animations that are easy for the browser to render, commonly transform/op
 Avoid broad “animate everything” transitions. Declare intended properties.
 
 Ensure:
+
 - transform origin matches the visual behavior;
 - SVG transform behavior is predictable;
 - animation can be interrupted by user input;
@@ -173,6 +188,7 @@ Motion should communicate relationships, not delay the task.
 ## 15. Scroll behavior
 
 Check:
+
 - modal/drawer overscroll does not leak into the page;
 - anchor targets are not hidden under sticky headers;
 - focus/scroll changes do not unexpectedly throw users around;
@@ -181,6 +197,7 @@ Check:
 ## 16. State completeness
 
 For reusable components inspect as applicable:
+
 - default;
 - hover;
 - focus;

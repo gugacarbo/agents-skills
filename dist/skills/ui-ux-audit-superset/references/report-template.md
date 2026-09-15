@@ -13,6 +13,7 @@
 **Accessibility baseline:** WCAG 2.2 AA unless overridden
 
 ### Evidence sources
+
 - running application
 - source
 - Figma
@@ -22,17 +23,21 @@
 - other
 
 ### Verified
+
 - ...
 
 ### Not verified
+
 - ...
 
 ### Assumptions
+
 - ...
 
 ## 2. Executive assessment
 
 State:
+
 - overall task usability;
 - highest-impact issue;
 - strongest systemic issue;
@@ -45,15 +50,16 @@ Avoid vague praise or generic criticism.
 
 ## 3. Critical flows reviewed
 
-| Flow | Result | Highest severity | Evidence/notes |
-|---|---|---:|---|
-| Sign in | Pass / Issues / Blocked | Major | ... |
+| Flow    | Result                  | Highest severity | Evidence/notes |
+| ------- | ----------------------- | ---------------: | -------------- |
+| Sign in | Pass / Issues / Blocked |            Major | ...            |
 
 ## 4. Strengths worth preserving
 
 Only list concrete strengths supported by inspection.
 
 Examples:
+
 - coherent form infrastructure;
 - excellent focus treatment;
 - consistent responsive navigation;
@@ -62,13 +68,13 @@ Examples:
 
 ## 5. Findings overview
 
-| Severity | Count |
-|---|---:|
-| Blocker | 0 |
-| Critical | 0 |
-| Major | 0 |
-| Minor | 0 |
-| Opportunity | 0 |
+| Severity    | Count |
+| ----------- | ----: |
+| Blocker     |     0 |
+| Critical    |     0 |
+| Major       |     0 |
+| Minor       |     0 |
+| Opportunity |     0 |
 
 ## 6. Detailed findings
 
@@ -77,9 +83,10 @@ Examples:
 **Category:**  
 **Severity:**  
 **Confidence:**  
-**Affected:**  
+**Affected:**
 
 **Evidence**
+
 - route/state/viewport
 - reproduction steps
 - screenshot or source location when available
@@ -89,6 +96,7 @@ Explain the consequence in user terms.
 
 **Rationale**
 Reference:
+
 - WCAG criterion;
 - design-system rule;
 - product requirement;
@@ -108,6 +116,7 @@ State how to confirm the fix.
 ## 7. Systemic/root-cause findings
 
 Group issues caused by:
+
 - shared component;
 - token;
 - layout primitive;
@@ -121,6 +130,7 @@ Include affected finding IDs/surfaces.
 ## 8. Accessibility summary
 
 Report:
+
 - automated tooling used;
 - keyboard coverage;
 - zoom/reflow;
@@ -134,6 +144,7 @@ Do not claim full conformance from partial testing.
 ## 9. Design-system summary
 
 Report:
+
 - component reuse;
 - token adherence;
 - Figma/Storybook alignment;
@@ -144,6 +155,7 @@ Report:
 ## 10. Responsive/theme summary
 
 Report:
+
 - viewport coverage;
 - breakpoint defects;
 - tables/forms/dialogs;
@@ -154,6 +166,7 @@ Report:
 ## 11. Source-level web-quality summary
 
 If code was reviewed, summarize:
+
 - semantics;
 - focus;
 - forms;
@@ -170,6 +183,7 @@ Do not dump every low-value lint-style detail into the executive summary.
 ## 12. Recommended remediation order
 
 Example:
+
 1. fix keyboard blocker in shared dialog;
 2. fix systemic form error association;
 3. correct mobile table behavior;
@@ -179,6 +193,7 @@ Example:
 ## 13. Verification gaps
 
 List anything that could materially change conclusions:
+
 - admin route unavailable;
 - screen reader unavailable;
 - Safari unavailable;
@@ -188,6 +203,6 @@ List anything that could materially change conclusions:
 
 ## Appendix — Evidence map
 
-| Finding | Surface | Evidence |
-|---|---|---|
-| A11Y-001 | Dialog | Runtime + source |
+| Finding  | Surface | Evidence         |
+| -------- | ------- | ---------------- |
+| A11Y-001 | Dialog  | Runtime + source |

@@ -5,6 +5,7 @@ Review visual craft as a functional part of the product. Separate objective clar
 ## 1. Conceptual direction
 
 Ask:
+
 - Does the visual language fit the product, audience, and task?
 - Is the interface intentionally minimal, dense, editorial, playful, industrial, luxurious, technical, etc.?
 - Is that direction coherent across screens?
@@ -16,6 +17,7 @@ For enterprise/internal tools, do not demand novelty for its own sake.
 ## 2. Hierarchy
 
 Check whether:
+
 - page purpose is immediately clear;
 - title and primary task dominate appropriately;
 - primary actions are visually clear;
@@ -28,6 +30,7 @@ Flag emphasis that does not match importance.
 ## 3. Typography
 
 Inspect:
+
 - font family roles;
 - size scale;
 - weight scale;
@@ -45,6 +48,7 @@ Do not ban a common font simply because it is common. Judge whether the typograp
 ## 4. Color and theme
 
 Check:
+
 - coherent palette;
 - semantic color roles;
 - appropriate contrast;
@@ -58,6 +62,7 @@ Avoid using raw color differences as the only status cue.
 ## 5. Spatial composition
 
 Inspect:
+
 - grid;
 - alignment;
 - spacing rhythm;
@@ -73,6 +78,7 @@ Minimal interfaces require precise spacing and typography. Rich/maximal interfac
 ## 6. Components and surfaces
 
 Check visual consistency of:
+
 - buttons;
 - inputs;
 - cards;
@@ -91,6 +97,7 @@ Differences should correspond to semantic or interaction differences.
 ## 7. Iconography
 
 Check:
+
 - one coherent icon family or intentional combinations;
 - consistent stroke/weight;
 - consistent optical sizing;
@@ -101,6 +108,7 @@ Check:
 ## 8. Motion as visual craft
 
 Motion should:
+
 - communicate cause/effect;
 - orient users;
 - reinforce hierarchy;
@@ -113,6 +121,7 @@ Review motion accessibility separately in `interaction-states.md`.
 ## 9. Backgrounds and decorative detail
 
 For expressive designs, evaluate whether:
+
 - gradients;
 - textures;
 - layered transparency;
@@ -128,6 +137,7 @@ Do not recommend decorative complexity for products where clarity and speed are 
 ## 10. Generic-interface warning signs
 
 Treat these as aesthetic opportunities, not automatic defects:
+
 - repetitive card grids without information hierarchy;
 - arbitrary gradients;
 - excessive rounded containers;
@@ -140,6 +150,7 @@ Only escalate when the lack of direction materially reduces clarity, trust, bran
 ## 11. Visual fidelity to design specs
 
 When Figma or another source of truth exists:
+
 - compare spacing;
 - typography;
 - color roles;
@@ -150,6 +161,7 @@ When Figma or another source of truth exists:
 - icon treatment.
 
 Distinguish:
+
 - deliberate approved deviation;
 - implementation drift;
 - missing design-system capability.

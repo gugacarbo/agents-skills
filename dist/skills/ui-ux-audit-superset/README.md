@@ -3,10 +3,12 @@
 A portable Agent Skill for comprehensive UI/UX auditing of web applications.
 
 This edition is designed as a **standalone superset** of the useful review coverage found in:
+
 - Microsoft `frontend-design-review`;
 - Vercel `web-design-guidelines`;
 
 and adds:
+
 - WCAG 2.2 AA depth;
 - task/flow-based usability analysis;
 - information architecture;

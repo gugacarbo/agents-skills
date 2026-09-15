@@ -18,6 +18,7 @@ A screen should make the next useful action understandable without requiring use
 ## 2. Task efficiency
 
 Inspect:
+
 - unnecessary steps;
 - repeated data entry;
 - avoidable confirmation screens;
@@ -32,6 +33,7 @@ A “three interactions or fewer” target may be a useful warning signal for si
 ## 3. Action hierarchy
 
 Prefer:
+
 - one obvious primary action for the current task;
 - at most a small number of competing high-emphasis actions;
 - secondary actions visually quieter;
@@ -39,6 +41,7 @@ Prefer:
 - destructive actions separated from routine actions.
 
 Flag:
+
 - multiple buttons that all appear primary;
 - a primary action hidden in overflow while low-value actions are prominent;
 - disabled primary controls without explanation;
@@ -47,6 +50,7 @@ Flag:
 ## 4. Visibility of system status
 
 Users should be able to tell:
+
 - whether input was accepted;
 - whether work is saving;
 - whether processing is still happening;
@@ -61,6 +65,7 @@ Avoid ambiguous inactivity.
 Use product/domain language rather than internal implementation vocabulary.
 
 Check:
+
 - labels;
 - entity names;
 - grouping;
@@ -74,6 +79,7 @@ Do not expose database/framework terminology unless users actually use that term
 ## 6. User control and freedom
 
 Check:
+
 - clear back/cancel/close behavior;
 - reversible actions where appropriate;
 - undo for low-cost reversible destructive changes;
@@ -84,12 +90,14 @@ Check:
 ## 7. Consistency and predictability
 
 Equivalent things should:
+
 - look equivalent;
 - have equivalent names;
 - appear in predictable locations;
 - behave equivalently.
 
 Check:
+
 - save semantics;
 - dialog buttons;
 - keyboard behavior;
@@ -104,6 +112,7 @@ Check:
 Prefer preventing an error over explaining it later when practical.
 
 Check:
+
 - duplicate submission protection;
 - dangerous defaults;
 - destructive confirmations;
@@ -115,11 +124,13 @@ Check:
 ## 9. Error recovery
 
 A useful error explains:
+
 1. what failed;
 2. what it affects;
 3. what the user can do next.
 
 For data-entry errors:
+
 - preserve entered values;
 - identify the specific fields;
 - move or direct focus appropriately;
@@ -130,6 +141,7 @@ For data-entry errors:
 Keep needed context visible.
 
 Examples:
+
 - show selected filters;
 - retain relevant record identity in dialogs;
 - show units beside values;
@@ -139,6 +151,7 @@ Examples:
 ## 11. Flexibility and efficiency
 
 Where appropriate support:
+
 - keyboard operation;
 - bulk actions;
 - good defaults;
@@ -153,6 +166,7 @@ Do not optimize expert efficiency at the expense of discoverability for normal u
 ## 12. Information architecture
 
 Review:
+
 - main navigation;
 - grouping of features;
 - naming;
@@ -164,6 +178,7 @@ Review:
 - page orientation.
 
 Questions:
+
 - Can users tell where they are?
 - Can they predict where a feature lives?
 - Are categories mutually understandable?
@@ -173,6 +188,7 @@ Questions:
 ## 13. Navigation state
 
 Inspect:
+
 - current section highlighting;
 - back behavior;
 - scroll position restoration where useful;
@@ -184,6 +200,7 @@ Inspect:
 ## 14. Onboarding and discoverability
 
 When a feature is non-obvious:
+
 - explain it at introduction or first use;
 - prefer contextual guidance to long documentation;
 - use smart defaults;
@@ -194,6 +211,7 @@ Do not add tutorials for self-evident controls.
 ## 15. Help
 
 Where help is needed:
+
 - keep its location consistent;
 - make contact/help mechanisms easy to find;
 - make inline help task-specific;
@@ -204,6 +222,7 @@ Where help is needed:
 Do not mistake density for poor UX.
 
 Evaluate whether density:
+
 - supports expert workflows;
 - preserves scanning;
 - uses alignment and grouping;

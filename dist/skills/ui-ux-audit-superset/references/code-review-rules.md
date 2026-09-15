@@ -7,6 +7,7 @@ Report code findings with precise locations when possible.
 ## A. Semantics and accessibility
 
 Check for:
+
 - icon-only controls without accessible names;
 - controls without labels;
 - action behavior implemented with generic clickable elements instead of buttons;
@@ -28,6 +29,7 @@ Custom widgets need the expected keyboard model.
 ## B. Focus
 
 Check for:
+
 - focus outline removed without replacement;
 - no visible focus;
 - focus styling that is barely perceptible;
@@ -38,6 +40,7 @@ Check for:
 ## C. Forms
 
 Check for:
+
 - missing `name`;
 - missing/useful autocomplete;
 - incorrect input type/inputmode;
@@ -57,6 +60,7 @@ Check for:
 ## D. Motion
 
 Check for:
+
 - no reduced-motion handling;
 - broad `transition: all`;
 - animation of expensive layout properties without reason;
@@ -69,6 +73,7 @@ Check for:
 ## E. Typography and content
 
 Check for:
+
 - inconsistent punctuation/status copy;
 - number columns with poor numeric alignment when comparisons matter;
 - heading widows/awkward wrapping where easy to improve;
@@ -81,6 +86,7 @@ Treat editorial conventions as project-style checks rather than universal defect
 ## F. Content robustness
 
 Check:
+
 - long strings;
 - user-generated content;
 - empty arrays/strings;
@@ -92,6 +98,7 @@ Check:
 ## G. Images/media
 
 Check:
+
 - images without dimensions/aspect ratio;
 - non-critical below-fold images loading eagerly;
 - critical hero images deprioritized;
@@ -101,6 +108,7 @@ Check:
 ## H. Performance risks
 
 Check:
+
 - massive non-virtualized DOM when actual size makes it expensive;
 - synchronous layout reads during render;
 - repeated DOM read/write thrashing;
@@ -113,6 +121,7 @@ Use measurement/context. Do not flag merely because a list has more than an arbi
 ## I. Navigation and URL state
 
 Check:
+
 - links replaced by onclick navigation;
 - filters/tabs/pagination that should be shareable/restorable but exist only in transient component state;
 - browser back not restoring meaningful state;
@@ -124,6 +133,7 @@ Not every accordion or ephemeral tooltip belongs in the URL. Use user value and 
 ## J. Touch and gestures
 
 Check:
+
 - essential hover-only controls;
 - gesture-only actions;
 - drag-only operation;
@@ -136,6 +146,7 @@ Check:
 ## K. Safe areas and layout
 
 Check:
+
 - full-bleed fixed UI ignoring safe-area insets;
 - overflow hidden masking layout bugs;
 - JS layout measurement where CSS can express the layout;
@@ -145,6 +156,7 @@ Check:
 ## L. Themes
 
 Check:
+
 - dark theme without correct browser `color-scheme`;
 - native controls unreadable in dark mode;
 - theme-color inconsistent with surface;
@@ -154,6 +166,7 @@ Check:
 ## M. Localization
 
 Check:
+
 - hard-coded date/time formats;
 - hard-coded currency/number formatting;
 - IP-only language detection;
@@ -166,6 +179,7 @@ Prefer locale APIs such as `Intl` where appropriate.
 ## N. Hydration and controlled inputs
 
 Check:
+
 - input has a controlled value without a matching update path;
 - server/client date/time/locale mismatches;
 - random/browser-only values rendered differently on server;
@@ -174,6 +188,7 @@ Check:
 ## O. Hover and state feedback
 
 Check:
+
 - no hover feedback where pointer hover is available;
 - active/focus less visible than resting state;
 - clickable surface has no interaction affordance;
@@ -182,6 +197,7 @@ Check:
 ## P. High-signal anti-pattern scan
 
 Flag with context:
+
 - user zoom disabled;
 - paste intentionally prevented;
 - generic clickable `div`/`span` for standard control behavior;

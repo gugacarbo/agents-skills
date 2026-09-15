@@ -5,6 +5,7 @@ This is a UI/UX audit module, not a full performance-engineering benchmark.
 ## 1. Perceived responsiveness
 
 Check:
+
 - button/input feedback appears quickly;
 - navigation does not look frozen;
 - long operations communicate progress;
@@ -14,6 +15,7 @@ Check:
 ## 2. Layout stability
 
 Look for:
+
 - image-induced layout shifts;
 - fonts causing severe reflow;
 - skeleton mismatch;
@@ -23,6 +25,7 @@ Look for:
 ## 3. Images
 
 For normal image elements:
+
 - provide intrinsic dimensions/aspect ratio to reduce layout shift;
 - lazy-load below-fold images when appropriate;
 - prioritize truly critical above-fold imagery.
@@ -32,6 +35,7 @@ Do not lazy-load the main LCP image blindly.
 ## 4. Animated media
 
 For decorative looping imagery:
+
 - compressed video is often more efficient than a large GIF;
 - provide a still/reduced-motion alternative where appropriate;
 - avoid autoplay behavior that harms accessibility or data usage.
@@ -39,11 +43,13 @@ For decorative looping imagery:
 ## 5. Large collections
 
 For very large rendered lists/tables:
+
 - inspect actual DOM/rendering cost;
 - consider virtualization or `content-visibility` when measurement shows value;
 - do not apply a fixed item-count threshold as a universal rule.
 
 Check whether virtualization harms:
+
 - accessibility;
 - browser find;
 - print/export;
@@ -54,6 +60,7 @@ Check whether virtualization harms:
 Avoid layout measurement in the render path when it causes synchronous layout work.
 
 When measuring:
+
 - batch reads/writes where possible;
 - avoid repeated read/write interleaving;
 - prefer CSS layout when feasible.
@@ -63,6 +70,7 @@ When measuring:
 Controlled inputs are fine when inexpensive.
 
 Flag:
+
 - expensive recomputation on each keystroke;
 - whole-page rerender;
 - network calls without debounce/cancellation where inappropriate;
@@ -77,6 +85,7 @@ Use them intentionally, not automatically.
 ## 9. Fonts
 
 For critical web fonts:
+
 - avoid invisible text for long periods;
 - use an appropriate `font-display` strategy;
 - preload only genuinely critical font resources;
@@ -85,6 +94,7 @@ For critical web fonts:
 ## 10. Loading architecture
 
 Check:
+
 - route-level blocking vs local loading;
 - repeated refetch flashes;
 - optimistic updates with rollback;
@@ -94,6 +104,7 @@ Check:
 ## 11. Hydration and SSR
 
 Look for server/client mismatch risks:
+
 - locale/time-dependent rendering;
 - random values;
 - browser-only data;
@@ -106,6 +117,7 @@ If suppression is present, verify that the mismatch is understood and intentiona
 ## 12. Browser-visible metadata
 
 Where applicable inspect:
+
 - theme-color;
 - color-scheme;
 - viewport configuration;
@@ -121,6 +133,7 @@ If performance tooling is available, use metrics as supporting evidence.
 Do not convert a Lighthouse score directly into a UX severity without observing the affected experience.
 
 Differentiate:
+
 - measured performance issue;
 - observed perceived-performance issue;
 - potential implementation risk.

@@ -5,6 +5,7 @@ Forms concentrate accessibility, usability, browser-behavior, and error-recovery
 ## 1. Labels and names
 
 Every control should have:
+
 - a persistent understandable label;
 - a meaningful programmatic name;
 - a meaningful `name` when submitted/stored by browser behavior.
@@ -18,6 +19,7 @@ For checkbox/radio rows, avoid “dead zones” between label and control when t
 ## 2. Input type and input mode
 
 Use appropriate HTML input types and input modes where useful:
+
 - email;
 - telephone;
 - URL;
@@ -29,6 +31,7 @@ Do not use `type=number` for identifiers that happen to contain digits.
 ## 3. Autocomplete
 
 Use autocomplete metadata when it improves:
+
 - names;
 - addresses;
 - email;
@@ -46,6 +49,7 @@ If a non-auth field repeatedly triggers inappropriate password-manager behavior,
 Never block paste merely to force manual entry.
 
 This is especially important for:
+
 - passwords;
 - one-time codes;
 - account identifiers;
@@ -54,6 +58,7 @@ This is especially important for:
 ## 5. Spellcheck and correction
 
 Disable spellcheck/autocorrection where it creates incorrect transformations, such as:
+
 - emails;
 - usernames;
 - codes;
@@ -66,6 +71,7 @@ Keep it available for natural-language fields where it helps.
 Make formatting expectations explicit.
 
 Examples:
+
 - expected date format;
 - units;
 - allowed characters;
@@ -78,6 +84,7 @@ Placeholder examples should supplement, not replace, labels.
 Users should understand what is required before submit.
 
 Avoid:
+
 - marking every field required if most are required and the distinction becomes noise;
 - required state conveyed only by color or an unexplained symbol.
 
@@ -92,15 +99,18 @@ For dependent fields, make the dependency clear.
 ## 9. Submit behavior
 
 Before request:
+
 - primary submit remains operable unless submission is genuinely impossible.
 
 During request:
+
 - prevent duplicate submission;
 - communicate pending state;
 - preserve button meaning;
 - use spinner/progress only when it helps.
 
 After request:
+
 - confirm success;
 - keep user context;
 - explain failures.
@@ -108,6 +118,7 @@ After request:
 ## 10. Errors
 
 Errors should be:
+
 - close to the field;
 - understandable;
 - programmatically associated;
@@ -115,6 +126,7 @@ Errors should be:
 - actionable.
 
 After failed submit:
+
 - preserve values;
 - identify all relevant errors;
 - move or direct focus to the first/summary error appropriately;
@@ -123,6 +135,7 @@ After failed submit:
 ## 11. Multi-step forms
 
 Check:
+
 - progress;
 - ability to go back;
 - data retention;
@@ -133,6 +146,7 @@ Check:
 ## 12. Unsaved changes
 
 When navigation would discard meaningful work:
+
 - warn the user or preserve the draft;
 - integrate with router/browser behavior;
 - avoid warnings for trivial untouched forms.
@@ -140,6 +154,7 @@ When navigation would discard meaningful work:
 ## 13. Mobile form behavior
 
 Inspect:
+
 - keyboard type;
 - viewport not obscured;
 - submit action reachable when keyboard opens;
@@ -151,10 +166,12 @@ Inspect:
 Use the right semantic concept.
 
 Disabled:
+
 - not currently operable;
 - may be removed from keyboard focus depending on native behavior.
 
 Read-only:
+
 - value can be inspected/copied but not changed.
 
 If users need to understand why an action is unavailable, provide the reason somewhere discoverable.
@@ -162,6 +179,7 @@ If users need to understand why an action is unavailable, provide the reason som
 ## 15. Authentication forms
 
 Check:
+
 - password manager support;
 - paste allowed;
 - show/hide password accessible;

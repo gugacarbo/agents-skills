@@ -68,9 +68,11 @@ The audit should answer:
 Select the narrowest mode that satisfies the user.
 
 ## Full Product Audit
+
 Use for “audit the app”, “review the whole UI/UX”, “check everything”, or equivalent.
 
 Inspect:
+
 - representative routes and all critical flows;
 - desktop + mobile;
 - relevant themes;
@@ -81,14 +83,17 @@ Inspect:
 - source-level web-interface rules when code is available.
 
 ## Scoped Flow Audit
+
 Use when the user names a flow, route, feature, component family, or role.
 
 Inspect the complete task, including entry, success, errors, recovery, and responsive/accessibility behavior.
 
 ## PR / UI Code Review
+
 Use when reviewing a change set.
 
 Prioritize:
+
 - changed UI behavior;
 - design-system component/token usage;
 - semantics and accessibility;
@@ -98,25 +103,30 @@ Prioritize:
 - mismatch with Figma or existing component APIs.
 
 ## Accessibility Deep Dive
+
 Use when accessibility is the primary request.
 
 Use `references/accessibility-wcag22.md` and perform manual testing where possible.
 
 ## Design-System Compliance Audit
+
 Use when conformity with Figma/Storybook/tokens/components is primary.
 
 Use `references/design-system.md`.
 
 ## Creative / Aesthetic Quality Review
+
 Use when the user explicitly asks whether a design feels distinctive, intentional, polished, generic, or appropriate to a brand.
 
 Use `references/visual-design.md`.
 Do not penalize a conventional enterprise interface merely for not being visually experimental.
 
 ## Quick Audit
+
 Use only when the user explicitly wants a fast review.
 
 Minimum:
+
 - primary route/flow;
 - one desktop and one mobile width;
 - keyboard/focus smoke test;
@@ -179,6 +189,7 @@ Evidence sources may include:
 Rank direct reproduction above inference.
 
 Document:
+
 - **Verified**
 - **Not verified**
 - **Assumptions**
@@ -215,6 +226,7 @@ Discover as applicable:
 Group repeated UI into pattern families rather than auditing each route as if unique.
 
 Examples:
+
 - app shell;
 - form pattern;
 - table pattern;
@@ -224,6 +236,7 @@ Examples:
 - notification pattern.
 
 Mark a flow **critical** when failure can:
+
 - block the main task;
 - cause data loss or irreversible change;
 - expose sensitive information;
@@ -249,50 +262,73 @@ When a running product is available:
 Use the references below. Load only the files relevant to the current audit phase; a full audit still needs every applicable domain.
 
 ## Product usability and IA
+
 Read:
+
 - `references/usability-ia.md`
 
 ## Visual quality and aesthetic direction
+
 Read:
+
 - `references/visual-design.md`
 
 ## Design-system and Figma/component conformity
+
 Read:
+
 - `references/design-system.md`
 
 ## Accessibility
+
 Read:
+
 - `references/accessibility-wcag22.md`
 
 ## Forms and data entry
+
 Read:
+
 - `references/forms-inputs.md`
 
 ## Interaction, focus, states, dialogs, touch, motion
+
 Read:
+
 - `references/interaction-states.md`
 
 ## Responsive layout, tables, safe areas, themes
+
 Read:
+
 - `references/responsive-layout.md`
 
 ## Content, typography, localization
+
 Read:
+
 - `references/content-i18n.md`
 
 ## Images, perceived performance, rendering/hydration
+
 Read:
+
 - `references/performance-web-quality.md`
 
 ## Static implementation/code rules
+
 Read:
+
 - `references/code-review-rules.md`
 
 ## Trust, AI disclosure, destructive/error transparency
+
 Read:
+
 - `references/trust-safety-ui.md`
 
 ## Full-audit coverage check
+
 Before reporting a Full Product Audit, read
 `references/coverage-matrix.md` and account for every applicable row. Mark
 unavailable rows explicitly as **Not verified** rather than inventing evidence
@@ -353,6 +389,7 @@ If no product matrix exists, use approximately:
 Also test **intermediate widths around actual breakpoints**, because many layout defects occur between canonical device sizes.
 
 Input methods where relevant:
+
 - keyboard only;
 - mouse/trackpad;
 - touch;
@@ -377,6 +414,7 @@ When Figma, Storybook, a component library, tokens, or documented patterns exist
 7. document intentional deviations separately from accidental drift.
 
 When no component exists:
+
 - first check whether an existing primitive can express the need;
 - treat a justified new pattern as a design-system extension, not automatically a defect;
 - recommend documenting the exception or adding a canonical component when repetition warrants it.
@@ -390,6 +428,7 @@ If source is available, inspect the relevant UI files.
 Use `references/code-review-rules.md`.
 
 Prefer location-aware findings:
+
 - file path;
 - line number or smallest useful code span;
 - affected component;
@@ -425,6 +464,7 @@ over:
 # Phase 8 — Classify findings
 
 Read:
+
 - `references/severity-confidence.md`
 
 Each finding must contain:
@@ -464,6 +504,7 @@ Do not use severity to encode aesthetic preference.
 # Phase 9 — Produce the report
 
 Read:
+
 - `references/report-template.md`
 
 A source-only or capture-only review must be labeled as such and must not present inferred behavior as runtime-verified.
@@ -489,10 +530,12 @@ A full report should make clear:
 Do not fabricate precision.
 
 Only provide `x/100` category scores when:
+
 - the user asks for scoring; or
 - a defined organizational rubric exists.
 
 If the user asks for scores without a rubric:
+
 1. define the dimensions, weights, evidence limits, and scoring scale first;
 2. label every numeric score and the overall score as **heuristic**;
 3. state that scores do not establish conformance; and
@@ -505,6 +548,7 @@ If the user asks for scores without a rubric:
 Only enter remediation mode when explicitly requested.
 
 Order:
+
 1. Blockers;
 2. Criticals;
 3. systemic/root-cause Majors;
@@ -513,6 +557,7 @@ Order:
 6. Opportunities.
 
 During remediation:
+
 - prefer canonical design-system primitives;
 - preserve successful patterns;
 - avoid unrelated redesign;

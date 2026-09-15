@@ -9,6 +9,7 @@ This document is an operational audit guide, not a substitute for the normative 
 Automated accessibility scanners find only a subset of accessibility issues.
 
 Never conclude:
+
 - “accessible”;
 - “WCAG compliant”;
 - “passes WCAG”
@@ -20,6 +21,7 @@ solely because an automated scan reports zero violations.
 If available, run axe or an equivalent engine on representative routes and states.
 
 Capture:
+
 - rule;
 - affected node;
 - route/state;
@@ -29,6 +31,7 @@ Capture:
 Reclassify final severity based on actual user impact.
 
 Automated tools are useful for:
+
 - missing accessible names;
 - some label failures;
 - invalid ARIA;
@@ -36,6 +39,7 @@ Automated tools are useful for:
 - some contrast problems.
 
 They cannot reliably judge:
+
 - meaningful alt text;
 - logical focus order;
 - cognitive clarity;
@@ -48,6 +52,7 @@ They cannot reliably judge:
 Test important tasks without a pointing device.
 
 Verify:
+
 - all functions reachable;
 - logical Tab/Shift+Tab order;
 - clear focus indicator;
@@ -62,6 +67,7 @@ Verify:
 ## 3. Focus
 
 Inspect:
+
 - visible focus;
 - focus indicator has enough contrast to be perceivable;
 - author-created sticky headers/footers/overlays do not fully hide the focused control;
@@ -73,6 +79,7 @@ WCAG 2.2 AA particularly adds focus-not-obscured requirements.
 ## 4. Structure and semantics
 
 Check:
+
 - page language;
 - meaningful page title;
 - landmark structure;
@@ -91,17 +98,20 @@ Prefer native HTML before recreating semantics with ARIA.
 ## 5. Non-text content
 
 Images:
+
 - meaningful images receive useful alternatives;
 - decorative images are ignored appropriately;
 - charts/diagrams provide equivalent information when necessary.
 
 Icons:
+
 - decorative icons should not clutter assistive technology;
 - icon-only controls need an accessible name.
 
 ## 6. Audio/video/media
 
 Where relevant:
+
 - captions;
 - transcripts;
 - audio description or equivalent where required;
@@ -112,6 +122,7 @@ Where relevant:
 ## 7. Contrast and color
 
 Inspect:
+
 - body text;
 - large text;
 - link distinction;
@@ -126,6 +137,7 @@ Information must not depend on color alone.
 ## 8. Resize, zoom, reflow and spacing
 
 Test where possible:
+
 - 200% browser zoom;
 - narrow reflow equivalent;
 - enlarged text;
@@ -133,6 +145,7 @@ Test where possible:
 - long content.
 
 Look for:
+
 - clipping;
 - overlap;
 - hidden controls;
@@ -147,6 +160,7 @@ Complex diagrams/data grids may legitimately need two-dimensional interaction; j
 WCAG 2.2 AA introduces a minimum target-size requirement with exceptions.
 
 Operationally:
+
 - look for small, tightly packed controls;
 - especially icon actions, pagination, chips, close buttons, row actions;
 - verify spacing when targets are under the baseline size;
@@ -157,18 +171,21 @@ Do not automatically require 44×44 CSS px for AA; that larger target is associa
 ## 10. Pointer and gestures
 
 Check:
+
 - complex pointer gestures have simpler alternatives when required;
 - drag-based actions have a non-drag alternative unless drag is essential;
 - pointer-down does not trigger dangerous irreversible actions prematurely;
 - functionality is not mouse-only.
 
 Examples:
+
 - sortable list should offer buttons/menu/keyboard alternative when appropriate;
 - swipe-only action should have a visible alternative.
 
 ## 11. Forms and input assistance
 
 Check:
+
 - labels;
 - instructions;
 - required fields;
@@ -185,6 +202,7 @@ Check:
 Authentication must not unnecessarily require a cognitive function test without an allowed alternative/mechanism.
 
 Inspect:
+
 - paste is allowed in password/code fields;
 - password managers can function;
 - challenge flows have accessible alternatives where required;
@@ -195,6 +213,7 @@ Do not block password paste.
 ## 13. Status messages and dynamic updates
 
 Check:
+
 - async validation;
 - save status;
 - loading state;
@@ -209,6 +228,7 @@ Where appropriate, status changes should be exposed programmatically without une
 ## 14. Content on hover/focus
 
 If content appears on hover or focus:
+
 - user can dismiss it when required;
 - it remains available while interacting with it when necessary;
 - it does not vanish before users can perceive/use it.
@@ -224,6 +244,7 @@ Do not restrict users to only one available input mechanism unless essential.
 ## 16. Motion and flashing
 
 Check:
+
 - flashing/seizure risk;
 - motion triggered by interaction;
 - reduced-motion preference;
@@ -234,12 +255,14 @@ Check:
 If a real screen reader environment is available, test representative critical flows.
 
 Potential desktop combinations include:
+
 - NVDA;
 - JAWS;
 - Narrator;
 - VoiceOver on Apple platforms.
 
 Check:
+
 - control names;
 - states;
 - reading order;
@@ -255,6 +278,7 @@ If no real screen reader is available, state that screen-reader compatibility wa
 ## 18. High contrast / forced colors
 
 When relevant and testable:
+
 - verify focus remains visible;
 - status is not color-only;
 - essential boundaries/icons survive;
@@ -265,6 +289,7 @@ When relevant and testable:
 Use criterion mappings only when confident.
 
 Common examples:
+
 - 1.1.1 Non-text Content
 - 1.3.1 Info and Relationships
 - 1.3.2 Meaningful Sequence

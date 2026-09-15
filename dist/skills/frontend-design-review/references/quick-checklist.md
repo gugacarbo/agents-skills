@@ -3,6 +3,7 @@
 Before approving any UI work:
 
 ## Design System Compliance
+
 - [ ] Component verified in your Figma Design System
 - [ ] Component implementation checked in your Component Library
 - [ ] Figma Dev Mode specs followed (spacing, tokens, typography)
@@ -13,6 +14,7 @@ Before approving any UI work:
 - [ ] Deviations documented with design approval
 
 ## Aesthetic Quality (especially for new designs)
+
 - [ ] Clear conceptual direction (not generic overused fonts and cliched schemes)
 - [ ] Distinctive typography (avoid overused fonts)
 - [ ] Cohesive color palette with CSS variables
@@ -22,10 +24,12 @@ Before approving any UI work:
 - [ ] Implementation complexity matches vision
 
 ## Frictionless
+
 - [ ] Core task completable efficiently (≤3 interactions)
 - [ ] Single clear primary action per view
 
 ## Quality Craft
+
 - [ ] Uses design system components (verified in Figma)
 - [ ] Design tokens used (no hardcoded values)
 - [ ] Distinctive aesthetic (not generic overused fonts/cliched schemes)
@@ -34,5 +38,6 @@ Before approving any UI work:
 - [ ] Tested in light/dark/high contrast modes
 
 ## Trustworthy
+
 - [ ] AI-generated content has disclaimer
 - [ ] Error messages are actionable
