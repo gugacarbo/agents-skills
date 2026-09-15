@@ -16,7 +16,7 @@ Execute a plan with fresh implementer subagents. Run tasks in a parallel wave on
 - Never dispatch, replace, or otherwise use a model that the user has not explicitly approved. The approved implementation configuration must name the exact model for every role before its dispatch.
 - Never dispatch a subagent with an omitted model or `model: inherit`. Every dispatch must set `model:` to the concrete, user-approved model recorded in the ledger.
 - Run every test or validation command explicitly requested by the user, plan, or spec. Do not claim a task or the plan is complete until the requested commands have run successfully on the relevant result.
-- If a requested test or validation command fails, errors, or cannot run, stop the orchestration, record the command and complete output in the ledger, and return the error and its command output to the user before any retry, fix, reassignment, or further dispatch. Do not make a ruling that bypasses a requested validation failure.
+- If a requested test or validation command fails, errors, or cannot run, record the exact command and complete output in the ledger, then diagnose and address the failure when a viable implementation path remains. Re-run the command after the relevant fix or environment correction; do not claim the task or plan complete while a required validation remains unresolved.
 
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
@@ -24,8 +24,8 @@ ledger and the tool results carry the record.
 **Continuous execution:** After the required Implementation Configuration Gate
 below is approved, do not pause to check in with your human partner between
 tasks. Execute all tasks from the plan without stopping. The only reasons to
-stop are the five named below, a requested validation error or failure, a change
-to the approved model configuration, or all tasks complete. "Should I continue?" prompts and progress summaries
+stop are the five named below, a change to the approved model configuration, or
+all tasks complete. "Should I continue?" prompts and progress summaries
 waste their time — they asked you to execute the plan, so execute it.
 
 **Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
@@ -39,8 +39,10 @@ session parked on a question costs their whole day and buys nothing.
 Five things stop you, and only these: an irreversible or destructive operation;
 a security-sensitive action; a side effect outside this worktree that norms say
 you ask about first (a merge, a push to a shared branch, a publish); a plan so
-broken that every path forward is a guess; and any requested validation error,
-failure, or inability to run. For any of these, stop and return to the user.
+broken that every path forward is a guess; or a requested validation failure for
+which no viable implementation or environment-repair path remains. A validation
+failure with a viable path is an implementation problem: record it, diagnose it,
+fix it, and continue. For a stop condition, return to the user.
 
 ## When to Use
 
@@ -478,10 +480,14 @@ Dispatch the task reviewer with the printed path.
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
 
-**Requested-test error or failure:** This is not a normal `BLOCKED` result.
-Stop the orchestration and return the failing command and its complete output to
-the user. Do not fix, retry, re-dispatch, or choose another model unless the
-user explicitly instructs you to proceed after seeing the error.
+**Requested-test error or failure:** This is not an automatic `BLOCKED` result.
+Record the failing command and its complete output, then diagnose and address
+the failure when a viable implementation or environment-repair path remains.
+Re-run the covering validation after the fix and continue the ordinary review
+loop. If the failure is isolated to a task, do not cancel unrelated work that
+can proceed safely. Report `BLOCKED` and stop only when no viable path remains,
+continuing requires new authority or a user decision, or another named stop
+condition applies.
 
 If the implementer asks questions — before starting or mid-task — answer
 clearly and completely, provide additional context if needed, and don't

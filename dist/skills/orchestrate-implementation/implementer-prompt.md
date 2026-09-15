@@ -61,10 +61,12 @@ Subagent (general-purpose):
     While iterating, run the focused test for what you're changing; run every
     test or validation command explicitly requested by the user, plan, or spec
     before reporting DONE; run the full suite once before committing, not after
-    every edit. If any requested command fails, errors, or cannot run, stop
-    immediately and report BLOCKED with the exact command and complete output.
-    Do not retry, fix, or continue: the controller must return that error to
-    the user first.
+    every edit. If any requested command fails, errors, or cannot run, record
+    the exact command and complete output, then diagnose and address the failure
+    when a viable implementation or environment-repair path remains. Re-run the
+    covering validation after the fix. Report BLOCKED only when no viable
+    implementation path remains, continuing requires new authority or a user
+    decision, or another named stop condition applies.
 
     ## You Do Not Dispatch Subagents
 

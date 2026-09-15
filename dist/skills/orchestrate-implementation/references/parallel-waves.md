@@ -121,9 +121,11 @@ new integration head.
 
 After every task in the wave passes its own gate, run the plan's integration or
 full-suite command once on the combined integration branch. If that requested
-command fails, errors, or cannot run, stop and return its complete output to the
-user before any diagnosis, retry, or fixer dispatch. Do not dispatch competing
-speculative fixers.
+command fails, errors, or cannot run, record its complete output, diagnose and
+fix it before deciding that the orchestration is blocked, and re-run the
+command after the fix. Use one sequential diagnosis/fix path; do not dispatch
+competing speculative fixers. Stop only when no viable implementation or
+environment-repair path remains, or another named stop condition applies.
 
 ## Cleanup
 

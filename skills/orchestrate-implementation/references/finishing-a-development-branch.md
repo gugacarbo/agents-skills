@@ -15,7 +15,9 @@ description: Use when implementation is complete, all tests pass, and you need t
 
 Run the project's full test suite (`npm test` / `cargo test` / `pytest` / `go test ./...`).
 
-**If tests fail**, report the failures and stop — the menu comes after a green suite:
+**If tests fail**, record the failures and investigate. Fix and re-run the
+covering tests when a viable implementation or environment-repair path remains;
+stop and report only when no viable path remains:
 
 ```
 Tests failing (<N> failures). Must fix before completing:
@@ -99,9 +101,10 @@ git merge <feature-branch>
 <test command>
 ```
 
-If tests fail on the merged result: stop, leave the worktree and branch in
-place, and investigate — nothing has been pushed, so the merge is local
-and recoverable.
+If tests fail on the merged result: leave the worktree and branch in place,
+investigate, and fix/re-run when a viable path remains — nothing has been
+pushed, so the merge is local and recoverable. Stop only when no viable path
+remains or another named stop condition applies.
 
 Once the merged result is green: clean up the worktree (Step 6), then
 delete the branch:
@@ -211,15 +214,15 @@ place. If your platform provides a workspace-exit tool, use it.
 
 ## Common Rationalizations
 
-| Excuse                                                        | Reality                                                                                                                    |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| "Tests passed earlier this session"                           | Run the suite on the tree you are about to integrate. A green run only proves the tree it ran on.                          |
-| "They obviously want it merged"                               | Integration is your human partner's decision. Present the menu and wait.                                                   |
-| "They seem done with this feature — I'll offer to discard it" | The menu is complete as written. Discard happens only when your human partner asks for it in so many words.                |
-| "'Yeah, get rid of it' counts as confirmation"                | Only the typed word `discard` authorizes deletion.                                                                         |
-| "The PR is up, so the worktree is clutter now"                | PR feedback gets fixed in that worktree. It stays until the work lands.                                                    |
-| "This other worktree looks stale — I'll clean it too"         | Clean up only worktrees under `.worktrees/` or `worktrees/`. Everything else belongs to the host.                          |
-| "Removal refused — `--force` is just finishing the cleanup"   | The refusal means files exist only in that worktree. `--force` destroys them permanently. Show your human partner and ask. |
-| "The merged-result failure is probably flaky"                 | A failing merged result stops everything. Branch and worktree stay put while you investigate.                              |
-| "The base branch is obviously main"                           | Confirm the fork point or ask. Merging into the wrong base is expensive to undo.                                           |
-| "The push was rejected — force-push will fix it"              | A rejected push means the remote moved. Investigate; force-push only on your human partner's explicit request.             |
+| Excuse                                                        | Reality                                                                                                                        |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| "Tests passed earlier this session"                           | Run the suite on the tree you are about to integrate. A green run only proves the tree it ran on.                              |
+| "They obviously want it merged"                               | Integration is your human partner's decision. Present the menu and wait.                                                       |
+| "They seem done with this feature — I'll offer to discard it" | The menu is complete as written. Discard happens only when your human partner asks for it in so many words.                    |
+| "'Yeah, get rid of it' counts as confirmation"                | Only the typed word `discard` authorizes deletion.                                                                             |
+| "The PR is up, so the worktree is clutter now"                | PR feedback gets fixed in that worktree. It stays until the work lands.                                                        |
+| "This other worktree looks stale — I'll clean it too"         | Clean up only worktrees under `.worktrees/` or `worktrees/`. Everything else belongs to the host.                              |
+| "Removal refused — `--force` is just finishing the cleanup"   | The refusal means files exist only in that worktree. `--force` destroys them permanently. Show your human partner and ask.     |
+| "The merged-result failure is probably flaky"                 | A failing merged result requires investigation and a fix when a viable path remains; keep the branch and worktree recoverable. |
+| "The base branch is obviously main"                           | Confirm the fork point or ask. Merging into the wrong base is expensive to undo.                                               |
+| "The push was rejected — force-push will fix it"              | A rejected push means the remote moved. Investigate; force-push only on your human partner's explicit request.                 |

@@ -92,12 +92,14 @@ describe("orchestrate-implementation implementation configuration", () => {
 		}
 	});
 
-	test("requires user-approved concrete models and returns test failures to the user", () => {
+	test("requires user-approved concrete models and recovers from validation failures when possible", () => {
 		const skill = read("SKILL.md");
 		const implementerPrompt = read("implementer-prompt.md");
 		const taskReviewerPrompt = read("task-reviewer-prompt.md");
 		const reReviewPrompt = read("re-review-prompt.md");
 		const branchReviewerPrompt = read("references/code-reviewer.md");
+		const parallelWaves = read("references/parallel-waves.md");
+		const finishingGuide = read("references/finishing-a-development-branch.md");
 
 		expect(skill).toContain(
 			"Never dispatch a subagent with an omitted model or `model: inherit`.",
@@ -109,7 +111,23 @@ describe("orchestrate-implementation implementation configuration", () => {
 			"Run every test or validation command explicitly requested by the user, plan, or spec.",
 		);
 		expect(skill).toContain(
+			"diagnose and address the failure when a viable implementation path remains",
+		);
+		expect(skill).toContain("stop only when no viable path remains");
+		expect(skill).not.toContain(
 			"return the error and its command output to the user before any retry, fix, reassignment, or further dispatch.",
+		);
+		expect(implementerPrompt).toContain(
+			"record\n    the exact command and complete output, then diagnose and address the failure\n    when a viable implementation or environment-repair path remains.",
+		);
+		expect(implementerPrompt).toContain(
+			"Report BLOCKED only when no viable\n    implementation path remains",
+		);
+		expect(parallelWaves).toContain(
+			"diagnose and\nfix it before deciding that the orchestration is blocked",
+		);
+		expect(finishingGuide).toContain(
+			"Fix and re-run the\ncovering tests when a viable implementation or environment-repair path remains",
 		);
 		expect(skill).not.toContain("the four named below");
 
