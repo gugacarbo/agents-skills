@@ -381,7 +381,8 @@ comments=${JSON.stringify(commentsPath)}
 body=${JSON.stringify(bodyPath)}
 case "$1 $2" in
   'issue view')
-    printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","body":%s,"labels":%s,"comments":[]}\n' "$(cat "$status")" "$(jq -Rs . < "$body")" "$(cat "$state")"
+    comment_json=$(jq -Rs . < "$comments")
+    printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","body":%s,"labels":%s,"comments":[{"body":%s}]}\n' "$(cat "$status")" "$(jq -Rs . < "$body")" "$(cat "$state")" "$comment_json"
     ;;
   'issue edit')
     shift 3
@@ -759,6 +760,45 @@ esac
 		expect(planComments).toContain("<!-- code-flow:implementation-plan:end -->");
 		expect(planComments.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
 		expect(planComments.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
+		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
+		expectSuccess(
+			runTransition([
+				"--finish-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:needs-plan",
+			]),
+		);
+		expect(labels()).toContain("stage:ready-for-execution");
+		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
+		write(commentsPath, "<!-- code-flow:implementation-plan:start -->\ninvalid\n<!-- code-flow:implementation-plan:end -->\n");
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:needs-plan",
+			]),
+		);
+		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
+		setLabels(["code-flow:active", "stage:needs-architect", "stage:in-progress"]);
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:awaiting-execution-approval",
+				"--require-from",
+				"stage:needs-architect",
+			]),
+		);
+		setLabels(["code-flow:active", "stage:awaiting-execution-approval", "needs-human"]);
+		expectFailure(
+			runTransition([
+				"--gate-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:awaiting-execution-approval",
+			]),
+		);
 		write(bodyPath, "> Complexity: M\n\n# M hard-trigger delivery\n");
 		setLabels(["code-flow:active", "stage:needs-architect", "stage:in-progress"]);
 		expectFailure(

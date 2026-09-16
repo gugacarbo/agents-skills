@@ -126,7 +126,7 @@ transition_allowed() {
 [ -z "$TARGET" ] || is_primary "$TARGET" || die "Error: invalid target state '$TARGET'"
 [ -z "$REQUIRE_FROM" ] || is_primary "$REQUIRE_FROM" || die "Error: invalid --require-from '$REQUIRE_FROM'"
 
-ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url,body)
+ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url,body,comments)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
 ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
 [ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != null ] || die "Error: could not resolve issue: $ISSUE"
@@ -155,6 +155,13 @@ if [ "$TARGET" = 'stage:awaiting-plan-approval' ] || [ "$TARGET" = 'stage:needs-
   [ "$CANONICAL_COMPLEXITY" = L ] || [ "$CANONICAL_COMPLEXITY" = XL ] || die "Error: planning states require canonical Complexity L or XL"
 elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
   [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL requires plan approval and planner before execution"
+elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:awaiting-execution-approval' ]; then
+  [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL requires plan approval, not execution approval"
+elif [ "$CURRENT" = 'stage:awaiting-execution-approval' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
+  [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL cannot be authorized through execution approval"
+elif [ "$CURRENT" = 'stage:needs-plan' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
+  VALID_PLANNER_RESULTS=$(printf '%s' "$ISSUE_JSON" | jq '[.comments[]?.body // "" | select(([scan("<!-- code-flow:implementation-plan:start -->")] | length) == 1) | select(([scan("<!-- code-flow:implementation-plan:end -->")] | length) == 1) | select(test("> agent: planner")) | select(test("code-flow:event:v1")) | try capture("(?s)<!-- code-flow:implementation-plan:start -->(?<plan>.*?)<!-- code-flow:implementation-plan:end -->").plan catch empty | select(contains("## Base SHA, escopo e definição de pronto")) | select(contains("## Ondas e tarefas")) | select(contains("### Onda ")) | select(contains("Task ID")) | select(contains("Owner/subagent")) | select(contains("Dependências")) | select(contains("Áreas/arquivos esperados")) | select(contains("Validação")) | select(contains("Paralelismo seguro")) | select(contains("## Barreiras de integração")) | select(contains("## Validação global")) | select(contains("## Rollback/reconciliação")) | select(contains("## Handoff final"))] | length')
+  [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: needs-plan -> ready-for-execution requires exactly one valid planner result comment"
 fi
 
 if [ "$HAS_ACTIVE" = true ] && [ -n "$UNKNOWN_STAGES" ] && { [ "$OP" != complete ] || [ "$ALLOW_REPAIR" -eq 0 ]; }; then
