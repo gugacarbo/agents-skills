@@ -126,7 +126,7 @@ transition_allowed() {
 [ -z "$TARGET" ] || is_primary "$TARGET" || die "Error: invalid target state '$TARGET'"
 [ -z "$REQUIRE_FROM" ] || is_primary "$REQUIRE_FROM" || die "Error: invalid --require-from '$REQUIRE_FROM'"
 
-ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url)
+ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url,body)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
 ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
 [ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != null ] || die "Error: could not resolve issue: $ISSUE"
@@ -143,6 +143,14 @@ HAS_HUMAN=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name] | index("needs-huma
 UNKNOWN_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r --slurpfile cfg "$STATES_FILE" --arg activity "$ACTIVITY" '[.labels[].name | select(startswith("stage:")) | select(. != $activity) | select(. as $n | ($cfg[0].states | map(.label) | index($n)) == null)] | join("\n")')
 
 [ -z "$REQUIRE_FROM" ] || [ "$CURRENT" = "$REQUIRE_FROM" ] || die "Error: expected '$REQUIRE_FROM'; found '${CURRENT:-none}'"
+
+# Planning is deliberately restricted to L/XL. Keep this invariant in the
+# deterministic transition helper so a forged event cannot route M (including
+# M with a hard trigger), S, or XS into either planning state.
+if [ "$TARGET" = 'stage:awaiting-plan-approval' ] || [ "$TARGET" = 'stage:needs-plan' ]; then
+  IS_LXL=$(printf '%s' "$ISSUE_JSON" | jq -r '(.body // "") | test("(^|\\n)>[[:space:]]*Complexity:[[:space:]]*(L|XL)[[:space:]]*(\\n|$)")')
+  [ "$IS_LXL" = true ] || die "Error: planning states require Complexity L or XL"
+fi
 
 if [ "$HAS_ACTIVE" = true ] && [ -n "$UNKNOWN_STAGES" ] && { [ "$OP" != complete ] || [ "$ALLOW_REPAIR" -eq 0 ]; }; then
   die "Error: active issue has unknown stage labels: $UNKNOWN_STAGES"

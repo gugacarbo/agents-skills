@@ -38,8 +38,10 @@ somente esse overlay, preservando o estado principal.
 
 ## Contexto independente e saída
 
-Cada stage usa sessão limpa. Code reviewer e gate exigem `fresh_context: true`;
-o reviewer registra run_ids produtores diferentes do seu. A continuidade vem de
+Cada stage usa sessão limpa. Planner, code reviewer e gate exigem
+`fresh_context: true`; o planner recebe arquitetura aprovada e guidance atuais,
+revalida L/XL e publica seu plano sem editar código de entrega. O code reviewer
+registra run_ids de dispatcher, architect, planner e executor diferentes do seu. A continuidade vem de
 issue, comentários de evento, branch, PR e worktree, não de memória.
 
 Retorne sempre um objeto do [schema `worker-result`](schemas/worker-result.schema.json): `completed`,

@@ -41,7 +41,11 @@ irreversibilidade, alto blast radius, operação destrutiva/privilegiada ou
 rollback não demonstrado.
 
 XS/S sem hard trigger seguem diretamente à execução. M+, hard trigger ou risco
-promovido exigem triagem humana e architect. Risco é efêmero e deve ser
+promovido exigem triagem humana e architect. Para M (inclusive M com hard
+trigger; M+ com hard trigger não é planejamento), o architect mantém a rota de
+aprovação de execução. Somente L/XL
+seguem do architect para aprovação de plano e, após aprovação, ao planner; o
+resultado do planner libera diretamente a execução. Risco é efêmero e deve ser
 recalculado em retomada, mudança de base ou escopo.
 
 ## Protocolo GitHub
@@ -71,6 +75,7 @@ estado.
 ## Gates e saída
 
 - triage: `approve`, `adjust` ou `block`;
+- plan (somente L/XL): `approve`, `adjust` ou `block`;
 - execution: `authorize`, `adjust` ou `block`;
 - merge: `integrate`, `adjust` ou `wait`;
 - resume: estado registrado no `Resume`;
@@ -90,8 +95,12 @@ código.
 
 Code-reviewer roda em instância nova e recebe somente issue, guidance e
 artefatos publicados. Pode usar a mesma conta GitHub, mas seu run_id não pode
-coincidir com run_ids de dispatcher, architect ou executor; registre os run_ids
+coincidir com run_ids de dispatcher, architect, planner ou executor; registre os run_ids
 revisados. Sem instância nova comprovável, peça review humana.
+
+Planner roda em instância nova e recebe a arquitetura aprovada, issue atual e
+guidance; valida `Complexity: L | XL`, publica o plano como resultado e não edita
+código de entrega. M com hard trigger não entra em planejamento.
 
 Drift não material atualiza Base e repete checks. Mudança material na área,
 contrato ou dependência exige nova code review; hard trigger novo retorna ao

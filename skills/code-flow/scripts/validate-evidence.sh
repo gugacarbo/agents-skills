@@ -80,7 +80,7 @@ fi
 if [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$RUN_ID" ]; then
   PRODUCER_COLLISION=$(printf '%s' "$ISSUE_JSON" | jq -r --arg run "$RUN_ID" '
     [(.body // ""), (.comments[] | .body)
-     | select(test("agent:\\s*(dispatcher|architect|executor)"))
+     | select(test("agent:\\s*(dispatcher|architect|planner|executor)"))
      | select(test("run_id:\\s*" + $run + "([[:space:]]|$)"))]
      | length
   ' 2> /dev/null || printf '0')
@@ -88,7 +88,7 @@ if [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$RUN_ID" ]; then
 fi
 
 if [ "$PRIMARY_ACTOR" = code-reviewer ] && [ -n "$RUN_ID" ] && [ "$EVENT_COUNT" -gt 0 ]; then
-  PRODUCER_COLLISION=$(printf '%s' "$EVENTS" | jq --arg run "$RUN_ID" '[.[] | select(.role | IN("dispatcher", "architect", "executor")) | select(.run_id == $run)] | length')
+  PRODUCER_COLLISION=$(printf '%s' "$EVENTS" | jq --arg run "$RUN_ID" '[.[] | select(.role | IN("dispatcher", "architect", "planner", "executor")) | select(.run_id == $run)] | length')
   [ "$PRODUCER_COLLISION" -eq 0 ] || ERRORS="$ERRORS\ncode-reviewer run_id '$RUN_ID' collides with a producer event"
 fi
 

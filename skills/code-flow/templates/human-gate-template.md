@@ -19,6 +19,7 @@
 | Gate      | Opções                     |
 | --------- | -------------------------- |
 | triage    | approve / adjust / block   |
+| plan      | approve / adjust / block   |
 | execution | authorize / adjust / block |
 | merge     | integrate / adjust / wait  |
 | resume    | `<estado do Resume>`       |

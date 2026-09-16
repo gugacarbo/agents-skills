@@ -16,6 +16,8 @@
 
 ## Planejamento
 
+Plano publicado (L/XL): `<URL/comentário e run_id do planner; n/a para XS/S/M>`
+
 | Escopo   | Áreas     | Validação    |
 | -------- | --------- | ------------ |
 | `<item>` | `<paths>` | `<comandos>` |

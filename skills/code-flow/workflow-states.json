@@ -59,12 +59,48 @@
 			},
 			"next": [
 				"stage:ready-for-execution",
+				"stage:awaiting-plan-approval",
 				"stage:awaiting-execution-approval",
 				"stage:blocked"
 			],
 			"outcomes": {
 				"direct": "stage:ready-for-execution",
+				"planning": "stage:awaiting-plan-approval",
 				"human_review": "stage:awaiting-execution-approval",
+				"block": "stage:blocked"
+			}
+		},
+		{
+			"label": "stage:awaiting-plan-approval",
+			"actor": "gate",
+			"kind": "human",
+			"prompt": "agents/06-gate.md",
+			"capabilities": ["read", "github", "edit"],
+			"trigger": {
+				"requires": ["code-flow:active", "stage:awaiting-plan-approval", "needs-human"],
+				"forbids": ["stage:in-progress"]
+			},
+			"next": ["stage:needs-plan", "stage:needs-architect", "stage:blocked"],
+			"outcomes": {
+				"approve": "stage:needs-plan",
+				"adjust": "stage:needs-architect",
+				"block": "stage:blocked"
+			}
+		},
+		{
+			"label": "stage:needs-plan",
+			"actor": "planner",
+			"kind": "agent",
+			"prompt": "agents/07-planner.md",
+			"capabilities": ["read", "github", "edit"],
+			"trigger": {
+				"requires": ["code-flow:active", "stage:needs-plan"],
+				"forbids": ["needs-human", "stage:in-progress"]
+			},
+			"next": ["stage:ready-for-execution", "stage:needs-architect", "stage:blocked"],
+			"outcomes": {
+				"plan": "stage:ready-for-execution",
+				"escalate": "stage:needs-architect",
 				"block": "stage:blocked"
 			}
 		},
@@ -214,6 +250,8 @@
 				"stage:needs-triage",
 				"stage:awaiting-triage-approval",
 				"stage:needs-architect",
+				"stage:awaiting-plan-approval",
+				"stage:needs-plan",
 				"stage:awaiting-execution-approval",
 				"stage:ready-for-execution",
 				"stage:needs-changes",

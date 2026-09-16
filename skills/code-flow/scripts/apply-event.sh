@@ -58,7 +58,7 @@ jq -e '
   type == "object" and
   (["event_id","run_id","role","event","state_before","state_after","observed_issue","sources_evidence","project_guidance","base_head","result"] - keys | length == 0) and
   (.event_id|type == "string" and length > 0) and (.run_id|type == "string" and length > 0) and
-  (.role|IN("dispatcher","architect","executor","code-reviewer","integrator","gate")) and
+  (.role|IN("dispatcher","architect","planner","executor","code-reviewer","integrator","gate")) and
   (.state_before|type == "string") and (.state_after|type == "string") and
   (.observed_issue.number|type == "number") and (.observed_issue.url|type == "string") and
   (.sources_evidence|type == "array") and (.project_guidance|type == "array") and

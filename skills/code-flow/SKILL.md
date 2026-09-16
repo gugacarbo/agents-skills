@@ -25,9 +25,14 @@ No worker, leia também [`worker-runtime.md`](worker-runtime.md) e
 | -------------------------------------------------- | --------------------------------------------- |
 | `stage:needs-triage`                               | [`dispatcher`](agents/01-dispatcher.md)       |
 | `stage:needs-architect`                            | [`architect`](agents/02-architect.md)         |
+| `stage:needs-plan`                                 | [`planner`](agents/07-planner.md)             |
 | `stage:ready-for-execution`, `stage:needs-changes` | [`executor`](agents/03-executor.md)           |
 | `stage:needs-delivery-review`                      | [`code-reviewer`](agents/04-code-reviewer.md) |
 | `stage:integration-authorized`                     | [`integrator`](agents/05-integrator.md)       |
+
+`stage:awaiting-plan-approval` is a human gate reserved for L/XL; approval
+advances to `stage:needs-plan`, whose successful planner result releases
+`stage:ready-for-execution` directly.
 
 Inícios são silenciosos: valide o estado, adicione `stage:in-progress` e não
 publique comentário. O dispatcher grava sua triagem no body, sem comentário;

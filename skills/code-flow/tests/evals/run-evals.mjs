@@ -313,6 +313,76 @@ async function grade(evalCase, context) {
 		);
 	}
 
+	if (evalCase.id === 9) {
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				hasText("architect") && hasText("stage:awaiting-plan-approval"),
+				"architect routes L/XL to plan approval",
+			),
+			result(
+				evalCase.expectations[1],
+				hasText("approve|aprova") && hasText("stage:needs-plan") && hasText("planner"),
+				"plan gate invokes planner",
+			),
+			result(
+				evalCase.expectations[2],
+				hasText("stage:ready-for-execution"),
+				"planner releases execution",
+			),
+			result(
+				evalCase.expectations[3],
+				!hasText("execution approval|aprovação de execução|authorize"),
+				"no second execution gate",
+			),
+		);
+	}
+
+	if (evalCase.id === 10) {
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				hasText("M") && hasText("hard trigger") && hasText("stage:awaiting-execution-approval"),
+				"M hard-trigger remains on execution approval",
+			),
+			result(
+				evalCase.expectations[1],
+				!hasText("stage:awaiting-plan-approval"),
+				"M does not enter plan approval",
+			),
+			result(
+				evalCase.expectations[2],
+				!hasText("stage:needs-plan"),
+				"M does not enter planner",
+			),
+		);
+	}
+
+	if (evalCase.id === 11) {
+		expectations.push(
+			result(
+				evalCase.expectations[0],
+				hasText("code-flow:event:v1") && hasText("planner"),
+				"planner protocol metadata",
+			),
+			result(
+				evalCase.expectations[1],
+				hasText("onda|wave") && hasText("task.?id") && hasText("owner|subagent") && hasText("depend"),
+				"wave task ownership and dependencies",
+			),
+			result(
+				evalCase.expectations[2],
+				hasText("paralel|parallel") && hasText("barreira|barrier"),
+				"parallelism and integration barriers",
+			),
+			result(
+				evalCase.expectations[3],
+				hasText("valida|validat") && hasText("rollback|reconcil") && hasText("handoff"),
+				"validation, rollback and handoff",
+			),
+		);
+	}
+
 	const passed = expectations.every((item) => item.passed);
 	return { passed, expectations };
 }

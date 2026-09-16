@@ -21,6 +21,7 @@
 			"enum": [
 				"dispatcher",
 				"architect",
+				"planner",
 				"executor",
 				"code-reviewer",
 				"integrator",

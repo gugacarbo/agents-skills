@@ -134,6 +134,50 @@
 			"skill_type": "technique",
 			"baseline_failure": "leaves_final_tables_inside_code_block_and_omits_verdict",
 			"failure_form": "output_contract"
+		},
+		{
+			"id": 9,
+			"prompt": "A issue #50 foi triada como Complexity XL e está em stage:needs-architect. O relatório de arquitetura foi publicado. Execute o architect, peça aprovação do plano, execute o planner aprovado e encaminhe para execução.",
+			"expected_output": "The architect routes the XL issue to stage:awaiting-plan-approval; only the human plan approval moves it to stage:needs-plan; the fresh planner publishes a structured plan and moves directly to stage:ready-for-execution without a second gate.",
+			"files": [],
+			"expectations": [
+				"The architect destination is stage:awaiting-plan-approval.",
+				"Plan approval maps to stage:needs-plan and invokes a fresh planner.",
+				"The planner result maps directly to stage:ready-for-execution.",
+				"No execution approval gate occurs after the planner result."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "sends_l_xl_directly_to_execution_gate",
+			"failure_form": "state_condition"
+		},
+		{
+			"id": 10,
+			"prompt": "A issue #51 foi triada como Complexity M e possui hard trigger de contrato público. Verifique o encaminhamento do architect.",
+			"expected_output": "The M issue, even with a hard trigger, stays on the execution-approval route and cannot enter stage:awaiting-plan-approval or stage:needs-plan.",
+			"files": [],
+			"expectations": [
+				"The architect routes M with a hard trigger to stage:awaiting-execution-approval.",
+				"The issue does not enter stage:awaiting-plan-approval.",
+				"The issue does not enter stage:needs-plan."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "broadens_planning_to_m_hard_trigger",
+			"failure_form": "prohibition"
+		},
+		{
+			"id": 11,
+			"prompt": "Produza o comentário de plano para uma issue XL. O comentário deve permitir auditoria e execução por ondas independentes.",
+			"expected_output": "The planner publishes a normal result comment with protocol metadata, base/scope/DoD, numbered waves, stable task IDs, owners or subagents, dependencies, expected files, validation, parallelism rationale, integration barriers, rollback/reconciliation, and final handoff.",
+			"files": [],
+			"expectations": [
+				"The comment contains code-flow:event:v1 and planner metadata.",
+				"The comment has numbered waves and task IDs with ownership and dependencies.",
+				"The comment explains parallel-safe work and serialized integration barriers.",
+				"The comment includes validation, rollback/reconciliation, and final handoff."
+			],
+			"skill_type": "technique",
+			"baseline_failure": "publishes_unstructured_planner_summary",
+			"failure_form": "output_contract"
 		}
 	]
 }

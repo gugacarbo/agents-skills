@@ -48,8 +48,8 @@ Base SHA: `<sha>`
 ## Veredito final
 
 Veredito: `EXECUÇÃO DIRETA | REQUER APROVAÇÃO HUMANA | BLOQUEADO`
-Destino: `stage:ready-for-execution | stage:awaiting-execution-approval | stage:blocked`
+Destino: `stage:ready-for-execution | stage:awaiting-plan-approval | stage:awaiting-execution-approval | stage:blocked`
 Justificativa: <síntese baseada em complexidade, hard triggers, spec/ADR e blockers>
-Próximo responsável: `<executor | gate | architect após desbloqueio>`
+Próximo responsável: `<executor | planner após aprovação de plano | gate | architect após desbloqueio>`
 
 <!-- code-flow:architect-review:end -->

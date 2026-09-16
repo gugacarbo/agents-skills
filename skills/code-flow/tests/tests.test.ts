@@ -39,6 +39,7 @@ describe("code-flow skill", () => {
 			"04-code-reviewer.md",
 			"05-integrator.md",
 			"06-gate.md",
+			"07-planner.md",
 		]);
 
 		const templates = readdirSync(join(skillRoot, "templates"))
@@ -51,6 +52,7 @@ describe("code-flow skill", () => {
 			"follow-up-issue-template.md",
 			"human-gate-template.md",
 			"implementation-evidence-template.md",
+			"implementation-plan-template.md",
 			"integration-report-template.md",
 			"issue-template.md",
 			"operational-note-template.md",
@@ -118,7 +120,7 @@ describe("code-flow skill", () => {
 		expect(registry.schema_version).toBe(1);
 		expect(registry.worker_contract_version).toBe(1);
 		expect(registry.legacy.migration).toBe("explicit");
-		expect(registry.states).toHaveLength(10);
+		expect(registry.states).toHaveLength(12);
 		expect(
 			registry.states.find((state) => state.label === "stage:needs-triage")
 				?.actor,
@@ -149,6 +151,25 @@ describe("code-flow skill", () => {
 			registry.states.find((state) => state.label === "stage:needs-changes")
 				?.outcomes.escalate,
 		).toBe("stage:needs-architect");
+		const awaitingPlan = registry.states.find(
+			(state) => state.label === "stage:awaiting-plan-approval",
+		);
+		const needsPlan = registry.states.find(
+			(state) => state.label === "stage:needs-plan",
+		);
+		expect(awaitingPlan?.kind).toBe("human");
+		expect(awaitingPlan?.actor).toBe("gate");
+		expect(awaitingPlan?.outcomes.approve).toBe("stage:needs-plan");
+		expect(awaitingPlan?.outcomes.adjust).toBe("stage:needs-architect");
+		expect(awaitingPlan?.outcomes.block).toBe("stage:blocked");
+		expect(needsPlan?.kind).toBe("agent");
+		expect(needsPlan?.actor).toBe("planner");
+		expect(needsPlan?.outcomes.plan).toBe("stage:ready-for-execution");
+		expect(needsPlan?.outcomes.escalate).toBe("stage:needs-architect");
+		expect(needsPlan?.outcomes.block).toBe("stage:blocked");
+		expect(needsPlan?.next).toContain("stage:ready-for-execution");
+		expect(needsPlan?.next).toContain("stage:needs-architect");
+		expect(needsPlan?.next).toContain("stage:blocked");
 	});
 
 	test("keeps the worker manifest valid", () => {
@@ -173,9 +194,57 @@ describe("code-flow skill", () => {
 		]);
 		expect(manifest.roles["code-reviewer"].fresh_context).toBe(true);
 		expect(manifest.roles.gate.prompt).toBe("agents/06-gate.md");
+		expect(manifest.roles.planner.prompt).toBe("agents/07-planner.md");
+		expect(manifest.roles.planner.fresh_context).toBe(true);
 		expect(manifest.contracts.worker_input).toBe(
 			"schemas/worker-input.schema.json",
 		);
+	});
+
+	test("registers planner in every event and evidence contract", () => {
+		for (const schemaName of [
+			"schemas/protocol-event.schema.json",
+			"schemas/worker-input.schema.json",
+		]) {
+			expect(contents(schemaName)).toContain('"planner"');
+		}
+		expectContains("schemas/worker-result.schema.json", '"planner"');
+		expectContains("templates/evidence-template.md", "planner");
+		expectContains("templates/implementation-plan-template.md", "> agent: planner");
+	});
+
+	test("implementation plan template makes waves and handoff auditable", () => {
+		const template = contents("templates/implementation-plan-template.md");
+		for (const field of [
+			"Base SHA",
+			"Escopo",
+			"Definição de pronto",
+			"Onda",
+			"Task ID",
+			"Owner/subagent",
+			"Dependências",
+			"Áreas/arquivos esperados",
+			"Validação",
+			"Paralelismo seguro",
+			"Barreiras de integração",
+			"Rollback/reconciliação",
+		]) {
+			expect(template).toContain(field);
+		}
+		expect(template).toMatch(/^## Handoff final$/m);
+		expect(template).toContain("code-flow:implementation-plan:start");
+		expect(template).toContain("code-flow:implementation-plan:end");
+	});
+
+	test("documents the L/XL route and excludes M hard-trigger planning", () => {
+		expectContains("agents/02-architect.md", "L/XL");
+		expectContains("agents/02-architect.md", "stage:awaiting-plan-approval");
+		expectContains("agents/02-architect.md", "M");
+		expectContains("agents/07-planner.md", "stage:needs-plan");
+		expectContains("agents/07-planner.md", "não edite código");
+		expectContains("agents/03-executor.md", "plano publicado");
+		expectContains("runtime.md", "M+ com hard trigger");
+		expectContains("SKILL.md", "stage:needs-plan");
 	});
 
 	for (const template of [
@@ -184,6 +253,7 @@ describe("code-flow skill", () => {
 		"evidence-template.md",
 		"human-gate-template.md",
 		"implementation-evidence-template.md",
+		"implementation-plan-template.md",
 		"integration-report-template.md",
 		"operational-note-template.md",
 	]) {
@@ -255,7 +325,7 @@ describe("code-flow skill", () => {
 		}
 	});
 
-	test("transition and event scripts enforce the worker state contract", () => {
+	test("transition and event scripts enforce the worker state contract", { timeout: 15000 }, () => {
 		const temporaryRoot = makeTempDir("code-flow-transition-test");
 		const statePath = join(temporaryRoot, "state.json");
 		const statusPath = join(temporaryRoot, "state.status");
@@ -539,10 +609,124 @@ esac
 				{ env: environment },
 			);
 			expectSuccess(migrated);
-			expect(JSON.parse(migrated.stdout)).toMatchObject({
-				confirmed_state: "stage:ready-for-execution",
-			});
-		} finally {
+		expect(JSON.parse(migrated.stdout)).toMatchObject({
+			confirmed_state: "stage:ready-for-execution",
+		});
+
+		// The L/XL route must cross plan approval and planner before execution.
+		const protocolEvent = (
+			file: string,
+			role: string,
+			event: string,
+			runId: string,
+			before: string,
+			after: string,
+			gate?: { decision: string; author: string },
+		) => {
+			write(
+				file,
+				JSON.stringify({
+					event_id: `evt-${runId}`,
+					run_id: runId,
+					role,
+					event,
+					state_before: before,
+					state_after: after,
+					observed_issue: {
+						number: 42,
+						url: "https://github.com/acme/demo/issues/42",
+						labels: ["code-flow:active", before],
+					},
+					sources_evidence: ["https://github.com/acme/demo/issues/42"],
+					project_guidance: ["AGENTS.md"],
+					base_head: { base: "abc", head: "abc" },
+					result: { status: "completed", summary: `${role} ${event}` },
+					...(gate ? { gate } : {}),
+				}) + "\n",
+			);
+		};
+		write(bodyPath, "> Complexity: XL\n\n# XL delivery\n");
+		setLabels(["code-flow:active", "stage:needs-architect"]);
+		protocolEvent(
+			eventPath,
+			"architect",
+			"activity-start",
+			"arch-start",
+			"stage:needs-architect",
+			"stage:needs-architect",
+		);
+		expectSuccess(
+			run([applyEvent, "42", "start", "--event", eventPath], {
+				env: environment,
+			}),
+		);
+		protocolEvent(
+			eventPath,
+			"architect",
+			"architecture-result",
+			"arch-xl",
+			"stage:needs-architect",
+			"stage:awaiting-plan-approval",
+		);
+		expectSuccess(
+			run([applyEvent, "42", "finish", "--event", eventPath], {
+				env: environment,
+			}),
+		);
+		expect(labels()).toContain("stage:awaiting-plan-approval");
+		protocolEvent(
+			eventPath,
+			"gate",
+			"gate-decision",
+			"plan-gate",
+			"stage:awaiting-plan-approval",
+			"stage:needs-plan",
+			{ decision: "approve", author: "maintainer" },
+		);
+		expectSuccess(
+			run([applyEvent, "42", "gate", "--event", eventPath], {
+				env: environment,
+			}),
+		);
+		expect(labels()).toContain("stage:needs-plan");
+		protocolEvent(
+			eventPath,
+			"planner",
+			"activity-start",
+			"plan-start",
+			"stage:needs-plan",
+			"stage:needs-plan",
+		);
+		expectSuccess(
+			run([applyEvent, "42", "start", "--event", eventPath], {
+				env: environment,
+			}),
+		);
+		protocolEvent(
+			eventPath,
+			"planner",
+			"implementation-plan-result",
+			"plan-xl",
+			"stage:needs-plan",
+			"stage:ready-for-execution",
+		);
+		expectSuccess(
+			run([applyEvent, "42", "finish", "--event", eventPath], {
+				env: environment,
+			}),
+		);
+		expect(labels()).toContain("stage:ready-for-execution");
+		write(bodyPath, "> Complexity: M\n\n# M hard-trigger delivery\n");
+		setLabels(["code-flow:active", "stage:needs-architect", "stage:in-progress"]);
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:awaiting-plan-approval",
+				"--require-from",
+				"stage:needs-architect",
+			]),
+		);
+	} finally {
 			cleanup(temporaryRoot);
 		}
 	});
