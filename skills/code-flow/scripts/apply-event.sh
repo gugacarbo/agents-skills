@@ -72,34 +72,8 @@ elif [ -n "$BODY_FILE" ]; then
   die 'Error: --body-file is only valid for dispatcher or planner finish'
 fi
 
-validate_plan() {
-  [ "$(grep -Fc '<!-- code-flow:implementation-plan:start -->' "$BODY_FILE" || true)" -eq 1 ] || die 'Error: planner result requires exactly one implementation-plan start marker'
-  [ "$(grep -Fc '<!-- code-flow:implementation-plan:end -->' "$BODY_FILE" || true)" -eq 1 ] || die 'Error: planner result requires exactly one implementation-plan end marker'
-  START_LINE=$(grep -n -m1 -F '<!-- code-flow:implementation-plan:start -->' "$BODY_FILE" | cut -d: -f1)
-  END_LINE=$(grep -n -m1 -F '<!-- code-flow:implementation-plan:end -->' "$BODY_FILE" | cut -d: -f1)
-  [ "$START_LINE" -lt "$END_LINE" ] || die 'Error: planner result markers are out of order'
-  for required in \
-    '> agent: planner' \
-    '"role":"planner"' \
-    '## Base SHA, escopo e definição de pronto' \
-    '## Ondas e tarefas' \
-    '### Onda ' \
-    'Task ID' \
-    'Owner/subagent' \
-    'Dependências' \
-    'Áreas/arquivos esperados' \
-    'Validação' \
-    'Paralelismo seguro' \
-    '## Barreiras de integração' \
-    '## Validação global' \
-    '## Rollback/reconciliação' \
-    '## Handoff final'; do
-    grep -Fq "$required" "$BODY_FILE" || die "Error: planner result missing required structure: $required"
-  done
-}
-
 if [ "$ROLE" = planner ] && [ "$OPERATION" = finish ] && [ "$(printf '%s' "$EVENT" | jq -r '.state_after')" = 'stage:ready-for-execution' ]; then
-  validate_plan
+  "$SCRIPT_DIR/validate-plan.sh" "$BODY_FILE" || die 'Error: planner result has invalid implementation-plan structure'
 fi
 
 ISSUE_JSON=$(gh issue view "$ISSUE" --json number,url,labels,state,updatedAt)

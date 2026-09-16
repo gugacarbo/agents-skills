@@ -760,6 +760,41 @@ esac
 		expect(planComments).toContain("<!-- code-flow:implementation-plan:end -->");
 		expect(planComments.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
 		expect(planComments.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
+		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
+		write(commentsPath, "");
+		setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
+		expectFailure(
+			runTransition([
+				"--gate-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:blocked",
+			]),
+		);
+		write(commentsPath, read(planPath));
+		expectSuccess(
+			runTransition([
+				"--gate-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:blocked",
+			]),
+		);
+		expect(labels()).toContain("stage:ready-for-execution");
+		write(bodyPath, "> Complexity: M\n");
+		write(commentsPath, "");
+		setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
+		expectSuccess(
+			runTransition([
+				"--gate-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:blocked",
+			]),
+		);
+		expect(labels()).toContain("stage:ready-for-execution");
+		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
+		write(commentsPath, read(planPath));
 		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
 		expectSuccess(
 			runTransition([
