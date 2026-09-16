@@ -58,7 +58,7 @@ describe("orchestrate-implementation parallel waves", () => {
 			resolve(skillRoot, "evals/evals.json"),
 		).json();
 		expect(catalog.skill_name).toBe("orchestrate-implementation");
-		expect(catalog.evals).toHaveLength(4);
+		expect(catalog.evals).toHaveLength(5);
 	});
 });
 
@@ -141,6 +141,45 @@ describe("orchestrate-implementation implementation configuration", () => {
 			expect(prompt).toContain("explicitly approved by the");
 			expect(prompt).toContain("`model: inherit`");
 		}
+	});
+});
+
+describe("orchestrate-implementation run reporting", () => {
+	test("requires concise reports for every result and a table for completed batches", () => {
+		const skill = read("SKILL.md");
+
+		expect(skill).toContain("### Run reporting");
+		expect(skill).toContain("Every time a task or batch reaches a result");
+		expect(skill).toContain("review clean, or a fix-round");
+		expect(skill).toContain("show the user a simple run report");
+		expect(skill).toContain("under five lines");
+		expect(skill).toContain("Required run reports are the exception");
+		expect(skill).toContain("### Batch completion table");
+		expect(skill).toContain("`Task`,");
+		expect(skill).toContain("`Result`, `Tests`, `Commits`, `Review`, `Notes`");
+		expect(skill).toContain("one row per task and a summary row");
+		expect(skill).toContain("complete with parked findings");
+		expect(skill).toContain("totals of completed and unfinished");
+		expect(skill).toContain("tasks.");
+		expect(skill).toContain("only after every task is");
+		expect(skill).toContain("own review/fix loop has a final result");
+		expect(skill).toContain("do not imply a");
+	});
+
+	test("contains parseable reporting eval metadata", async () => {
+		const catalog = await Bun.file(
+			resolve(skillRoot, "evals/evals.json"),
+		).json();
+
+		expect(catalog.evals).toHaveLength(5);
+		const reportingEval = catalog.evals.find(
+			(evaluation: { name: string }) =>
+				evaluation.name === "result-and-batch-reporting",
+		);
+		expect(reportingEval).toBeDefined();
+		expect(reportingEval?.expectations).toContainEqual(
+			"The controller posts a concise user-facing report after each task result: DONE, DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED, review clean, or fix result.",
+		);
 	});
 });
 

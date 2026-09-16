@@ -75,6 +75,32 @@
 			"skill_type": "pattern",
 			"baseline_failure": "cannot_form_dependency_bounded_parallel_waves",
 			"failure_form": "condition"
+		},
+		{
+			"id": 5,
+			"name": "result-and-batch-reporting",
+			"prompt": "Execute este plano com orchestrate-implementation e não pare entre tasks. O plano tem três tasks independentes do mesmo tipo de edição. Cada task deve gerar um resultado e o batch deve ser concluído antes da revisão final.",
+			"expected_output": "Report each task result briefly to the user without pausing, then after the batch reaches final results show a concise status table covering every task and the batch summary.",
+			"files": [],
+			"expectations": [
+				"The controller posts a concise user-facing report after each task result: DONE, DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED, review clean, or fix result.",
+				"The controller does not request permission merely because it reports progress.",
+				"When the batch has no pending implementation work, it displays a table with columns Task, Result, Tests, Commits, Review, and Notes.",
+				"The batch table includes one row per task plus a summary row with the overall implementation status and completed/unfinished totals.",
+				"A parallel wave is not reported as complete until every task is integrated and each task has a final review/fix result."
+			],
+			"skill_type": "discipline",
+			"baseline_failure": "silent_between_task_results",
+			"failure_form": "condition",
+			"pressures": [
+				"shared_session",
+				"multiple_task_results",
+				"batch_execution"
+			],
+			"rationalizations": [
+				"Continuous execution means the user should not see progress until the end.",
+				"A concise report is the same as asking whether to continue."
+			]
 		}
 	]
 }

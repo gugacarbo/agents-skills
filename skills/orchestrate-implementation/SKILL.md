@@ -25,8 +25,10 @@ ledger and the tool results carry the record.
 below is approved, do not pause to check in with your human partner between
 tasks. Execute all tasks from the plan without stopping. The only reasons to
 stop are the five named below, a change to the approved model configuration, or
-all tasks complete. "Should I continue?" prompts and progress summaries
-waste their time — they asked you to execute the plan, so execute it.
+all tasks complete. "Should I continue?" prompts and verbose progress
+summaries waste their time — they asked you to execute the plan, so execute it.
+Required run reports are the exception: they are concise facts, not check-ins
+or permission requests.
 
 **Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
 ambiguities, plan defects, a cap you would have asked to exceed — decide
@@ -382,7 +384,37 @@ constant change, or field addition repeated across files — do not dispatch
 one subagent per task. Compose ONE dispatch brief listing every file and
 its change, send the whole batch to a single subagent, and review its diff
 as one unit. Reserve one-dispatch-per-task for work that needs its own
-judgment, its own tests, or its own review surface.
+judgment, its own tests, or its own review surface. Treat that one dispatch
+as the batch for status reporting: one row per original plan task, not one
+row per file changed.
+
+### Run reporting
+
+Every time a task or batch reaches a result — DONE,
+DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED, review clean, or a fix-round
+result — show the user a simple run report before starting unrelated
+bookkeeping. Keep it under five lines: task/batch, status, the one-line
+test or review outcome, commits when known, and the next action. For a
+concern, blocked result, or context request, include the specific blocker
+or question; this report is not permission to proceed when the contract
+already authorizes the next step. If a report arrives while you are doing
+local work for that task, post the report after that local step so it
+reflects the result, then continue.
+
+### Batch completion table
+
+When a batch's last task has a final result —
+and the batch has no more pending implementation work — show a table with
+one row per task and a summary row. Use exactly these columns: `Task`,
+`Result`, `Tests`, `Commits`, `Review`, `Notes`. Keep each row concise;
+report `pending` for a column whose value is not yet known, and put parked
+findings or concerns in `Notes`. The summary row reports the batch
+implementation status (`complete`, `complete with parked findings`,
+`blocked`, or `needs context`) and the totals of completed and unfinished
+tasks. For a parallel wave, print the table only after every task is
+integrated and its own review/fix loop has a final result; do not imply a
+wave is complete while a task is unreviewed or stale. A sequential
+single-task batch also gets a one-row table when its task finishes.
 
 Everything you paste into a dispatch prompt — and everything a subagent
 prints back — stays resident in your context for the rest of the session
@@ -455,7 +487,9 @@ Template: [implementer-prompt.md](implementer-prompt.md)
 
 ### 2. Handle the report
 
-Implementer subagents report one of four statuses. Handle each appropriately:
+Implementer subagents report one of four statuses. Handle each appropriately.
+For every result below, first apply the result-specific handling, then show the
+required simple run report before moving to an unrelated step.
 
 **DONE:** For a sequential task already running on the integration branch,
 generate the review package directly. For a parallel task, first verify and
