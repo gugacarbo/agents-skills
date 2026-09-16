@@ -381,8 +381,8 @@ comments=${JSON.stringify(commentsPath)}
 body=${JSON.stringify(bodyPath)}
 case "$1 $2" in
   'issue view')
-    comment_json=$(jq -Rs . < "$comments")
-    printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","body":%s,"labels":%s,"comments":[{"body":%s}]}\n' "$(cat "$status")" "$(jq -Rs . < "$body")" "$(cat "$state")" "$comment_json"
+    comment_json=$(jq -Rs 'split("\u001e") | map(select(length > 0) | {body: .})' < "$comments")
+    printf '{"number":42,"url":"https://github.com/acme/demo/issues/42","state":"%s","body":%s,"labels":%s,"comments":%s}\n' "$(cat "$status")" "$(jq -Rs . < "$body")" "$(cat "$state")" "$comment_json"
     ;;
   'issue edit')
     shift 3
@@ -399,8 +399,8 @@ case "$1 $2" in
     shift 3
     while [ "$#" -gt 0 ]; do
       case "$1" in
-        --body-file) cat "$2" >>"$comments"; printf '\n' >>"$comments"; shift 2 ;;
-        --body) printf '%s\n' "$2" >>"$comments"; shift 2 ;;
+        --body-file) cat "$2" >>"$comments"; printf '\036' >>"$comments"; shift 2 ;;
+        --body) printf '%s\036' "$2" >>"$comments"; shift 2 ;;
         *) shift ;;
       esac
     done
@@ -761,8 +761,56 @@ esac
 		expect(planComments.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
 		expect(planComments.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
 		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
+		write(
+			commentsPath,
+			read(planPath).replace(
+				'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
+				'code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"}',
+			),
+		);
+		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:needs-plan",
+			]),
+		);
+		write(
+			commentsPath,
+			read(planPath).replace(
+				'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
+				'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->\n<!-- code-flow:event:v1 {"event_id":"evt-plan-xl-duplicate","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
+			),
+		);
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:needs-plan",
+			]),
+		);
 		write(commentsPath, "");
 		setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
+		expectFailure(
+			runTransition([
+				"--gate-to",
+				"stage:ready-for-execution",
+				"--require-from",
+				"stage:blocked",
+			]),
+		);
+		write(
+			commentsPath,
+			read(planPath)
+				.replace('"role":"planner"', '"role":"executor"')
+				.replace(
+					"## Resume",
+					'incidental protocol text {"role":"planner"}\n\n## Resume',
+				),
+		);
 		expectFailure(
 			runTransition([
 				"--gate-to",

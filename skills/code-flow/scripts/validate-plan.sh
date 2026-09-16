@@ -4,7 +4,7 @@ set -euo pipefail
 usage='Usage: validate-plan.sh FILE | --comments-json FILE|-'
 
 validate_file() {
-  local file="$1" start_line end_line required
+  local file="$1" start_line end_line required event_marker_count event_json
   [[ -f "$file" ]] || return 1
   [[ "$(grep -Fc '<!-- code-flow:implementation-plan:start -->' "$file" || true)" -eq 1 ]] || return 1
   [[ "$(grep -Fc '<!-- code-flow:implementation-plan:end -->' "$file" || true)" -eq 1 ]] || return 1
@@ -12,7 +12,12 @@ validate_file() {
   end_line=$(grep -n -m1 -F '<!-- code-flow:implementation-plan:end -->' "$file" | cut -d: -f1)
   [[ "$start_line" -lt "$end_line" ]] || return 1
   grep -Fq '> agent: planner' "$file" || return 1
-  grep -Fq '"role":"planner"' "$file" || return 1
+  event_marker_count=$(grep -oF '<!-- code-flow:event:v1' "$file" | wc -l | tr -d '[:space:]')
+  [[ "$event_marker_count" -eq 1 ]] || return 1
+  event_json=$(sed -nE 's/^[[:space:]]*<!--[[:space:]]*code-flow:event:v1[[:space:]]+(\{.*\})[[:space:]]*-->[[:space:]]*$/\1/p' "$file")
+  [[ -n "$event_json" ]] || return 1
+  [[ "$(printf '%s\n' "$event_json" | wc -l | tr -d '[:space:]')" -eq 1 ]] || return 1
+  printf '%s\n' "$event_json" | jq -e 'type == "object" and .role == "planner"' > /dev/null || return 1
   for required in \
     '## Base SHA, escopo e definição de pronto' \
     '## Ondas e tarefas' \
