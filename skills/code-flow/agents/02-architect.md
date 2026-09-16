@@ -31,7 +31,7 @@ transição confirmada.
    - S sem hard trigger e `not required` → `stage:ready-for-execution`;
    - L/XL → `stage:awaiting-plan-approval + needs-human` para aprovação do
      plano e posterior planner. Isso inclui L/XL com hard trigger;
-   - M, inclusive M com hard trigger, ou `create/update` →
+   - S com hard trigger, M (inclusive M com hard trigger), ou `create/update` →
      `stage:awaiting-execution-approval + needs-human`;
    - blocker → `stage:blocked + needs-human`, Resume para
      `stage:needs-architect`.

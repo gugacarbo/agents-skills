@@ -66,10 +66,40 @@ jq -e '
   (.result.status|IN("completed","waiting_human","blocked","retryable_failure","invalid_state"))
 ' "$EVENT_FILE" > /dev/null || die 'Error: invalid protocol event v1'
 ROLE=$(printf '%s' "$EVENT" | jq -r '.role')
-if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
-  [ -n "$BODY_FILE" ] && [ -f "$BODY_FILE" ] || die 'Error: dispatcher finish requires --body-file'
+if { [ "$ROLE" = dispatcher ] || [ "$ROLE" = planner ]; } && [ "$OPERATION" = finish ]; then
+  [ -n "$BODY_FILE" ] && [ -f "$BODY_FILE" ] || die 'Error: dispatcher/planner finish requires --body-file'
 elif [ -n "$BODY_FILE" ]; then
-  die 'Error: --body-file is only valid for dispatcher finish'
+  die 'Error: --body-file is only valid for dispatcher or planner finish'
+fi
+
+validate_plan() {
+  [ "$(grep -Fc '<!-- code-flow:implementation-plan:start -->' "$BODY_FILE" || true)" -eq 1 ] || die 'Error: planner result requires exactly one implementation-plan start marker'
+  [ "$(grep -Fc '<!-- code-flow:implementation-plan:end -->' "$BODY_FILE" || true)" -eq 1 ] || die 'Error: planner result requires exactly one implementation-plan end marker'
+  START_LINE=$(grep -n -m1 -F '<!-- code-flow:implementation-plan:start -->' "$BODY_FILE" | cut -d: -f1)
+  END_LINE=$(grep -n -m1 -F '<!-- code-flow:implementation-plan:end -->' "$BODY_FILE" | cut -d: -f1)
+  [ "$START_LINE" -lt "$END_LINE" ] || die 'Error: planner result markers are out of order'
+  for required in \
+    '> agent: planner' \
+    '"role":"planner"' \
+    '## Base SHA, escopo e definição de pronto' \
+    '## Ondas e tarefas' \
+    '### Onda ' \
+    'Task ID' \
+    'Owner/subagent' \
+    'Dependências' \
+    'Áreas/arquivos esperados' \
+    'Validação' \
+    'Paralelismo seguro' \
+    '## Barreiras de integração' \
+    '## Validação global' \
+    '## Rollback/reconciliação' \
+    '## Handoff final'; do
+    grep -Fq "$required" "$BODY_FILE" || die "Error: planner result missing required structure: $required"
+  done
+}
+
+if [ "$ROLE" = planner ] && [ "$OPERATION" = finish ] && [ "$(printf '%s' "$EVENT" | jq -r '.state_after')" = 'stage:ready-for-execution' ]; then
+  validate_plan
 fi
 
 ISSUE_JSON=$(gh issue view "$ISSUE" --json number,url,labels,state,updatedAt)
@@ -110,6 +140,8 @@ fi
 # the issue body; other results, gates, and completion remain comments.
 if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
   "$SCRIPT_DIR/update-issue-body.sh" "$ISSUE_NUMBER" --body-file "$BODY_FILE" --event-file "$EVENT_FILE" > /dev/null
+elif [ "$ROLE" = planner ] && [ "$OPERATION" = finish ]; then
+  gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --body-file "$BODY_FILE" > /dev/null
 elif [ "$OPERATION" != start ]; then
   SUMMARY=$(printf '%s' "$EVENT" | jq -r '.result.summary')
   BODY=$(printf '### code-flow %s\n\n%s\n\n<!-- code-flow:event:v1 %s -->' "$OPERATION" "$SUMMARY" "$EVENT")

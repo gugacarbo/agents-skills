@@ -42,9 +42,9 @@ rollback não demonstrado.
 
 XS/S sem hard trigger seguem diretamente à execução. M+, hard trigger ou risco
 promovido exigem triagem humana e architect. Para M (inclusive M com hard
-trigger; M+ com hard trigger não é planejamento), o architect mantém a rota de
-aprovação de execução. Somente L/XL
-seguem do architect para aprovação de plano e, após aprovação, ao planner; o
+trigger), o architect mantém a rota de aprovação de execução. Somente L/XL,
+com ou sem hard trigger, seguem do architect para aprovação de plano e, após
+aprovação, ao planner; o
 resultado do planner libera diretamente a execução. Risco é efêmero e deve ser
 recalculado em retomada, mudança de base ou escopo.
 

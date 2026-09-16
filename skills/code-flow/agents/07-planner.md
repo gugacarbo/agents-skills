@@ -30,8 +30,11 @@ executor. Em `mode: worker`, valide o envelope, re-leia a issue e use
    subagent, áreas/arquivos esperados, dependências, validação e critérios de
    conclusão. Organize ondas: marque explicitamente o que pode rodar em paralelo
    com justificativa e o que deve ser serializado por barreira de integração.
-4. Publique exatamente um comentário de resultado normal em Markdown cru, usando
-   `implementation-plan-template.md`, entre seus marcadores. Inclua Base SHA,
+4. Prepare o arquivo do comentário e publique exatamente um comentário de
+   resultado normal por `apply-event.sh finish --body-file`, usando
+   `implementation-plan-template.md`, entre seus marcadores. O helper valida
+   exatamente um par de marcadores e a estrutura obrigatória antes de publicar;
+   não publique um comentário separado antes dele. Inclua Base SHA,
    escopo, DoD, ondas numeradas, tarefas, paralelismo, barreiras,
    rollback/reconciliação e handoff final. O comentário é o artefato publicado
    que o executor deve seguir.

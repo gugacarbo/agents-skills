@@ -23,7 +23,9 @@ registry, prompt do papel e guidance nearest-wins podem alterar o procedimento.
 Antes de qualquer mutação, valide um evento conforme
 `schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` adiciona o
 overlay sem publicar comentário. No `finish` do dispatcher, passe o body por
-`--body-file`: o script grava body e evento sem comentário. Nos demais
+`--body-file`: o script grava body e evento sem comentário. No `finish` do
+planner, passe o comentário de plano por `--body-file`: o helper valida e
+publica exatamente um comentário. Nos demais
 `finish`, `gate` e `complete`, o comentário inclui JSON de uma linha em
 `<!-- code-flow:event:v1 ... -->` e resumo Markdown antes da transição. O script
 relê a issue, confirma a transição e retorna JSON.

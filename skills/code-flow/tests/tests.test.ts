@@ -201,6 +201,14 @@ describe("code-flow skill", () => {
 		);
 	});
 
+	test("keeps the OpenAI metadata parseable with spaces-only indentation", () => {
+		const metadata = contents("agents/openai.yaml");
+		expect(metadata).not.toMatch(/^\t/m);
+		expect(metadata).toMatch(/^interface:\n  display_name:/m);
+		expect(metadata).toMatch(/^  default_prompt:/m);
+		expect(metadata).toMatch(/^policy:\n  allow_implicit_invocation: (true|false)$/m);
+	});
+
 	test("registers planner in every event and evidence contract", () => {
 		for (const schemaName of [
 			"schemas/protocol-event.schema.json",
@@ -234,16 +242,23 @@ describe("code-flow skill", () => {
 		expect(template).toMatch(/^## Handoff final$/m);
 		expect(template).toContain("code-flow:implementation-plan:start");
 		expect(template).toContain("code-flow:implementation-plan:end");
+		expect(template.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
+		expect(template.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
 	});
 
 	test("documents the L/XL route and excludes M hard-trigger planning", () => {
 		expectContains("agents/02-architect.md", "L/XL");
 		expectContains("agents/02-architect.md", "stage:awaiting-plan-approval");
 		expectContains("agents/02-architect.md", "M");
+		expectContains("agents/02-architect.md", "S com hard trigger");
 		expectContains("agents/07-planner.md", "stage:needs-plan");
 		expectContains("agents/07-planner.md", "não edite código");
 		expectContains("agents/03-executor.md", "plano publicado");
-		expectContains("runtime.md", "M+ com hard trigger");
+		expectContains("agents/03-executor.md", "na ordem das");
+		expectContains("agents/03-executor.md", "subagent");
+		expectContains("agents/03-executor.md", "barreira");
+		expectContains("agents/03-executor.md", "desvio");
+		expectContains("runtime.md", "M com hard trigger");
 		expectContains("SKILL.md", "stage:needs-plan");
 	});
 
@@ -332,6 +347,7 @@ describe("code-flow skill", () => {
 		const repositoryLabelsPath = join(temporaryRoot, "repo-labels");
 		const commentsPath = join(temporaryRoot, "comments");
 		const bodyPath = join(temporaryRoot, "body.md");
+		const planPath = join(temporaryRoot, "plan.md");
 		const bin = join(temporaryRoot, "bin");
 		const fakeGh = join(bin, "gh");
 		const transition = join(skillRoot, "scripts", "transition-issue.sh");
@@ -378,7 +394,16 @@ case "$1 $2" in
       esac
     done
     ;;
-  'issue comment') printf '%s\n' "$*" >>"$comments" ;;
+  'issue comment')
+    shift 3
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --body-file) cat "$2" >>"$comments"; printf '\n' >>"$comments"; shift 2 ;;
+        --body) printf '%s\n' "$2" >>"$comments"; shift 2 ;;
+        *) shift ;;
+      esac
+    done
+    ;;
   'label view') grep -Fxq -- "$3" "$repo_labels" ;;
   'label create') grep -Fxq -- "$3" "$repo_labels" || printf '%s\n' "$3" >>"$repo_labels" ;;
   'auth status'|'repo view') exit 0 ;;
@@ -645,7 +670,7 @@ esac
 				}) + "\n",
 			);
 		};
-		write(bodyPath, "> Complexity: XL\n\n# XL delivery\n");
+		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n\n# XL delivery\n");
 		setLabels(["code-flow:active", "stage:needs-architect"]);
 		protocolEvent(
 			eventPath,
@@ -699,8 +724,8 @@ esac
 		);
 		expectSuccess(
 			run([applyEvent, "42", "start", "--event", eventPath], {
-				env: environment,
-			}),
+			env: environment,
+		}),
 		);
 		protocolEvent(
 			eventPath,
@@ -710,18 +735,60 @@ esac
 			"stage:needs-plan",
 			"stage:ready-for-execution",
 		);
+		write(planPath, "<!-- code-flow:implementation-plan:start -->\ninvalid\n<!-- code-flow:implementation-plan:end -->\n");
+		const commentsBeforeInvalidPlan = read(commentsPath);
+		expectFailure(
+			run([applyEvent, "42", "finish", "--event", eventPath, "--body-file", planPath], {
+				env: environment,
+		}),
+		);
+		expect(read(commentsPath)).toBe(commentsBeforeInvalidPlan);
+		write(
+			planPath,
+			`> agent: planner\n> run_id: plan-xl\n> event: implementation-plan-result\n> state_before: stage:needs-plan + stage:in-progress\n> state_after: stage:ready-for-execution\n> sources_evidence: issue, architecture, guidance, Base SHA\n> project_guidance: AGENTS.md\n\n<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->\n\n## Resume\n\nPlano completo.\n\n<!-- code-flow:implementation-plan:start -->\n\n## Base SHA, escopo e definição de pronto\n\nBase SHA: abc\n\n## Ondas e tarefas\n\n### Onda 1 — foundation\n\nParalelismo seguro: sim; arquivos sem sobreposição\n\n| Task ID | Owner/subagent | Dependências | Áreas/arquivos esperados | Validação |\n| T1 | dev | none | src | bun test |\n\n## Barreiras de integração\n\n| Barreira | Tarefas/ondas | Condição de entrada | Prova/owner |\n| B1 | T1 | checks | dev |\n\n## Validação global\n\nbun test\n\n## Rollback/reconciliação\n\nrollback branch; reconcile drift\n\n## Handoff final\n\nResponsável: executor\n\n<!-- code-flow:implementation-plan:end -->\n`,
+		);
+		const commentsBeforeValidPlan = read(commentsPath);
 		expectSuccess(
-			run([applyEvent, "42", "finish", "--event", eventPath], {
+			run([applyEvent, "42", "finish", "--event", eventPath, "--body-file", planPath], {
 				env: environment,
 			}),
 		);
 		expect(labels()).toContain("stage:ready-for-execution");
+		const planComments = read(commentsPath).slice(commentsBeforeValidPlan.length);
+		expect(planComments).toContain("<!-- code-flow:implementation-plan:start -->");
+		expect(planComments).toContain("<!-- code-flow:implementation-plan:end -->");
+		expect(planComments.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
+		expect(planComments.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
 		write(bodyPath, "> Complexity: M\n\n# M hard-trigger delivery\n");
 		setLabels(["code-flow:active", "stage:needs-architect", "stage:in-progress"]);
 		expectFailure(
 			runTransition([
 				"--finish-to",
 				"stage:awaiting-plan-approval",
+				"--require-from",
+				"stage:needs-architect",
+			]),
+		);
+		write(
+			bodyPath,
+			"<!-- code-flow:issue-header:start -->\n> Complexity: M\n<!-- code-flow:issue-header:end -->\n\n> Complexity: XL\n",
+		);
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:awaiting-plan-approval",
+				"--require-from",
+				"stage:needs-architect",
+			]),
+		);
+		write(
+			bodyPath,
+			"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n",
+		);
+		expectFailure(
+			runTransition([
+				"--finish-to",
+				"stage:ready-for-execution",
 				"--require-from",
 				"stage:needs-architect",
 			]),

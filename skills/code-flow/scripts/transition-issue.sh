@@ -144,12 +144,17 @@ UNKNOWN_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r --slurpfile cfg "$STATES_FILE
 
 [ -z "$REQUIRE_FROM" ] || [ "$CURRENT" = "$REQUIRE_FROM" ] || die "Error: expected '$REQUIRE_FROM'; found '${CURRENT:-none}'"
 
-# Planning is deliberately restricted to L/XL. Keep this invariant in the
-# deterministic transition helper so a forged event cannot route M (including
-# M with a hard trigger), S, or XS into either planning state.
+# Complexity is authoritative only when rendered by the dispatcher inside its
+# canonical issue-header markers. Preserved user text outside that region must
+# not influence routing.
+CANONICAL_COMPLEXITY=$(printf '%s' "$ISSUE_JSON" | jq -r '(.body // "") | try (capture("(?s)<!-- code-flow:issue-header:start -->(?<header>.*?)<!-- code-flow:issue-header:end -->").header | capture("(?m)^>[[:space:]]*Complexity:[[:space:]]*(?<complexity>XS|S|M|L|XL)[[:space:]]*(\\n|$)").complexity) catch empty')
+
+# Planning is deliberately restricted to L/XL, and the architect cannot
+# bypass it with a forged direct ready-for-execution transition.
 if [ "$TARGET" = 'stage:awaiting-plan-approval' ] || [ "$TARGET" = 'stage:needs-plan' ]; then
-  IS_LXL=$(printf '%s' "$ISSUE_JSON" | jq -r '(.body // "") | test("(^|\\n)>[[:space:]]*Complexity:[[:space:]]*(L|XL)[[:space:]]*(\\n|$)")')
-  [ "$IS_LXL" = true ] || die "Error: planning states require Complexity L or XL"
+  [ "$CANONICAL_COMPLEXITY" = L ] || [ "$CANONICAL_COMPLEXITY" = XL ] || die "Error: planning states require canonical Complexity L or XL"
+elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
+  [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL requires plan approval and planner before execution"
 fi
 
 if [ "$HAS_ACTIVE" = true ] && [ -n "$UNKNOWN_STAGES" ] && { [ "$OP" != complete ] || [ "$ALLOW_REPAIR" -eq 0 ]; }; then
