@@ -77,7 +77,11 @@
 			"prompt": "agents/06-gate.md",
 			"capabilities": ["read", "github", "edit"],
 			"trigger": {
-				"requires": ["code-flow:active", "stage:awaiting-plan-approval", "needs-human"],
+				"requires": [
+					"code-flow:active",
+					"stage:awaiting-plan-approval",
+					"needs-human"
+				],
 				"forbids": ["stage:in-progress"]
 			},
 			"next": ["stage:needs-plan", "stage:needs-architect", "stage:blocked"],
@@ -97,7 +101,11 @@
 				"requires": ["code-flow:active", "stage:needs-plan"],
 				"forbids": ["needs-human", "stage:in-progress"]
 			},
-			"next": ["stage:ready-for-execution", "stage:needs-architect", "stage:blocked"],
+			"next": [
+				"stage:ready-for-execution",
+				"stage:needs-architect",
+				"stage:blocked"
+			],
 			"outcomes": {
 				"plan": "stage:ready-for-execution",
 				"escalate": "stage:needs-architect",

@@ -322,7 +322,9 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[1],
-				hasText("approve|aprova") && hasText("stage:needs-plan") && hasText("planner"),
+				hasText("approve|aprova") &&
+					hasText("stage:needs-plan") &&
+					hasText("planner"),
 				"plan gate invokes planner",
 			),
 			result(
@@ -342,7 +344,9 @@ async function grade(evalCase, context) {
 		expectations.push(
 			result(
 				evalCase.expectations[0],
-				hasText("M") && hasText("hard trigger") && hasText("stage:awaiting-execution-approval"),
+				hasText("M") &&
+					hasText("hard trigger") &&
+					hasText("stage:awaiting-execution-approval"),
 				"M hard-trigger remains on execution approval",
 			),
 			result(
@@ -367,7 +371,10 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[1],
-				hasText("onda|wave") && hasText("task.?id") && hasText("owner|subagent") && hasText("depend"),
+				hasText("onda|wave") &&
+					hasText("task.?id") &&
+					hasText("owner|subagent") &&
+					hasText("depend"),
 				"wave task ownership and dependencies",
 			),
 			result(
@@ -377,7 +384,9 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[3],
-				hasText("valida|validate") && hasText("rollback|reconcil") && hasText("handoff"),
+				hasText("valida|validate") &&
+					hasText("rollback|reconcil") &&
+					hasText("handoff"),
 				"validation, rollback and handoff",
 			),
 		);
