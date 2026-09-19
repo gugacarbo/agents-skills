@@ -7,6 +7,7 @@ Evaluate whether the PR preserves the repository's intended structural boundarie
 Inspect existing architecture before proposing anything new.
 
 Look for concrete problems such as:
+
 - responsibility moved into the wrong layer;
 - dependency inversion/boundary violations;
 - duplicate or competing architectural mechanisms;
@@ -19,6 +20,7 @@ Look for concrete problems such as:
 Do not recommend broad rewrites for theoretical purity.
 
 A finding is valid only if you can identify:
+
 - intended repository rule/pattern;
 - exact violation;
 - concrete consequence;

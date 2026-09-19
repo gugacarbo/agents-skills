@@ -7,6 +7,7 @@ Determine whether the tests would detect realistic regressions in the changed be
 Treat tests as executable specifications, not coverage decoration.
 
 Look for:
+
 - important behavior with no regression test;
 - assertions that do not prove the outcome;
 - excessive mocks that bypass production semantics;

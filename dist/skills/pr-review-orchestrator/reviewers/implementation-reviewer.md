@@ -7,6 +7,7 @@ Your responsibility is to determine whether the implementation actually and comp
 Build a requirement matrix before judging the implementation.
 
 For each material requirement classify:
+
 - IMPLEMENTED
 - PARTIALLY IMPLEMENTED
 - NOT IMPLEMENTED
@@ -20,6 +21,7 @@ Check wiring across layers when necessary: UI -> API -> domain/service -> persis
 Report only discrepancies from explicit requirements or regressions caused by fulfilling them. Do not invent new requirements or propose unrelated improvements.
 
 Every finding must include:
+
 - violated requirement;
 - exact location;
 - observed implementation;

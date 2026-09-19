@@ -16,14 +16,14 @@
 
 ## Decisão
 
-| Gate      | Opções                     |
-| --------- | -------------------------- |
-| triage    | approve / adjust / block   |
-| plan      | approve / adjust / block   |
+| Gate      | Opções                                        |
+| --------- | --------------------------------------------- |
+| triage    | approve / adjust / block                      |
+| plan      | approve / adjust / block                      |
 | execution | authorize (`draft_pr: true`) / adjust / block |
-| merge     | integrate / adjust / wait  |
-| resume    | `<estado do Resume>`       |
-| activity  | reset                      |
+| merge     | integrate / adjust / wait                     |
+| resume    | `<estado do Resume>`                          |
+| activity  | reset                                         |
 
 ## Ação humana
 

@@ -7,6 +7,7 @@ Ask what happens when operations overlap, execute twice, arrive out of order, or
 Assume networks fail, requests retry, workers restart, dependencies time out, and acknowledgments can be lost.
 
 Inspect:
+
 - race conditions/lost updates/check-then-act;
 - idempotency and duplicate side effects;
 - transaction boundaries and partial commits;
@@ -20,6 +21,7 @@ Inspect:
 - stale locks/cache/source-of-truth divergence.
 
 For each important multi-step operation, test mentally:
+
 1. failure before step 1;
 2. failure between each pair of steps;
 3. failure after the final side effect but before acknowledgment;

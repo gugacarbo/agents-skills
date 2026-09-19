@@ -160,10 +160,10 @@ elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:awaiting-e
 elif [ "$CURRENT" = 'stage:awaiting-execution-approval' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
   [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL cannot be authorized through execution approval"
 elif [ "$CURRENT" = 'stage:needs-plan' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
-  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2>/dev/null) || VALID_PLANNER_RESULTS=0
+  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2> /dev/null) || VALID_PLANNER_RESULTS=0
   [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: needs-plan -> ready-for-execution requires exactly one valid planner result comment"
 elif [ "$CURRENT" = 'stage:blocked' ] && [ "$TARGET" = 'stage:ready-for-execution' ] && [ "$CANONICAL_COMPLEXITY" = L -o "$CANONICAL_COMPLEXITY" = XL ]; then
-  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2>/dev/null) || VALID_PLANNER_RESULTS=0
+  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2> /dev/null) || VALID_PLANNER_RESULTS=0
   [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: blocked L/XL resume to ready requires exactly one valid planner result comment"
 fi
 

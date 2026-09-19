@@ -31,18 +31,18 @@ Do not dispatch every reviewer by default. Reviewer count is not evidence of rev
 
 The canonical reviewer prompts are stored under [`reviewers/`](reviewers/).
 
-| Reviewer | Primary purpose |
-|---|---|
-| [`code-reviewer`](reviewers/code-reviewer.md) | Lightweight review for trivial or very small changes. |
-| [`final-adversarial-reviewer`](reviewers/final-adversarial-reviewer.md) | General adversarial review for ordinary PRs, or final independent pass after specialists. |
-| [`implementation-reviewer`](reviewers/implementation-reviewer.md) | Trace explicit requirements/acceptance criteria to the implementation. |
-| [`functional-correctness-reviewer`](reviewers/functional-correctness-reviewer.md) | Validate non-trivial behavior, state transitions, algorithms, and edge cases. |
-| [`architecture-reviewer`](reviewers/architecture-reviewer.md) | Validate boundaries, dependency direction, ownership, and canonical architecture. |
-| [`security-reviewer`](reviewers/security-reviewer.md) | Review auth, authorization, trust boundaries, sensitive data, hostile input, and exploitability. |
-| [`reliability-reviewer`](reviewers/reliability-reviewer.md) | Review concurrency, retries, transactions, async work, idempotency, and partial failure. |
-| [`test-quality-reviewer`](reviewers/test-quality-reviewer.md) | Determine whether tests would detect realistic regressions in changed behavior. |
-| [`performance-reviewer`](reviewers/performance-reviewer.md) | Review query/render/algorithm/resource behavior where scale or hot paths matter. |
-| [`maintainability-agent-dx-reviewer`](reviewers/maintainability-agent-dx-reviewer.md) | Review duplication, competing patterns, repository structure, and agent/human discoverability. |
+| Reviewer                                                                              | Primary purpose                                                                                  |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [`code-reviewer`](reviewers/code-reviewer.md)                                         | Lightweight review for trivial or very small changes.                                            |
+| [`final-adversarial-reviewer`](reviewers/final-adversarial-reviewer.md)               | General adversarial review for ordinary PRs, or final independent pass after specialists.        |
+| [`implementation-reviewer`](reviewers/implementation-reviewer.md)                     | Trace explicit requirements/acceptance criteria to the implementation.                           |
+| [`functional-correctness-reviewer`](reviewers/functional-correctness-reviewer.md)     | Validate non-trivial behavior, state transitions, algorithms, and edge cases.                    |
+| [`architecture-reviewer`](reviewers/architecture-reviewer.md)                         | Validate boundaries, dependency direction, ownership, and canonical architecture.                |
+| [`security-reviewer`](reviewers/security-reviewer.md)                                 | Review auth, authorization, trust boundaries, sensitive data, hostile input, and exploitability. |
+| [`reliability-reviewer`](reviewers/reliability-reviewer.md)                           | Review concurrency, retries, transactions, async work, idempotency, and partial failure.         |
+| [`test-quality-reviewer`](reviewers/test-quality-reviewer.md)                         | Determine whether tests would detect realistic regressions in changed behavior.                  |
+| [`performance-reviewer`](reviewers/performance-reviewer.md)                           | Review query/render/algorithm/resource behavior where scale or hot paths matter.                 |
+| [`maintainability-agent-dx-reviewer`](reviewers/maintainability-agent-dx-reviewer.md) | Review duplication, competing patterns, repository structure, and agent/human discoverability.   |
 
 Do not invent additional reviewers unless the user explicitly asks for another review dimension.
 
@@ -578,14 +578,17 @@ Use:
 # PR Review
 
 ## Result
+
 PASS | CHANGES REQUIRED
 
 ## Review strategy
+
 <one concise sentence stating which reviewers were used and why>
 
 ## Material findings
 
 ### [SEVERITY] Title
+
 - Location:
 - Trigger/scenario:
 - Evidence:
@@ -593,12 +596,15 @@ PASS | CHANGES REQUIRED
 - Recommended correction:
 
 ## Requirement coverage
+
 <include only when implementation-reviewer was used or explicit requirements materially matter>
 
 ## Validation performed
+
 <commands/checks actually executed>
 
 ## Residual risk
+
 <only meaningful unverified areas>
 ```
 
@@ -684,22 +690,22 @@ The final adversarial reviewer must not rephrase first-wave findings simply to p
 
 # Routing examples
 
-| Change | Expected reviewers |
-|---|---|
-| README typo | `code-reviewer` |
-| CSS spacing/token correction | `code-reviewer` |
-| Mechanical local rename/refactor | `code-reviewer` |
-| Ordinary bounded bug fix | `final-adversarial-reviewer(STANDALONE)` |
-| Routine CRUD feature without sensitive boundaries | `final-adversarial-reviewer(STANDALONE)` |
-| Complex parser/state transition | `functional-correctness-reviewer`; add final pass only if other gate conditions apply |
-| Authorization/ownership change | `security-reviewer` + `final-adversarial-reviewer(FINAL_PASS)` |
-| Queue worker with retry/idempotency change | `reliability-reviewer`; add `security-reviewer` only if trust/auth boundaries are touched; final pass when high-impact or cross-system |
-| Payment webhook handling | `security-reviewer` + `reliability-reviewer` + `final-adversarial-reviewer(FINAL_PASS)` |
+| Change                                             | Expected reviewers                                                                                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| README typo                                        | `code-reviewer`                                                                                                                                                            |
+| CSS spacing/token correction                       | `code-reviewer`                                                                                                                                                            |
+| Mechanical local rename/refactor                   | `code-reviewer`                                                                                                                                                            |
+| Ordinary bounded bug fix                           | `final-adversarial-reviewer(STANDALONE)`                                                                                                                                   |
+| Routine CRUD feature without sensitive boundaries  | `final-adversarial-reviewer(STANDALONE)`                                                                                                                                   |
+| Complex parser/state transition                    | `functional-correctness-reviewer`; add final pass only if other gate conditions apply                                                                                      |
+| Authorization/ownership change                     | `security-reviewer` + `final-adversarial-reviewer(FINAL_PASS)`                                                                                                             |
+| Queue worker with retry/idempotency change         | `reliability-reviewer`; add `security-reviewer` only if trust/auth boundaries are touched; final pass when high-impact or cross-system                                     |
+| Payment webhook handling                           | `security-reviewer` + `reliability-reviewer` + `final-adversarial-reviewer(FINAL_PASS)`                                                                                    |
 | Large feature with explicit spec, auth, async jobs | `implementation-reviewer` + `security-reviewer` + `reliability-reviewer` + relevant functional/test reviewer(s) in parallel, then `final-adversarial-reviewer(FINAL_PASS)` |
-| New shared package and dependency boundaries | `architecture-reviewer`; add `maintainability-agent-dx-reviewer` if a new canonical pattern or duplication risk is introduced |
-| Behavior-preserving broad refactor | `architecture-reviewer` + `test-quality-reviewer` + `maintainability-agent-dx-reviewer`, then final pass if cross-cutting |
-| Query rewrite on a large listing endpoint | `performance-reviewer`; add `functional-correctness-reviewer` if result semantics also changed |
-| Test harness/mocking infrastructure change | `test-quality-reviewer`; add architecture only if the testing architecture itself changes repository-wide boundaries |
+| New shared package and dependency boundaries       | `architecture-reviewer`; add `maintainability-agent-dx-reviewer` if a new canonical pattern or duplication risk is introduced                                              |
+| Behavior-preserving broad refactor                 | `architecture-reviewer` + `test-quality-reviewer` + `maintainability-agent-dx-reviewer`, then final pass if cross-cutting                                                  |
+| Query rewrite on a large listing endpoint          | `performance-reviewer`; add `functional-correctness-reviewer` if result semantics also changed                                                                             |
+| Test harness/mocking infrastructure change         | `test-quality-reviewer`; add architecture only if the testing architecture itself changes repository-wide boundaries                                                       |
 
 ---
 

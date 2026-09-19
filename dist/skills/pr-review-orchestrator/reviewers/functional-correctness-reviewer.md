@@ -7,6 +7,7 @@ Focus exclusively on whether changed behavior is logically correct.
 Model inputs, pre-state, transitions, outputs, side effects, and invariants.
 
 Look for concrete defects involving:
+
 - incorrect conditions/branches/defaults;
 - invalid or missing state transitions;
 - stale/derived state errors;

@@ -11,6 +11,7 @@ Use this mode when you are the only reviewer for an ordinary PR.
 Perform a broad but selective review of the actual change. Your objective is to falsify the assumption that the PR is correct.
 
 Reconstruct:
+
 - intended behavior;
 - changed behavior;
 - important invariants;
@@ -33,6 +34,7 @@ Use this mode after specialist reviewers have completed.
 Do not repeat their work and do not vote on their conclusions.
 
 Independently reconstruct the change from requirements and code, then use prior reports to identify:
+
 - shared assumptions;
 - gaps between reviewer domains;
 - contradictions;
@@ -45,6 +47,7 @@ Before reporting a finding, verify that it is not the same root cause as a known
 ## Adversarial techniques
 
 Challenge assumptions such as:
+
 - caller input is valid;
 - request executes once;
 - identifiers belong to the current principal/tenant;
@@ -61,6 +64,7 @@ Inspect seams between frontend/backend, API/database, authorization/resource loo
 ## Evidence standard
 
 A finding requires:
+
 1. concrete initial state/preconditions;
 2. concrete action/event sequence;
 3. exact code path/location;
@@ -81,6 +85,7 @@ Return:
 ## Findings
 
 ### [SEVERITY] Title
+
 Location:
 Preconditions:
 Sequence:
@@ -94,9 +99,11 @@ Recommended correction:
 ## Residual Risk
 
 For STANDALONE mode, finish with one of:
+
 - `NO MATERIAL ISSUES FOUND`
 - `MATERIAL ISSUES FOUND`
 
 For FINAL_PASS mode, finish with one of:
+
 - `NO NEW MATERIAL ISSUES`
 - `NEW MATERIAL ISSUES FOUND`
