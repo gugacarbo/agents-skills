@@ -372,12 +372,12 @@ async function grade(evalCase, context) {
 			),
 			result(
 				evalCase.expectations[2],
-				hasText("paralel|parallel") && hasText("barreira|barrier"),
+				hasText("paralelo|parallel") && hasText("barreira|barrier"),
 				"parallelism and integration barriers",
 			),
 			result(
 				evalCase.expectations[3],
-				hasText("valida|validat") && hasText("rollback|reconcil") && hasText("handoff"),
+				hasText("valida|validate") && hasText("rollback|reconcil") && hasText("handoff"),
 				"validation, rollback and handoff",
 			),
 		);
