@@ -19,7 +19,8 @@
 | Gate      | Opções                     |
 | --------- | -------------------------- |
 | triage    | approve / adjust / block   |
-| execution | authorize / adjust / block |
+| plan      | approve / adjust / block   |
+| execution | authorize (`draft_pr: true`) / adjust / block |
 | merge     | integrate / adjust / wait  |
 | resume    | `<estado do Resume>`       |
 | activity  | reset                      |
@@ -27,6 +28,7 @@
 ## Ação humana
 
 - Decisão: `<valor>`
+- PR draft: `<true para authorize; n/a nos demais gates>`
 - Artefato: `<link>`
 - Digest/Base/Head: `<prova>`
 - Próximo estado: `<stage:*>`

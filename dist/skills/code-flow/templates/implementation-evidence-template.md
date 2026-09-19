@@ -16,6 +16,8 @@
 
 ## Planejamento
 
+Plano publicado (L/XL): `<URL/comentário e run_id do planner; n/a para XS/S/M>`
+
 | Escopo   | Áreas     | Validação    |
 | -------- | --------- | ------------ |
 | `<item>` | `<paths>` | `<comandos>` |
@@ -44,7 +46,7 @@
 
 ## Resultado
 
-PR publicado: `<URL ou n/a>`
+PR draft publicada: `<URL ou n/a>`
 
 <mudanças ou prova objetiva NO_CHANGES; nunca crie commit/PR vazio>
 

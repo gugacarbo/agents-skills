@@ -23,6 +23,7 @@
 			"enum": [
 				"dispatcher",
 				"architect",
+				"planner",
 				"executor",
 				"code-reviewer",
 				"integrator",
@@ -74,7 +75,8 @@
 			"properties": {
 				"decision": { "type": "string" },
 				"author": { "type": "string" },
-				"comment_url": { "type": "string" }
+				"comment_url": { "type": "string" },
+				"draft_pr": { "type": "boolean" }
 			}
 		}
 	}

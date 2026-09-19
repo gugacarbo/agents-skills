@@ -8,7 +8,7 @@ um exemplo de código ou diff, encerre-o antes do heading seguinte.
 > agent: architect
 > run_id: <uuid>
 > event: architecture-result
-> state_before: stage:needs-architect + stage:in-progress
+> state_before: stage:needs-architect
 > state_after: <destino>
 > sources_evidence: <issue, guidance, código/testes e Base SHA>
 > project_guidance: <paths e comandos>
@@ -48,8 +48,8 @@ Base SHA: `<sha>`
 ## Veredito final
 
 Veredito: `EXECUÇÃO DIRETA | REQUER APROVAÇÃO HUMANA | BLOQUEADO`
-Destino: `stage:ready-for-execution | stage:awaiting-execution-approval | stage:blocked`
+Destino: `stage:ready-for-execution | stage:awaiting-plan-approval | stage:awaiting-execution-approval | stage:blocked`
 Justificativa: <síntese baseada em complexidade, hard triggers, spec/ADR e blockers>
-Próximo responsável: `<executor | gate | architect após desbloqueio>`
+Próximo responsável: `<executor | planner após aprovação de plano | gate | architect após desbloqueio>`
 
 <!-- code-flow:architect-review:end -->

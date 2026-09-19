@@ -17,8 +17,11 @@ Consuma somente comentário com sintaxe exata `/code-flow gate DECISION`. Leia
    que exige exatamente o overlay ativo no estado registrado.
 2. Consulte a permissão GitHub atual do autor. Apenas `write`, `maintain` ou
    `admin` podem decidir; não confie em menções, cargo no comentário ou snapshot.
-3. Mapeie a decisão pelo campo `outcomes` do registry: `approve`, `authorize`,
-   `integrate`, `adjust`, `block`, `wait`, `resume`, `reset` ou `migrate`.
+3. Mapeie a decisão pelo campo `outcomes` do registry: triage usa `approve`,
+   `adjust` ou `block`; o gate de plano L/XL usa `approve`, `adjust` ou `block`;
+   execution usa `authorize`, `adjust` ou `block`; ao autorizar a execução,
+   confirme explicitamente `draft_pr: true`; merge usa `integrate`,
+   `adjust` ou `wait`; resume/activity usa `resume`, `reset` ou `migrate`.
 4. Publique evento de gate antes de labels e aplique-o com `apply-event.sh gate`.
    Em `migrate`, restaure somente o estado registrado no evento legado bloqueado.
 5. Confirme labels remotas e retorne o resultado estruturado. Não implemente,

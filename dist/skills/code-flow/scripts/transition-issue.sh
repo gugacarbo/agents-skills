@@ -126,7 +126,7 @@ transition_allowed() {
 [ -z "$TARGET" ] || is_primary "$TARGET" || die "Error: invalid target state '$TARGET'"
 [ -z "$REQUIRE_FROM" ] || is_primary "$REQUIRE_FROM" || die "Error: invalid --require-from '$REQUIRE_FROM'"
 
-ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url)
+ISSUE_JSON=$(gh issue view "$ISSUE" --json number,labels,state,url,body,comments)
 ISSUE_NUMBER=$(printf '%s' "$ISSUE_JSON" | jq -r '.number')
 ISSUE_REPO=$(printf '%s' "$ISSUE_JSON" | jq -r '.url | capture("^https?://(?<host>[^/]+)/(?<path>[^/]+/[^/]+)/issues/[0-9]+$") | "\(.host)/\(.path)"')
 [ -n "$ISSUE_NUMBER" ] && [ "$ISSUE_NUMBER" != null ] || die "Error: could not resolve issue: $ISSUE"
@@ -143,6 +143,29 @@ HAS_HUMAN=$(printf '%s' "$ISSUE_JSON" | jq '[.labels[].name] | index("needs-huma
 UNKNOWN_STAGES=$(printf '%s' "$ISSUE_JSON" | jq -r --slurpfile cfg "$STATES_FILE" --arg activity "$ACTIVITY" '[.labels[].name | select(startswith("stage:")) | select(. != $activity) | select(. as $n | ($cfg[0].states | map(.label) | index($n)) == null)] | join("\n")')
 
 [ -z "$REQUIRE_FROM" ] || [ "$CURRENT" = "$REQUIRE_FROM" ] || die "Error: expected '$REQUIRE_FROM'; found '${CURRENT:-none}'"
+
+# Complexity is authoritative only when rendered by the dispatcher inside its
+# canonical issue-header markers. Preserved user text outside that region must
+# not influence routing.
+CANONICAL_COMPLEXITY=$(printf '%s' "$ISSUE_JSON" | jq -r '(.body // "") | try (capture("(?s)<!-- code-flow:issue-header:start -->(?<header>.*?)<!-- code-flow:issue-header:end -->").header | capture("(?m)^>[[:space:]]*Complexity:[[:space:]]*(?<complexity>XS|S|M|L|XL)[[:space:]]*(\\n|$)").complexity) catch empty')
+
+# Planning is deliberately restricted to L/XL, and the architect cannot
+# bypass it with a forged direct ready-for-execution transition.
+if [ "$TARGET" = 'stage:awaiting-plan-approval' ] || [ "$TARGET" = 'stage:needs-plan' ]; then
+  [ "$CANONICAL_COMPLEXITY" = L ] || [ "$CANONICAL_COMPLEXITY" = XL ] || die "Error: planning states require canonical Complexity L or XL"
+elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
+  [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL requires plan approval and planner before execution"
+elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:awaiting-execution-approval' ]; then
+  [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL requires plan approval, not execution approval"
+elif [ "$CURRENT" = 'stage:awaiting-execution-approval' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
+  [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL cannot be authorized through execution approval"
+elif [ "$CURRENT" = 'stage:needs-plan' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
+  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2>/dev/null) || VALID_PLANNER_RESULTS=0
+  [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: needs-plan -> ready-for-execution requires exactly one valid planner result comment"
+elif [ "$CURRENT" = 'stage:blocked' ] && [ "$TARGET" = 'stage:ready-for-execution' ] && [ "$CANONICAL_COMPLEXITY" = L -o "$CANONICAL_COMPLEXITY" = XL ]; then
+  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2>/dev/null) || VALID_PLANNER_RESULTS=0
+  [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: blocked L/XL resume to ready requires exactly one valid planner result comment"
+fi
 
 if [ "$HAS_ACTIVE" = true ] && [ -n "$UNKNOWN_STAGES" ] && { [ "$OP" != complete ] || [ "$ALLOW_REPAIR" -eq 0 ]; }; then
   die "Error: active issue has unknown stage labels: $UNKNOWN_STAGES"
@@ -165,7 +188,11 @@ case "$OP" in
     ;;
   finish)
     [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: finish requires one active primary state'
-    [ "$HAS_ACTIVITY" = true ] || die 'Error: finish requires stage:in-progress'
+    if [ "$(target_actor "$CURRENT")" = executor ]; then
+      [ "$HAS_ACTIVITY" = true ] || die 'Error: executor finish requires stage:in-progress'
+    else
+      [ "$HAS_ACTIVITY" = false ] || die "Error: non-executor finish cannot use $ACTIVITY"
+    fi
     [ "$HAS_HUMAN" = false ] || die 'Error: activity and needs-human cannot coexist'
     transition_allowed "$CURRENT" "$TARGET" || die "Error: transition '$CURRENT' -> '$TARGET' is not allowed"
     ;;
@@ -243,11 +270,11 @@ case "$OP" in
     add_label "$TARGET"
     ;;
   start)
-    add_label "$ACTIVITY"
+    if [ "$ROLE" = executor ]; then add_label "$ACTIVITY"; fi
     ;;
   finish)
     remove_label "$CURRENT"
-    remove_label "$ACTIVITY"
+    if [ "$HAS_ACTIVITY" = true ]; then remove_label "$ACTIVITY"; fi
     add_label "$TARGET"
     if [ "$(target_kind "$TARGET")" = human ]; then add_label 'needs-human'; else [ "$HAS_HUMAN" = false ] || remove_label 'needs-human'; fi
     ;;
@@ -287,7 +314,13 @@ if [ "$OP" = complete ] || [ "$OP" = stop ]; then
     || die "Error: completion confirmation failed: $LABELS_AFTER"
 else
   [ "$AFTER_ACTIVE" = true ] && [ "$AFTER_COUNT" -eq 1 ] || die "Error: expected active workflow with one primary state: $LABELS_AFTER"
-  if [ "$OP" = start ]; then [ "$AFTER_ACTIVITY" = true ] || die 'Error: activity label missing after start'; fi
+  if [ "$OP" = start ]; then
+    if [ "$ROLE" = executor ]; then
+      [ "$AFTER_ACTIVITY" = true ] || die 'Error: activity label missing after executor start'
+    else
+      [ "$AFTER_ACTIVITY" = false ] || die 'Error: non-executor start added activity label'
+    fi
+  fi
   if [ "$OP" = reset ] || [ "$OP" = finish ] || [ "$OP" = gate ] || [ "$OP" = activate ]; then
     [ "$AFTER_ACTIVITY" = false ] || die 'Error: unexpected activity label after operation'
   fi

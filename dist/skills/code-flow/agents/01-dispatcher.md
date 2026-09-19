@@ -16,8 +16,8 @@ Em `mode: worker`, leia também `../worker-runtime.md`, valide o envelope e use
 
 1. Valide exatamente um estado principal. Se já houver overlay, não retome:
    exija `activity reset`.
-2. Inicie silenciosamente com `apply-event.sh start`, que adiciona
-   `stage:in-progress` sem publicar comentário.
+2. Valide o início silenciosamente com `apply-event.sh start`; o dispatcher não
+   adiciona `stage:in-progress`.
 3. Investigue código/testes e preencha problema, objetivo, limites, DoD,
    dependências, rubrica de complexidade e hard triggers. Não escreva solução,
    plano técnico ou decisão `create | update | not required` de spec/ADR.

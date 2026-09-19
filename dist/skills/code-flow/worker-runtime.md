@@ -21,12 +21,17 @@ registry, prompt do papel e guidance nearest-wins podem alterar o procedimento.
 ## Eventos, mutação e gates
 
 Antes de qualquer mutação, valide um evento conforme
-`schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` adiciona o
-overlay sem publicar comentário. No `finish` do dispatcher, passe o body por
-`--body-file`: o script grava body e evento sem comentário. Nos demais
+`schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` somente
+adiciona o overlay quando o papel é `executor`; os demais papéis apenas validam
+o início sem publicar comentário. No `finish` do dispatcher, passe o body por
+`--body-file`: o script grava body e evento sem comentário. No `finish` do
+planner, passe o comentário de plano por `--body-file`: o helper valida e
+publica exatamente um comentário. Nos demais
 `finish`, `gate` e `complete`, o comentário inclui JSON de uma linha em
 `<!-- code-flow:event:v1 ... -->` e resumo Markdown antes da transição. O script
 relê a issue, confirma a transição e retorna JSON.
+No gate `authorize` de `stage:awaiting-execution-approval`, o evento deve
+confirmar `gate.draft_pr: true` antes de liberar o executor.
 Não chame `transition-issue.sh` diretamente no modo worker.
 
 Gates chegam como comentário exatamente `/code-flow gate DECISION`. O papel
@@ -38,8 +43,10 @@ somente esse overlay, preservando o estado principal.
 
 ## Contexto independente e saída
 
-Cada stage usa sessão limpa. Code reviewer e gate exigem `fresh_context: true`;
-o reviewer registra run_ids produtores diferentes do seu. A continuidade vem de
+Cada stage usa sessão limpa. Planner, code reviewer e gate exigem
+`fresh_context: true`; o planner recebe arquitetura aprovada e guidance atuais,
+revalida L/XL e publica seu plano sem editar código de entrega. O code reviewer
+registra run_ids de dispatcher, architect, planner e executor diferentes do seu. A continuidade vem de
 issue, comentários de evento, branch, PR e worktree, não de memória.
 
 Retorne sempre um objeto do [schema `worker-result`](schemas/worker-result.schema.json): `completed`,

@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Define solução técnica, riscos, rollback e impacto de spec/ADR para uma issue já triada; não reescreve o contrato, implementa ou revisa.
+description: Define solução técnica, riscos, rollback e impacto de spec/ADR para uma issue já triada; encaminha L/XL ao planner sem reescrever o contrato, implementar ou revisar.
 requires_tools: [read, github, edit]
 inputs: [issue_url, project_guidance, base_sha]
 outputs: [architecture-review, spec_adr_decision, final-verdict]
@@ -17,7 +17,8 @@ Em `mode: worker`, valide o envelope, use `apply-event.sh` e termine após a
 transição confirmada.
 
 1. Valide estado e ausência de overlay; inicie silenciosamente com
-   `apply-event.sh start`, sem publicar comentário.
+   `apply-event.sh start`, sem publicar comentário e sem adicionar
+   `stage:in-progress`.
 2. Referencie objetivo, limites e DoD da issue sem duplicá-los. Defina abordagem,
    fronteiras técnicas, gaps, casos de borda, mitigação, validação e rollback.
 3. Decida `Spec impact: create | update | not required`. `create/update` inclui
@@ -29,12 +30,16 @@ transição confirmada.
    após publicar.
 5. Publique o resultado, faça a transição e confirme:
    - S sem hard trigger e `not required` → `stage:ready-for-execution`;
-   - M+, hard trigger ou `create/update` →
+   - L/XL → `stage:awaiting-plan-approval + needs-human` para aprovação do
+     plano e posterior planner. Isso inclui L/XL com hard trigger;
+   - S com hard trigger, M (inclusive M com hard trigger), ou `create/update` →
      `stage:awaiting-execution-approval + needs-human`;
    - blocker → `stage:blocked + needs-human`, Resume para
      `stage:needs-architect`.
 6. Termine o relatório com `## Veredito final`, informando veredito, destino,
    justificativa e próximo responsável coerentes com a transição escolhida.
 
-O gate execution aplica `authorize`, `adjust` ou `block`. Nunca autorize a
-própria execução, implemente ou faça code review.
+O gate de plano aplica `approve`, `adjust` ou `block`; após `approve`, o planner
+é o próximo responsável. O gate execution (`authorize`, `adjust`, `block`)
+continua valendo para M e demais rotas não-L/XL. Nunca autorize a própria
+execução, implemente ou faça code review.

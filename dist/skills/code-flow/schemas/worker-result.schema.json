@@ -13,7 +13,17 @@
 	],
 	"properties": {
 		"run_id": { "type": "string", "minLength": 1 },
-		"role": { "type": "string" },
+		"role": {
+			"enum": [
+				"dispatcher",
+				"architect",
+				"planner",
+				"executor",
+				"code-reviewer",
+				"integrator",
+				"gate"
+			]
+		},
 		"status": {
 			"enum": [
 				"completed",

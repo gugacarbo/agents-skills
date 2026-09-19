@@ -58,7 +58,7 @@ jq -e '
   type == "object" and
   (["event_id","run_id","role","event","state_before","state_after","observed_issue","sources_evidence","project_guidance","base_head","result"] - keys | length == 0) and
   (.event_id|type == "string" and length > 0) and (.run_id|type == "string" and length > 0) and
-  (.role|IN("dispatcher","architect","executor","code-reviewer","integrator","gate")) and
+  (.role|IN("dispatcher","architect","planner","executor","code-reviewer","integrator","gate")) and
   (.state_before|type == "string") and (.state_after|type == "string") and
   (.observed_issue.number|type == "number") and (.observed_issue.url|type == "string") and
   (.sources_evidence|type == "array") and (.project_guidance|type == "array") and
@@ -66,10 +66,14 @@ jq -e '
   (.result.status|IN("completed","waiting_human","blocked","retryable_failure","invalid_state"))
 ' "$EVENT_FILE" > /dev/null || die 'Error: invalid protocol event v1'
 ROLE=$(printf '%s' "$EVENT" | jq -r '.role')
-if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
-  [ -n "$BODY_FILE" ] && [ -f "$BODY_FILE" ] || die 'Error: dispatcher finish requires --body-file'
+if { [ "$ROLE" = dispatcher ] || [ "$ROLE" = planner ]; } && [ "$OPERATION" = finish ]; then
+  [ -n "$BODY_FILE" ] && [ -f "$BODY_FILE" ] || die 'Error: dispatcher/planner finish requires --body-file'
 elif [ -n "$BODY_FILE" ]; then
-  die 'Error: --body-file is only valid for dispatcher finish'
+  die 'Error: --body-file is only valid for dispatcher or planner finish'
+fi
+
+if [ "$ROLE" = planner ] && [ "$OPERATION" = finish ] && [ "$(printf '%s' "$EVENT" | jq -r '.state_after')" = 'stage:ready-for-execution' ]; then
+  "$SCRIPT_DIR/validate-plan.sh" "$BODY_FILE" || die 'Error: planner result has invalid implementation-plan structure'
 fi
 
 ISSUE_JSON=$(gh issue view "$ISSUE" --json number,url,labels,state,updatedAt)
@@ -101,15 +105,21 @@ if [ "$OPERATION" = gate ]; then
         || die "Error: recorded gate target '$TARGET' is not a valid resume state"
     fi
     [ -n "$TARGET" ] || die "Error: gate decision '$DECISION' is not applicable to '$CURRENT'"
+    if [ "$CURRENT" = 'stage:awaiting-execution-approval' ] && [ "$DECISION" = authorize ]; then
+      DRAFT_PR_CONFIRMED=$(printf '%s' "$EVENT" | jq -r 'if .gate.draft_pr == true then "true" else "false" end')
+      [ "$DRAFT_PR_CONFIRMED" = true ] || die 'Error: execution authorization must confirm draft_pr: true'
+    fi
   fi
   PERMISSION=$(gh api "repos/$ISSUE_REPO/collaborators/$AUTHOR/permission" --jq .permission 2> /dev/null || true)
   case "$PERMISSION" in write | maintain | admin) ;; *) die "Error: gate author '$AUTHOR' lacks write permission" ;; esac
 fi
 
-# Starting work only acquires the activity overlay. Dispatcher results replace
+# Only executor starts acquire the activity overlay. Dispatcher results replace
 # the issue body; other results, gates, and completion remain comments.
 if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
   "$SCRIPT_DIR/update-issue-body.sh" "$ISSUE_NUMBER" --body-file "$BODY_FILE" --event-file "$EVENT_FILE" > /dev/null
+elif [ "$ROLE" = planner ] && [ "$OPERATION" = finish ]; then
+  gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPO" --body-file "$BODY_FILE" > /dev/null
 elif [ "$OPERATION" != start ]; then
   SUMMARY=$(printf '%s' "$EVENT" | jq -r '.result.summary')
   BODY=$(printf '### code-flow %s\n\n%s\n\n<!-- code-flow:event:v1 %s -->' "$OPERATION" "$SUMMARY" "$EVENT")

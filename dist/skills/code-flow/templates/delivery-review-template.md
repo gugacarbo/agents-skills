@@ -3,7 +3,7 @@
 > agent: code-reviewer
 > run_id: <uuid novo>
 > event: delivery-review-result
-> state_before: stage:needs-delivery-review + stage:in-progress
+> state_before: stage:needs-delivery-review
 > state_after: <destino>
 > sources_evidence: <issue, planejamento/arquitetura, executor e PR/NO_CHANGES>
 > project_guidance: <paths e comandos>

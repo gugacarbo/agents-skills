@@ -22,6 +22,11 @@
 			"prompt": "agents/02-architect.md",
 			"capabilities": ["read", "github", "edit"]
 		},
+		"planner": {
+			"prompt": "agents/07-planner.md",
+			"capabilities": ["read", "github", "edit"],
+			"fresh_context": true
+		},
 		"executor": {
 			"prompt": "agents/03-executor.md",
 			"capabilities": ["read", "edit", "terminal", "github"]
