@@ -2,10 +2,11 @@
 Publique como Markdown cru, exatamente um par de marcadores. Este é o plano
 aprovado que o executor seguirá; não inclua alterações de código neste comentário.
 -->
+
 > agent: planner
 > run_id: <uuid>
 > event: implementation-plan-result
-> state_before: stage:needs-plan + stage:in-progress
+> state_before: stage:needs-plan
 > state_after: <stage:ready-for-execution | stage:blocked>
 > sources_evidence: <issue, arquitetura aprovada, guidance e Base SHA>
 > project_guidance: <paths nearest-wins e comandos>
@@ -32,17 +33,17 @@ Definição de pronto: <resultados observáveis e provas exigidas>
 
 Paralelismo seguro: <sim/não e racional; arquivos sem sobreposição e dependências satisfeitas>
 
-| Task ID | Owner/subagent | Dependências | Áreas/arquivos esperados | Validação |
-| ------- | -------------- | ------------ | ------------------------- | --------- |
-| `T1`    | `<owner>`       | `<none ou IDs>` | `<paths>`              | `<comandos/provas>` |
+| Task ID | Owner/subagent | Dependências    | Áreas/arquivos esperados | Validação           |
+| ------- | -------------- | --------------- | ------------------------ | ------------------- |
+| `T1`    | `<owner>`      | `<none ou IDs>` | `<paths>`                | `<comandos/provas>` |
 
 ### Onda 2 — `<nome>`
 
 Paralelismo seguro: <sim/não e racional>
 
-| Task ID | Owner/subagent | Dependências | Áreas/arquivos esperados | Validação |
-| ------- | -------------- | ------------ | ------------------------- | --------- |
-| `T2`    | `<owner>`       | `<T1>`       | `<paths>`                 | `<comandos/provas>` |
+| Task ID | Owner/subagent | Dependências | Áreas/arquivos esperados | Validação           |
+| ------- | -------------- | ------------ | ------------------------ | ------------------- |
+| `T2`    | `<owner>`      | `<T1>`       | `<paths>`                | `<comandos/provas>` |
 
 ## Barreiras de integração
 
@@ -56,8 +57,8 @@ Paralelismo seguro: <sim/não e racional>
 
 ## Rollback/reconciliação
 
-| Cenário | Rollback | Reconciliação / decisão |
-| ------- | -------- | ----------------------- |
+| Cenário                   | Rollback        | Reconciliação / decisão                                   |
+| ------------------------- | --------------- | --------------------------------------------------------- |
 | `<drift, falha ou risco>` | `<ação segura>` | `<owner, evidência e retorno ao architect se necessário>` |
 
 ## Handoff final

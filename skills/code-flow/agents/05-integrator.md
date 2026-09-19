@@ -18,10 +18,12 @@ Em `mode: worker`, valide o envelope e use `apply-event.sh`; não execute outro
 papel após integrar ou bloquear.
 
 1. Valide estado e ausência de overlay; inicie silenciosamente com
-   `apply-event.sh start`, sem publicar comentário.
+   `apply-event.sh start`, sem publicar comentário e sem adicionar
+   `stage:in-progress`.
 2. PR aprovada implica integração com diff; NO_CHANGES aprovado e ausência de
    diff/PR vazio implica fechamento sem diff. Ambas ou nenhuma bloqueiam.
-3. Para PR, use worktree isolada, atualize remotes e confira target,
+3. Para PR draft aprovada, marque-a como pronta para review antes do merge;
+   use worktree isolada, atualize remotes e confira target,
    possibilidade de merge, proteção, método de merge e checks.
 4. Rebase limpo com drift não material, patch equivalente e checks verdes pode
    usar `--force-with-lease`. Drift material ou qualquer conflito resolvido →
@@ -32,6 +34,6 @@ papel após integrar ou bloquear.
    Em NO_CHANGES, feche sem artefato vazio. Publique o relatório e execute
    `transition-issue.sh --complete` somente após a issue estar CLOSED.
 
-Falha transitória remove overlay e preserva integração autorizada. Bloqueio
+Falha transitória preserva a integração autorizada. Bloqueio
 externo deixa `stage:blocked + needs-human`, Resume para integração. Nunca faça
 code review do próprio conflito.

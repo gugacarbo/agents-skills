@@ -19,10 +19,11 @@ Em `mode: worker`, `fresh_context` deve ser verdadeiro; valide o envelope e use
 
 1. Valide fontes e run_ids dos produtores com
    `validate-evidence.sh <issue> --run-id <run_id>`, confirme ausência de overlay
-   e inicie silenciosamente com `apply-event.sh start`.
+   e inicie silenciosamente com `apply-event.sh start`, sem adicionar
+   `stage:in-progress`.
 2. O mesmo autor GitHub é permitido. Seu run_id não pode coincidir com nenhum
    run_id produtor. Sem instância nova comprovável, pare para review humana.
-3. Revise a PR remota — nunca só branch local — ou prova NO_CHANGES, DoD,
+3. Revise a PR draft remota — nunca só branch local — ou prova NO_CHANGES, DoD,
    arquitetura/outline, spec, testes, escopo, evidências e casos de borda.
 4. Publique cobertura, reconciliação e achados. Critical, Important e Cannot
    verify bloqueiam; ressalva aprovadora é somente Minor não bloqueante.

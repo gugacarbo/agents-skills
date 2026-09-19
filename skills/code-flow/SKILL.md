@@ -34,10 +34,13 @@ No worker, leia também [`worker-runtime.md`](worker-runtime.md) e
 advances to `stage:needs-plan`, whose successful planner result releases
 `stage:ready-for-execution` directly.
 
-Inícios são silenciosos: valide o estado, adicione `stage:in-progress` e não
-publique comentário. O dispatcher grava sua triagem no body, sem comentário;
+Inícios são silenciosos: valide o estado e não publique comentário. Somente o
+executor, durante a implementação, adiciona `stage:in-progress`; os demais
+papéis não adquirem esse overlay. O dispatcher grava sua triagem no body, sem comentário;
 demais resultados e gates precedem suas transições. Gate usa `needs-human`; nunca combine ambos. Cada papel lê seu
 próprio prompt, runtime, registry e templates, sem memória do papel anterior.
+Implementações com diff abrem PR draft por padrão; o gate de autorização da
+execução confirma essa escolha antes de liberar o executor.
 Use `scripts/transition-issue.sh`, `scripts/validate-evidence.sh`,
 `scripts/update-issue-body.sh` e `scripts/source-set-digest.sh` para operações determinísticas.
 Workers usam `scripts/apply-event.sh`; comentários de gate têm sintaxe

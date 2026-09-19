@@ -21,14 +21,17 @@ registry, prompt do papel e guidance nearest-wins podem alterar o procedimento.
 ## Eventos, mutação e gates
 
 Antes de qualquer mutação, valide um evento conforme
-`schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` adiciona o
-overlay sem publicar comentário. No `finish` do dispatcher, passe o body por
+`schemas/protocol-event.schema.json`. Em `start`, `apply-event.sh` somente
+adiciona o overlay quando o papel é `executor`; os demais papéis apenas validam
+o início sem publicar comentário. No `finish` do dispatcher, passe o body por
 `--body-file`: o script grava body e evento sem comentário. No `finish` do
 planner, passe o comentário de plano por `--body-file`: o helper valida e
 publica exatamente um comentário. Nos demais
 `finish`, `gate` e `complete`, o comentário inclui JSON de uma linha em
 `<!-- code-flow:event:v1 ... -->` e resumo Markdown antes da transição. O script
 relê a issue, confirma a transição e retorna JSON.
+No gate `authorize` de `stage:awaiting-execution-approval`, o evento deve
+confirmar `gate.draft_pr: true` antes de liberar o executor.
 Não chame `transition-issue.sh` diretamente no modo worker.
 
 Gates chegam como comentário exatamente `/code-flow gate DECISION`. O papel

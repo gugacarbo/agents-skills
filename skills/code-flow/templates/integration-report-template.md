@@ -1,7 +1,7 @@
 > agent: integrator
 > run_id: <uuid>
 > event: integration-result
-> state_before: stage:integration-authorized + stage:in-progress
+> state_before: stage:integration-authorized
 > state_after: <closed/labels-cleared | destino>
 > sources_evidence: <review, PR/NO_CHANGES, rebase, checks e issue>
 > project_guidance: <paths e comandos>

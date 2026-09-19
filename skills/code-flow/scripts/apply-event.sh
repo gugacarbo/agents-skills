@@ -105,12 +105,16 @@ if [ "$OPERATION" = gate ]; then
         || die "Error: recorded gate target '$TARGET' is not a valid resume state"
     fi
     [ -n "$TARGET" ] || die "Error: gate decision '$DECISION' is not applicable to '$CURRENT'"
+    if [ "$CURRENT" = 'stage:awaiting-execution-approval' ] && [ "$DECISION" = authorize ]; then
+      DRAFT_PR_CONFIRMED=$(printf '%s' "$EVENT" | jq -r 'if .gate.draft_pr == true then "true" else "false" end')
+      [ "$DRAFT_PR_CONFIRMED" = true ] || die 'Error: execution authorization must confirm draft_pr: true'
+    fi
   fi
   PERMISSION=$(gh api "repos/$ISSUE_REPO/collaborators/$AUTHOR/permission" --jq .permission 2> /dev/null || true)
   case "$PERMISSION" in write | maintain | admin) ;; *) die "Error: gate author '$AUTHOR' lacks write permission" ;; esac
 fi
 
-# Starting work only acquires the activity overlay. Dispatcher results replace
+# Only executor starts acquire the activity overlay. Dispatcher results replace
 # the issue body; other results, gates, and completion remain comments.
 if [ "$ROLE" = dispatcher ] && [ "$OPERATION" = finish ]; then
   "$SCRIPT_DIR/update-issue-body.sh" "$ISSUE_NUMBER" --body-file "$BODY_FILE" --event-file "$EVENT_FILE" > /dev/null

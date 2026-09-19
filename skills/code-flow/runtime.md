@@ -15,6 +15,13 @@ No modo interativo, o orquestrador relê labels após cada papel e despacha uma 
 em estado humano, blocker, conclusão, overlay incompatível ou após dez papéis;
 no limite, publique handoff e preserve o estado atual.
 
+Depois que o gate de início da execução autorizar (`authorize`), o orquestrador
+deve continuar automaticamente pelo executor, review, correções necessárias e
+integração até a conclusão. Não interrompa por conveniência nem peça nova
+confirmação intermediária; pare somente quando houver blocker, decisão humana
+obrigatória, drift material, falha persistente ou o limite de segurança de dez
+papéis.
+
 ## Complexidade e risco
 
 O dispatcher persiste `Complexity: XS | S | M | L | XL` e evidencia:
@@ -51,9 +58,10 @@ recalculado em retomada, mudança de base ou escopo.
 ## Protocolo GitHub
 
 Issue ativa tem `code-flow:active` e exatamente um estado principal do registry.
-Atividade acrescenta `stage:in-progress` e nunca `needs-human`. Estado humano
+Durante a implementação, o executor acrescenta `stage:in-progress` e nunca
+`needs-human`. Os demais papéis não acrescentam esse overlay. Estado humano
 acrescenta `needs-human` e nunca overlay. O início apenas valida o estado e
-adiciona o overlay, sem publicar comentário. O dispatcher persiste triagem e
+o executor adquire o overlay sem publicar comentário. O dispatcher persiste triagem e
 evento no body; os demais resultados e gates usam comentários. A evidência
 precede sua transição e a confirmação remota a sucede. Labels são sinalização
 cooperativa, não lock atômico.
@@ -82,7 +90,8 @@ estado.
 - activity: `reset`.
 
 Gate valida estado, ausência de overlay, evidência, Base/Head e opção; publica
-decisão antes da transição. Merge com diff exige `integrate`; `NO_CHANGES`
+decisão antes da transição. Autorização de execution só avança com confirmação
+explícita de PR draft. Merge com diff exige `integrate`; `NO_CHANGES`
 aprovado segue sem gate de merge. No worker, o gate vem exclusivamente do
 comentário `/code-flow gate DECISION`, com permissão GitHub `write+` validada ao vivo.
 

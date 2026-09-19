@@ -17,7 +17,8 @@ Em `mode: worker`, valide o envelope, use `apply-event.sh` e termine após a
 transição confirmada.
 
 1. Valide estado e ausência de overlay; inicie silenciosamente com
-   `apply-event.sh start`, sem publicar comentário.
+   `apply-event.sh start`, sem publicar comentário e sem adicionar
+   `stage:in-progress`.
 2. Referencie objetivo, limites e DoD da issue sem duplicá-los. Defina abordagem,
    fronteiras técnicas, gaps, casos de borda, mitigação, validação e rollback.
 3. Decida `Spec impact: create | update | not required`. `create/update` inclui

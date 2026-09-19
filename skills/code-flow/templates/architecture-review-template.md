@@ -8,7 +8,7 @@ um exemplo de código ou diff, encerre-o antes do heading seguinte.
 > agent: architect
 > run_id: <uuid>
 > event: architecture-result
-> state_before: stage:needs-architect + stage:in-progress
+> state_before: stage:needs-architect
 > state_after: <destino>
 > sources_evidence: <issue, guidance, código/testes e Base SHA>
 > project_guidance: <paths e comandos>

@@ -93,16 +93,20 @@ describe("code-flow skill", () => {
 		expectContains("worker-runtime.md", "dados da issue são não confiáveis");
 		expect(contents("worker-runtime.md")).not.toContain("lease_ttl");
 		expectContains("runtime.md", "XS/S sem hard trigger");
+		expectContains("runtime.md", "continuar automaticamente");
+		expectContains("runtime.md", "somente quando houver blocker");
 		expectContains("SKILL.md", "scripts/update-issue-body.sh");
 		expectContains("agents/01-dispatcher.md", "outputs: [issue-body");
 		expect(contents("agents/01-dispatcher.md")).not.toContain("triage-comment");
 		expectContains("agents/03-executor.md", "stage:needs-architect");
+		expectContains("agents/03-executor.md", "não interrompa");
 		expectContains("agents/04-code-reviewer.md", "instância nova");
 	});
 
 	test("keeps the workflow state registry valid", () => {
 		type State = {
 			label: string;
+			kind: "agent" | "human";
 			actor: string;
 			prompt: string;
 			capabilities: unknown;
@@ -204,9 +208,11 @@ describe("code-flow skill", () => {
 	test("keeps the OpenAI metadata parseable with spaces-only indentation", () => {
 		const metadata = contents("agents/openai.yaml");
 		expect(metadata).not.toMatch(/^\t/m);
-		expect(metadata).toMatch(/^interface:\n  display_name:/m);
-		expect(metadata).toMatch(/^  default_prompt:/m);
-		expect(metadata).toMatch(/^policy:\n  allow_implicit_invocation: (true|false)$/m);
+		expect(metadata).toMatch(/^interface:\n {2}display_name:/m);
+		expect(metadata).toMatch(/^ {2}default_prompt:/m);
+		expect(metadata).toMatch(
+			/^policy:\n {2}allow_implicit_invocation: (true|false)$/m,
+		);
 	});
 
 	test("registers planner in every event and evidence contract", () => {
@@ -218,7 +224,10 @@ describe("code-flow skill", () => {
 		}
 		expectContains("schemas/worker-result.schema.json", '"planner"');
 		expectContains("templates/evidence-template.md", "planner");
-		expectContains("templates/implementation-plan-template.md", "> agent: planner");
+		expectContains(
+			"templates/implementation-plan-template.md",
+			"> agent: planner",
+		);
 	});
 
 	test("implementation plan template makes waves and handoff auditable", () => {
@@ -242,8 +251,12 @@ describe("code-flow skill", () => {
 		expect(template).toMatch(/^## Handoff final$/m);
 		expect(template).toContain("code-flow:implementation-plan:start");
 		expect(template).toContain("code-flow:implementation-plan:end");
-		expect(template.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
-		expect(template.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
+		expect(template.match(/code-flow:implementation-plan:start/g)).toHaveLength(
+			1,
+		);
+		expect(template.match(/code-flow:implementation-plan:end/g)).toHaveLength(
+			1,
+		);
 	});
 
 	test("documents the L/XL route and excludes M hard-trigger planning", () => {
@@ -340,7 +353,7 @@ describe("code-flow skill", () => {
 		}
 	});
 
-	test("transition and event scripts enforce the worker state contract", { timeout: 15000 }, () => {
+	test("transition and event scripts enforce the worker state contract", () => {
 		const temporaryRoot = makeTempDir("code-flow-transition-test");
 		const statePath = join(temporaryRoot, "state.json");
 		const statusPath = join(temporaryRoot, "state.status");
@@ -424,6 +437,7 @@ esac
 					"stage:needs-triage",
 				]),
 			);
+			expect(labels()).not.toContain("stage:in-progress");
 			expectSuccess(
 				runTransition([
 					"--finish-to",
@@ -517,11 +531,7 @@ esac
 					observed_issue: {
 						number: 42,
 						url: "https://github.com/acme/demo/issues/42",
-						labels: [
-							"code-flow:active",
-							"stage:needs-triage",
-							"stage:in-progress",
-						],
+						labels: ["code-flow:active", "stage:needs-triage"],
 					},
 					sources_evidence: ["https://github.com/acme/demo/issues/42"],
 					project_guidance: ["AGENTS.md"],
@@ -529,11 +539,7 @@ esac
 					result: { status: "completed", summary: "triaged" },
 				})}\n`,
 			);
-			setLabels([
-				"code-flow:active",
-				"stage:needs-triage",
-				"stage:in-progress",
-			]);
+			setLabels(["code-flow:active", "stage:needs-triage"]);
 			expectFailure(
 				run([applyEvent, "42", "finish", "--event", dispatcherEventPath], {
 					env: environment,
@@ -635,291 +641,397 @@ esac
 				{ env: environment },
 			);
 			expectSuccess(migrated);
-		expect(JSON.parse(migrated.stdout)).toMatchObject({
-			confirmed_state: "stage:ready-for-execution",
-		});
+			expect(JSON.parse(migrated.stdout)).toMatchObject({
+				confirmed_state: "stage:ready-for-execution",
+			});
 
-		// The L/XL route must cross plan approval and planner before execution.
-		const protocolEvent = (
-			file: string,
-			role: string,
-			event: string,
-			runId: string,
-			before: string,
-			after: string,
-			gate?: { decision: string; author: string },
-		) => {
+			// The L/XL route must cross plan approval and planner before execution.
+			const protocolEvent = (
+				file: string,
+				role: string,
+				event: string,
+				runId: string,
+				before: string,
+				after: string,
+				gate?: { decision: string; author: string; draft_pr?: boolean },
+			) => {
+				write(
+					file,
+					`${JSON.stringify({
+						event_id: `evt-${runId}`,
+						run_id: runId,
+						role,
+						event,
+						state_before: before,
+						state_after: after,
+						observed_issue: {
+							number: 42,
+							url: "https://github.com/acme/demo/issues/42",
+							labels: ["code-flow:active", before],
+						},
+						sources_evidence: ["https://github.com/acme/demo/issues/42"],
+						project_guidance: ["AGENTS.md"],
+						base_head: { base: "abc", head: "abc" },
+						result: { status: "completed", summary: `${role} ${event}` },
+						...(gate ? { gate } : {}),
+					})}\n`,
+				);
+			};
 			write(
-				file,
-				JSON.stringify({
-					event_id: `evt-${runId}`,
-					run_id: runId,
-					role,
-					event,
-					state_before: before,
-					state_after: after,
-					observed_issue: {
-						number: 42,
-						url: "https://github.com/acme/demo/issues/42",
-						labels: ["code-flow:active", before],
-					},
-					sources_evidence: ["https://github.com/acme/demo/issues/42"],
-					project_guidance: ["AGENTS.md"],
-					base_head: { base: "abc", head: "abc" },
-					result: { status: "completed", summary: `${role} ${event}` },
-					...(gate ? { gate } : {}),
-				}) + "\n",
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n\n# XL delivery\n",
 			);
-		};
-		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n\n# XL delivery\n");
-		setLabels(["code-flow:active", "stage:needs-architect"]);
-		protocolEvent(
-			eventPath,
-			"architect",
-			"activity-start",
-			"arch-start",
-			"stage:needs-architect",
-			"stage:needs-architect",
-		);
-		expectSuccess(
-			run([applyEvent, "42", "start", "--event", eventPath], {
-				env: environment,
-			}),
-		);
-		protocolEvent(
-			eventPath,
-			"architect",
-			"architecture-result",
-			"arch-xl",
-			"stage:needs-architect",
-			"stage:awaiting-plan-approval",
-		);
-		expectSuccess(
-			run([applyEvent, "42", "finish", "--event", eventPath], {
-				env: environment,
-			}),
-		);
-		expect(labels()).toContain("stage:awaiting-plan-approval");
-		protocolEvent(
-			eventPath,
-			"gate",
-			"gate-decision",
-			"plan-gate",
-			"stage:awaiting-plan-approval",
-			"stage:needs-plan",
-			{ decision: "approve", author: "maintainer" },
-		);
-		expectSuccess(
-			run([applyEvent, "42", "gate", "--event", eventPath], {
-				env: environment,
-			}),
-		);
-		expect(labels()).toContain("stage:needs-plan");
-		protocolEvent(
-			eventPath,
-			"planner",
-			"activity-start",
-			"plan-start",
-			"stage:needs-plan",
-			"stage:needs-plan",
-		);
-		expectSuccess(
-			run([applyEvent, "42", "start", "--event", eventPath], {
-			env: environment,
-		}),
-		);
-		protocolEvent(
-			eventPath,
-			"planner",
-			"implementation-plan-result",
-			"plan-xl",
-			"stage:needs-plan",
-			"stage:ready-for-execution",
-		);
-		write(planPath, "<!-- code-flow:implementation-plan:start -->\ninvalid\n<!-- code-flow:implementation-plan:end -->\n");
-		const commentsBeforeInvalidPlan = read(commentsPath);
-		expectFailure(
-			run([applyEvent, "42", "finish", "--event", eventPath, "--body-file", planPath], {
-				env: environment,
-		}),
-		);
-		expect(read(commentsPath)).toBe(commentsBeforeInvalidPlan);
-		write(
-			planPath,
-			`> agent: planner\n> run_id: plan-xl\n> event: implementation-plan-result\n> state_before: stage:needs-plan + stage:in-progress\n> state_after: stage:ready-for-execution\n> sources_evidence: issue, architecture, guidance, Base SHA\n> project_guidance: AGENTS.md\n\n<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->\n\n## Resume\n\nPlano completo.\n\n<!-- code-flow:implementation-plan:start -->\n\n## Base SHA, escopo e definição de pronto\n\nBase SHA: abc\n\n## Ondas e tarefas\n\n### Onda 1 — foundation\n\nParalelismo seguro: sim; arquivos sem sobreposição\n\n| Task ID | Owner/subagent | Dependências | Áreas/arquivos esperados | Validação |\n| T1 | dev | none | src | bun test |\n\n## Barreiras de integração\n\n| Barreira | Tarefas/ondas | Condição de entrada | Prova/owner |\n| B1 | T1 | checks | dev |\n\n## Validação global\n\nbun test\n\n## Rollback/reconciliação\n\nrollback branch; reconcile drift\n\n## Handoff final\n\nResponsável: executor\n\n<!-- code-flow:implementation-plan:end -->\n`,
-		);
-		const commentsBeforeValidPlan = read(commentsPath);
-		expectSuccess(
-			run([applyEvent, "42", "finish", "--event", eventPath, "--body-file", planPath], {
-				env: environment,
-			}),
-		);
-		expect(labels()).toContain("stage:ready-for-execution");
-		const planComments = read(commentsPath).slice(commentsBeforeValidPlan.length);
-		expect(planComments).toContain("<!-- code-flow:implementation-plan:start -->");
-		expect(planComments).toContain("<!-- code-flow:implementation-plan:end -->");
-		expect(planComments.match(/code-flow:implementation-plan:start/g)).toHaveLength(1);
-		expect(planComments.match(/code-flow:implementation-plan:end/g)).toHaveLength(1);
-		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
-		write(
-			commentsPath,
-			read(planPath).replace(
-				'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
-				'code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"}',
-			),
-		);
-		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
-		expectFailure(
-			runTransition([
-				"--finish-to",
-				"stage:ready-for-execution",
-				"--require-from",
+			setLabels(["code-flow:active", "stage:needs-architect"]);
+			protocolEvent(
+				eventPath,
+				"architect",
+				"activity-start",
+				"arch-start",
+				"stage:needs-architect",
+				"stage:needs-architect",
+			);
+			expectSuccess(
+				run([applyEvent, "42", "start", "--event", eventPath], {
+					env: environment,
+				}),
+			);
+			protocolEvent(
+				eventPath,
+				"architect",
+				"architecture-result",
+				"arch-xl",
+				"stage:needs-architect",
+				"stage:awaiting-plan-approval",
+			);
+			expectSuccess(
+				run([applyEvent, "42", "finish", "--event", eventPath], {
+					env: environment,
+				}),
+			);
+			expect(labels()).toContain("stage:awaiting-plan-approval");
+			protocolEvent(
+				eventPath,
+				"gate",
+				"gate-decision",
+				"plan-gate",
+				"stage:awaiting-plan-approval",
 				"stage:needs-plan",
-			]),
-		);
-		write(
-			commentsPath,
-			read(planPath).replace(
-				'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
-				'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->\n<!-- code-flow:event:v1 {"event_id":"evt-plan-xl-duplicate","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
-			),
-		);
-		expectFailure(
-			runTransition([
-				"--finish-to",
-				"stage:ready-for-execution",
-				"--require-from",
+				{ decision: "approve", author: "maintainer" },
+			);
+			expectSuccess(
+				run([applyEvent, "42", "gate", "--event", eventPath], {
+					env: environment,
+				}),
+			);
+			expect(labels()).toContain("stage:needs-plan");
+			protocolEvent(
+				eventPath,
+				"planner",
+				"activity-start",
+				"plan-start",
 				"stage:needs-plan",
-			]),
-		);
-		write(commentsPath, "");
-		setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
-		expectFailure(
-			runTransition([
-				"--gate-to",
+				"stage:needs-plan",
+			);
+			expectSuccess(
+				run([applyEvent, "42", "start", "--event", eventPath], {
+					env: environment,
+				}),
+			);
+			protocolEvent(
+				eventPath,
+				"planner",
+				"implementation-plan-result",
+				"plan-xl",
+				"stage:needs-plan",
 				"stage:ready-for-execution",
-				"--require-from",
-				"stage:blocked",
-			]),
-		);
-		write(
-			commentsPath,
-			read(planPath)
-				.replace('"role":"planner"', '"role":"executor"')
-				.replace(
-					"## Resume",
-					'incidental protocol text {"role":"planner"}\n\n## Resume',
+			);
+			write(
+				planPath,
+				"<!-- code-flow:implementation-plan:start -->\ninvalid\n<!-- code-flow:implementation-plan:end -->\n",
+			);
+			const commentsBeforeInvalidPlan = read(commentsPath);
+			expectFailure(
+				run(
+					[
+						applyEvent,
+						"42",
+						"finish",
+						"--event",
+						eventPath,
+						"--body-file",
+						planPath,
+					],
+					{
+						env: environment,
+					},
 				),
-		);
-		expectFailure(
-			runTransition([
-				"--gate-to",
-				"stage:ready-for-execution",
-				"--require-from",
-				"stage:blocked",
-			]),
-		);
-		write(commentsPath, read(planPath));
-		expectSuccess(
-			runTransition([
-				"--gate-to",
-				"stage:ready-for-execution",
-				"--require-from",
-				"stage:blocked",
-			]),
-		);
-		expect(labels()).toContain("stage:ready-for-execution");
-		write(bodyPath, "> Complexity: M\n");
-		write(commentsPath, "");
-		setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
-		expectSuccess(
-			runTransition([
-				"--gate-to",
-				"stage:ready-for-execution",
-				"--require-from",
-				"stage:blocked",
-			]),
-		);
-		expect(labels()).toContain("stage:ready-for-execution");
-		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
-		write(commentsPath, read(planPath));
-		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
-		expectSuccess(
-			runTransition([
-				"--finish-to",
-				"stage:ready-for-execution",
-				"--require-from",
-				"stage:needs-plan",
-			]),
-		);
-		expect(labels()).toContain("stage:ready-for-execution");
-		setLabels(["code-flow:active", "stage:needs-plan", "stage:in-progress"]);
-		write(commentsPath, "<!-- code-flow:implementation-plan:start -->\ninvalid\n<!-- code-flow:implementation-plan:end -->\n");
-		expectFailure(
-			runTransition([
-				"--finish-to",
-				"stage:ready-for-execution",
-				"--require-from",
-				"stage:needs-plan",
-			]),
-		);
-		write(bodyPath, "<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n");
-		setLabels(["code-flow:active", "stage:needs-architect", "stage:in-progress"]);
-		expectFailure(
-			runTransition([
-				"--finish-to",
+			);
+			expect(read(commentsPath)).toBe(commentsBeforeInvalidPlan);
+			write(
+				planPath,
+				`> agent: planner\n> run_id: plan-xl\n> event: implementation-plan-result\n> state_before: stage:needs-plan\n> state_after: stage:ready-for-execution\n> sources_evidence: issue, architecture, guidance, Base SHA\n> project_guidance: AGENTS.md\n\n<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->\n\n## Resume\n\nPlano completo.\n\n<!-- code-flow:implementation-plan:start -->\n\n## Base SHA, escopo e definição de pronto\n\nBase SHA: abc\n\n## Ondas e tarefas\n\n### Onda 1 — foundation\n\nParalelismo seguro: sim; arquivos sem sobreposição\n\n| Task ID | Owner/subagent | Dependências | Áreas/arquivos esperados | Validação |\n| T1 | dev | none | src | bun test |\n\n## Barreiras de integração\n\n| Barreira | Tarefas/ondas | Condição de entrada | Prova/owner |\n| B1 | T1 | checks | dev |\n\n## Validação global\n\nbun test\n\n## Rollback/reconciliação\n\nrollback branch; reconcile drift\n\n## Handoff final\n\nResponsável: executor\n\n<!-- code-flow:implementation-plan:end -->\n`,
+			);
+			const commentsBeforeValidPlan = read(commentsPath);
+			expectSuccess(
+				run(
+					[
+						applyEvent,
+						"42",
+						"finish",
+						"--event",
+						eventPath,
+						"--body-file",
+						planPath,
+					],
+					{
+						env: environment,
+					},
+				),
+			);
+			expect(labels()).toContain("stage:ready-for-execution");
+			const planComments = read(commentsPath).slice(
+				commentsBeforeValidPlan.length,
+			);
+			expect(planComments).toContain(
+				"<!-- code-flow:implementation-plan:start -->",
+			);
+			expect(planComments).toContain(
+				"<!-- code-flow:implementation-plan:end -->",
+			);
+			expect(
+				planComments.match(/code-flow:implementation-plan:start/g),
+			).toHaveLength(1);
+			expect(
+				planComments.match(/code-flow:implementation-plan:end/g),
+			).toHaveLength(1);
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n",
+			);
+			write(
+				commentsPath,
+				read(planPath).replace(
+					'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
+					'code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"}',
+				),
+			);
+			setLabels(["code-flow:active", "stage:needs-plan"]);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:needs-plan",
+				]),
+			);
+			write(
+				commentsPath,
+				read(planPath).replace(
+					'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
+					'<!-- code-flow:event:v1 {"event_id":"evt-plan-xl","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->\n<!-- code-flow:event:v1 {"event_id":"evt-plan-xl-duplicate","run_id":"plan-xl","role":"planner","event":"implementation-plan-result"} -->',
+				),
+			);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:needs-plan",
+				]),
+			);
+			write(commentsPath, "");
+			setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
+			expectFailure(
+				runTransition([
+					"--gate-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:blocked",
+				]),
+			);
+			write(
+				commentsPath,
+				read(planPath)
+					.replace('"role":"planner"', '"role":"executor"')
+					.replace(
+						"## Resume",
+						'incidental protocol text {"role":"planner"}\n\n## Resume',
+					),
+			);
+			expectFailure(
+				runTransition([
+					"--gate-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:blocked",
+				]),
+			);
+			write(commentsPath, read(planPath));
+			expectSuccess(
+				runTransition([
+					"--gate-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:blocked",
+				]),
+			);
+			expect(labels()).toContain("stage:ready-for-execution");
+			write(bodyPath, "> Complexity: M\n");
+			write(commentsPath, "");
+			setLabels(["code-flow:active", "stage:blocked", "needs-human"]);
+			expectSuccess(
+				runTransition([
+					"--gate-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:blocked",
+				]),
+			);
+			expect(labels()).toContain("stage:ready-for-execution");
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n",
+			);
+			write(commentsPath, read(planPath));
+			setLabels(["code-flow:active", "stage:needs-plan"]);
+			expectSuccess(
+				runTransition([
+					"--finish-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:needs-plan",
+				]),
+			);
+			expect(labels()).toContain("stage:ready-for-execution");
+			setLabels(["code-flow:active", "stage:needs-plan"]);
+			write(
+				commentsPath,
+				"<!-- code-flow:implementation-plan:start -->\ninvalid\n<!-- code-flow:implementation-plan:end -->\n",
+			);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:needs-plan",
+				]),
+			);
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n",
+			);
+			setLabels(["code-flow:active", "stage:needs-architect"]);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:awaiting-execution-approval",
+					"--require-from",
+					"stage:needs-architect",
+				]),
+			);
+			setLabels([
+				"code-flow:active",
 				"stage:awaiting-execution-approval",
-				"--require-from",
-				"stage:needs-architect",
-			]),
-		);
-		setLabels(["code-flow:active", "stage:awaiting-execution-approval", "needs-human"]);
-		expectFailure(
-			runTransition([
-				"--gate-to",
-				"stage:ready-for-execution",
-				"--require-from",
+				"needs-human",
+			]);
+			expectFailure(
+				runTransition([
+					"--gate-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:awaiting-execution-approval",
+				]),
+			);
+			write(bodyPath, "> Complexity: M\n\n# M hard-trigger delivery\n");
+			setLabels(["code-flow:active", "stage:needs-architect"]);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:awaiting-plan-approval",
+					"--require-from",
+					"stage:needs-architect",
+				]),
+			);
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: M\n<!-- code-flow:issue-header:end -->\n",
+			);
+			setLabels(["code-flow:active", "stage:needs-architect"]);
+			expectSuccess(
+				runTransition([
+					"--finish-to",
+					"stage:awaiting-execution-approval",
+					"--require-from",
+					"stage:needs-architect",
+				]),
+			);
+			setLabels([
+				"code-flow:active",
 				"stage:awaiting-execution-approval",
-			]),
-		);
-		write(bodyPath, "> Complexity: M\n\n# M hard-trigger delivery\n");
-		setLabels(["code-flow:active", "stage:needs-architect", "stage:in-progress"]);
-		expectFailure(
-			runTransition([
-				"--finish-to",
-				"stage:awaiting-plan-approval",
-				"--require-from",
-				"stage:needs-architect",
-			]),
-		);
-		write(
-			bodyPath,
-			"<!-- code-flow:issue-header:start -->\n> Complexity: M\n<!-- code-flow:issue-header:end -->\n\n> Complexity: XL\n",
-		);
-		expectFailure(
-			runTransition([
-				"--finish-to",
-				"stage:awaiting-plan-approval",
-				"--require-from",
-				"stage:needs-architect",
-			]),
-		);
-		write(
-			bodyPath,
-			"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n",
-		);
-		expectFailure(
-			runTransition([
-				"--finish-to",
+				"needs-human",
+			]);
+			protocolEvent(
+				eventPath,
+				"gate",
+				"gate-decision",
+				"execution-gate-missing-draft",
+				"stage:awaiting-execution-approval",
 				"stage:ready-for-execution",
-				"--require-from",
-				"stage:needs-architect",
-			]),
-		);
-	} finally {
+				{ decision: "authorize", author: "maintainer" },
+			);
+			expectFailure(
+				run([applyEvent, "42", "gate", "--event", eventPath], {
+					env: environment,
+				}),
+			);
+			setLabels([
+				"code-flow:active",
+				"stage:awaiting-execution-approval",
+				"needs-human",
+			]);
+			protocolEvent(
+				eventPath,
+				"gate",
+				"gate-decision",
+				"execution-gate-draft-confirmed",
+				"stage:awaiting-execution-approval",
+				"stage:ready-for-execution",
+				{ decision: "authorize", author: "maintainer", draft_pr: true },
+			);
+			expectSuccess(
+				run([applyEvent, "42", "gate", "--event", eventPath], {
+					env: environment,
+				}),
+			);
+			expect(labels()).toContain("stage:ready-for-execution");
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: M\n<!-- code-flow:issue-header:end -->\n\n> Complexity: XL\n",
+			);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:awaiting-plan-approval",
+					"--require-from",
+					"stage:needs-architect",
+				]),
+			);
+			write(
+				bodyPath,
+				"<!-- code-flow:issue-header:start -->\n> Complexity: XL\n<!-- code-flow:issue-header:end -->\n",
+			);
+			expectFailure(
+				runTransition([
+					"--finish-to",
+					"stage:ready-for-execution",
+					"--require-from",
+					"stage:needs-architect",
+				]),
+			);
+		} finally {
 			cleanup(temporaryRoot);
 		}
-	});
+	}, 15000);
 
 	test("dispatcher replaces the issue body and preserves the original report idempotently", () => {
 		const temporaryRoot = makeTempDir("code-flow-issue-body-test");

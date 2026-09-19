@@ -160,10 +160,10 @@ elif [ "$CURRENT" = 'stage:needs-architect' ] && [ "$TARGET" = 'stage:awaiting-e
 elif [ "$CURRENT" = 'stage:awaiting-execution-approval' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
   [ "$CANONICAL_COMPLEXITY" != L ] && [ "$CANONICAL_COMPLEXITY" != XL ] || die "Error: canonical Complexity L/XL cannot be authorized through execution approval"
 elif [ "$CURRENT" = 'stage:needs-plan' ] && [ "$TARGET" = 'stage:ready-for-execution' ]; then
-  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2>/dev/null) || VALID_PLANNER_RESULTS=0
+  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2> /dev/null) || VALID_PLANNER_RESULTS=0
   [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: needs-plan -> ready-for-execution requires exactly one valid planner result comment"
 elif [ "$CURRENT" = 'stage:blocked' ] && [ "$TARGET" = 'stage:ready-for-execution' ] && [ "$CANONICAL_COMPLEXITY" = L -o "$CANONICAL_COMPLEXITY" = XL ]; then
-  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2>/dev/null) || VALID_PLANNER_RESULTS=0
+  VALID_PLANNER_RESULTS=$({ printf '%s' "$ISSUE_JSON" | "$SCRIPT_DIR/validate-plan.sh" --comments-json -; } 2> /dev/null) || VALID_PLANNER_RESULTS=0
   [ "$VALID_PLANNER_RESULTS" -eq 1 ] || die "Error: blocked L/XL resume to ready requires exactly one valid planner result comment"
 fi
 
@@ -188,7 +188,11 @@ case "$OP" in
     ;;
   finish)
     [ "$HAS_ACTIVE" = true ] && [ "$PRIMARY_COUNT" -eq 1 ] || die 'Error: finish requires one active primary state'
-    [ "$HAS_ACTIVITY" = true ] || die 'Error: finish requires stage:in-progress'
+    if [ "$(target_actor "$CURRENT")" = executor ]; then
+      [ "$HAS_ACTIVITY" = true ] || die 'Error: executor finish requires stage:in-progress'
+    else
+      [ "$HAS_ACTIVITY" = false ] || die "Error: non-executor finish cannot use $ACTIVITY"
+    fi
     [ "$HAS_HUMAN" = false ] || die 'Error: activity and needs-human cannot coexist'
     transition_allowed "$CURRENT" "$TARGET" || die "Error: transition '$CURRENT' -> '$TARGET' is not allowed"
     ;;
@@ -266,11 +270,11 @@ case "$OP" in
     add_label "$TARGET"
     ;;
   start)
-    add_label "$ACTIVITY"
+    if [ "$ROLE" = executor ]; then add_label "$ACTIVITY"; fi
     ;;
   finish)
     remove_label "$CURRENT"
-    remove_label "$ACTIVITY"
+    if [ "$HAS_ACTIVITY" = true ]; then remove_label "$ACTIVITY"; fi
     add_label "$TARGET"
     if [ "$(target_kind "$TARGET")" = human ]; then add_label 'needs-human'; else [ "$HAS_HUMAN" = false ] || remove_label 'needs-human'; fi
     ;;
@@ -310,7 +314,13 @@ if [ "$OP" = complete ] || [ "$OP" = stop ]; then
     || die "Error: completion confirmation failed: $LABELS_AFTER"
 else
   [ "$AFTER_ACTIVE" = true ] && [ "$AFTER_COUNT" -eq 1 ] || die "Error: expected active workflow with one primary state: $LABELS_AFTER"
-  if [ "$OP" = start ]; then [ "$AFTER_ACTIVITY" = true ] || die 'Error: activity label missing after start'; fi
+  if [ "$OP" = start ]; then
+    if [ "$ROLE" = executor ]; then
+      [ "$AFTER_ACTIVITY" = true ] || die 'Error: activity label missing after executor start'
+    else
+      [ "$AFTER_ACTIVITY" = false ] || die 'Error: non-executor start added activity label'
+    fi
+  fi
   if [ "$OP" = reset ] || [ "$OP" = finish ] || [ "$OP" = gate ] || [ "$OP" = activate ]; then
     [ "$AFTER_ACTIVITY" = false ] || die 'Error: unexpected activity label after operation'
   fi
