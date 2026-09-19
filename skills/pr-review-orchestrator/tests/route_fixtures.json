@@ -1,0 +1,110 @@
+[
+	{ "name": "README typo", "trivial": true, "expected": ["code-reviewer"] },
+	{ "name": "CSS spacing fix", "trivial": true, "expected": ["code-reviewer"] },
+	{
+		"name": "Mechanical private rename",
+		"trivial": true,
+		"expected": ["code-reviewer"]
+	},
+	{
+		"name": "Ordinary bounded bug fix",
+		"expected": ["final-adversarial-reviewer:STANDALONE"]
+	},
+	{
+		"name": "Routine CRUD feature",
+		"expected": ["final-adversarial-reviewer:STANDALONE"]
+	},
+	{
+		"name": "Complex parser",
+		"functional_complexity": true,
+		"expected": ["functional-correctness-reviewer"]
+	},
+	{
+		"name": "Authorization ownership change",
+		"security_boundary": true,
+		"high_impact_boundary": true,
+		"expected": ["security-reviewer", "final-adversarial-reviewer:FINAL_PASS"]
+	},
+	{
+		"name": "Bounded queue retry fix",
+		"reliability_concurrency": true,
+		"expected": ["reliability-reviewer"]
+	},
+	{
+		"name": "Payment webhook",
+		"security_boundary": true,
+		"reliability_concurrency": true,
+		"high_impact_boundary": true,
+		"domains_interact": true,
+		"expected": [
+			"security-reviewer",
+			"reliability-reviewer",
+			"final-adversarial-reviewer:FINAL_PASS"
+		]
+	},
+	{
+		"name": "Multi-layer explicit spec",
+		"explicit_requirements": true,
+		"cross_layer_integration": true,
+		"expected": [
+			"implementation-reviewer",
+			"final-adversarial-reviewer:FINAL_PASS"
+		]
+	},
+	{
+		"name": "New shared package",
+		"architecture_change": true,
+		"expected": ["architecture-reviewer"]
+	},
+	{
+		"name": "Broad behavior-preserving refactor",
+		"architecture_change": true,
+		"critical_test_risk": true,
+		"maintainability_pattern_change": true,
+		"broad_refactor": true,
+		"domains_interact": true,
+		"expected": [
+			"architecture-reviewer",
+			"test-quality-reviewer",
+			"maintainability-agent-dx-reviewer",
+			"final-adversarial-reviewer:FINAL_PASS"
+		]
+	},
+	{
+		"name": "Large listing query perf rewrite",
+		"performance_scale": true,
+		"expected": ["performance-reviewer"]
+	},
+	{
+		"name": "Query rewrite changes pagination semantics",
+		"functional_complexity": true,
+		"performance_scale": true,
+		"domains_interact": true,
+		"expected": [
+			"functional-correctness-reviewer",
+			"performance-reviewer",
+			"final-adversarial-reviewer:FINAL_PASS"
+		]
+	},
+	{
+		"name": "Test harness mock layer change",
+		"critical_test_risk": true,
+		"expected": ["test-quality-reviewer"]
+	},
+	{
+		"name": "Spec + authz + async side effects + critical tests",
+		"explicit_requirements": true,
+		"security_boundary": true,
+		"reliability_concurrency": true,
+		"critical_test_risk": true,
+		"high_impact_boundary": true,
+		"domains_interact": true,
+		"expected": [
+			"implementation-reviewer",
+			"security-reviewer",
+			"reliability-reviewer",
+			"test-quality-reviewer",
+			"final-adversarial-reviewer:FINAL_PASS"
+		]
+	}
+]
