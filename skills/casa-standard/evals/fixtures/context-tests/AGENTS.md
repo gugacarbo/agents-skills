@@ -13,6 +13,6 @@ bun test
 
 ## Mapa de contexto
 
-| Capítulo | Quando carregar |
-| --- | --- |
+| Capítulo                | Quando carregar                         |
+| ----------------------- | --------------------------------------- |
 | `docs/context/TESTS.md` | Ao alterar testes ou comandos canônicos |

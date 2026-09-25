@@ -13,6 +13,6 @@ npm test
 
 ## Mapa de contexto
 
-| Capítulo | Quando carregar |
-| --- | --- |
+| Capítulo                      | Quando carregar                            |
+| ----------------------------- | ------------------------------------------ |
 | `docs/context/CONVENTIONS.md` | Ao alterar nomes e formatos compartilhados |

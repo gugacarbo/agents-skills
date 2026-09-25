@@ -21,7 +21,10 @@ Leia esta referência por completo quando o router ativar o CASA.
 6. Use `gate_required=true` se a mutação de documento CASA for inferida, não
    pedida, ultrapassar o escopo autorizado ou depender de decisão ainda aberta.
    São documentos CASA os routers `AGENTS.md`, a ponte `CLAUDE.md`, ADRs, Specs,
-   capítulos de contexto, backlog, templates e índices CASA.
+   capítulos de contexto, backlog e templates mantidos como documentação-fonte.
+   O gate cobre a edição desses documentos, não arquivos de índice ou outros
+   artefatos derivados gerados por ferramenta. Regenerá-los após uma edição
+   documental aprovada não os adiciona ao envelope nem abre outro gate.
 7. Use `gate_required=false` quando o usuário pedir diretamente criar,
    atualizar, depreciar ou fechar o artefato com ação e escopo semântico
    identificáveis. Continue sem gate quando não houver escrita documental e em
@@ -149,6 +152,9 @@ termine a tarefa e só então apresente a sugestão compacta definida em
   documental e não concede autorização remota.
 - Não copie o Standard, edite índice gerado manualmente ou use `dist/` quando o
   repo o proibir.
+- Regenerar índice não é mutação documental CASA para fins de gate. Se a tarefa
+  alterar somente arquivos gerados, não abra gate por essa razão; siga a
+  ferramenta geradora e as regras do repositório.
 - Ao detectar escrita prematura, pare, reporte o desvio e retorne ao gate.
 
 Metadados de desenvolvimento: [interface do agente](../agents/openai.yaml),

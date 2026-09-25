@@ -1,8 +1,8 @@
 {
-	"name": "@gugacarbo/skill-casa-workflow",
+	"name": "@gugacarbo/skill-casa-standard",
 	"version": "0.0.0",
 	"private": true,
-	"description": "Development tooling for the casa-workflow skill.",
+	"description": "Development tooling for the casa-standard skill.",
 	"type": "module",
 	"scripts": {
 		"test": "bun test dev/tests.test.ts",

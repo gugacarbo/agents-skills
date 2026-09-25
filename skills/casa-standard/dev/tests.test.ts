@@ -14,7 +14,7 @@ function expectContains(relativePath: string, expected: string): void {
 	expect(contents(relativePath)).toContain(expected);
 }
 
-describe("casa-workflow skill", () => {
+describe("casa-standard skill", () => {
 	test("contains the complete runtime and no placeholder directories", () => {
 		for (const relativePath of [
 			"SKILL.md",
@@ -45,7 +45,7 @@ describe("casa-workflow skill", () => {
 			.split("\n")
 			.filter((line) => /^[a-zA-Z0-9_-]+:/.test(line));
 		expect(frontmatter).toHaveLength(2);
-		expect(frontmatter[0]).toStartWith("name: casa-workflow");
+		expect(frontmatter[0]).toStartWith("name: casa-standard");
 		expect(frontmatter[1]).toStartWith("description:");
 		expect(skill.match(/\n/g)?.length ?? 0).toBeLessThanOrEqual(70);
 		expect(skill.trim().split(/\s+/).length).toBeLessThanOrEqual(430);
@@ -182,7 +182,7 @@ describe("casa-workflow skill", () => {
 
 	test("keeps agent metadata and package scripts valid", () => {
 		expectContains("agents/openai.yaml", "allow_implicit_invocation: true");
-		expectContains("agents/openai.yaml", "Use $casa-workflow");
+		expectContains("agents/openai.yaml", "Use $casa-standard");
 
 		const packageJson = JSON.parse(contents("package.json")) as {
 			scripts?: Record<string, string>;
@@ -197,7 +197,7 @@ describe("casa-workflow skill", () => {
 			skill_name: string;
 			evals: unknown[];
 		};
-		expect(evalCatalog.skill_name).toBe("casa-workflow");
+		expect(evalCatalog.skill_name).toBe("casa-standard");
 		expect(evalCatalog.evals.length).toBeGreaterThanOrEqual(7);
 
 		const triggerCatalog = JSON.parse(

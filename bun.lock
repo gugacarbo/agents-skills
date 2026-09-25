@@ -24,8 +24,8 @@
       "name": "@gugacarbo/skill-brainstorm",
       "version": "0.0.0",
     },
-    "skills/casa-workflow": {
-      "name": "@gugacarbo/skill-casa-workflow",
+    "skills/casa-standard": {
+      "name": "@gugacarbo/skill-casa-standard",
       "version": "0.0.0",
     },
     "skills/code-flow": {
@@ -261,7 +261,7 @@
 
     "@gugacarbo/skill-brainstorm": ["@gugacarbo/skill-brainstorm@workspace:skills/brainstorm"],
 
-    "@gugacarbo/skill-casa-workflow": ["@gugacarbo/skill-casa-workflow@workspace:skills/casa-workflow"],
+    "@gugacarbo/skill-casa-standard": ["@gugacarbo/skill-casa-standard@workspace:skills/casa-standard"],
 
     "@gugacarbo/skill-code-flow": ["@gugacarbo/skill-code-flow@workspace:skills/code-flow"],
 

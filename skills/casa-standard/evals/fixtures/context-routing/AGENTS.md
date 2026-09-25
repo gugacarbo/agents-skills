@@ -13,7 +13,7 @@ bun test
 
 ## Mapa de contexto
 
-| Capítulo | Quando carregar |
-| --- | --- |
-| `docs/context/INFRA.md` | Ao alterar deploy ou ambientes |
+| Capítulo                   | Quando carregar                   |
+| -------------------------- | --------------------------------- |
+| `docs/context/INFRA.md`    | Ao alterar deploy ou ambientes    |
 | `docs/context/SECURITY.md` | Ao alterar segredos ou permissões |

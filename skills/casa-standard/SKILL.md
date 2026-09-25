@@ -1,9 +1,9 @@
 ---
-name: casa-workflow
-description: Classifica tier, artefatos, gates e contexto durável em repositórios CASA. Use quando o usuário invocar $casa-workflow, mencionar CASA, casa-init ou docs-check, pedir adoção/upgrade, alterar ADR, Spec ou contexto, fechar Spec ou implementar em repo com metadados CASA. Não use em repo não CASA ou explicação genérica.
+name: casa-standard
+description: Classifica tier, artefatos, gates e contexto durável em repositórios CASA. Use quando o usuário invocar $casa-standard, mencionar CASA, casa-init ou docs-check, pedir adoção/upgrade, alterar ADR, Spec ou contexto, fechar Spec ou implementar em repo com metadados CASA. Não use em repo não CASA ou explicação genérica.
 ---
 
-# CASA Workflow
+# CASA Standard
 
 ## Ativação
 
@@ -42,18 +42,17 @@ durável, comando canônico, estado operacional ou gotcha recorrente.
 ## Threshold do gate
 
 `gate_required=true` somente para mutação documental CASA inferida, não pedida,
-fora do escopo autorizado ou dependente de decisão ainda aberta. Upgrade ou
-adoção com alvo móvel/não resolvido (“mais recente”) fica aberto até definir
-versão, ref e source-set exatos.
-`gate_required=false` quando o usuário pedir diretamente criar, atualizar,
-depreciar ou fechar o artefato com escopo semântico identificável, e quando não
-houver escrita documental: código, teste, schema, migração, auditoria read-only e sugestão.
+fora do escopo autorizado ou dependente de decisão ainda aberta. O gate cobre
+documentação-fonte (`AGENTS.md`, ADR, Spec, contexto), não índices gerados.
+Upgrade/adoção com alvo móvel/não resolvido (“mais recente”) fica sem versão,
+ref e source-set exatos.
+`gate_required=false` para pedido direto com escopo semântico identificável ou
+sem edição da documentação-fonte: código, teste, schema, migração, índice
+gerado, auditoria read-only e sugestão.
 
 Autorizações comuns de segurança, dados, operação destrutiva ou efeito remoto
 continuam válidas, mas não se tornam gate CASA sem mutação documental. Um gate cobre todo o envelope documental aprovado.
-Classifique documentos primeiro; tamanho, risco, schema e migration não definem
-ADR nem gate. Autorização direta não permite editar corpo de ADR aceita, fechar
-Spec sem evidência ou executar efeito remoto não autorizado.
+Classifique documentos primeiro: tamanho, risco, schema e migration não definem ADR nem gate. Autorização direta não permite editar corpo de ADR aceita, fechar Spec sem evidência ou executar efeito remoto não autorizado.
 
 ## Gate e bypass
 

@@ -3,8 +3,8 @@
 	"ignore": [
 		"skills/brainstorm/scripts/visual-companion/helper.js",
 		"skills/brainstorm/scripts/visual-companion/server.cjs",
-		"skills/casa-workflow/evals/fixtures/**",
-		"skills/casa-workflow/evals/run-evals.mjs",
+		"skills/casa-standard/evals/fixtures/**",
+		"skills/casa-standard/evals/run-evals.mjs",
 		"skills/code-flow/tests/evals/run-evals.mjs",
 		"skills/commit-changes/evals/run-evals.mjs",
 		"skills/project-init/evals/run-evals.mjs",

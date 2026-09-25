@@ -161,9 +161,9 @@ async function preflight(options) {
 	}
 	if (options.configuration !== "without_skill") return;
 	const homes = new Set([
-		path.join(process.env.HOME ?? "", ".agents/skills/casa-workflow"),
-		path.join(process.env.HOME ?? "", ".claude/skills/casa-workflow"),
-		path.join(process.env.CODEX_HOME ?? "", "skills/casa-workflow"),
+		path.join(process.env.HOME ?? "", ".agents/skills/casa-standard"),
+		path.join(process.env.HOME ?? "", ".claude/skills/casa-standard"),
+		path.join(process.env.CODEX_HOME ?? "", "skills/casa-standard"),
 	]);
 	for (const candidate of homes) {
 		if (candidate && (await exists(candidate)))
@@ -1022,7 +1022,7 @@ async function updateBenchmark(output, options) {
 		JSON.stringify(
 			{
 				metadata: {
-					skill_name: "casa-workflow",
+					skill_name: "casa-standard",
 					skill_path: options.skill,
 					executor_model:
 						models.length === 1 ? models[0] : models.length ? "mixed" : null,
@@ -1172,8 +1172,8 @@ async function main() {
 			if (options.configuration !== "without_skill") {
 				const target =
 					options.host === "codex"
-						? path.join(workspace, ".agents/skills/casa-workflow")
-						: path.join(workspace, ".claude/skills/casa-workflow");
+						? path.join(workspace, ".agents/skills/casa-standard")
+						: path.join(workspace, ".claude/skills/casa-standard");
 				await installRuntimeSkill(options.skill, target);
 			}
 			const before = await snapshot(workspace);
@@ -1187,7 +1187,7 @@ async function main() {
 			let args;
 			const executionPrompt =
 				options.configuration !== "without_skill"
-					? `${options.host === "claude" ? "/casa-workflow" : "$casa-workflow"}\n\n${evalCase.prompt}`
+					? `${options.host === "claude" ? "/casa-standard" : "$casa-standard"}\n\n${evalCase.prompt}`
 					: evalCase.prompt;
 			if (options.host === "codex") {
 				command = "codex";
