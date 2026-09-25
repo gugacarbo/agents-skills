@@ -1,0 +1,6 @@
+interface:
+  display_name: "CASA Standard"
+  short_description: "Guardrail do ciclo de mudanças CASA"
+  default_prompt: "Use $casa-standard para classificar tier, artefatos, gate e contexto durável desta mudança."
+policy:
+  allow_implicit_invocation: true
