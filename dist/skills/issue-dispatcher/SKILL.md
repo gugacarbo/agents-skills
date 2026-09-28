@@ -17,11 +17,11 @@ Use o formato que o usuário pedir. Se não houver escolha explícita, recomende
 um formato com base no escopo e explique a recomendação antes de tratar a
 escolha como definitiva:
 
-| Modelo | Use quando |
-| --- | --- |
+| Modelo                                      | Use quando                                                                                                                                                         |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [Issue simples](references/simple-issue.md) | Uma entrega delimitada, com contexto e resultado claros, sem precisar narrar uma persona ou coordenar várias entregas. É o padrão para trabalho pequeno ou direto. |
-| [User story](references/user-story.md) | A necessidade é melhor explicada pelo ponto de vista de uma pessoa usuária e pelo valor que ela obtém; critérios de aceite descrevem comportamento observável. |
-| [Epic](references/epic.md) | O objetivo precisa de várias entregas coordenadas, pode ser dividido em issues-filhas ou envolve dependências e marcos. A Epic acompanha o resultado agregado. |
+| [User story](references/user-story.md)      | A necessidade é melhor explicada pelo ponto de vista de uma pessoa usuária e pelo valor que ela obtém; critérios de aceite descrevem comportamento observável.     |
+| [Epic](references/epic.md)                  | O objetivo precisa de várias entregas coordenadas, pode ser dividido em issues-filhas ou envolve dependências e marcos. A Epic acompanha o resultado agregado.     |
 
 Se o usuário deixar a escolha em aberto e os sinais não apontarem claramente
 para um modelo, pergunte qual prefere antes de finalizar a issue. Se ele

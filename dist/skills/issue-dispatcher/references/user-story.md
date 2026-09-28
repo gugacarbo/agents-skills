@@ -13,13 +13,16 @@ quero <capacidade ou mudança>,
 para <benefício ou resultado desejado>.
 
 ## Contexto
+
 <Situação e necessidade relevante>
 
 ## Critérios de aceite
+
 - [ ] Dado <contexto>, quando <ação>, então <resultado observável>.
 - [ ] <Outros resultados verificáveis, se necessários>
 
 ## Fora de escopo / pendências
+
 - <Limites explícitos ou decisões em aberto; omita se não houver>
 ```
 

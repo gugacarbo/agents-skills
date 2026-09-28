@@ -10,24 +10,30 @@ que ainda precisa ser decidido.
 # Epic: <objetivo agregado>
 
 ## Contexto e oportunidade
+
 <Problema, público afetado e contexto conhecido>
 
 ## Resultado da Epic
+
 <Mudança ou benefício agregado observável>
 
 ## Escopo
+
 - Inclui: <resultados abrangidos>
 - Não inclui: <limites explícitos>
 
 ## Critérios de conclusão
+
 - [ ] <Sinal verificável de que o objetivo agregado foi alcançado>
 
 ## Entregas relacionadas
-| Issue / resultado | Dependências | Situação |
-| --- | --- | --- |
+
+| Issue / resultado             | Dependências                       | Situação           |
+| ----------------------------- | ---------------------------------- | ------------------ |
 | <issue ou entrega confirmada> | <dependência conhecida ou nenhuma> | <estado conhecido> |
 
 ## Decisões e pendências
+
 - <Decisão em aberto, risco ou dependência; omita se não houver>
 ```
 
