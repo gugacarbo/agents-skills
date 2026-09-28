@@ -108,11 +108,12 @@ Review gates remain task-scoped and sequential on the integration branch. A
 parallel implementer finishing early does not make its result eligible to skip
 plan order or review.
 
-For fix rounds, resume the original implementer in its task worktree through
-round 3. It appends a report and creates new commits on the same task branch.
-Verify the new commit range, cherry-pick it into the integration branch, and
-create the scoped re-review package from the integration head that the previous
-review saw.
+For fix round 1, resume the original implementer in its task worktree. For fix
+round 2, use a fresh implementer on the approved higher-tier model in that same
+task worktree and branch. The implementer appends a report and creates new
+commits. Verify the new commit range, cherry-pick it into the integration
+branch, and create the scoped re-review package from the integration head that
+the previous review saw.
 
 Before integrating a fix, compare its changed paths with every pending task in
 the wave. If they overlap, or if the fix changes an interface a pending task

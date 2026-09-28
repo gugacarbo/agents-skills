@@ -12,10 +12,10 @@ describe("orchestrate-implementation parallel waves", () => {
 
 	test("routes safe parallel execution to the detailed reference", () => {
 		expect(skill).toContain(
-			"[parallel-waves.md](references/parallel-waves.md)",
+			"[`parallel-waves.md`](references/parallel-waves.md)",
 		);
-		expect(skill).toContain("Parallel wave:");
-		expect(skill).toContain("Sequential task:");
+		expect(skill).toContain("parallel wave, load");
+		expect(skill).toContain("sequentially by default");
 		expect(skill).not.toContain(
 			"Never dispatch multiple implementation subagents in parallel",
 		);
@@ -63,37 +63,24 @@ describe("orchestrate-implementation parallel waves", () => {
 });
 
 describe("orchestrate-implementation implementation configuration", () => {
-	test("requires model confirmation before implementation and persists dispatch variables", () => {
+	test("approves models before implementation and records dispatch boundaries", () => {
 		const skill = read("SKILL.md");
+		const setup = read("references/controller-setup.md");
+		const taskLoop = read("references/controller-task-loop.md");
 
-		expect(skill).toContain("## Implementation Configuration Gate");
-		expect(skill).toContain("wait\nfor explicit approval");
-		expect(skill).toContain("## Implementation configuration");
-		for (const variable of [
-			"PLAN_FILE",
-			"WORKSPACE",
-			"MERGE_BASE",
-			"MODEL",
-			"BRIEF_FILE",
-			"REPORT_FILE",
-			"WORKTREE",
-			"TASK_BRANCH",
-			"WRITE_SET",
-			"GLOBAL_CONSTRAINTS",
-			"BASE_SHA",
-			"HEAD_SHA",
-			"WAVE_BASE",
-			"INTEGRATION_BASE",
-			"FIX_BASE_SHA",
-			"DIFF_FILE",
-			"FINDINGS",
-		]) {
-			expect(skill).toContain(variable);
-		}
+		expect(skill).toContain("controller-setup.md");
+		expect(setup).toContain("## Configuration Gate");
+		expect(setup).toContain("Wait for explicit approval");
+		expect(setup).toContain("## Ledger Records");
+		expect(setup).toContain("append-only run records");
+		expect(setup).toContain("exact values used");
+		expect(taskLoop).toContain("approved write set");
+		expect(taskLoop).toContain("base commit");
 	});
 
 	test("requires user-approved concrete models and recovers from validation failures when possible", () => {
 		const skill = read("SKILL.md");
+		const taskLoop = read("references/controller-task-loop.md");
 		const implementerPrompt = read("implementer-prompt.md");
 		const taskReviewerPrompt = read("task-reviewer-prompt.md");
 		const reReviewPrompt = read("re-review-prompt.md");
@@ -101,19 +88,12 @@ describe("orchestrate-implementation implementation configuration", () => {
 		const parallelWaves = read("references/parallel-waves.md");
 		const finishingGuide = read("references/finishing-a-development-branch.md");
 
+		expect(skill).toContain("Never dispatch an agent with an omitted model");
 		expect(skill).toContain(
-			"Never dispatch a subagent with an omitted model or `model: inherit`.",
+			"Run every validation requested by the user, plan, or Spec.",
 		);
-		expect(skill).toContain(
-			"Never dispatch, replace, or otherwise use a model that the user has not explicitly approved.",
-		);
-		expect(skill).toContain(
-			"Run every test or validation command explicitly requested by the user, plan, or spec.",
-		);
-		expect(skill).toContain(
-			"diagnose and address the failure when a viable implementation path remains",
-		);
-		expect(skill).toContain("stop only when no viable path remains");
+		expect(taskLoop).toContain("record its command and full output");
+		expect(taskLoop).toContain("diagnose and fix it where viable");
 		expect(skill).not.toContain(
 			"return the error and its command output to the user before any retry, fix, reassignment, or further dispatch.",
 		);
@@ -129,7 +109,10 @@ describe("orchestrate-implementation implementation configuration", () => {
 		expect(finishingGuide).toContain(
 			"Fix and re-run the\ncovering tests when a viable implementation or environment-repair path remains",
 		);
-		expect(skill).not.toContain("the four named below");
+		expect(taskLoop).toContain("Two Rounds Maximum");
+		expect(taskLoop).toContain("**Round 1:**");
+		expect(taskLoop).toContain("**Round 2:**");
+		expect(taskLoop).toContain("fix round <R>/2");
 
 		for (const prompt of [
 			implementerPrompt,
@@ -145,25 +128,15 @@ describe("orchestrate-implementation implementation configuration", () => {
 });
 
 describe("orchestrate-implementation run reporting", () => {
-	test("requires concise reports for every result and a table for completed batches", () => {
-		const skill = read("SKILL.md");
+	test("reports blockers promptly and summarizes completed batches", () => {
+		const taskLoop = read("references/controller-task-loop.md");
 
-		expect(skill).toContain("### Run reporting");
-		expect(skill).toContain("Every time a task or batch reaches a result");
-		expect(skill).toContain("review clean, or a fix-round");
-		expect(skill).toContain("show the user a simple run report");
-		expect(skill).toContain("under five lines");
-		expect(skill).toContain("Required run reports are the exception");
-		expect(skill).toContain("### Batch completion table");
-		expect(skill).toContain("`Task`,");
-		expect(skill).toContain("`Result`, `Tests`, `Commits`, `Review`, `Notes`");
-		expect(skill).toContain("one row per task and a summary row");
-		expect(skill).toContain("complete with parked findings");
-		expect(skill).toContain("totals of completed and unfinished");
-		expect(skill).toContain("tasks.");
-		expect(skill).toContain("only after every task is");
-		expect(skill).toContain("own review/fix loop has a final result");
-		expect(skill).toContain("do not imply a");
+		expect(taskLoop).toContain("ordinary task results");
+		expect(taskLoop).toContain("without a separate progress\nmessage");
+		expect(taskLoop).toContain("report the specific issue immediately");
+		expect(taskLoop).toContain("show one concise table");
+		expect(taskLoop).toContain("one row per original task plus a summary row");
+		expect(taskLoop).toContain("parallel wave complete while any result");
 	});
 
 	test("contains parseable reporting eval metadata", async () => {
@@ -178,7 +151,7 @@ describe("orchestrate-implementation run reporting", () => {
 		);
 		expect(reportingEval).toBeDefined();
 		expect(reportingEval?.expectations).toContainEqual(
-			"The controller posts a concise user-facing report after each task result: DONE, DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED, review clean, or fix result.",
+			"Ordinary task results are recorded in the ledger without individual progress messages; blockers and required user decisions are reported immediately.",
 		);
 	});
 });
