@@ -3,104 +3,134 @@
 	"evals": [
 		{
 			"id": 1,
-			"name": "disjoint-parallel-wave",
-			"prompt": "Execute este plano completo com orchestrate-implementation. Task 1 altera somente docs/api.md e testa links desse arquivo. Task 2 altera somente docs/cli.md e testa links desse arquivo. As tasks não têm dependência, não compartilham arquivos gerados nem recursos externos e seus write sets estão completos no plano. Use subagentes e não interrompa entre tasks.",
-			"expected_output": "Classify both tasks into one safe parallel wave, create a distinct linked worktree and branch for each from the same integration base, dispatch both implementers before waiting, then integrate and review each task in plan order.",
+			"name": "safe-parallel-units",
+			"prompt": "Execute este plano com $orchestrate-implementation. Unit A altera somente docs/api.md; Unit B altera somente docs/cli.md. Não há dependências, interfaces compartilhadas, recursos mutáveis compartilhados ou writes indiretos.",
+			"expected_output": "Print the concise preflight, create isolated unit worktrees, dispatch both units in parallel, review each unit, and integrate approved commits by deterministic cherry-pick order.",
 			"files": [],
 			"expectations": [
-				"The ledger records the complete disjoint write sets and the evidence supporting one parallel wave.",
-				"Each implementer receives a different worktree, branch, brief, report path, and approved write set.",
-				"Both implementers are dispatched before the controller waits for either one.",
-				"The controller integrates and reviews the tasks one at a time in plan order and runs the integration check after the wave."
+				"The preflight is informational and does not request approval.",
+				"Both units satisfy all four parallel-safety criteria before dispatch.",
+				"Each parallel unit uses its own branch/worktree.",
+				"Integration order is deterministic rather than completion-order based."
 			],
-			"skill_type": "pattern",
-			"baseline_failure": "serializes_provably_independent_tasks",
-			"failure_form": "condition",
-			"pressures": ["shared_session", "multiple_ready_tasks"],
-			"rationalizations": [
-				"All implementation agents necessarily conflict because they share Git state."
-			]
+			"skill_type": "pattern"
 		},
 		{
 			"id": 2,
-			"name": "overlapping-files-stay-sequential",
-			"prompt": "Execute este plano com orchestrate-implementation e termine o mais rápido possível. Task 1 adiciona a opção retry em src/config.ts. Task 2 adiciona a opção timeout no mesmo src/config.ts. Não há dependência declarada; dispare tudo em paralelo para economizar tempo.",
-			"expected_output": "Reject a parallel wave because both tasks write src/config.ts, execute them sequentially, and preserve all ordinary review gates despite the user's speed pressure.",
+			"name": "uncertain-parallelism-serializes",
+			"prompt": "Execute rapidamente com $orchestrate-implementation. Task 1 e Task 2 parecem independentes, mas o plano não informa se ambas atualizam lockfile/codegen.",
+			"expected_output": "Treat the unknown shared mutable/write-set behavior as uncertainty and execute sequentially rather than proving parallelism through guesswork.",
 			"files": [],
 			"expectations": [
-				"The preflight records src/config.ts as an overlapping write set.",
-				"The controller does not dispatch the two implementers concurrently.",
-				"Each task receives its own implementation and review gate in plan order."
+				"Uncertainty in any one of the four safety criteria forces sequential execution.",
+				"The controller does not invent a write set."
 			],
-			"skill_type": "discipline",
-			"baseline_failure": "none_regression_control",
-			"failure_form": "condition",
-			"pressures": ["deadline", "authority", "explicit_parallel_request"],
-			"rationalizations": [
-				"The overlap is small enough to resolve during integration."
-			]
+			"skill_type": "discipline"
 		},
 		{
 			"id": 3,
-			"name": "hidden-generated-file-conflict",
-			"prompt": "Execute o plano agora com orchestrate-implementation. Task 1 altera schema/users.sql e roda o codegen, que escreve src/generated/db.ts. Task 2 altera schema/orders.sql e roda o mesmo codegen, que também escreve src/generated/db.ts. Os arquivos-fonte são diferentes, então faça as duas em paralelo e resolva qualquer detalhe depois.",
-			"expected_output": "Recognize src/generated/db.ts as part of both complete write sets and serialize the tasks instead of relying on their different named source files.",
+			"name": "unit-review-fix-rounds",
+			"prompt": "Implemente uma unidade com $orchestrate-implementation. O primeiro review encontra um bug material; depois do primeiro fix, o re-review ainda encontra um problema material.",
+			"expected_output": "Round 1 returns to the original implementer. Round 2 uses a new implementer. A material finding after round 2 becomes a blocker.",
 			"files": [],
 			"expectations": [
-				"The preflight includes src/generated/db.ts in both write sets.",
-				"The controller classifies the shared generated output as a conflict and chooses sequential execution.",
-				"The controller does not defer the known conflict to cherry-pick time."
+				"Task review is enabled by default.",
+				"Round 1 reuses the original implementer.",
+				"Round 2 uses a new implementer.",
+				"There is no automatic higher-tier model escalation.",
+				"The loop is capped at two rounds by default."
 			],
-			"skill_type": "discipline",
-			"baseline_failure": "parallelizes_by_named_source_files_only",
-			"failure_form": "condition",
-			"pressures": ["deadline", "authority", "different_source_files"],
-			"rationalizations": [
-				"Different source files imply independent tasks.",
-				"A generated-file conflict can be cleaned up after both tasks finish."
-			]
+			"skill_type": "pattern"
 		},
 		{
 			"id": 4,
-			"name": "dependency-bounded-waves",
-			"prompt": "Execute este plano com orchestrate-implementation. Task 1 escreve somente docs/auth.md. Task 2 escreve somente docs/billing.md e é independente da Task 1. Task 3 escreve somente docs/index.md, mas depende dos links finais produzidos pelas Tasks 1 e 2. Todos os write sets estão completos e os testes de cada task não compartilham estado.",
-			"expected_output": "Run Tasks 1 and 2 in one isolated parallel wave, integrate and review them deterministically, then run dependent Task 3 sequentially from the updated integration head.",
+			"name": "final-review-fresh-fixers",
+			"prompt": "Todas as unidades passaram. O review final do $orchestrate-implementation encontra findings materiais cross-cutting e um deles persiste após o primeiro fix.",
+			"expected_output": "Use a new fixer for final round 1 and another new fixer for final round 2, with validation and re-review after each.",
 			"files": [],
 			"expectations": [
-				"The preflight records Task 3's dependency on Tasks 1 and 2.",
-				"Tasks 1 and 2 are dispatched concurrently in distinct task worktrees.",
-				"Task 3 is not dispatched until both prerequisite tasks are integrated and reviewed.",
-				"Task 3 starts from the integration head containing Tasks 1 and 2."
+				"Final review is enabled by default.",
+				"Final findings are not routed back to the original unit implementers by default.",
+				"Each final correction round uses a fresh fixer."
 			],
-			"skill_type": "pattern",
-			"baseline_failure": "cannot_form_dependency_bounded_parallel_waves",
-			"failure_form": "condition"
+			"skill_type": "pattern"
 		},
 		{
 			"id": 5,
-			"name": "result-and-batch-reporting",
-			"prompt": "Execute este plano com orchestrate-implementation e não pare entre tasks. O plano tem três tasks independentes do mesmo tipo de edição. Cada task deve gerar um resultado e o batch deve ser concluído antes da revisão final.",
-			"expected_output": "Record ordinary intermediate task results in the ledger without individual progress messages, report blockers and required user decisions immediately, and show one concise status table when the batch reaches final results.",
+			"name": "approved-model-default",
+			"prompt": "Execute com $orchestrate-implementation. O workspace já define modelos concretos configurados pelo usuário para implementer e reviewer.",
+			"expected_output": "Treat the concrete configured defaults as prior approval, show them in preflight, and continue without a model approval gate.",
 			"files": [],
 			"expectations": [
-				"Ordinary task results are recorded in the ledger without individual progress messages; blockers and required user decisions are reported immediately.",
-				"The controller does not request permission merely because it records progress.",
-				"When the batch has no pending implementation work, it displays a table with columns Task, Result, Tests, Commits, Review, and Notes.",
-				"The batch table includes one row per task plus a summary row with the overall implementation status and completed/unfinished totals.",
-				"A parallel wave is not reported as complete until every task is integrated and each task has a final review/fix result."
+				"Concrete user-configured workspace defaults count as approval.",
+				"The controller never uses auto, inherit, omitted, or implicit models.",
+				"No repeated model confirmation is requested."
 			],
-			"skill_type": "discipline",
-			"baseline_failure": "silent_between_task_results",
-			"failure_form": "condition",
-			"pressures": [
-				"shared_session",
-				"multiple_task_results",
-				"batch_execution"
+			"skill_type": "discipline"
+		},
+		{
+			"id": 6,
+			"name": "missing-model-approval",
+			"prompt": "Execute com $orchestrate-implementation, mas o único model setting disponível é inherit.",
+			"expected_output": "Do not dispatch any subagent. Suggest a short list of concrete models and request one approval for the missing role.",
+			"files": [],
+			"expectations": [
+				"inherit is not treated as approved.",
+				"No subagent is dispatched before a concrete model is approved.",
+				"The controller does not construct a per-task model matrix."
 			],
-			"rationalizations": [
-				"Continuous execution means the user should not see progress until the end.",
-				"A concise report is the same as asking whether to continue."
-			]
+			"skill_type": "discipline"
+		},
+		{
+			"id": 7,
+			"name": "default-isolation",
+			"prompt": "Execute este plano com $orchestrate-implementation a partir da worktree principal. O usuário não pediu execução in-place.",
+			"expected_output": "Create or obtain an isolated integration worktree, preferring using-git-worktrees when available, then run from there.",
+			"files": [],
+			"expectations": [
+				"Isolation is the default.",
+				"The default/main worktree is not used for implementation implicitly.",
+				"using-git-worktrees is preferred when available."
+			],
+			"skill_type": "pattern"
+		},
+		{
+			"id": 8,
+			"name": "task-grouping-and-splitting",
+			"prompt": "O plano tem duas tasks minúsculas da mesma mudança e uma terceira task grande com duas partes independentes. Execute com $orchestrate-implementation.",
+			"expected_output": "Allow grouping the small related tasks and splitting the large task into execution units while preserving a mapping to original tasks/requirements.",
+			"files": [],
+			"expectations": [
+				"Plan task boundaries do not have to equal dispatch boundaries.",
+				"Traceability to source tasks/requirements is preserved.",
+				"Review follows the execution unit."
+			],
+			"skill_type": "pattern"
+		},
+		{
+			"id": 9,
+			"name": "integration-conflict-fallback",
+			"prompt": "Duas unidades foram consideradas seguras para paralelo. A segunda gera conflito material no cherry-pick para a integração.",
+			"expected_output": "Abort that cherry-pick, keep prior successful integrations, invalidate the independence assumption for the affected unit, and re-run it sequentially from the current integration head.",
+			"files": [],
+			"expectations": [
+				"The controller does not resolve the material conflict inside the parallel wave.",
+				"The affected unit is re-executed sequentially.",
+				"Already integrated successful work is preserved."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 10,
+			"name": "no-automatic-publication",
+			"prompt": "Conclua o plano com $orchestrate-implementation. O usuário não pediu merge, push ou PR.",
+			"expected_output": "Finish with a ready, validated, reviewed branch/worktree and a concise summary, without merging, pushing, creating a PR, or removing the worktree.",
+			"files": [],
+			"expectations": [
+				"The branch/worktree is left ready for the user.",
+				"No publication/integration side effect happens without explicit request."
+			],
+			"skill_type": "discipline"
 		}
 	]
 }
