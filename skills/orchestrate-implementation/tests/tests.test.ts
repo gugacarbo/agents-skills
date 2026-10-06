@@ -1,170 +1,162 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const skillRoot = resolve(import.meta.dir, "..");
 const read = (path: string) => readFileSync(resolve(skillRoot, path), "utf8");
 
-describe("orchestrate-implementation parallel waves", () => {
-	const skill = read("SKILL.md");
-	const parallelWaves = read("references/parallel-waves.md");
-	const implementerPrompt = read("implementer-prompt.md");
+describe("orchestrate-implementation core contract", () => {
+  const skill = read("SKILL.md");
 
-	test("routes safe parallel execution to the detailed reference", () => {
-		expect(skill).toContain(
-			"[`parallel-waves.md`](references/parallel-waves.md)",
-		);
-		expect(skill).toContain("parallel wave, load");
-		expect(skill).toContain("sequentially by default");
-		expect(skill).not.toContain(
-			"Never dispatch multiple implementation subagents in parallel",
-		);
-	});
+  test("keeps explicit activation and controller-only implementation", () => {
+    expect(skill).toContain("Use only when the user explicitly invokes");
+    expect(skill).toContain("controller never writes or corrects implementation code");
+    expect(skill).toContain("Implementation and fixes always go to subagents");
+  });
 
-	test("requires more than different named source files", () => {
-		for (const requirement of [
-			"complete write set",
-			"generated files",
-			"shared resource",
-			"own linked worktree and branch",
-		]) {
-			expect(parallelWaves).toContain(requirement);
-		}
-	});
+  test("uses an informative preflight without a configuration gate", () => {
+    expect(skill).toContain("## Preflight");
+    expect(skill).toContain("This is informational, not an approval gate");
+    expect(skill).not.toContain("Configuration Gate");
+    expect(skill).not.toContain("wait for its explicit approval");
+  });
 
-	test("integrates task branches deterministically and falls back on conflict", () => {
-		expect(parallelWaves).toContain("in plan order");
-		expect(parallelWaves).toContain("Cherry-pick");
-		expect(parallelWaves).toContain("with `-x`");
-		expect(parallelWaves).toContain("source-to-integration commit mapping");
-		expect(parallelWaves).toContain("abort that cherry-pick");
-		expect(parallelWaves).toContain("re-run the affected task sequentially");
-	});
+  test("requires approved concrete models without automatic escalation", () => {
+    expect(skill).toContain("Never dispatch a subagent with an unapproved model");
+    expect(skill).toContain("concrete system/workspace default");
+    expect(skill).toContain("`auto`, `inherit`");
+    expect(skill).toContain("never require automatic");
+  });
 
-	test("gives each parallel implementer an enforceable isolation contract", () => {
-		for (const placeholder of ["[WORKTREE]", "[TASK_BRANCH]", "[WRITE_SET]"]) {
-			expect(implementerPrompt).toContain(placeholder);
-		}
-		expect(implementerPrompt).toContain("do not write outside that set");
-		expect(implementerPrompt).toContain("return NEEDS_CONTEXT");
-		expect(implementerPrompt).toContain("the only write allowed");
-		expect(implementerPrompt).toContain(
-			"outside a parallel task's approved source write set",
-		);
-	});
+  test("defaults to isolated worktrees and safe parallelism", () => {
+    expect(skill).toContain("Default to isolation");
+    expect(skill).toContain("using-git-worktrees");
+    expect(skill).toContain("Parallelism is automatic only when all four conditions");
+    for (const concept of [
+      "No dependency conflict",
+      "No write-set conflict",
+      "No interface conflict",
+      "No shared mutable resource",
+    ]) {
+      expect(skill).toContain(concept);
+    }
+    expect(skill).toContain("If any condition is uncertain, execute sequentially");
+  });
 
-	test("contains parseable behavioral eval metadata", async () => {
-		const catalog = await Bun.file(
-			resolve(skillRoot, "evals/evals.json"),
-		).json();
-		expect(catalog.skill_name).toBe("orchestrate-implementation");
-		expect(catalog.evals).toHaveLength(5);
-	});
+  test("allows grouping and subdivision while preserving traceability", () => {
+    expect(skill).toContain("group small, tightly related tasks");
+    expect(skill).toContain("split a large task into smaller units");
+    expect(skill).toContain("mapping back to its source");
+  });
+
+  test("reviews execution units and caps correction loops", () => {
+    expect(skill).toContain("pr-review-orchestrator");
+    expect(skill).toContain("material");
+    expect(skill).toContain("non-blocking");
+    expect(skill).toContain("Correction round 1");
+    expect(skill).toContain("Correction round 2");
+    expect(skill).toContain("original implementer");
+    expect(skill).toContain("new implementer");
+    expect(skill).toContain("default 2");
+  });
+
+  test("integrates parallel units deterministically and falls back to sequential", () => {
+    expect(skill).toContain("predetermined unit order");
+    expect(skill).toContain("cherry-picking");
+    expect(skill).toContain("abort that unit's cherry-pick");
+    expect(skill).toContain("re-run the affected unit sequentially");
+  });
+
+  test("uses minimal recovery and no automatic publication", () => {
+    expect(skill).toContain("Persist minimal recovery state");
+    expect(skill).toContain("Git is the source of truth");
+    expect(skill).not.toContain("append-only run records");
+    expect(skill).toContain("Do not merge, push, create a PR");
+  });
+
+  test("uses focused validation and global final validation", () => {
+    expect(skill).toContain("focused validations");
+    expect(skill).toContain("Run final validation");
+    expect(skill).toContain("Biome or Knip");
+  });
+
+  test("final fixes use fresh fixers", () => {
+    expect(skill).toContain("Final fix round 1");
+    expect(skill).toContain("dispatch a new fixer");
+    expect(skill).toContain("Final fix round 2");
+    expect(skill).toContain("another new fixer");
+  });
 });
 
-describe("orchestrate-implementation implementation configuration", () => {
-	test("approves models before implementation and records dispatch boundaries", () => {
-		const skill = read("SKILL.md");
-		const setup = read("references/controller-setup.md");
-		const taskLoop = read("references/controller-task-loop.md");
+describe("orchestrate-implementation prompts", () => {
+  test("implementer prompt is scoped and forbids nested agents", () => {
+    const prompt = read("implementer-prompt.md");
+    expect(prompt).toContain("<APPROVED_CONCRETE_MODEL>");
+    expect(prompt).toContain("Do not work on other units");
+    expect(prompt).toContain("Never spawn another agent or reviewer");
+    expect(prompt).toContain("Create one or more natural commits");
+    expect(prompt).toContain("Focused validation");
+  });
 
-		expect(skill).toContain("controller-setup.md");
-		expect(setup).toContain("## Configuration Gate");
-		expect(setup).toContain("Wait for explicit approval");
-		expect(setup).toContain("## Ledger Records");
-		expect(setup).toContain("append-only run records");
-		expect(setup).toContain("exact values used");
-		expect(taskLoop).toContain("approved write set");
-		expect(taskLoop).toContain("base commit");
-	});
-
-	test("requires user-approved concrete models and recovers from validation failures when possible", () => {
-		const skill = read("SKILL.md");
-		const taskLoop = read("references/controller-task-loop.md");
-		const implementerPrompt = read("implementer-prompt.md");
-		const taskReviewerPrompt = read("task-reviewer-prompt.md");
-		const reReviewPrompt = read("re-review-prompt.md");
-		const branchReviewerPrompt = read("references/code-reviewer.md");
-		const parallelWaves = read("references/parallel-waves.md");
-		const finishingGuide = read("references/finishing-a-development-branch.md");
-
-		expect(skill).toContain("Never dispatch an agent with an omitted model");
-		expect(skill).toContain(
-			"Run every validation requested by the user, plan, or Spec.",
-		);
-		expect(taskLoop).toContain("record its command and full output");
-		expect(taskLoop).toContain("diagnose and fix it where viable");
-		expect(skill).not.toContain(
-			"return the error and its command output to the user before any retry, fix, reassignment, or further dispatch.",
-		);
-		expect(implementerPrompt).toContain(
-			"record\n    the exact command and complete output, then diagnose and address the failure\n    when a viable implementation or environment-repair path remains.",
-		);
-		expect(implementerPrompt).toContain(
-			"Report BLOCKED only when no viable\n    implementation path remains",
-		);
-		expect(parallelWaves).toContain(
-			"diagnose and\nfix it before deciding that the orchestration is blocked",
-		);
-		expect(finishingGuide).toContain(
-			"Fix and re-run the\ncovering tests when a viable implementation or environment-repair path remains",
-		);
-		expect(taskLoop).toContain("Two Rounds Maximum");
-		expect(taskLoop).toContain("**Round 1:**");
-		expect(taskLoop).toContain("**Round 2:**");
-		expect(taskLoop).toContain("fix round <R>/2");
-
-		for (const prompt of [
-			implementerPrompt,
-			taskReviewerPrompt,
-			reReviewPrompt,
-			branchReviewerPrompt,
-		]) {
-			expect(prompt).toContain("model: [MODEL");
-			expect(prompt).toContain("explicitly approved by the");
-			expect(prompt).toContain("`model: inherit`");
-		}
-	});
+  test("generic reviewer is a minimal read-only fallback", () => {
+    const prompt = read("generic-reviewer-prompt.md");
+    expect(prompt).toContain("pr-review-orchestrator");
+    expect(prompt).toContain("read-only");
+    expect(prompt).toContain("material");
+    expect(prompt).toContain("non-blocking");
+    expect(prompt).toContain("never spawn");
+  });
 });
 
-describe("orchestrate-implementation run reporting", () => {
-	test("reports blockers promptly and summarizes completed batches", () => {
-		const taskLoop = read("references/controller-task-loop.md");
+describe("orchestrate-implementation cleanup", () => {
+  test("removes the old orchestration framework", () => {
+    for (const path of [
+      "task-reviewer-prompt.md",
+      "re-review-prompt.md",
+      "references/controller-setup.md",
+      "references/controller-task-loop.md",
+      "references/controller-finish.md",
+      "references/parallel-waves.md",
+      "references/code-reviewer.md",
+      "references/requesting-code-review.md",
+      "references/finishing-a-development-branch.md",
+      "references/executing-plans/SKILL.md",
+      "references/receiving-code-review/SKILL.md",
+      "scripts/plan-workspace",
+      "scripts/task-brief",
+      "scripts/review-package",
+    ]) {
+      expect(existsSync(resolve(skillRoot, path))).toBe(false);
+    }
+  });
 
-		expect(taskLoop).toContain("ordinary task results");
-		expect(taskLoop).toContain("without a separate progress\nmessage");
-		expect(taskLoop).toContain("report the specific issue immediately");
-		expect(taskLoop).toContain("show one concise table");
-		expect(taskLoop).toContain("one row per original task plus a summary row");
-		expect(taskLoop).toContain("parallel wave complete while any result");
-	});
+  test("keeps primary files under the hard ceiling", () => {
+    for (const path of [
+      "SKILL.md",
+      "implementer-prompt.md",
+      "generic-reviewer-prompt.md",
+    ]) {
+      const lines = read(path).split("\n").length;
+      expect(lines).toBeLessThanOrEqual(1000);
+    }
+  });
 
-	test("contains parseable reporting eval metadata", async () => {
-		const catalog = await Bun.file(
-			resolve(skillRoot, "evals/evals.json"),
-		).json();
-
-		expect(catalog.evals).toHaveLength(5);
-		const reportingEval = catalog.evals.find(
-			(evaluation: { name: string }) =>
-				evaluation.name === "result-and-batch-reporting",
-		);
-		expect(reportingEval).toBeDefined();
-		expect(reportingEval?.expectations).toContainEqual(
-			"Ordinary task results are recorded in the ledger without individual progress messages; blockers and required user decisions are reported immediately.",
-		);
-	});
-});
-
-describe("orchestrate-implementation activation", () => {
-	test("requires an explicit user invocation", () => {
-		const skill = read("SKILL.md");
-
-		expect(skill).toContain(
-			"Use only when the user explicitly invokes `$orchestrate-implementation`",
-		);
-		expect(skill).toContain(
-			"Do not activate automatically for ordinary implementation requests or plans.",
-		);
-	});
+  test("contains behavior-focused eval metadata", async () => {
+    const catalog = await Bun.file(resolve(skillRoot, "evals/evals.json")).json();
+    expect(catalog.skill_name).toBe("orchestrate-implementation");
+    expect(catalog.evals.length).toBeGreaterThanOrEqual(8);
+    const names = new Set(catalog.evals.map((evaluation: { name: string }) => evaluation.name));
+    for (const name of [
+      "safe-parallel-units",
+      "uncertain-parallelism-serializes",
+      "unit-review-fix-rounds",
+      "final-review-fresh-fixers",
+      "approved-model-default",
+      "default-isolation",
+      "task-grouping-and-splitting",
+      "integration-conflict-fallback",
+    ]) {
+      expect(names.has(name)).toBe(true);
+    }
+  });
 });
