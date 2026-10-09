@@ -6,7 +6,6 @@ small: the orchestration skill owns flow, not a full review framework.
 ```text
 Subagent:
   description: "Review <UNIT_OR_FINAL_SCOPE>"
-  model: <APPROVED_CONCRETE_MODEL>
   prompt: |
     Review the supplied implementation read-only. Do not modify code and do not
     spawn subagents.

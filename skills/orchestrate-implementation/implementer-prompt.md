@@ -6,7 +6,6 @@ fills every placeholder before dispatch.
 ```text
 Subagent:
   description: "Implement <UNIT_ID>: <objective>"
-  model: <APPROVED_CONCRETE_MODEL>
   prompt: |
     Implement this execution unit. Do not work on other units and do not spawn
     subagents.

@@ -1,185 +1,78 @@
 # Implementer Subagent Prompt Template
 
-Use this template when dispatching an implementer subagent.
+Use this template for implementation units and correction work. The controller
+fills every placeholder before dispatch.
 
-```
-Subagent (general-purpose):
-  description: "Implement Task N: [task name]"
-  model: [MODEL — REQUIRED: concrete model explicitly approved by the user;
-         an omitted model or `model: inherit` is prohibited]
+```text
+Subagent:
+  description: "Implement <UNIT_ID>: <objective>"
   prompt: |
-    You are implementing Task N: [task name]
+    Implement this execution unit. Do not work on other units and do not spawn
+    subagents.
 
-    ## Task Description
+    Objective:
+    <OBJECTIVE>
 
-    Read your task brief first: [BRIEF_FILE]
-    It contains the full task text from the plan.
+    Source tasks / requirements:
+    <SOURCE_TASKS>
 
-    ## Context
+    Context:
+    <CONTEXT>
 
-    [Scene-setting: where this fits, dependencies, architectural context]
+    Relevant files / areas:
+    <AREAS>
 
-    ## Before You Begin
+    Constraints:
+    <CONSTRAINTS>
 
-    If you have questions about:
-    - The requirements or acceptance criteria
-    - The approach or implementation strategy
-    - Dependencies or assumptions
-    - Anything unclear in the task description
+    Acceptance criteria:
+    <ACCEPTANCE>
 
-    **Ask them now.** Raise any concerns before starting work.
+    Focused validation:
+    <VALIDATION>
 
-    ## Your Job
+    Workspace:
+    <WORKTREE>
 
-    Once you're clear on requirements:
-    1. Implement exactly what the task specifies
-    2. Write tests (following TDD if task says to)
-    3. Verify implementation works
-    4. Commit your work
-    5. Self-review (see below)
-    6. Report back
+    Branch:
+    <BRANCH>
 
-    Worktree: [WORKTREE]
-    Task branch: [TASK_BRANCH]
+    Expected write set:
+    <WRITE_SET_OR_UNKNOWN>
 
-    Start by confirming that the worktree and branch match these values. Commit
-    only on this branch.
+    Rules:
+    - Confirm the worktree and branch before editing.
+    - Stay inside this unit's scope.
+    - For a parallel unit, do not intentionally write outside the approved
+      write set. If an unexpected required write would make the unit conflict
+      with another parallel unit, stop and report NEEDS_CONTEXT.
+    - Do not pull, merge, rebase, cherry-pick, switch branches, or touch the
+      controller's integration worktree.
+    - Follow repository instructions and existing patterns.
+    - Run every validation explicitly required for this unit. Prefer focused
+      checks; do not run the full repository suite unless required.
+    - Diagnose and fix viable validation failures before reporting.
+    - Create one or more natural commits for the completed work.
+    - Never spawn another agent or reviewer.
 
-    If this task is part of a parallel wave, your approved write set is:
-    [WRITE_SET]
+    If this is a correction round, also use:
+    Findings:
+    <FINDINGS>
 
-    Except for the required [REPORT_FILE], do not write outside that set,
-    including generated files, lockfiles, snapshots, manifests, or formatter
-    outputs. Do not pull, merge, rebase, cherry-pick, switch branches, or touch
-    the controller's integration worktree. If the task requires another write,
-    stop before making it and return NEEDS_CONTEXT with the path and reason.
-    The controller will reclassify the task.
+    Previous attempt/evidence:
+    <PREVIOUS_ATTEMPT>
 
-    **While you work:** If you encounter something unexpected or unclear, **ask questions**.
-    It's always OK to pause and clarify. Don't guess or make assumptions.
-
-    While iterating, run the focused test for what you're changing; run every
-    test or validation command explicitly requested by the user, plan, or spec
-    before reporting DONE; run the full suite once before committing, not after
-    every edit. If any requested command fails, errors, or cannot run, record
-    the exact command and complete output, then diagnose and address the failure
-    when a viable implementation or environment-repair path remains. Re-run the
-    covering validation after the fix. Report BLOCKED only when no viable
-    implementation path remains, continuing requires new authority or a user
-    decision, or another named stop condition applies.
-
-    ## You Do Not Dispatch Subagents
-
-    Do all of this task's work yourself. Never spawn a subagent to
-    implement part of the task, and above all never spawn a reviewer to
-    check your work. Self-review (below) means reading your own diff.
-    Review is the controller's job: after you report, it dispatches a
-    fresh reviewer against your diff. A reviewer you spawn duplicates
-    that review at full cost, and its approval counts for nothing in
-    the process. If you catch yourself thinking "an independent review
-    would strengthen my report" — that review is already scheduled.
-    Report instead.
-
-    ## Code Organization
-
-    You reason best about code you can hold in context at once, and your edits are more
-    reliable when files are focused. Keep this in mind:
-    - Follow the file structure defined in the plan
-    - Each file should have one clear responsibility with a well-defined interface
-    - If a file you're creating is growing beyond the plan's intent, stop and report
-      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
-    - If an existing file you're modifying is already large or tangled, work carefully
-      and note it as a concern in your report
-    - In existing codebases, follow established patterns. Improve code you're touching
-      the way a good developer would, but don't restructure things outside your task.
-
-    ## When You're in Over Your Head
-
-    It is always OK to stop and say "this is too hard for me." Bad work is worse than
-    no work. You will not be penalized for escalating.
-
-    **STOP and escalate when:**
-    - The task requires architectural decisions with multiple valid approaches
-    - You need to understand code beyond what was provided and can't find clarity
-    - You feel uncertain about whether your approach is correct
-    - The task involves restructuring existing code in ways the plan didn't anticipate
-    - You've been reading file after file trying to understand the system without progress
-
-    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-    specifically what you're stuck on, what you've tried, and what kind of help you need.
-    The controller can provide more context, re-dispatch with a more capable model,
-    or break the task into smaller pieces.
-
-    ## Before Reporting Back: Self-Review
-
-    Review your work with fresh eyes. Ask yourself:
-
-    **Completeness:**
-    - Did I fully implement everything in the spec?
-    - Did I miss any requirements?
-    - Are there edge cases I didn't handle?
-
-    **Quality:**
-    - Is this my best work?
-    - Are names clear and accurate (match what things do, not how they work)?
-    - Is the code clean and maintainable?
-
-    **Discipline:**
-    - Did I avoid overbuilding (YAGNI)?
-    - Did I only build what was requested?
-    - Did I follow existing patterns in the codebase?
-
-    **Testing:**
-    - Do tests actually verify behavior (not just mock behavior)?
-    - Did I follow TDD if required?
-    - Are tests comprehensive?
-    - Is the test output pristine (no stray warnings or noise)?
-
-    If you find issues during self-review, fix them now before reporting.
-
-    ## After Review Findings
-
-    If the task review finds issues, you will be resumed with the findings.
-    Fix them, re-run the tests that cover the amended code, and append a fix
-    report to your report file: what you changed, the covering tests you
-    ran, the command, and the output. Reviewers will not re-run tests for
-    you — your report is the test evidence. Then reply with the same short
-    status contract as your first report.
-
-    ## Report Format
-
-    Write your full report to [REPORT_FILE]:
-    - What you implemented (or what you attempted, if blocked)
-    - What you tested and test results
-    - **TDD Evidence** (if TDD was required for this task):
-      - RED: command run, relevant failing output before implementation, and why the failure was expected
-      - GREEN: command run and relevant passing output after implementation
+    Report:
+    - Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+    - Commits created (SHA + subject)
     - Files changed
-    - Self-review findings (if any)
-    - Any issues or concerns
+    - Validations run and results
+    - Concise implementation summary
+    - Remaining concerns/blockers
 
-    Then report back with ONLY (under 15 lines — the detail lives in the
-    report file):
-    - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-    - Commits created (short SHA + subject)
-    - One-line test summary (e.g. "14/14 passing, output pristine")
-    - Your concerns, if any
-    - The report file path
-
-    If BLOCKED or NEEDS_CONTEXT, put the specifics in the final message
-    itself — the controller acts on it directly.
-
-    Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
-    Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
-    information that wasn't provided. Never silently produce work you're unsure about.
+    If requirements are materially ambiguous, scope must expand, or a safe
+    implementation path is unavailable, stop and report rather than guessing.
 ```
 
-**Placeholders:**
-
-- `[WORKTREE]` — REQUIRED absolute worktree path. For parallel waves this is a
-  task-specific linked worktree, never the integration worktree.
-- `[TASK_BRANCH]` — REQUIRED branch checked out in `[WORKTREE]`.
-- `[WRITE_SET]` — REQUIRED for a parallel wave. For a sequential task, write
-  "not restricted by a parallel wave".
-- `[REPORT_FILE]` — REQUIRED absolute report path and the only write allowed
-  outside a parallel task's approved source write set.
+The controller must never replace `<APPROVED_CONCRETE_MODEL>` with `auto`,
+`inherit`, an omitted model, or an unapproved model.
