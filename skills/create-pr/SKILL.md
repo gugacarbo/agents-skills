@@ -1,5 +1,5 @@
 ---
-name: creating-pr
+name: create-pr
 description: >
   Use this skill whenever an agent needs to prepare, create, or open a Pull Request.
   It defines a safe workflow for isolating the intended work, protecting unrelated
@@ -7,7 +7,7 @@ description: >
   a clean and reviewable PR.
 ---
 
-# Creating Pull Requests
+# Create Pull Request
 
 Create focused PRs without disturbing unrelated work. Never publish unrelated
 changes; use a dedicated branch, validate the implementation, review the complete
@@ -83,7 +83,7 @@ reversible operations and inspect unexpected files before acting.
 
 Use the repository's branch naming convention. Otherwise choose a descriptive,
 task-specific name (for example, `feat/remote-browser-sync`, `fix/multi-chat-activity`,
-`refactor/process-manager`, `docs/creating-pr-skill`); avoid vague names such as
+`refactor/process-manager`, `docs/create-pr-skill`); avoid vague names such as
 `changes`, `fix`, `test`, `temp`, or `wip`.
 
 Inspect `git status --short`, `git diff`, and `git diff --stat` periodically.

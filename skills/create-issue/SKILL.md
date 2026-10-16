@@ -1,9 +1,9 @@
 ---
-name: issue-dispatcher
+name: create-issue
 description: "Triages requests and drafts issues using a basic, user-story, or Epic format. Use when creating, refining, or choosing a format for a work-tracking issue."
 ---
 
-# Issue Dispatcher
+# Create Issue
 
 Transforme o pedido do usuário em um contrato de trabalho claro para uma issue,
 preservando a intenção e as decisões que ele já tomou. Investigue o contexto
