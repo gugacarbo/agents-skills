@@ -13,7 +13,9 @@ describe("orchestrate-implementation core contract", () => {
 		expect(skill).toContain(
 			"controller never writes or corrects implementation code",
 		);
-		expect(skill).toContain("Implementation and fixes always go to subagents");
+		expect(skill).toContain(
+			"It never implements or fixes product code itself.",
+		);
 	});
 
 	test("uses an informative preflight without a configuration gate", () => {
