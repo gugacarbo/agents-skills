@@ -28,6 +28,17 @@
 - [ ] Spatial composition creates visual interest
 - [ ] Backgrounds and visual details add atmosphere
 
+### Visual Critique (when visual evidence available)
+- **Evidence**: [Playwright screenshots (desktop/mobile), user-supplied print, Figma — or "code-only inference"]
+- **First impression**: [What draws the eye first — is that correct?]
+- **Reading flow**: [How the eye moves through the layout; are the right things emphasized?]
+
+| Finding | Severity | Recommendation |
+|---------|----------|----------------|
+| [Issue + code location] | 🔴 Critical / 🟡 Moderate / 🟢 Minor | [Fix] |
+
+- **Works well**: [Visual patterns worth preserving]
+
 ### Pillar Assessment
 
 | Pillar | Status | Notes |
