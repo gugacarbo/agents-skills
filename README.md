@@ -89,7 +89,6 @@ nome é informado, todas as skills disponíveis são instaladas.
 | -------------------------- | ----------------------------------------------------------------- |
 | `commit-changes`           | Cria commits com mensagens no padrão Conventional Commits         |
 | `find-docs`                | Busca documentação atualizada de bibliotecas e frameworks         |
-| `init-deep`                | Gera arquivos `AGENTS.md` hierárquicos no código (modo `--light`) |
 | `project-init`             | Scaffold de novos projetos a partir de templates curados          |
 | `skill-master`             | Criação, edição e avaliação de skills reutilizáveis para agentes  |
 | `code-flow`                | Entregas por issue com rigor adaptativo, reviews e gates humanos  |
@@ -180,7 +179,6 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 └── skills/                # Fonte das skills instaláveis
     ├── commit-changes/        # Commits com Conventional Commits
     ├── find-docs/             # Busca de documentação
-    ├── init-deep/             # Geração de AGENTS.md
     ├── project-init/          # Scaffold de projetos
     ├── skill-master/          # Autoria e avaliação de skills
     ├── code-flow/          # Entregas por issue com workflow verificável
