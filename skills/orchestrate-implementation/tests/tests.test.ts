@@ -60,7 +60,7 @@ describe("orchestrate-implementation core contract", () => {
 	});
 
 	test("reviews execution units and caps correction loops", () => {
-		expect(skill).toContain("pr-review-orchestrator");
+		expect(skill).toContain("orchestrate-review");
 		expect(skill).toContain("material");
 		expect(skill).toContain("non-blocking");
 		expect(skill).toContain("Correction round 1");
@@ -110,7 +110,7 @@ describe("orchestrate-implementation prompts", () => {
 
 	test("generic reviewer is a minimal read-only fallback", () => {
 		const prompt = read("generic-reviewer-prompt.md");
-		expect(prompt).toContain("pr-review-orchestrator");
+		expect(prompt).toContain("orchestrate-review");
 		expect(prompt).toContain("read-only");
 		expect(prompt).toContain("material");
 		expect(prompt).toContain("non-blocking");

@@ -1,13 +1,13 @@
 ---
-name: pr-review-orchestrator
+name: orchestrate-review
 description: Use only when the user explicitly asks for a review of a pull request, branch, commit range, diff, or implementation, or explicitly invokes this skill. Do not activate merely because a change is being implemented, prepared, or discussed, or because another skill recommends a review.
 ---
 
-# PR Review Orchestrator
+# Orchestrate Review
 
 ## Activation
 
-Use this skill only when the user's current request explicitly asks for a code review (for example, reviewing a PR, branch, commit range, diff, or implementation) or explicitly invokes `pr-review-orchestrator`.
+Use this skill only when the user's current request explicitly asks for a code review (for example, reviewing a PR, branch, commit range, diff, or implementation) or explicitly invokes `orchestrate-review`.
 
 Do not activate it merely because a change exists, is being implemented, or another skill or agent recommends review. A request to implement a feature, execute a plan, create a PR, or validate changes does not by itself request this skill. When another skill includes a review step but the user did not explicitly ask for a review, follow that skill's own review procedure without invoking this orchestrator.
 

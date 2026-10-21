@@ -1,6 +1,6 @@
 # Generic Reviewer Fallback Prompt
 
-Use this only when `pr-review-orchestrator` is unavailable. It is intentionally
+Use this only when `orchestrate-review` is unavailable. It is intentionally
 small: the orchestration skill owns flow, not a full review framework.
 
 ```text

@@ -160,7 +160,7 @@ After implementation:
    - **material** — must be corrected before the unit can complete;
    - **non-blocking** — may be reported without blocking completion.
 
-Use `pr-review-orchestrator` for unit or final review only when the user's
+Use `orchestrate-review` for unit or final review only when the user's
 request explicitly asks for code review or explicitly invokes that skill.
 Otherwise use [`generic-reviewer-prompt.md`](generic-reviewer-prompt.md) as the
 minimal review procedure. Do not recreate a large internal reviewer framework.
