@@ -116,7 +116,12 @@ describe("skill build", () => {
 
 			write(join(target, "code-toolbox", "SKILL.md"), "legacy\n");
 			write(
-				join(target, "orchestrate-implementation", "templates", "obsolete-template.md"),
+				join(
+					target,
+					"orchestrate-implementation",
+					"templates",
+					"obsolete-template.md",
+				),
 				"stale\n",
 			);
 			write(join(target, "external-skill", "SKILL.md"), "external\n");
@@ -133,7 +138,12 @@ describe("skill build", () => {
 			expectExists(join(target, "orchestrate-implementation", "SKILL.md"));
 			expectAbsent(join(target, "code-toolbox"));
 			expectAbsent(
-				join(target, "orchestrate-implementation", "templates", "obsolete-template.md"),
+				join(
+					target,
+					"orchestrate-implementation",
+					"templates",
+					"obsolete-template.md",
+				),
 			);
 			expectAbsent(join(target, "external-skill"));
 			expectAbsent(join(target, ".external-config"));
