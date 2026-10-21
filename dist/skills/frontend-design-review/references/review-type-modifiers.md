@@ -20,6 +20,13 @@ Adjust focus based on review context:
 - **Check**: Task completion path, action hierarchy, progressive disclosure
 - **Verify**: All components exist in design system or have documented exceptions
 
+## Visual / Mockup Critique
+
+- **Focus**: Rendered appearance of real code — screenshots, prints, Figma, live view
+- **Capture**: Browser automation (Playwright) screenshots when a URL or runnable app exists (primary view, desktop + mobile, key states); otherwise user-supplied images or Figma
+- **Apply**: First impression, usability, visual hierarchy, consistency, accessibility quick pass (see [visual-critique.md](visual-critique.md))
+- **Verify**: Visual findings traced back to code (tokens, styles, structure) so fixes land in the implementation
+
 ## Accessibility Audit
 
 - **Focus**: Deep dive Quality Craft pillar

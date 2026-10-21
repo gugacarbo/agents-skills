@@ -2,9 +2,11 @@
 name: frontend-design-review
 description: >
   Review and create distinctive, production-grade frontend interfaces with high design quality and design system compliance.
-  Evaluates using three pillars: frictionless insight-to-action, quality craft, and trustworthy building.
-  USE FOR: PR reviews, design reviews, accessibility audits, design system compliance checks, creative frontend design,
-  UI code review, component reviews, responsive design checks, theme testing, and creating memorable UI.
+  Evaluates using three pillars: frictionless insight-to-action, quality craft, and trustworthy building, plus evidence-based
+  visual critique of the rendered UI (screenshots, prints, Figma, live browser view via Playwright) applied to real code.
+  USE FOR: PR reviews, design reviews, mockup and screenshot critiques ("critique this design/mockup/screen"), Figma link
+  feedback, accessibility audits, design system compliance checks, creative frontend design, UI code review, component
+  reviews, responsive design checks, theme testing, and creating memorable UI.
   DO NOT USE FOR: Backend API reviews, database schema reviews, infrastructure or DevOps work, pure business logic
   without UI, or non-frontend code.
 metadata:
@@ -22,7 +24,7 @@ Review UI implementations against design quality standards and your design syste
 
 ### Mode 1: Design Review
 
-Evaluate existing UI for design system compliance, three quality pillars (Frictionless, Quality Craft, Trustworthy), accessibility, and code quality.
+Evaluate existing UI for design system compliance, three quality pillars (Frictionless, Quality Craft, Trustworthy), accessibility, code quality — and the rendered appearance via visual critique whenever a screenshot, print, Figma link, or live view is available.
 
 ### Mode 2: Creative Frontend Design
 
@@ -79,12 +81,13 @@ Match implementation complexity to vision. Maximalist = elaborate code. Minimali
 ### Review Process
 
 1. Identify user task
-2. Check design system for matching patterns
-3. Evaluate aesthetic direction
-4. Identify scope (component, feature, or flow)
-5. Evaluate each pillar
-6. Score and prioritize issues (blocking/major/minor)
-7. Provide recommendations with design system examples
+2. Capture visual evidence when available (see Visual Critique below)
+3. Check design system for matching patterns
+4. Evaluate aesthetic direction
+5. Identify scope (component, feature, or flow)
+6. Evaluate each pillar
+7. Score and prioritize issues (blocking/major/minor)
+8. Provide recommendations with design system examples
 
 ### Core Principles
 
@@ -92,6 +95,14 @@ Match implementation complexity to vision. Maximalist = elaborate code. Minimali
 - **Action hierarchy**: 1-2 primary actions per view. Progressive disclosure for secondary.
 - **Onboarding**: Explain features on introduction. Smart defaults over configuration.
 - **Navigation**: Clear entry/exit points. Back/cancel always available. Breadcrumbs for deep flows.
+
+---
+
+## Visual Critique
+
+A design review targets real code — so look at its rendered result, not only at source. When a URL, runnable app, screenshot/print, or Figma link is available, gather visual evidence and critique it: first impression, usability, visual hierarchy, consistency, and an accessibility quick pass. Anchor every visual finding to a code location (token, style, structure) so fixes land in the implementation.
+
+See [references/visual-critique.md](references/visual-critique.md) for the evidence-capture procedure, critique framework, and feedback principles.
 
 ---
 
@@ -144,4 +155,4 @@ See [references/pattern-examples.md](references/pattern-examples.md) for good/ba
 
 ## Acknowledgments
 
-Creative frontend principles inspired by [Anthropic's frontend-design skill](https://github.com/anthropics/skills/tree/main/skills/frontend-design). Design review principles and quality pillar framework created by [@Quirinevwm](https://github.com/Quirinevwm) for systematic UI evaluation.
+Creative frontend principles inspired by [Anthropic's frontend-design skill](https://github.com/anthropics/skills/tree/main/skills/frontend-design). Design review principles and quality pillar framework created by [@Quirinevwm](https://github.com/Quirinevwm) for systematic UI evaluation. Visual critique framework merged from the former design-critique skill.

@@ -23,6 +23,13 @@ Before approving any UI work:
 - [ ] Atmosphere through backgrounds (gradients, textures, patterns)
 - [ ] Implementation complexity matches vision
 
+## Visual Critique (rendered evidence)
+
+- [ ] Visual evidence captured when possible (browser automation, print, or Figma)
+- [ ] First impression, hierarchy, and consistency checked on the rendered UI
+- [ ] Visual findings anchored to code locations
+- [ ] Captures not performed (viewport/theme/state) labeled as Not verified
+
 ## Frictionless
 
 - [ ] Core task completable efficiently (≤3 interactions)
