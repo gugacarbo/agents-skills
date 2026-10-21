@@ -28,16 +28,9 @@
       "name": "@gugacarbo/skill-casa-standard",
       "version": "0.0.0",
     },
-    "skills/code-flow": {
-      "name": "@gugacarbo/skill-code-flow",
-      "version": "0.0.0",
-    },
     "skills/orchestrate-implementation": {
       "name": "@gugacarbo/skill-orchestrate-implementation",
       "version": "0.0.0",
-    },
-    "skills/project-init": {
-      "name": "@gugacarbo/project-init-skill",
     },
     "skills/skill-master": {
       "name": "@gugacarbo/skill-master",
@@ -257,13 +250,9 @@
 
     "@emnapi/wasi-threads": ["@emnapi/wasi-threads@1.2.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-c95qOXkHdydNKhscBTebqEC1CVAZpyqOfVfBzQ1qgzyl3gfeldUjIggDbIZgDKsHLgnsM+igH7TJ/eAasaVuMA=="],
 
-    "@gugacarbo/project-init-skill": ["@gugacarbo/project-init-skill@workspace:skills/project-init"],
-
     "@gugacarbo/skill-brainstorm": ["@gugacarbo/skill-brainstorm@workspace:skills/brainstorm"],
 
     "@gugacarbo/skill-casa-standard": ["@gugacarbo/skill-casa-standard@workspace:skills/casa-standard"],
-
-    "@gugacarbo/skill-code-flow": ["@gugacarbo/skill-code-flow@workspace:skills/code-flow"],
 
     "@gugacarbo/skill-master": ["@gugacarbo/skill-master@workspace:skills/skill-master"],
 
