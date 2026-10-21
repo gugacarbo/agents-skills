@@ -77,12 +77,12 @@ describe("skill build", () => {
 			expectSuccess(firstBuild);
 
 			expectExists(join(output, "commit-changes", "SKILL.md"));
-			expectExists(join(output, "code-flow", "SKILL.md"));
+			expectExists(join(output, "orchestrate-implementation", "SKILL.md"));
 			expectAbsent(join(output, "stale-skill"));
 			expectAbsent(join(output, "skill-master", "dev"));
-			expectAbsent(join(output, "code-flow", "tests"));
+			expectAbsent(join(output, "orchestrate-implementation", "tests"));
 			expectAbsent(join(output, "skill-master", "package.json"));
-			expectAbsent(join(output, "code-flow", "package.json"));
+			expectAbsent(join(output, "orchestrate-implementation", "package.json"));
 			expectExists(join(output, fixtureName, "SKILL.md"));
 			expectExists(join(output, fixtureName, ".gitignore"));
 			expectExists(join(output, fixtureName, ".env.example"));
@@ -116,7 +116,7 @@ describe("skill build", () => {
 
 			write(join(target, "code-toolbox", "SKILL.md"), "legacy\n");
 			write(
-				join(target, "code-flow", "templates", "obsolete-template.md"),
+				join(target, "orchestrate-implementation", "templates", "obsolete-template.md"),
 				"stale\n",
 			);
 			write(join(target, "external-skill", "SKILL.md"), "external\n");
@@ -130,17 +130,17 @@ describe("skill build", () => {
 			});
 			expectSuccess(secondBuild);
 
-			expectExists(join(target, "code-flow", "SKILL.md"));
+			expectExists(join(target, "orchestrate-implementation", "SKILL.md"));
 			expectAbsent(join(target, "code-toolbox"));
 			expectAbsent(
-				join(target, "code-flow", "templates", "obsolete-template.md"),
+				join(target, "orchestrate-implementation", "templates", "obsolete-template.md"),
 			);
 			expectAbsent(join(target, "external-skill"));
 			expectAbsent(join(target, ".external-config"));
 			expectAbsent(join(target, "skill-master", "dev"));
-			expectAbsent(join(target, "code-flow", "tests"));
+			expectAbsent(join(target, "orchestrate-implementation", "tests"));
 			expectAbsent(join(target, "skill-master", "package.json"));
-			expectAbsent(join(target, "code-flow", "package.json"));
+			expectAbsent(join(target, "orchestrate-implementation", "package.json"));
 			expectAbsent(join(target, fixtureName, "__pycache__"));
 		} finally {
 			cleanup(temporaryRoot);
