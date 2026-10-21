@@ -61,15 +61,33 @@ export function copy(source: string, destination: string): void {
 	cpSync(source, destination, { recursive: true });
 }
 
+// Git hooks export the parent repository context (GIT_DIR, GIT_INDEX_FILE...).
+// Fixture repositories must not inherit it, or `git -C <dir>` inside a hook
+// silently targets the host repository instead of the fixture.
+const GIT_CONTEXT_VARIABLES = [
+	"GIT_DIR",
+	"GIT_COMMON_DIR",
+	"GIT_WORK_TREE",
+	"GIT_INDEX_FILE",
+	"GIT_INDEX_VERSION",
+	"GIT_OBJECT_DIRECTORY",
+	"GIT_ALTERNATE_OBJECT_DIRECTORIES",
+	"GIT_NAMESPACE",
+];
+
 export function run(command: string[], options: RunOptions = {}): RunResult {
+	const env: Record<string, string | undefined> = {
+		...Bun.env,
+		AGENTS_SKILLS_PROMPT_INPUT: "/dev/null",
+		...options.env,
+	};
+	for (const variable of GIT_CONTEXT_VARIABLES) {
+		delete env[variable];
+	}
 	const process = Bun.spawnSync({
 		cmd: command,
 		cwd: options.cwd,
-		env: {
-			...Bun.env,
-			AGENTS_SKILLS_PROMPT_INPUT: "/dev/null",
-			...options.env,
-		},
+		env,
 		stdin: options.stdin === undefined ? "ignore" : new Blob([options.stdin]),
 		stdout: "pipe",
 		stderr: "pipe",
