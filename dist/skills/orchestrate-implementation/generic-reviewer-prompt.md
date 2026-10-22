@@ -25,6 +25,17 @@ Subagent:
     Validation evidence:
     <VALIDATION_EVIDENCE>
 
+    For a scoped re-review, also use:
+    Previous material findings:
+    <PREVIOUS_FINDINGS>
+
+    Fix range:
+    <FIX_BASE>..<FIX_HEAD>
+
+    In a scoped re-review, only confirm each previous material finding is
+    resolved and check the fix range for new material problems. Do not
+    re-review the rest of the scope.
+
     Review for:
     - correctness and requirement coverage;
     - regressions or unsafe edge cases;

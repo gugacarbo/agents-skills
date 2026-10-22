@@ -66,7 +66,8 @@ Subagent:
     - Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - Commits created (SHA + subject)
     - Files changed
-    - Validations run and results
+    - Validations run: exact command, exit status, and relevant result line
+      for each (the controller relies on this instead of re-running them)
     - Concise implementation summary
     - Remaining concerns/blockers
 
