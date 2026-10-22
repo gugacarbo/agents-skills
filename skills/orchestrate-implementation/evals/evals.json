@@ -30,13 +30,14 @@
 		{
 			"id": 3,
 			"name": "unit-review-fix-rounds",
-			"prompt": "Implemente uma unidade com $orchestrate-implementation. O primeiro review encontra um bug material; depois do primeiro fix, o re-review ainda encontra um problema material.",
+			"prompt": "Implemente uma unidade que altera uma migration de banco com $orchestrate-implementation. O primeiro review encontra um bug material; depois do primeiro fix, o re-review ainda encontra um problema material.",
 			"expected_output": "Round 1 returns to the original implementer. Round 2 uses a new implementer. A material finding after round 2 becomes a blocker.",
 			"files": [],
 			"expectations": [
-				"Task review is enabled by default.",
+				"The migration makes the unit qualify for its own review under the default risk-based task review.",
 				"Round 1 reuses the original implementer.",
 				"Round 2 uses a new implementer.",
+				"Each re-review is scoped to the previous material findings and the fix range, not the whole unit.",
 				"There is no automatic higher-tier model escalation.",
 				"The loop is capped at two rounds by default."
 			],
@@ -98,10 +99,10 @@
 			"id": 8,
 			"name": "task-grouping-and-splitting",
 			"prompt": "O plano tem duas tasks minúsculas da mesma mudança e uma terceira task grande com duas partes independentes. Execute com $orchestrate-implementation.",
-			"expected_output": "Allow grouping the small related tasks and splitting the large task into execution units while preserving a mapping to original tasks/requirements.",
+			"expected_output": "Group the small related tasks into one unit by default and split the large task only because its parts are independent, preserving a mapping to original tasks/requirements.",
 			"files": [],
 			"expectations": [
-				"Plan task boundaries do not have to equal dispatch boundaries.",
+				"Plan task boundaries do not have to equal dispatch boundaries; grouping small related tasks is the default.",
 				"Traceability to source tasks/requirements is preserved.",
 				"Review follows the execution unit."
 			],
@@ -129,6 +130,33 @@
 			"expectations": [
 				"The branch/worktree is left ready for the user.",
 				"No publication/integration side effect happens without explicit request."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 11,
+			"name": "risk-based-review-skips-low-risk",
+			"prompt": "Execute com $orchestrate-implementation um plano de 6 tasks: cinco ajustes pequenos de UI/docs e uma task que altera a checagem de permissões. O usuário não configurou task_review.",
+			"expected_output": "Group the small tasks into few units, review only the permissions unit individually, and rely on the final review for the low-risk units.",
+			"files": [],
+			"expectations": [
+				"The run uses far fewer units than plan tasks.",
+				"Only the high-risk (permissions) unit gets its own review.",
+				"Low-risk units are not reviewed individually but are covered by the final review.",
+				"The preflight shows which units are reviewed."
+			],
+			"skill_type": "pattern"
+		},
+		{
+			"id": 12,
+			"name": "validation-evidence-not-rerun",
+			"prompt": "Um implementer do $orchestrate-implementation reporta DONE com os comandos de validação focada, exit 0 e os commits criados. Nada no diff contradiz o relato.",
+			"expected_output": "Verify the reported evidence and commits in Git and move on without re-running the focused validations.",
+			"files": [],
+			"expectations": [
+				"The controller does not re-run focused validations when evidence is complete and consistent.",
+				"The controller would re-run a check only if evidence were missing, ambiguous, or contradicted by the diff.",
+				"Full validation still runs once after integration."
 			],
 			"skill_type": "discipline"
 		}

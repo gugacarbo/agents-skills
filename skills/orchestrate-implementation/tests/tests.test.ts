@@ -59,6 +59,31 @@ describe("orchestrate-implementation core contract", () => {
 		expect(skill).toContain("mapping back to its source");
 	});
 
+	test("defaults to few coarse units to limit dispatch overhead", () => {
+		expect(skill).toContain("few, coarse units; group by default");
+		expect(skill).toContain("fewest units that one implementer can complete");
+		expect(skill).toContain("tightly related tasks by default");
+	});
+
+	test("reviews units by risk and leaves the rest to the final review", () => {
+		expect(skill).toContain("task_review: auto # auto | on | off");
+		expect(skill).toContain("review a unit on its own only when");
+		expect(skill).toContain("still covered by the final review");
+		expect(skill).not.toContain("Task/unit review: enabled.");
+	});
+
+	test("trusts implementer validation evidence instead of re-running", () => {
+		expect(skill).toContain("verify the implementer's report");
+		expect(skill).toContain("never by default");
+		expect(skill).not.toContain("run or verify the unit's focused validations");
+	});
+
+	test("scopes re-reviews to findings and the fix range", () => {
+		expect(skill).toContain("### Scoped re-review");
+		expect(skill).toContain("`fix_base..fix_head`");
+		expect(skill).toContain("full final validation must");
+	});
+
 	test("reviews execution units and caps correction loops", () => {
 		expect(skill).toContain("orchestrate-review");
 		expect(skill).toContain("material");
@@ -106,6 +131,7 @@ describe("orchestrate-implementation prompts", () => {
 		expect(prompt).toContain("Never spawn another agent or reviewer");
 		expect(prompt).toContain("Create one or more natural commits");
 		expect(prompt).toContain("Focused validation");
+		expect(prompt).toContain("exact command, exit status");
 	});
 
 	test("generic reviewer is a minimal read-only fallback", () => {
@@ -115,6 +141,7 @@ describe("orchestrate-implementation prompts", () => {
 		expect(prompt).toContain("material");
 		expect(prompt).toContain("non-blocking");
 		expect(prompt).toContain("never spawn");
+		expect(prompt).toContain("scoped re-review");
 	});
 });
 
@@ -169,6 +196,8 @@ describe("orchestrate-implementation cleanup", () => {
 			"default-isolation",
 			"task-grouping-and-splitting",
 			"integration-conflict-fallback",
+			"risk-based-review-skips-low-risk",
+			"validation-evidence-not-rerun",
 		]) {
 			expect(names.has(name)).toBe(true);
 		}
