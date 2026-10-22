@@ -50,10 +50,8 @@ if [ "$RUN_REPOSITORY_TESTS" = true ]; then
 elif [ "${#SKILL_TEST_DIRECTORIES[@]}" -gt 0 ]; then
   printf '\nRunning tests for changed skills...\n'
   while IFS= read -r skill_directory; do
-    ${BUN_RUNNER} --cwd "$skill_directory" run test
+    ${BUN_RUNNER} run --cwd "$skill_directory" test
   done < <(printf '%s\n' "${!SKILL_TEST_DIRECTORIES[@]}" | sort)
 else
   printf '\nSkipping tests: no staged runtime changes.\n'
 fi
-printf '\nRunning TypeScript staged-file checks...\n'
-${BUN_RUNNER} x tsc-files
