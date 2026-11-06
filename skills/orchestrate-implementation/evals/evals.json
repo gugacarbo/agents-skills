@@ -4,14 +4,14 @@
 		{
 			"id": 1,
 			"name": "safe-parallel-units",
-			"prompt": "Execute este plano com $orchestrate-implementation. Unit A altera somente docs/api.md; Unit B altera somente docs/cli.md. Não há dependências, interfaces compartilhadas, recursos mutáveis compartilhados ou writes indiretos.",
-			"expected_output": "Print the concise preflight, create isolated unit worktrees, dispatch both units in parallel, review each unit, and integrate approved commits by deterministic cherry-pick order.",
+			"prompt": "Execute este plano com $orchestrate-implementation. Task 1 cria o schema base; Task 2 implementa o módulo de relatórios em src/reports/; Task 3 implementa o módulo de exportação em src/export/. As tasks 2 e 3 dependem só do schema, são substanciais e não compartilham arquivos, lockfile, codegen ou recursos mutáveis.",
+			"expected_output": "Shape units by the dependency graph (foundation, then two independent branches), run the two branch units as a parallel wave in their own worktrees, and integrate them in plan order.",
 			"files": [],
 			"expectations": [
-				"The preflight is informational and does not request approval.",
-				"Both units satisfy all four parallel-safety criteria before dispatch.",
-				"Each parallel unit uses its own branch/worktree.",
-				"Integration order is deterministic rather than completion-order based."
+				"The preflight shows waves such as A -> [B || C] and is informational.",
+				"The two branch units pass all five parallel conditions, including being substantial.",
+				"The controller reads parallel-waves.md only because a wave qualifies.",
+				"Each parallel unit uses its own branch and worktree; integration order is the plan order, not completion order."
 			],
 			"skill_type": "pattern"
 		},
@@ -22,7 +22,7 @@
 			"expected_output": "Treat the unknown shared mutable/write-set behavior as uncertainty and execute sequentially rather than proving parallelism through guesswork.",
 			"files": [],
 			"expectations": [
-				"Uncertainty in any one of the four safety criteria forces sequential execution.",
+				"Uncertainty in any parallel condition forces sequential execution.",
 				"The controller does not invent a write set."
 			],
 			"skill_type": "discipline"
@@ -30,135 +30,220 @@
 		{
 			"id": 3,
 			"name": "unit-review-fix-rounds",
-			"prompt": "Implemente uma unidade que altera uma migration de banco com $orchestrate-implementation. O primeiro review encontra um bug material; depois do primeiro fix, o re-review ainda encontra um problema material.",
+			"prompt": "Implemente uma unidade que altera uma migration de banco com $orchestrate-implementation. O primeiro review encontra um bug material com evidência; depois do primeiro fix, o re-review ainda encontra um problema material com evidência.",
 			"expected_output": "Round 1 returns to the original implementer. Round 2 uses a new implementer. A material finding after round 2 becomes a blocker.",
 			"files": [],
 			"expectations": [
-				"The migration makes the unit qualify for its own review under the default risk-based task review.",
-				"Round 1 reuses the original implementer.",
-				"Round 2 uses a new implementer.",
-				"Each re-review is scoped to the previous material findings and the fix range, not the whole unit.",
-				"There is no automatic higher-tier model escalation.",
-				"The loop is capped at two rounds by default."
+				"The migration makes the unit qualify for its own review.",
+				"Round 1 reuses the original implementer; round 2 uses a new implementer.",
+				"Each re-review is scoped to the previous material findings and fix_base..fix_head.",
+				"There is no automatic higher-tier model escalation and the loop is capped at two rounds."
 			],
 			"skill_type": "pattern"
 		},
 		{
 			"id": 4,
-			"name": "final-review-fresh-fixers",
-			"prompt": "Todas as unidades passaram. O review final do $orchestrate-implementation encontra findings materiais cross-cutting e um deles persiste após o primeiro fix.",
-			"expected_output": "Use a new fixer for final round 1 and another new fixer for final round 2, with validation and re-review after each.",
+			"name": "final-review-fix-routing",
+			"prompt": "Todas as unidades passaram. O review final do $orchestrate-implementation encontra dois findings materiais: um restrito à Unit B, cujo implementer ainda pode ser retomado, e um cross-unit entre B e C.",
+			"expected_output": "Route the single-unit finding to Unit B's implementer and the cross-unit finding to a new fixer, then revalidate, run scoped re-reviews, and run full final validation on the final head.",
 			"files": [],
 			"expectations": [
-				"Final review is enabled by default.",
-				"Final findings are not routed back to the original unit implementers by default.",
-				"Each final correction round uses a fresh fixer."
+				"The Unit B finding goes back to Unit B's resumable implementer.",
+				"The cross-unit finding goes to a new fixer.",
+				"Full final validation passes on the final head before completion."
 			],
 			"skill_type": "pattern"
 		},
 		{
 			"id": 5,
 			"name": "approved-model-default",
-			"prompt": "Execute com $orchestrate-implementation. O workspace já define modelos concretos configurados pelo usuário para implementer e reviewer.",
+			"prompt": "Execute com $orchestrate-implementation. O workspace já define modelos e efforts concretos configurados pelo usuário para implement, task review e final review.",
 			"expected_output": "Treat the concrete configured defaults as prior approval, show them in preflight, and continue without a model approval gate.",
 			"files": [],
 			"expectations": [
-				"Concrete user-configured workspace defaults count as approval.",
-				"The controller never uses auto, inherit, omitted, or implicit models.",
+				"Concrete user-configured defaults count as approval for all three roles.",
 				"No repeated model confirmation is requested."
 			],
 			"skill_type": "discipline"
 		},
 		{
 			"id": 6,
-			"name": "missing-model-approval",
-			"prompt": "Execute com $orchestrate-implementation, mas o único model setting disponível é inherit.",
-			"expected_output": "Do not dispatch any subagent. Suggest a short list of concrete models and request one approval for the missing role.",
+			"name": "missing-model-proposal",
+			"prompt": "Execute com $orchestrate-implementation. O usuário não definiu modelos e o único setting disponível é inherit.",
+			"expected_output": "Do not dispatch. List available models, propose model and effort for implement, task review, and final review with a reason each, and request one approval. Save nothing for later runs.",
 			"files": [],
 			"expectations": [
 				"inherit is not treated as approved.",
-				"No subagent is dispatched before a concrete model is approved.",
-				"The controller does not construct a per-task model matrix."
+				"The proposal covers exactly the three roles, each with model, effort, and reason.",
+				"One approval is requested before any dispatch.",
+				"The proposal is not persisted as a profile for future runs."
 			],
 			"skill_type": "discipline"
 		},
 		{
 			"id": 7,
 			"name": "default-isolation",
-			"prompt": "Execute este plano com $orchestrate-implementation a partir da worktree principal. O usuário não pediu execução in-place.",
-			"expected_output": "Create or obtain an isolated integration worktree, preferring using-git-worktrees when available, then run from there.",
+			"prompt": "Execute este plano com $orchestrate-implementation a partir do checkout principal do repositório. O usuário não pediu execução in-place.",
+			"expected_output": "Detect the main checkout from git rev-parse, create an isolated integration worktree (preferring using-git-worktrees), and run from there.",
 			"files": [],
 			"expectations": [
-				"Isolation is the default.",
-				"The default/main worktree is not used for implementation implicitly.",
+				"Workspace detection uses Git state, not assumptions.",
+				"The main checkout is not used for implementation implicitly.",
 				"using-git-worktrees is preferred when available."
 			],
 			"skill_type": "pattern"
 		},
 		{
 			"id": 8,
-			"name": "task-grouping-and-splitting",
-			"prompt": "O plano tem duas tasks minúsculas da mesma mudança e uma terceira task grande com duas partes independentes. Execute com $orchestrate-implementation.",
-			"expected_output": "Group the small related tasks into one unit by default and split the large task only because its parts are independent, preserving a mapping to original tasks/requirements.",
+			"name": "reuse-linked-worktree",
+			"prompt": "O usuário invoca $orchestrate-implementation já dentro de um worktree secundário e limpo, na branch feat/reports, criado por ele antes.",
+			"expected_output": "Reuse the linked worktree as the integration worktree with feat/reports as the integration branch and HEAD as base; report existing isolated.",
 			"files": [],
 			"expectations": [
-				"Plan task boundaries do not have to equal dispatch boundaries; grouping small related tasks is the default.",
-				"Traceability to source tasks/requirements is preserved.",
-				"Review follows the execution unit."
+				"No additional integration worktree is created.",
+				"The preflight reports existing isolated.",
+				"A dirty linked worktree would have been a blocker instead."
 			],
 			"skill_type": "pattern"
 		},
 		{
 			"id": 9,
-			"name": "integration-conflict-fallback",
-			"prompt": "Duas unidades foram consideradas seguras para paralelo. A segunda gera conflito material no cherry-pick para a integração.",
-			"expected_output": "Abort that cherry-pick, keep prior successful integrations, invalidate the independence assumption for the affected unit, and re-run it sequentially from the current integration head.",
+			"name": "task-grouping-by-graph",
+			"prompt": "O plano tem duas tasks minúsculas da mesma mudança e uma terceira task grande com duas partes independentes. Execute com $orchestrate-implementation.",
+			"expected_output": "Group the small related tasks into one unit, split the large task into independent branch units, and preserve a mapping to original tasks/requirements.",
 			"files": [],
 			"expectations": [
-				"The controller does not resolve the material conflict inside the parallel wave.",
-				"The affected unit is re-executed sequentially.",
-				"Already integrated successful work is preserved."
+				"Plan task boundaries do not have to equal dispatch boundaries.",
+				"Independent branches are not merged just to reduce the unit count.",
+				"Traceability to source tasks/requirements is preserved."
 			],
-			"skill_type": "discipline"
+			"skill_type": "pattern"
 		},
 		{
 			"id": 10,
-			"name": "no-automatic-publication",
-			"prompt": "Conclua o plano com $orchestrate-implementation. O usuário não pediu merge, push ou PR.",
-			"expected_output": "Finish with a ready, validated, reviewed branch/worktree and a concise summary, without merging, pushing, creating a PR, or removing the worktree.",
+			"name": "small-units-not-parallel",
+			"prompt": "Execute com $orchestrate-implementation um plano com duas tasks independentes de uma linha cada, em arquivos diferentes.",
+			"expected_output": "Do not create a parallel wave for tiny units; group them into one sequential unit in the integration worktree.",
 			"files": [],
 			"expectations": [
-				"The branch/worktree is left ready for the user.",
-				"No publication/integration side effect happens without explicit request."
+				"The worth-it condition fails for small units.",
+				"No per-unit worktree is created."
 			],
 			"skill_type": "discipline"
 		},
 		{
 			"id": 11,
-			"name": "risk-based-review-skips-low-risk",
-			"prompt": "Execute com $orchestrate-implementation um plano de 6 tasks: cinco ajustes pequenos de UI/docs e uma task que altera a checagem de permissões. O usuário não configurou task_review.",
-			"expected_output": "Group the small tasks into few units, review only the permissions unit individually, and rely on the final review for the low-risk units.",
+			"name": "integration-conflict-disables-parallel",
+			"prompt": "Duas unidades foram consideradas seguras para paralelo pelo $orchestrate-implementation. A segunda gera conflito material no cherry-pick para a integração.",
+			"expected_output": "Abort that cherry-pick, keep prior integrations, resume the unit's original implementer to redo it sequentially from the integration head, and disable parallel waves for the rest of the run.",
 			"files": [],
 			"expectations": [
-				"The run uses far fewer units than plan tasks.",
-				"Only the high-risk (permissions) unit gets its own review.",
-				"Low-risk units are not reviewed individually but are covered by the final review.",
-				"The preflight shows which units are reviewed."
+				"The controller does not resolve the conflict itself.",
+				"The affected unit is redone sequentially by its original implementer.",
+				"Already integrated work is preserved.",
+				"Parallel waves are disabled for the rest of the run."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 12,
+			"name": "no-automatic-publication",
+			"prompt": "Conclua o plano com $orchestrate-implementation. A branch tem um PR aberto, mas o usuário não pediu merge, push nem comentário.",
+			"expected_output": "Finish with a validated, reviewed branch and summary, show the deferred-findings report in chat, and offer — not post — a PR comment.",
+			"files": [],
+			"expectations": [
+				"No merge, push, PR, or worktree removal happens.",
+				"The deferred-findings report is shown in chat and only offered as a PR comment."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 13,
+			"name": "risk-based-review-skips-low-risk",
+			"prompt": "Execute com $orchestrate-implementation um plano de 6 tasks: cinco ajustes pequenos de UI/docs e uma task que altera a checagem de permissões. O usuário não falou nada sobre review.",
+			"expected_output": "Group the small tasks into few units, review only the permissions unit individually, mark the rest deferred-to-final, and review them fully in the final review.",
+			"files": [],
+			"expectations": [
+				"Only the permissions unit gets its own review.",
+				"Low-risk units are marked deferred-to-final and fully covered by the final review.",
+				"The preflight lists the reviewed unit with its reason."
 			],
 			"skill_type": "pattern"
 		},
 		{
-			"id": 12,
+			"id": 14,
 			"name": "validation-evidence-not-rerun",
 			"prompt": "Um implementer do $orchestrate-implementation reporta DONE com os comandos de validação focada, exit 0 e os commits criados. Nada no diff contradiz o relato.",
 			"expected_output": "Verify the reported evidence and commits in Git and move on without re-running the focused validations.",
 			"files": [],
 			"expectations": [
 				"The controller does not re-run focused validations when evidence is complete and consistent.",
-				"The controller would re-run a check only if evidence were missing, ambiguous, or contradicted by the diff.",
 				"Full validation still runs once after integration."
 			],
 			"skill_type": "discipline"
+		},
+		{
+			"id": 15,
+			"name": "unsupported-finding-downgraded",
+			"prompt": "No $orchestrate-implementation, o reviewer marca como material: 'isso pode dar problema de concorrência', sem arquivo:linha, cenário ou evidência.",
+			"expected_output": "Downgrade the finding to the deferred log as unsupported without dispatching a fix or re-investigating it.",
+			"files": [],
+			"expectations": [
+				"No correction round starts for the unsupported finding.",
+				"The controller does not investigate the claim itself.",
+				"The finding is logged with reason unsupported."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 16,
+			"name": "refactor-is-non-blocking",
+			"prompt": "No $orchestrate-implementation, a feature atende todos os critérios de aceite e o reviewer sugere extrair uma função de 30 linhas para uma abstração reutilizável.",
+			"expected_output": "Classify the suggestion as non-blocking, complete the unit, and record it in the deferred-findings log.",
+			"files": [],
+			"expectations": [
+				"Refactor suggestions never block completion.",
+				"The suggestion is recorded, not implemented."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 17,
+			"name": "no-final-review-reviews-every-unit",
+			"prompt": "Execute com $orchestrate-implementation, sem revisão final. O plano tem units de baixo risco.",
+			"expected_output": "Skip the final review and review every unit individually instead, saying so in the preflight.",
+			"files": [],
+			"expectations": [
+				"The final review is disabled by request.",
+				"Every unit gets its own review, including low-risk ones."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 18,
+			"name": "blocked-unit-becomes-blocker",
+			"prompt": "No $orchestrate-implementation, o implementer da Unit B reporta BLOCKED porque falta uma credencial externa. Unit C não depende de B; Unit D depende de B.",
+			"expected_output": "Record a blocker for B, continue C, stop D, and report the blocker in the summary.",
+			"files": [],
+			"expectations": [
+				"Independent units continue.",
+				"Dependent units stop.",
+				"The controller does not implement a workaround itself."
+			],
+			"skill_type": "discipline"
+		},
+		{
+			"id": 19,
+			"name": "deferred-findings-consolidated",
+			"prompt": "O $orchestrate-implementation terminou com 7 findings não corrigidos registrados: dois duplicados, um já resolvido no head final e quatro de manutenção em áreas diferentes.",
+			"expected_output": "Dispatch one read-only consolidation implementer that drops the resolved one, merges duplicates, groups the rest, and reports them in chat with a suggested next step per group.",
+			"files": [],
+			"expectations": [
+				"Consolidation uses the implement model and never changes code.",
+				"Resolved findings are dropped and duplicates merged.",
+				"The grouped report is shown in the chat."
+			],
+			"skill_type": "pattern"
 		}
 	]
 }

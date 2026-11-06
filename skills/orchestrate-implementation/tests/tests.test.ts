@@ -1,164 +1,187 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 const skillRoot = resolve(import.meta.dir, "..");
 const read = (path: string) => readFileSync(resolve(skillRoot, path), "utf8");
 
-describe("orchestrate-implementation core contract", () => {
-	const skill = read("SKILL.md");
+const primaryFiles = [
+	"SKILL.md",
+	"parallel-waves.md",
+	"implementer-prompt.md",
+	"generic-reviewer-prompt.md",
+];
 
-	test("keeps explicit activation and controller-only implementation", () => {
+const skill = read("SKILL.md");
+
+/** Splits markdown into fenced-code text and prose text. */
+const splitFences = (markdown: string) => {
+	const parts = markdown.split("```");
+	return {
+		code: parts.filter((_, index) => index % 2 === 1).join("\n"),
+		prose: parts.filter((_, index) => index % 2 === 0).join("\n"),
+	};
+};
+
+const placeholders = (text: string) =>
+	new Set(text.match(/<[A-Z][A-Z0-9_]+>/g) ?? []);
+
+/** Returns the body of a `## <heading>` section, up to the next `## `. */
+const section = (markdown: string, heading: string) => {
+	const start = markdown.indexOf(`\n## ${heading}`);
+	expect(start).toBeGreaterThan(-1);
+	const end = markdown.indexOf("\n## ", start + 1);
+	return markdown.slice(start, end === -1 ? undefined : end);
+};
+
+describe("structure: cross-file consistency", () => {
+	test("every relative markdown link resolves", () => {
+		for (const path of primaryFiles) {
+			const links = [...read(path).matchAll(/\]\(([^)#]+)\)/g)].map(
+				(match) => match[1],
+			);
+			for (const link of links) {
+				if (/^[a-z]+:/.test(link)) continue;
+				expect(existsSync(resolve(skillRoot, dirname(path), link))).toBe(true);
+			}
+		}
+	});
+
+	test("placeholders named in prose exist in the prompt templates", () => {
+		for (const path of [
+			"implementer-prompt.md",
+			"generic-reviewer-prompt.md",
+		]) {
+			const { code, prose } = splitFences(read(path));
+			const defined = placeholders(code);
+			expect(defined.size).toBeGreaterThan(0);
+			for (const name of placeholders(prose)) {
+				expect(defined.has(name)).toBe(true);
+			}
+		}
+	});
+
+	test("prompt templates carry a model and effort field", () => {
+		for (const path of [
+			"implementer-prompt.md",
+			"generic-reviewer-prompt.md",
+		]) {
+			const { code } = splitFences(read(path));
+			expect(code).toMatch(/model: <[A-Z_]+_MODEL>/);
+			expect(code).toMatch(/effort: <[A-Z_]+_EFFORT>/);
+		}
+	});
+
+	test("every implementer status is handled by the controller", () => {
+		const statusLine = read("implementer-prompt.md").match(
+			/Status: ([A-Z_| ]+)/,
+		);
+		expect(statusLine).not.toBeNull();
+		const statuses = (statusLine?.[1] ?? "").split("|").map((s) => s.trim());
+		expect(statuses.length).toBe(4);
+		const dispatch = section(skill, "4. Dispatch implementers");
+		for (const status of statuses) {
+			expect(dispatch).toContain(`**${status}**`);
+		}
+	});
+
+	test("the configuration block only has run-shape keys", () => {
+		const config = skill.match(/```yaml\n([\s\S]*?)```/);
+		expect(config).not.toBeNull();
+		const keys = (config?.[1] ?? "")
+			.split("\n")
+			.filter(Boolean)
+			.map((line) => line.split(":")[0].trim());
+		expect(keys).toEqual(["parallel", "worktree", "max_fix_rounds"]);
+		for (const path of primaryFiles) {
+			expect(read(path)).not.toMatch(/task_review|final_review/);
+		}
+	});
+
+	test("recovery-state review values match the documented set", () => {
+		const state = section(skill, "6. Persist minimal recovery state");
+		const declared = state.match(/`review` is one of `([^`]+)`/);
+		expect(declared).not.toBeNull();
+		const allowed = new Set(
+			(declared?.[1] ?? "").split("|").map((value) => value.trim()),
+		);
+		const used = [...state.matchAll(/^\s+review: (\S+)$/gm)].map((m) => m[1]);
+		expect(used.length).toBeGreaterThan(0);
+		for (const value of used) expect(allowed.has(value)).toBe(true);
+		expect(allowed.has("deferred-to-final")).toBe(true);
+	});
+
+	test("deferred-finding categories agree between controller and reviewer", () => {
+		const categories = (text: string) => {
+			const match = text.match(
+				/category:?\s\(?`?(correctness \| tests \| maintainability \| style \| pre-existing)/,
+			);
+			return match?.[1];
+		};
+		const controller = categories(skill);
+		expect(controller).toBeDefined();
+		expect(categories(read("generic-reviewer-prompt.md"))).toBe(controller);
+	});
+
+	test("the three model roles appear in the roles table and the preflight", () => {
+		const models = section(skill, "Models");
+		const preflight = section(skill, "Preflight");
+		for (const role of ["implement", "task review", "final review"]) {
+			expect(models).toContain(`| ${role}`);
+			expect(preflight).toContain(`${role}: <model / effort>`);
+		}
+	});
+
+	test("parallel mechanics live only in parallel-waves.md", () => {
+		expect(skill).toContain("[`parallel-waves.md`](parallel-waves.md)");
+		expect(skill).not.toContain("cherry-pick");
+		expect(read("parallel-waves.md")).toContain("cherry-pick");
+	});
+});
+
+describe("contract: core invariants", () => {
+	test("activates only on explicit invocation", () => {
 		expect(skill).toContain("Use only when the user explicitly invokes");
+	});
+
+	test("controller never writes product code", () => {
 		expect(skill).toContain(
 			"controller never writes or corrects implementation code",
 		);
-		expect(skill).toContain(
-			"It never implements or fixes product code itself.",
-		);
 	});
 
-	test("uses an informative preflight without a configuration gate", () => {
-		expect(skill).toContain("## Preflight");
-		expect(skill).toContain("This is informational, not an approval gate");
-		expect(skill).not.toContain("Configuration Gate");
-		expect(skill).not.toContain("wait for its explicit approval");
-	});
-
-	test("requires approved concrete models without automatic escalation", () => {
+	test("never dispatches with an unapproved model", () => {
 		expect(skill).toContain(
 			"Never dispatch a subagent with an unapproved model",
 		);
-		expect(skill).toContain("concrete system/workspace default");
 		expect(skill).toContain("`auto`, `inherit`");
-		expect(skill).toContain("never require automatic");
+		expect(skill).toContain("Do not save proposals between runs");
 	});
 
-	test("defaults to isolated worktrees and safe parallelism", () => {
-		expect(skill).toContain("Default to isolation");
-		expect(skill).toContain("using-git-worktrees");
+	test("never publishes without an explicit request", () => {
 		expect(skill).toContain(
-			"Parallelism is automatic only when all four conditions",
+			"Nothing leaves the session without an explicit request",
 		);
-		for (const concept of [
-			"No dependency conflict",
-			"No write-set conflict",
-			"No interface conflict",
-			"No shared mutable resource",
-		]) {
-			expect(skill).toContain(concept);
-		}
-		expect(skill).toContain(
-			"If any condition is uncertain, execute sequentially",
-		);
-	});
-
-	test("allows grouping and subdivision while preserving traceability", () => {
-		expect(skill).toContain("group small, tightly related tasks");
-		expect(skill).toContain("split a large task into smaller units");
-		expect(skill).toContain("mapping back to its source");
-	});
-
-	test("defaults to few coarse units to limit dispatch overhead", () => {
-		expect(skill).toContain("few, coarse units; group by default");
-		expect(skill).toContain("fewest units that one implementer can complete");
-		expect(skill).toContain("tightly related tasks by default");
-	});
-
-	test("reviews units by risk and leaves the rest to the final review", () => {
-		expect(skill).toContain("task_review: auto # auto | on | off");
-		expect(skill).toContain("review a unit on its own only when");
-		expect(skill).toContain("still covered by the final review");
-		expect(skill).not.toContain("Task/unit review: enabled.");
-	});
-
-	test("trusts implementer validation evidence instead of re-running", () => {
-		expect(skill).toContain("verify the implementer's report");
-		expect(skill).toContain("never by default");
-		expect(skill).not.toContain("run or verify the unit's focused validations");
-	});
-
-	test("scopes re-reviews to findings and the fix range", () => {
-		expect(skill).toContain("### Scoped re-review");
-		expect(skill).toContain("`fix_base..fix_head`");
-		expect(skill).toContain("full final validation must");
-	});
-
-	test("reviews execution units and caps correction loops", () => {
-		expect(skill).toContain("orchestrate-review");
-		expect(skill).toContain("material");
-		expect(skill).toContain("non-blocking");
-		expect(skill).toContain("Correction round 1");
-		expect(skill).toContain("Correction round 2");
-		expect(skill).toContain("original implementer");
-		expect(skill).toContain("new implementer");
-		expect(skill).toContain("default 2");
-	});
-
-	test("integrates parallel units deterministically and falls back to sequential", () => {
-		expect(skill).toContain("predetermined unit order");
-		expect(skill).toContain("cherry-picking");
-		expect(skill).toContain("abort that unit's cherry-pick");
-		expect(skill).toContain("re-run the affected unit sequentially");
-	});
-
-	test("uses minimal recovery and no automatic publication", () => {
-		expect(skill).toContain("Persist minimal recovery state");
-		expect(skill).toContain("Git is the source of truth");
-		expect(skill).not.toContain("append-only run records");
 		expect(skill).toContain("Do not merge, push, create a PR");
 	});
-
-	test("uses focused validation and global final validation", () => {
-		expect(skill).toContain("focused validations");
-		expect(skill).toContain("Run final validation");
-		expect(skill).toContain("Biome or Knip");
-	});
-
-	test("final fixes use fresh fixers", () => {
-		expect(skill).toContain("Final fix round 1");
-		expect(skill).toContain("dispatch a new fixer");
-		expect(skill).toContain("Final fix round 2");
-		expect(skill).toContain("another new fixer");
-	});
 });
 
-describe("orchestrate-implementation prompts", () => {
-	test("implementer prompt is scoped and forbids nested agents", () => {
-		const prompt = read("implementer-prompt.md");
-		expect(prompt).toContain("<APPROVED_CONCRETE_MODEL>");
-		expect(prompt).toContain("Do not work on other units");
-		expect(prompt).toContain("Never spawn another agent or reviewer");
-		expect(prompt).toContain("Create one or more natural commits");
-		expect(prompt).toContain("Focused validation");
-		expect(prompt).toContain("exact command, exit status");
+describe("maintenance", () => {
+	test("primary files stay focused", () => {
+		for (const path of primaryFiles) {
+			const lines = read(path).split("\n").length;
+			expect(lines).toBeLessThanOrEqual(path === "SKILL.md" ? 450 : 200);
+		}
 	});
 
-	test("generic reviewer is a minimal read-only fallback", () => {
-		const prompt = read("generic-reviewer-prompt.md");
-		expect(prompt).toContain("orchestrate-review");
-		expect(prompt).toContain("read-only");
-		expect(prompt).toContain("material");
-		expect(prompt).toContain("non-blocking");
-		expect(prompt).toContain("never spawn");
-		expect(prompt).toContain("scoped re-review");
-	});
-});
-
-describe("orchestrate-implementation cleanup", () => {
-	test("removes the old orchestration framework", () => {
+	test("removed orchestration framework stays removed", () => {
 		for (const path of [
 			"task-reviewer-prompt.md",
 			"re-review-prompt.md",
 			"references/controller-setup.md",
 			"references/controller-task-loop.md",
 			"references/controller-finish.md",
-			"references/parallel-waves.md",
 			"references/code-reviewer.md",
-			"references/requesting-code-review.md",
-			"references/finishing-a-development-branch.md",
-			"references/executing-plans/SKILL.md",
-			"references/receiving-code-review/SKILL.md",
 			"scripts/plan-workspace",
 			"scripts/task-brief",
 			"scripts/review-package",
@@ -167,23 +190,15 @@ describe("orchestrate-implementation cleanup", () => {
 		}
 	});
 
-	test("keeps primary files under the hard ceiling", () => {
-		for (const path of [
-			"SKILL.md",
-			"implementer-prompt.md",
-			"generic-reviewer-prompt.md",
-		]) {
-			const lines = read(path).split("\n").length;
-			expect(lines).toBeLessThanOrEqual(1000);
-		}
-	});
-
-	test("contains behavior-focused eval metadata", async () => {
+	test("eval catalog covers the behavior contract", async () => {
 		const catalog = await Bun.file(
 			resolve(skillRoot, "evals/evals.json"),
 		).json();
 		expect(catalog.skill_name).toBe("orchestrate-implementation");
-		expect(catalog.evals.length).toBeGreaterThanOrEqual(8);
+		const ids = catalog.evals.map(
+			(evaluation: { id: number }) => evaluation.id,
+		);
+		expect(new Set(ids).size).toBe(ids.length);
 		const names = new Set(
 			catalog.evals.map((evaluation: { name: string }) => evaluation.name),
 		);
@@ -191,13 +206,22 @@ describe("orchestrate-implementation cleanup", () => {
 			"safe-parallel-units",
 			"uncertain-parallelism-serializes",
 			"unit-review-fix-rounds",
-			"final-review-fresh-fixers",
+			"final-review-fix-routing",
 			"approved-model-default",
+			"missing-model-proposal",
 			"default-isolation",
-			"task-grouping-and-splitting",
-			"integration-conflict-fallback",
+			"reuse-linked-worktree",
+			"task-grouping-by-graph",
+			"small-units-not-parallel",
+			"integration-conflict-disables-parallel",
+			"no-automatic-publication",
 			"risk-based-review-skips-low-risk",
 			"validation-evidence-not-rerun",
+			"unsupported-finding-downgraded",
+			"refactor-is-non-blocking",
+			"no-final-review-reviews-every-unit",
+			"blocked-unit-becomes-blocker",
+			"deferred-findings-consolidated",
 		]) {
 			expect(names.has(name)).toBe(true);
 		}

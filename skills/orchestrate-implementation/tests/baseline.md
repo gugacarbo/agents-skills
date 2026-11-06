@@ -1,23 +1,12 @@
-# Baseline before parallel-wave guidance
+# Verification status
 
-Snapshot SHA-256 for the original `SKILL.md`:
-`1be8e177978b4dcba930c655e5d7effc2f10ef1787e848da47365d8b8d8d7122`.
+`tests/tests.test.ts` checks structure and a few core invariants: links
+resolve, prompt placeholders and model/effort fields exist, every implementer
+status is handled, configuration keys, recovery-state values, finding
+categories, and file sizes. It does not prove agent behavior.
 
-The old skill had one unconditional execution choice:
-`Never dispatch multiple implementation subagents in parallel (conflicts).`
-
-Observed contract failures and controls:
-
-- A plan with two independent tasks and disjoint writes was serialized. The
-  skill had no route that could dispatch both implementers concurrently.
-- A plan with overlapping writes was serialized correctly. This remains a
-  regression control for the new conditional behavior.
-- The old preflight inspected shared files and interfaces but did not calculate
-  complete write sets, operational state, task waves, or isolated task
-  worktrees, so removing the prohibition alone would have made concurrency
-  unsafe.
-
-Because this environment did not authorize evaluator subagents, this is a
-deterministic instruction-contract baseline rather than a behavioral agent
-run. Paired behavioral runs remain required before claiming the revision is
-verified.
+Behavior is described by `evals/evals.json`. These evals have not been run
+against agents yet. Run them with the `skill-master` eval workflow (with-skill
+vs. baseline runs, graded against each eval's `expectations`) before claiming a
+behavior change is verified. `skill-master/scripts/run_eval.py` only measures
+description triggering, not this behavior.
