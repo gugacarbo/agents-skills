@@ -81,3 +81,4 @@ other agents. The controller must never fill `<REVIEW_MODEL>` or
 `<REVIEW_EFFORT>` with `auto`, `inherit`, an omitted value, or an unapproved
 model; use the `task review` model for unit reviews and the `final review`
 model for the final review.
+Use `n/a` for `<REVIEW_EFFORT>` only when the harness has no effort control.

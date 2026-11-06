@@ -24,6 +24,13 @@ Each unit goes through `SKILL.md` section 5 (evidence check, review when its
 risk requires it, correction rounds) inside its own worktree before it is
 integrated.
 
+## Write-set expansion
+
+A wave unit that reports NEEDS_CONTEXT because it must write outside its
+approved write set leaves the wave: stop it, remove its worktree, integrate the
+rest of the wave, then redo the unit sequentially from the new integration head
+in the integration worktree. The remaining waves stay eligible for parallelism.
+
 ## Integration
 
 For each completed unit, in the predetermined order:

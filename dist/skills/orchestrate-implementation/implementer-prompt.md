@@ -117,3 +117,4 @@ Subagent:
 
 The controller must never fill `<IMPLEMENT_MODEL>` or `<IMPLEMENT_EFFORT>` with
 `auto`, `inherit`, an omitted value, or an unapproved model.
+Use `n/a` for `<IMPLEMENT_EFFORT>` only when the harness has no effort control.
