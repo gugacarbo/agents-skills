@@ -5,7 +5,9 @@ fills every placeholder before dispatch.
 
 ```text
 Subagent:
-  description: "Implement <UNIT_ID>: <objective>"
+  description: "Implement <UNIT_ID>: <OBJECTIVE>"
+  model: <IMPLEMENT_MODEL>
+  effort: <IMPLEMENT_EFFORT>
   prompt: |
     Implement this execution unit. Do not work on other units and do not spawn
     subagents.
@@ -62,6 +64,9 @@ Subagent:
     Previous attempt/evidence:
     <PREVIOUS_ATTEMPT>
 
+    Fix only the listed material findings. Do not apply non-blocking
+    suggestions.
+
     Report:
     - Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - Commits created (SHA + subject)
@@ -75,5 +80,40 @@ Subagent:
     implementation path is unavailable, stop and report rather than guessing.
 ```
 
-The controller must never replace `<APPROVED_CONCRETE_MODEL>` with `auto`,
-`inherit`, an omitted model, or an unapproved model.
+## Deferred-findings consolidation
+
+Use once at the end of the run when the deferred-findings log is not empty.
+
+```text
+Subagent:
+  description: "Consolidate deferred findings"
+  model: <IMPLEMENT_MODEL>
+  effort: <IMPLEMENT_EFFORT>
+  prompt: |
+    Consolidate findings that were deliberately not fixed during this run.
+    Work read-only: do not modify code, do not commit, and do not spawn
+    subagents.
+
+    Workspace:
+    <WORKTREE>
+
+    Final head:
+    <HEAD_SHA>
+
+    Deferred findings:
+    <DEFERRED_FINDINGS>
+
+    For each finding, check it against the final head and drop it if it is
+    resolved or no longer applies. Merge duplicates. Group the rest by area or
+    category.
+
+    Report:
+    - Dropped: <count and one-line reason each>
+    - Groups:
+      - <group name>
+        - <file:line> — <summary>
+        - Suggested next step: open an issue | ignore
+```
+
+The controller must never fill `<IMPLEMENT_MODEL>` or `<IMPLEMENT_EFFORT>` with
+`auto`, `inherit`, an omitted value, or an unapproved model.
