@@ -132,6 +132,23 @@ describe("structure: cross-file consistency", () => {
 		}
 	});
 
+	test("every deferred-finding reason is assigned by the finding gate", () => {
+		const state = section(skill, "6. Persist minimal recovery state");
+		const declared = state.match(/reason\s\(`([^`]+)`\)/);
+		expect(declared).not.toBeNull();
+		const gate = skill.slice(skill.indexOf("### Finding gate"));
+		for (const reason of (declared?.[1] ?? "").split("|")) {
+			expect(gate).toContain(reason.trim());
+		}
+	});
+
+	test("resume and wave exits are routed", () => {
+		expect(section(skill, "1. Resolve the workspace")).toContain(
+			"git worktree list",
+		);
+		expect(read("parallel-waves.md")).toContain("## Write-set expansion");
+	});
+
 	test("parallel mechanics live only in parallel-waves.md", () => {
 		expect(skill).toContain("[`parallel-waves.md`](parallel-waves.md)");
 		expect(skill).not.toContain("cherry-pick");

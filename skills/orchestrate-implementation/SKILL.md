@@ -84,6 +84,11 @@ Models (proposed, needs approval):
 Do not save proposals between runs, build a per-unit model matrix, or escalate
 to a more expensive model automatically.
 
+Harness limits: when the harness has no effort control, record effort as `n/a`
+— it is not a blocker. When the harness cannot resume a subagent, "resume"
+anywhere in this skill means dispatching a new one with the previous brief,
+report, and findings as context.
+
 ## Preflight
 
 Before implementation, check the plan: every unit needs acceptance criteria
@@ -127,6 +132,10 @@ git status --porcelain
 ```
 
 Different paths mean a linked worktree.
+
+Before creating anything, check `git worktree list` for a worktree whose
+recovery state (section 6) belongs to the same plan. If one exists, switch to it
+and resume there instead of creating another.
 
 | State                                   | Action                                           |
 | --------------------------------------- | ------------------------------------------------ |
@@ -206,7 +215,9 @@ Handle the reported status:
 - **DONE** — continue to section 5.
 - **DONE_WITH_CONCERNS** — continue to section 5; the unit gets its own review.
 - **NEEDS_CONTEXT** — answer from the plan, spec, or repository and resume the
-  same implementer. If they cannot answer it, treat it as BLOCKED.
+  same implementer. If the controller cannot answer it, treat it as BLOCKED. A
+  parallel unit that needs to write outside its write set leaves the wave
+  instead (see [`parallel-waves.md`](parallel-waves.md)).
 - **BLOCKED** — record a blocker for the unit. Units that do not depend on it
   continue; dependent units stop.
 
@@ -253,8 +264,13 @@ Findings are only:
 
 The controller does not accept the reviewer's label blindly: a material finding
 without location, triggering scenario, or evidence is downgraded and recorded as
-`unsupported`. Do not re-investigate it yourself. Every finding not sent to a
+`unsupported`. Do not re-investigate it yourself. A material finding whose fix
+would require work outside the plan's scope is not fixed: record it as
+`out-of-scope` and report it in the final summary. Every finding not sent to a
 fixer goes to the deferred-findings log (section 6).
+
+Rounds run only while `max_fix_rounds` allows: with `1`, round 2 never runs;
+with `0`, any material finding becomes a blocker immediately.
 
 ### Correction round 1
 
@@ -323,6 +339,8 @@ Blockers: none
 ```
 
 `review` is one of `pass | changes-requested | deferred-to-final | skipped`.
+`head` is the unit's head on the integration branch; for a parallel unit, it is
+the unit branch head until integration and the integrated head afterwards.
 `worktree` exists only for units in a parallel wave. Each deferred finding keeps
 id, unit, origin (`unit-review | final-review`), `file:line`, category
 (`correctness | tests | maintainability | style | pre-existing`), reason
@@ -399,6 +417,7 @@ Unit reviews: <reviewed>/<total> (<deferred> deferred to final)
 Final validation: <passed>
 Final review: <passed | disabled by request>
 Fix rounds used: <N>
+Out of scope: <material findings left for later | none>
 Deferred findings: <consolidated report | none>
 Branch: <branch>
 Worktree: <path>
