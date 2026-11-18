@@ -244,3 +244,30 @@ describe("maintenance", () => {
 		}
 	});
 });
+
+describe("portable subagent boundaries", () => {
+	test("every dispatched prompt includes tool and workspace restrictions", () => {
+		for (const file of [
+			"implementer-prompt.md",
+			"generic-reviewer-prompt.md",
+		]) {
+			const templates = read(file).split("prompt: |").slice(1);
+			expect(templates.length).toBeGreaterThan(0);
+			for (const template of templates) {
+				expect(template).toContain("controller-only");
+				expect(template).toContain("update_plan");
+				expect(template).toContain("wrap_up");
+				expect(template).toContain("working-directory");
+				expect(template).toContain("one simple Git command");
+				expect(template).toContain("Do not bypass");
+				expect(template).toContain("<WORKTREE>");
+			}
+		}
+	});
+
+	test("controller ownership applies even to autofixes and replacements", () => {
+		expect(skill).toContain("Never edit a subagent-owned worktree");
+		expect(skill).toContain("integration workspace with no active writer");
+		expect(read("parallel-waves.md")).toContain("explicit ownership handoff");
+	});
+});

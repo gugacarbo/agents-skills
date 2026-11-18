@@ -42,6 +42,22 @@ Subagent:
     Expected write set:
     <WRITE_SET_OR_UNKNOWN>
 
+    Execution boundaries:
+    - Use only tools exposed and authorized for this subagent role. Do not call
+      controller-only planning, lifecycle or completion tools (for example,
+      update_plan or wrap_up). Return progress, a local plan if useful, and the
+      final result as ordinary messages to the controller instead.
+    - Run commands in the assigned Workspace using the tool's working-directory
+      parameter. Verify the effective directory/repository before Git or writes;
+      do not assume a directory change persists between tool calls. If the harness
+      lacks that parameter, use its supported directory selection and verify it.
+    - Run one simple Git command per invocation from that directory. Avoid shell
+      chains, wrappers, directory overrides such as git -C, and compound commands
+      that obscure the target. Read-only roles must not mutate Git state or files.
+    - A denied or unavailable operation is a boundary, not a retry strategy.
+      Do not bypass guards, rewrite commands to evade them, or request broader
+      privileges. Report the denied operation and blocker to the controller.
+
     Rules:
     - Confirm the worktree and branch before editing.
     - Stay inside this unit's scope.
@@ -96,6 +112,22 @@ Subagent:
 
     Workspace:
     <WORKTREE>
+
+    Execution boundaries:
+    - Use only tools exposed and authorized for this subagent role. Do not call
+      controller-only planning, lifecycle or completion tools (for example,
+      update_plan or wrap_up). Return progress, a local plan if useful, and the
+      final result as ordinary messages to the controller instead.
+    - Run commands in the assigned Workspace using the tool's working-directory
+      parameter. Verify the effective directory/repository before Git or writes;
+      do not assume a directory change persists between tool calls. If the harness
+      lacks that parameter, use its supported directory selection and verify it.
+    - Run one simple Git command per invocation from that directory. Avoid shell
+      chains, wrappers, directory overrides such as git -C, and compound commands
+      that obscure the target. Read-only roles must not mutate Git state or files.
+    - A denied or unavailable operation is a boundary, not a retry strategy.
+      Do not bypass guards, rewrite commands to evade them, or request broader
+      privileges. Report the denied operation and blocker to the controller.
 
     Final head:
     <HEAD_SHA>

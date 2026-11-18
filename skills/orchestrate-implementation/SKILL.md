@@ -42,7 +42,12 @@ max_fix_rounds: 2 # 0..2
 - The controller never writes or corrects implementation code. Implementation
   and fixes always go to subagents. The only exception: the controller may run
   the repository's own deterministic autofix commands (formatter, `lint --fix`)
-  and commit their output separately.
+  and commit their output separately in the integration workspace with no active writer.
+- Never edit a subagent-owned worktree, even for a small fix or autofix.
+  Send corrections to its implementer; reviewers remain read-only.
+- Before replacing a writer, confirm the previous one has stopped, preserve its
+  changes, and explicitly transfer workspace/write-set ownership. Completion
+  alone does not authorize the controller to edit the unit worktree.
 - Implementers, reviewers, and fixers do not spawn subagents.
 - Never dispatch a subagent with an unapproved model (see Models).
 - Run every validation explicitly required by the user, plan, spec, or
@@ -201,7 +206,11 @@ fallback, and cleanup. Sequential runs never need it.
 ## 4. Dispatch implementers
 
 Use [`implementer-prompt.md`](implementer-prompt.md) as the compact contract,
-with the approved `implement` model and effort.
+with the approved `implement` model and effort. Include the execution-boundary
+block in every initial, replacement and correction prompt; do not rely on parent
+history being inherited. Keep it on resumed tasks, including deferred consolidation.
+The controller also runs simple Git commands with an explicit working directory
+and reports guard denials without bypassing them.
 
 Each unit brief contains only what the implementer needs: objective, source
 tasks/requirements, necessary context, relevant files/areas, constraints,

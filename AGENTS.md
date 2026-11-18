@@ -88,6 +88,10 @@ bun run skills-check    # relações e arquivos publicados das skills válidos
   o `skills-check` considera catálogos/runners, mas ignora `evals/fixtures` e
   `evals/results`.
 
+- Evals de orquestração devem somar a telemetria do controlador e dos
+  descendentes; tempo de gravação de artefatos não mede execução. Preserve
+  tentativas com falha de ambiente/limite separadas dos reviews completos.
+
 ## Mapa de contexto
 
 <!-- Índice dos capítulos (docs/context/), cada um com QUANDO carregar.

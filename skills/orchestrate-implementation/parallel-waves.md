@@ -18,6 +18,17 @@ Sequential units never need it.
 - Dispatch all implementers of the wave before waiting on any of them. Each
   brief names its own worktree, branch, and expected write set.
 
+## Workspace ownership
+
+The unit implementer is the only writer in its worktree. The controller may
+inspect allowed read-only evidence but must route all edits, including formatting,
+to that implementer. Reviewers never write there. If the writer must be replaced,
+confirm it has stopped and preserve its changes before an explicit ownership handoff
+to the replacement. A paused or finished task does not itself transfer ownership.
+Keep integration operations in the integration workspace; directory selection must
+be explicit and Git commands simple, including during setup, integration and cleanup.
+Do not switch into a unit worktree to fix a conflict on the controller's behalf.
+
 ## Per-unit completion
 
 Each unit goes through `SKILL.md` section 5 (evidence check, review when its
