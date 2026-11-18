@@ -1,0 +1,1 @@
+Process signed payment webhooks exactly once per event ID, including when duplicate deliveries arrive concurrently. Invalid signatures must be rejected before any charge is recorded. Keep the HMAC-SHA256 signature check over the raw request body and constant-time comparison. The example store is in-memory and deterministic; `charge_count` counts successful distinct charges.

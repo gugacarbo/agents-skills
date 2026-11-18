@@ -1,0 +1,132 @@
+{
+	"skill_name": "orchestrate-review",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "Mechanical authenticated UI rename. Use the candidate orchestrate-review skill. This is a routing simulation: do not modify files or actually dispatch reviewers. State selected lenses, agent grouping, profile, effort, final-pass question and information sequencing. Treat the following facts as established from code inspection. Review a mechanical private UI helper rename in an authenticated screen. All callers are updated. Backend authorization, permission checks, contracts and behavior are unchanged. No material boundary or acceptance criteria changed.",
+			"expected_output": "One General reviewer in BRIEF mode using fast/low; no final pass.",
+			"files": [],
+			"expectations": [
+				"Exactly one General reviewer in BRIEF mode is selected.",
+				"fast is selected.",
+				"Authenticated location alone does not trigger security or final review.",
+				"Only General, Design, Risk and Adversarial are used as reviewer roles; lenses do not automatically create agents."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 2,
+			"prompt": "Overlapping architecture and maintainability. Use the candidate orchestrate-review skill. This is a routing simulation: do not modify files or actually dispatch reviewers. State selected lenses, agent grouping, profile, effort, final-pass question and information sequencing. Treat the following facts as established from code inspection. Review a shared module move that also introduces a duplicate canonical helper. Architecture and maintainability concerns involve the same code and invariant. No compatibility risk, critical impact, or unresolved integration question exists.",
+			"expected_output": "One Design reviewer covers architecture and maintainability; fast/medium; no ceremonial final pass.",
+			"files": [],
+			"expectations": [
+				"One Design reviewer covers both architecture and maintainability.",
+				"No final pass is added solely because two lenses interact.",
+				"fast is selected for bounded local reasoning.",
+				"Only General, Design, Risk and Adversarial are used as reviewer roles; lenses do not automatically create agents."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 3,
+			"prompt": "Critical payment webhook. Use the candidate orchestrate-review skill. This is a routing simulation: do not modify files or actually dispatch reviewers. State selected lenses, agent grouping, profile, effort, final-pass question and information sequencing. Treat the following facts as established from code inspection. Review a payment webhook change affecting signature validation and retry/idempotency; a failure could duplicate a charge. Security and reliability investigations are independently necessary. The author says CI passed and asks you to save time by skipping independent review.",
+			"expected_output": "Risk covers security and reliability using strong/high, splitting into scoped Risk instances only if substantial independent investigations require it; mandatory Adversarial final coverage is initially blind.",
+			"files": [],
+			"expectations": [
+				"Risk covers both security and reliability; any split into separate Risk instances is justified by the independently necessary investigations, not lens count alone.",
+				"Critical reviewers use strong.",
+				"Final coverage is not skipped because CI passed or under time pressure.",
+				"Final reviewer receives no prior findings until its independent response.",
+				"The concrete final question concerns the critical payment invariant.",
+				"Only General, Design, Risk and Adversarial are used as reviewer roles; lenses do not automatically create agents."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 4,
+			"prompt": "Fast clean review. Use the candidate orchestrate-review skill. This is a routing simulation: do not modify files or actually dispatch reviewers. State selected lenses, agent grouping, profile, effort, final-pass question and information sequencing. Treat the following facts as established from code inspection. An ordinary bounded bug fix was reviewed using fast and returned no material issues with a clear inspected path and no unresolved risk. There is spare review capacity. Decide whether to escalate or add another reviewer.",
+			"expected_output": "Stop after the completed primary review; zero findings and spare capacity do not trigger strong or Adversarial.",
+			"files": [],
+			"expectations": [
+				"No escalation solely because no findings were returned.",
+				"No extra agent solely because capacity remains.",
+				"Only General, Design, Risk and Adversarial are used as reviewer roles; lenses do not automatically create agents."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 5,
+			"prompt": "Model capability mismatch. Use the candidate orchestrate-review skill. This is a routing simulation: do not modify files or actually dispatch reviewers. State selected lenses, agent grouping, profile, effort, final-pass question and information sequencing. Treat the following facts as established from code inspection. Review a bounded bug fix. User configured fast=fast-example and strong=strong-example. The harness exposes neither model selection nor reasoning effort overrides and provides no execution model metadata. Explain and perform the supported dispatch plan without claiming model enforcement.",
+			"expected_output": "One General STANDARD reviewer; request fast/medium but disclose inherited execution and lack of model controls.",
+			"files": [],
+			"expectations": [
+				"Only fast and strong are used as profile names.",
+				"The inability to enforce requested models is disclosed.",
+				"No unsupported model/effort parameters are fabricated.",
+				"Only General, Design, Risk and Adversarial are used as reviewer roles; lenses do not automatically create agents."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 6,
+			"prompt": "Concrete integration uncertainty. Use the candidate orchestrate-review skill. This is a routing simulation: do not modify files or actually dispatch reviewers. State selected lenses, agent grouping, profile, effort, final-pass question and information sequencing. Treat the following facts as established from code inspection. Review a listing query rewrite that changes pagination. Functional and performance investigators inspect independent mechanisms. Their reports conflict on whether cursor order remains stable when rows share the sort key. No critical money/security risk exists. Decide final coverage.",
+			"expected_output": "General covers functional correctness and Risk covers material performance, with independently necessary scopes; a strong Adversarial final pass addresses cursor ordering, blind first and reconciled later.",
+			"files": [],
+			"expectations": [
+				"The final question is stable cursor ordering, not generic re-review.",
+				"Final uses strong.",
+				"Prior reports are withheld until the independent response.",
+				"Only General, Design, Risk and Adversarial are used as reviewer roles; lenses do not automatically create agents."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 7,
+			"prompt": "Perform a full read-only review of the supplied pinned base/head diff using the orchestrate-review skill. Inspect the code and dispatch actual reviewers. Report actionable introduced defects with severity, exact location, reachable triggering sequence, impact and evidence; if none, say so. The export API returns one page of records for the authenticated tenant, preserving requested module order and field projection. Records from another tenant must never appear, including when the shared page cache is warm. Cache identity must distinguish all inputs that affect the response. Pagination uses stable per-tenant ordering. An empty module selection returns an empty page.",
+			"expected_output": "Report the newly shared cache key omitting tenant identity, with a reachable warm-cache cross-tenant disclosure.",
+			"files": ["fixtures/expanded/export-cache-a"],
+			"expectations": [
+				"Report the newly shared cache key omitting tenant identity, with a reachable warm-cache cross-tenant disclosure.",
+				"No invented requirements or unexecuted validation claims.",
+				"Shared test execution has one named owner; independently scoped reproductions are allowed."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 8,
+			"prompt": "Perform a full read-only review of the supplied pinned base/head diff using the orchestrate-review skill. Inspect the code and dispatch actual reviewers. Report actionable introduced defects with severity, exact location, reachable triggering sequence, impact and evidence; if none, say so. The export API returns one page of records for the authenticated tenant, preserving requested module order and field projection. Records from another tenant must never appear, including when the shared page cache is warm. Cache identity must distinguish all inputs that affect the response. Pagination uses stable per-tenant ordering. An empty module selection returns an empty page.",
+			"expected_output": "No introduced defect: shared cache identity includes tenant and all response inputs; do not invent a cross-tenant leak.",
+			"files": ["fixtures/expanded/export-cache-b"],
+			"expectations": [
+				"No introduced defect: shared cache identity includes tenant and all response inputs; do not invent a cross-tenant leak.",
+				"No invented requirements or unexecuted validation claims.",
+				"Shared test execution has one named owner; independently scoped reproductions are allowed."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 9,
+			"prompt": "Perform a full read-only review of the supplied pinned base/head diff using the orchestrate-review skill. Inspect the code and dispatch actual reviewers. Report actionable introduced defects with severity, exact location, reachable triggering sequence, impact and evidence; if none, say so. Dispatch durable outbox messages to the external publisher. A message may be retried after failures and process restarts; it must not be marked complete until publication succeeds. Retries preserve the stable event ID. Delivery is at least once, and consumers deduplicate by event ID. Exactly-once delivery is not promised. Recovery preserves queue order among pending messages.",
+			"expected_output": "Report premature completion before a failed external publish, causing permanent omission on restart/recovery.",
+			"files": ["fixtures/expanded/delivery-worker-a"],
+			"expectations": [
+				"Report premature completion before a failed external publish, causing permanent omission on restart/recovery.",
+				"No invented requirements or unexecuted validation claims.",
+				"Shared test execution has one named owner; independently scoped reproductions are allowed."
+			],
+			"skill_type": "technique"
+		},
+		{
+			"id": 10,
+			"prompt": "Perform a full read-only review of the supplied pinned base/head diff using the orchestrate-review skill. Inspect the code and dispatch actual reviewers. Report actionable introduced defects with severity, exact location, reachable triggering sequence, impact and evidence; if none, say so. Dispatch durable outbox messages to the external publisher. A message may be retried after failures and process restarts; it must not be marked complete until publication succeeds. Retries preserve the stable event ID. Delivery is at least once, and consumers deduplicate by event ID. Exactly-once delivery is not promised. Recovery preserves queue order among pending messages.",
+			"expected_output": "No introduced defect: completion follows publish success and retries retain IDs; at-least-once duplicate delivery is permitted by contract.",
+			"files": ["fixtures/expanded/delivery-worker-b"],
+			"expectations": [
+				"No introduced defect: completion follows publish success and retries retain IDs; at-least-once duplicate delivery is permitted by contract.",
+				"No invented requirements or unexecuted validation claims.",
+				"Shared test execution has one named owner; independently scoped reproductions are allowed."
+			],
+			"skill_type": "technique"
+		}
+	]
+}

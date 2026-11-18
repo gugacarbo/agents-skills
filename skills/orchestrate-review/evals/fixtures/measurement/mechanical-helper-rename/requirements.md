@@ -1,0 +1,1 @@
+Rename the private helper `normalize_email` to `canonicalize_email` while preserving behavior exactly. Callers and tests must use the new name. Emails are trimmed and lowercased; empty input stays empty. The change is mechanical and must not alter account lookup results.

@@ -1,0 +1,1 @@
+Return a deterministic page of listings ordered by `score` descending and then unique `listing_id` ascending. Apply the same ordering before the offset/limit slice on every request so entries are not skipped or repeated between pages when scores tie. Preserve the existing search filtering and page size. The patch claims to speed up pagination.

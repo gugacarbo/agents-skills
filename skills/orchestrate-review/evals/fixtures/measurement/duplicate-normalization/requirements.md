@@ -1,0 +1,1 @@
+Move email canonicalization into the shared `email_keys` module and make both account indexing and lookup use that one canonical helper. Preserve the old behavior: trim surrounding whitespace and lowercase the entire address. `AccountDirectory.find` must locate an account regardless of input case or surrounding whitespace. Do not leave a second local normalization implementation.
