@@ -11,8 +11,13 @@ SKILLS_REPO_ROOT=$(
 
 AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}
 AGENTS_SKILLS_REPO=${AGENTS_SKILLS_REPO:-agents-skills}
-AGENTS_SKILLS_REF=${AGENTS_SKILLS_REF:-main}
-AGENTS_SKILLS_ARCHIVE_URL=${AGENTS_SKILLS_ARCHIVE_URL:-https://github.com/$AGENTS_SKILLS_OWNER/$AGENTS_SKILLS_REPO/archive/refs/heads/$AGENTS_SKILLS_REF.tar.gz}
+AGENTS_SKILLS_REF=${AGENTS_SKILLS_REF:-latest}
+if [ "$AGENTS_SKILLS_REF" = "latest" ]; then
+  release_path=latest/download
+else
+  release_path=download/$AGENTS_SKILLS_REF
+fi
+AGENTS_SKILLS_ARCHIVE_URL=${AGENTS_SKILLS_ARCHIVE_URL:-https://github.com/$AGENTS_SKILLS_OWNER/$AGENTS_SKILLS_REPO/releases/$release_path/agents-skills.tar.gz}
 
 YES=0
 USE_GLOBAL=0
@@ -237,6 +242,13 @@ tar -xzf "$archive_path" -C "$tmp_dir"
 REMOTE_ROOT=$(find_extracted_root "$tmp_dir")
 [ -n "$REMOTE_ROOT" ] || die "Não foi possível localizar os arquivos extraídos"
 [ -f "$REMOTE_ROOT/skills.sh" ] || die "Arquivo skills.sh não encontrado no pacote baixado"
+
+# Older repository-shaped installations keep their layout; normal installs
+# contain skill directories directly and must receive only the built skills.
+if [ ! -d "$UPDATE_TARGET/dist/skills" ]; then
+  REMOTE_ROOT=$REMOTE_ROOT/dist/skills
+  [ -d "$REMOTE_ROOT" ] || die "Skills geradas não encontradas no pacote baixado"
+fi
 
 [ -d "$UPDATE_TARGET" ] || die "Destino de update não existe: $UPDATE_TARGET. Use install primeiro."
 

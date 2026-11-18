@@ -24,8 +24,13 @@ fi
 
 AGENTS_SKILLS_OWNER=${AGENTS_SKILLS_OWNER:-gugacarbo}
 AGENTS_SKILLS_REPO=${AGENTS_SKILLS_REPO:-agents-skills}
-AGENTS_SKILLS_REF=${AGENTS_SKILLS_REF:-main}
-AGENTS_SKILLS_ARCHIVE_URL=${AGENTS_SKILLS_ARCHIVE_URL:-https://github.com/$AGENTS_SKILLS_OWNER/$AGENTS_SKILLS_REPO/archive/refs/heads/$AGENTS_SKILLS_REF.tar.gz}
+AGENTS_SKILLS_REF=${AGENTS_SKILLS_REF:-latest}
+if [ "$AGENTS_SKILLS_REF" = "latest" ]; then
+  release_path=latest/download
+else
+  release_path=download/$AGENTS_SKILLS_REF
+fi
+AGENTS_SKILLS_ARCHIVE_URL=${AGENTS_SKILLS_ARCHIVE_URL:-https://github.com/$AGENTS_SKILLS_OWNER/$AGENTS_SKILLS_REPO/releases/$release_path/agents-skills.tar.gz}
 
 if [ -t 1 ] && [ -z "${NO_COLOR-}" ]; then
   USE_COLOR=1
@@ -133,7 +138,9 @@ shift
 
 COMMAND_SCRIPT=$INTERNAL_SCRIPTS_DIR/$COMMAND.sh
 
-if [ ! -f "$COMMAND_SCRIPT" ]; then
+if [ ! -f "$COMMAND_SCRIPT" ] || {
+  [ "$COMMAND" = "install" ] && [ ! -d "$SCRIPT_DIR/dist/skills" ] && [ "${AGENTS_SKILLS_BOOTSTRAPPED:-0}" != "1" ]
+}; then
   if [ "${AGENTS_SKILLS_BOOTSTRAPPED:-0}" = "1" ]; then
     die "Comando $COMMAND não encontrado no pacote baixado"
   fi

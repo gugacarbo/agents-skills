@@ -20,4 +20,4 @@ run_check bunx biome check
 run_check bun run typecheck
 run_check bun run test
 run_check bun run validate:skills
-run_check bun run build
+run_check env AGENTS_SKILLS_BUILD_DEPLOY=0 bun run build

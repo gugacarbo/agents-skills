@@ -11,7 +11,7 @@ build/
 out/
 .next/
 .nuxt/
-# Published build artifact. It remains versioned through `git add -f dist/`.
+# Local build and release artifacts; CI publishes the tarball to GitHub Releases.
 dist
 
 # IDE

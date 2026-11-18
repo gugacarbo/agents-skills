@@ -11,11 +11,6 @@ ROOT="$(repo_root)"
 cd "$ROOT"
 detect_runner
 
-if [ "${AGENTS_SKILLS_GENERATED_ARTIFACT_COMMIT:-}" = "1" ]; then
-  printf '\nSkipping pre-commit checks for the pre-verified generated artifact.\n'
-  exit 0
-fi
-
 gitleaks git --pre-commit --staged --redact --verbose
 
 python3 "$ROOT/scripts/docs-check"

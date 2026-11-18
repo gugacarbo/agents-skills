@@ -53,3 +53,13 @@ rtk bash src/tests/orchestrator.sh
 - Não adicione um `install.sh` na raiz; o ponto público é `skills.sh install`.
 - Não remova arquivos locais extras no `update`; ele sobrescreve/adiciona arquivos remotos sem podar o destino.
 - Ao criar arquivos novos, lembre que a raiz usa `.gitignore` allowlist.
+
+## Pacote de distribuição
+
+`scripts/package-release.sh` empacota o build existente em
+`dist/agents-skills.tar.gz`. O bootstrap e o update usam o asset da Release
+`latest`, ou a tag indicada em `AGENTS_SKILLS_REF`; `AGENTS_SKILLS_ARCHIVE_URL`
+permite fornecer um pacote alternativo. O pacote tem uma raiz `agents-skills/`
+com `skills.sh`, `README.md`, `src/install.sh`, `src/update.sh` e `dist/skills/`.
+Update copia somente `dist/skills/` para instalações normais e preserva arquivos
+locais extras; instalações antigas com `dist/skills/` mantêm seu layout.

@@ -34,13 +34,13 @@ fontes e são removidos pelo build antes da publicação.
 
 ```sh
 bun install
-bun run test                      # testes globais e testes das skills
-bun run test:skills               # somente testes das skills com package
+bun run test        # testes globais e testes das skills
+bun run test:skills # somente testes das skills com package
 bun --filter @gugacarbo/skill-master test
 bun --filter @gugacarbo/skill-code-flow test
 bun --filter @gugacarbo/skill-task-completion-notifier test
-bun run validate:skills           # validações opcionais declaradas por skill
-bun run build                     # valida skills e gera dist/skills/
+bun run validate:skills # validações opcionais declaradas por skill
+bun run build           # valida skills e gera dist/skills/
 ```
 
 O workspace organiza o desenvolvimento, mas a distribuição continua sendo
@@ -73,26 +73,26 @@ nome é informado, todas as skills disponíveis são instaladas.
 
 ## Variáveis de ambiente
 
-| Variável                     | Padrão                                                           | Descrição                                              |
-| ---------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------ |
-| `AGENTS_SKILLS_OWNER`        | `gugacarbo`                                                      | Owner do GitHub para clone e download                  |
-| `AGENTS_SKILLS_REPO`         | `agents-skills`                                                  | Nome do repositório no GitHub                          |
-| `AGENTS_SKILLS_REF`          | `main`                                                           | Branch ou tag usada para clone e download              |
-| `AGENTS_SKILLS_REPO_URL`     | `https://github.com/$OWNER/$REPO.git`                            | URL completa do repositório Git                        |
-| `AGENTS_SKILLS_ARCHIVE_URL`  | `https://github.com/$OWNER/$REPO/archive/refs/heads/$REF.tar.gz` | URL do tarball para bootstrap via `curl \| sh`         |
-| `AGENTS_SKILLS_PROMPT_INPUT` | `/dev/tty`                                                       | Origem de entrada para prompts interativos (test seam) |
-| `NO_COLOR`                   | —                                                                | Desabilita saída colorida no terminal                  |
+| Variável                     | Padrão                                         | Descrição                                                 |
+| ---------------------------- | ---------------------------------------------- | --------------------------------------------------------- |
+| `AGENTS_SKILLS_OWNER`        | `gugacarbo`                                    | Owner do GitHub para clone e download                     |
+| `AGENTS_SKILLS_REPO`         | `agents-skills`                                | Nome do repositório no GitHub                             |
+| `AGENTS_SKILLS_REF`          | `latest`                                       | Release usada no download; `--init` usa `main` por padrão |
+| `AGENTS_SKILLS_REPO_URL`     | `https://github.com/$OWNER/$REPO.git`          | URL completa do repositório Git                           |
+| `AGENTS_SKILLS_ARCHIVE_URL`  | URL do asset `agents-skills.tar.gz` da Release | URL alternativa do pacote de distribuição                 |
+| `AGENTS_SKILLS_PROMPT_INPUT` | `/dev/tty`                                     | Origem de entrada para prompts interativos (test seam)    |
+| `NO_COLOR`                   | —                                              | Desabilita saída colorida no terminal                     |
 
 ## Skills incluídas
 
-| Skill                      | Descrição                                                         |
-| -------------------------- | ----------------------------------------------------------------- |
-| `commit-changes`           | Cria commits com mensagens no padrão Conventional Commits         |
-| `find-docs`                | Busca documentação atualizada de bibliotecas e frameworks         |
-| `project-init`             | Scaffold de novos projetos a partir de templates curados          |
-| `skill-master`             | Criação, edição e avaliação de skills reutilizáveis para agentes  |
-| `code-flow`                | Entregas por issue com rigor adaptativo, reviews e gates humanos  |
-| `task-completion-notifier` | Notificação de conclusão de tarefas no desktop                    |
+| Skill                      | Descrição                                                        |
+| -------------------------- | ---------------------------------------------------------------- |
+| `commit-changes`           | Cria commits com mensagens no padrão Conventional Commits        |
+| `find-docs`                | Busca documentação atualizada de bibliotecas e frameworks        |
+| `project-init`             | Scaffold de novos projetos a partir de templates curados         |
+| `skill-master`             | Criação, edição e avaliação de skills reutilizáveis para agentes |
+| `code-flow`                | Entregas por issue com rigor adaptativo, reviews e gates humanos |
+| `task-completion-notifier` | Notificação de conclusão de tarefas no desktop                   |
 
 ## Exemplos
 
@@ -162,10 +162,10 @@ curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills
 curl -fsSL https://raw.githubusercontent.com/gugacarbo/agents-skills/main/skills.sh | sh -s -- update --global
 ```
 
-### Usando um fork ou branch alternativa
+### Usando um fork ou uma versão específica
 
 ```sh
-AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --global
+AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=v1.2.0 ./skills.sh install --global
 ```
 
 ## Estrutura do projeto
@@ -175,7 +175,7 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 ├── skills.sh              # Entrypoint público; suporta bootstrap via curl | sh
 ├── src/                   # Scripts de instalação, atualização e desenvolvimento
 ├── scripts/               # Utilitários de documentação e hooks
-├── dist/skills/            # Artefato gerado e versionado, usado pelo instalador
+├── dist/skills/            # Artefato local gerado, ignorado pelo Git
 └── skills/                # Fonte das skills instaláveis
     ├── commit-changes/        # Commits com Conventional Commits
     ├── find-docs/             # Busca de documentação
@@ -187,10 +187,37 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=develop ./skills.sh install --glo
 
 O comando `./skills.sh install` copia as skills de `dist/skills/` diretamente
 para o destino escolhido. Nomes posicionais limitam a cópia às skills
-selecionadas. A pasta `skills/` é a fonte; execute `./skills.sh build` antes de
-publicar alterações. Depois da instalação, o comando oferece instalar a mesma
+selecionadas. A pasta `skills/` é a fonte; o CI gera o pacote de distribuição ao publicar uma tag `v*`. Depois da instalação, o comando oferece instalar a mesma
 seleção para `~/.claude/skills`, `~/.gemini/skills` e `~/.codex/skills`; cada
 destino já usado como principal não entra na pergunta. Ao aceitar, o
 instalador pergunta se deve criar symlinks apontando para o destino principal
 (padrão); respondendo `n`, ele faz uma cópia independente que preserva skills
 já existentes em cada destino.
+
+## Distribuição por GitHub Releases
+
+`dist/` existe somente como saída local de build e não é versionado. O workflow
+`.github/workflows/release.yml` testa, gera e publica `agents-skills.tar.gz`
+quando uma tag `v*` é enviada. O pacote contém as skills prontas, o instalador,
+o atualizador e o README da mesma versão; o consumidor não precisa de Bun.
+
+```sh
+# Publicar uma versão a partir de um commit já enviado ao GitHub
+git tag v1.2.0
+git push origin v1.2.0
+
+# Gerar o pacote localmente, sem instalar em ~/.agents/skills
+AGENTS_SKILLS_BUILD_DEPLOY=0 bun run build
+sh scripts/package-release.sh
+
+# Instalar uma versão publicada específica
+AGENTS_SKILLS_REF=v1.2.0 ./skills.sh install --path ~/.codex/skills
+```
+
+Sem `AGENTS_SKILLS_REF`, install e update baixam a Release marcada como latest.
+Branches e commits sem Release não são versões instaláveis pelo download padrão;
+`--init` continua disponível para clonar as fontes. Para republicar uma tag ainda
+sem Release, execute manualmente o workflow Release skills informando a tag existente.
+
+O pre-push valida o repositório sem criar commits de arquivos gerados. Remover
+`dist/` da árvore versionada não remove as cópias presentes no histórico anterior.
