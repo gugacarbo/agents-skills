@@ -249,6 +249,15 @@
 		"Worktree",
 		"worktree",
 		"worktrees",
-		"zipf"
+		"zipf",
+		"HMAC",
+		"PYTHONDONTWRITEBYTECODE",
+		"Straß",
+		"STRAẞ",
+		"canonicalizer",
+		"killpg",
+		"lifecycles",
+		"nonoverlapping",
+		"unrun"
 	]
 }
