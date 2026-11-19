@@ -1,0 +1,8 @@
+{
+	"assertions": [
+		"keep A, B, and C as three distinct sequential units",
+		"each unit implementation is committed by its implementer",
+		"do not run a final review because the user disabled it",
+		"unit review policy follows the selected skill version"
+	]
+}

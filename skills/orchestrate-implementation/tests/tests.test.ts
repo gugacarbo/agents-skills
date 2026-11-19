@@ -236,9 +236,9 @@ describe("maintenance", () => {
 			"validation-evidence-not-rerun",
 			"unsupported-finding-downgraded",
 			"refactor-is-non-blocking",
-			"no-final-review-reviews-every-unit",
+			"no-final-review-keeps-risk-selection",
 			"blocked-unit-becomes-blocker",
-			"deferred-findings-consolidated",
+			"deferred-findings-controller-summary",
 		]) {
 			expect(names.has(name)).toBe(true);
 		}

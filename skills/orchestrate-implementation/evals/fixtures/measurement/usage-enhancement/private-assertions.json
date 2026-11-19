@@ -1,0 +1,7 @@
+{
+	"assertions": [
+		"reject missing units and non-mapping events with ValueError",
+		"preserve first-seen order of users",
+		"do not mutate input events"
+	]
+}

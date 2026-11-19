@@ -20,12 +20,12 @@ reporting. It never implements or fixes product code itself.
 - Per-unit validation: focused, run by the implementer; the controller checks
   the evidence instead of re-running it.
 - Final validation: repository/plan canonical checks.
-- Findings not fixed: recorded, consolidated, and reported at the end.
+- Findings not fixed: material defects block completion; retain only useful optional
+  observations for a short controller summary. No consolidation-only agent.
 - Publication: no automatic merge, push, PR, comment, or worktree removal.
 
-Every subagent dispatch has a fixed cost: cold start, repository orientation,
-validation, and often review. Speed comes from fewer dispatches and from
-running independent units at the same time, not from shorter prompts.
+Each dispatch pays for cold start, orientation and validation. Reuse related
+sequential workers, avoid repeated context and parallelize independent units.
 
 Natural-language overrides take precedence: "revise todas as tasks", "sem
 review por task", "sem revisão final", "rode sequencialmente", "use a branch
@@ -62,11 +62,11 @@ max_fix_rounds: 2 # 0..2
 
 Three roles need a concrete model and effort:
 
-| Role         | Also used for                                              |
-| ------------ | ---------------------------------------------------------- |
-| implement    | unit fixers, final fixers, deferred-findings consolidation |
-| task review  | unit reviews and their scoped re-reviews                   |
-| final review | final review and its scoped re-reviews                     |
+| Role         | Also used for                            |
+| ------------ | ---------------------------------------- |
+| implement    | unit fixers and final fixers             |
+| task review  | unit reviews and their scoped re-reviews |
+| final review | final review and its scoped re-reviews   |
 
 Resolve each role in this order:
 
@@ -77,14 +77,7 @@ Resolve each role in this order:
 `auto`, `inherit`, an omitted model, or an implicit default never count as
 approval. To propose, list the models available in the current harness and
 show one choice per role with a one-line reason, then request a single
-approval before any dispatch:
-
-```text
-Models (proposed, needs approval):
-  implement:    <model> / <effort> — <reason>
-  task review:  <model> / <effort> — <reason>
-  final review: <model> / <effort> — <reason>
-```
+approval before any dispatch.
 
 Do not save proposals between runs, build a per-unit model matrix, or escalate
 to a more expensive model automatically.
@@ -107,20 +100,14 @@ Implementation run
 
 Plan: <path>
 Workspace: <isolated | existing isolated | explicitly in-place>
-Tasks: <N> -> Units: <M>
-Waves: <e.g. A -> [B || C] -> D | sequential>
-Review:
-  units: <reviewed units with reason, e.g. B: migration | none known yet>
-  may be added after implementation: diff size, DONE_WITH_CONCERNS
-  final: <enabled | disabled by request>
-Fix rounds: <0..2>
+Tasks: <N> -> Units: <M>; waves: <A -> [B || C] -> D | sequential>
+Unit reviews: <units and risk reasons; skipped coverage>
+Final review: <enabled | disabled by request>; fix rounds: <0..2>
 Models:
   implement: <model / effort>
   task review: <model / effort>
   final review: <model / effort>
-Validation:
-  per-unit: focused
-  final: <checks>
+Validation: per-unit focused; final <checks>
 Overrides: <none | summary>
 ```
 
@@ -196,7 +183,10 @@ A wave runs in parallel only when all of these are clearly true:
    group them into one unit instead.
 
 If any condition is uncertain, execute sequentially. `parallel: off` or
-"rode sequencialmente" disables waves entirely.
+"rode sequencialmente" disables waves entirely. Bound dispatches by available
+capacity, including controllers. If full, wait for a completion/capacity event;
+do not retry spawns, list agents or repeat preflight on every timeout. Refresh
+capacity when an event indicates it may have changed.
 
 A unit gets its own worktree if and only if it runs in a parallel wave;
 sequential units share the integration worktree. When a wave qualifies, read
@@ -205,12 +195,26 @@ fallback, and cleanup. Sequential runs never need it.
 
 ## 4. Dispatch implementers
 
+Resume the previous implementer for a related sequential unit in the same
+workspace/branch with the same approved model, if its prior work and required
+review passed and no writer is active. Assign the next unit explicitly, replacing
+its old write scope; keep acceptance, validation, base/head and commits separate.
+Use a fresh worker for unrelated scope, required independence, incompatible
+workspace/model, unavailable context or evidenced confusion. Never reuse an
+implementer as its independent reviewer. Do not resume one writer concurrently.
+
 Use [`implementer-prompt.md`](implementer-prompt.md) as the compact contract,
 with the approved `implement` model and effort. Include the execution-boundary
 block in every initial, replacement and correction prompt; do not rely on parent
-history being inherited. Keep it on resumed tasks, including deferred consolidation.
+history being inherited. Keep it on resumed tasks and correction rounds.
 The controller also runs simple Git commands with an explicit working directory
 and reports guard denials without bypassing them.
+
+For initial and replacement agents, use fresh context (`fork_turns: none` when
+supported) and a self-contained brief; do not copy the full parent chat, unrelated
+review verdicts or reports. If context isolation is unavailable, disclose
+it and send the smallest supported scope. Resume existing implementers/reviewers
+for corrections, retaining their relevant context and adding only new evidence.
 
 Each unit brief contains only what the implementer needs: objective, source
 tasks/requirements, necessary context, relevant files/areas, constraints,
@@ -251,11 +255,12 @@ Review a unit on its own when at least one applies:
 - the implementer reported `DONE_WITH_CONCERNS`;
 - the plan or user marks it as needing review.
 
-Every other unit is marked `deferred-to-final` and fully covered by the final
-review. "revise todas as tasks" reviews every unit; "sem review por task"
-reviews none individually. If the final review is turned off, every unit gets
-its own review instead; if the user turns off both, the preflight warns that
-nothing will be reviewed.
+Every other unit is marked `deferred-to-final` when the final review is enabled,
+or `skipped` when it is disabled. "revise todas as tasks" reviews every unit;
+"sem review por task" reviews none individually. Turning off final review does
+not change the risk-based unit selection or implicitly request more reviews.
+Disclose omitted coverage in preflight and the final report; do not replace it
+with unrequested individual reviews.
 
 Use [`generic-reviewer-prompt.md`](generic-reviewer-prompt.md) for unit and
 final reviews by default. Use `orchestrate-review` only when the user's request
@@ -271,12 +276,21 @@ Findings are only:
 - **non-blocking** — everything else: style, refactors, alternative
   abstractions, optional improvements, unrelated pre-existing issues.
 
-The controller does not accept the reviewer's label blindly: a material finding
-without location, triggering scenario, or evidence is downgraded and recorded as
-`unsupported`. Do not re-investigate it yourself. A material finding whose fix
-would require work outside the plan's scope is not fixed: record it as
-`out-of-scope` and report it in the final summary. Every finding not sent to a
-fixer goes to the deferred-findings log (section 6).
+The controller does not accept the reviewer's label blindly: a claim without
+location, triggering scenario, or evidence is `unsupported` and does not trigger
+a fix. Do not re-investigate unsupported speculation. A review may return zero
+findings; do not request optional observations to populate a report.
+
+An evidenced material regression introduced or worsened by this run blocks
+completion even when its correction is `out-of-scope`. Do not silently expand
+the plan or mark the run complete: route a bounded authorized correction or
+reversal to its implementer, or report BLOCKED and request the needed scope/risk
+decision. User acceptance of residual risk must be explicit and disclosed.
+
+Discard style preferences and unrelated pre-existing issues unless the user
+requested them. Retain only useful non-blocking observations or unresolved
+material blockers in the recovery state (section 6); never create a mandatory
+backlog of optional suggestions.
 
 Rounds run only while `max_fix_rounds` allows: with `1`, round 2 never runs;
 with `0`, any material finding becomes a blocker immediately.
@@ -288,9 +302,11 @@ It fixes, validates, commits, and the fix is re-reviewed.
 
 ### Correction round 2
 
-If material findings remain, dispatch a new implementer with the original brief,
-current state, findings, previous attempt, and validation evidence. It fixes,
-validates, commits, and the fix is re-reviewed.
+If material findings remain, resume the original implementer with the new
+counterexample. Replace it only if unavailable, blocked or repeatedly confused,
+not because of the round number. Transfer the brief, current state, findings and
+completed validation without restarting completed investigation. The implementer
+fixes, validates, commits, and receives a scoped re-review.
 
 ### Scoped re-review
 
@@ -318,40 +334,28 @@ run. Example:
 Plan: docs/implementation-plan.md
 Base: abc123
 Models: implement=<m/e> task-review=<m/e> final-review=<m/e>
-
 Unit A:
-  tasks: [1, 2]
+  tasks: [1,2]
   status: done
+  base: abc123
   head: def456
   review: pass
-
-Unit B:
-  tasks: [3]
-  status: fixing
-  head: 789abc
-  review: changes-requested
-  fix_round: 1
-  worktree: ../repo.units/B
-
-Unit C:
-  tasks: [4, 5]
-  status: done
-  head: 456def
-  review: deferred-to-final
-
-Deferred findings:
-  - F1 | unit C | unit-review | src/a.ts:42 | maintainability | non-blocking | <summary>
-
+Observations: <useful non-blocking items only, or none>
 Final validation: pending
 Final review: pending
 Blockers: none
 ```
 
 `review` is one of `pass | changes-requested | deferred-to-final | skipped`.
+Store `base`, `head`, the implementer ID and any active `fix_round` for resumption.
+Verify Git once per handoff; batch independent reads as separate simple commands.
+Reuse verified facts while workspace, HEAD and ownership remain unchanged; refresh
+on change, uncertain evidence or an external edit. Persist state on unit/review/fix/
+integration transitions, not waits. Do not repeat plan dumps or copy command logs.
 `head` is the unit's head on the integration branch; for a parallel unit, it is
 the unit branch head until integration and the integrated head afterwards.
-`worktree` exists only for units in a parallel wave. Each deferred finding keeps
-id, unit, origin (`unit-review | final-review`), `file:line`, category
+`worktree` exists only for units in a parallel wave. Each retained observation keeps
+unit, origin (`unit-review | final-review`), `file:line`, category
 (`correctness | tests | maintainability | style | pre-existing`), reason
 (`non-blocking | unsupported | out-of-scope`), and a one-line summary.
 
@@ -385,8 +389,11 @@ unless the user explicitly turned it off. It covers:
 - global requirement coverage and validation evidence;
 - a complete review of every `deferred-to-final` unit.
 
-It does not reopen units that already passed their own review unless there is
-new evidence of a material defect. The same finding gate applies.
+Give the reviewer each unit's range and review status, relevant requirements,
+and validation evidence, not the full implementation chat. Fully inspect
+`deferred-to-final` units; for passed units check cross-unit integration only,
+unless new evidence points to a material defect. Do not repeat their full
+individual review. The same finding gate applies.
 
 For material final-review findings, up to `max_fix_rounds` rounds:
 
@@ -400,42 +407,43 @@ Before reporting completion after any final fix, the full final validation must
 pass on the final head. If a material finding remains after the maximum, stop
 and report the blocker.
 
-## 9. Consolidate deferred findings
+## 9. Summarize useful observations
 
-If the deferred-findings log is not empty, dispatch one implementer (approved
-`implement` model) in read-only consolidation mode with the whole log, using the
-consolidation template in [`implementer-prompt.md`](implementer-prompt.md). It:
-
-- checks each finding against the final head and drops resolved ones;
-- merges duplicates and groups the rest by area or category;
-- writes a short report with a suggested next step per group (open an issue,
-  or ignore).
-
-It never changes code. Skip this step when the log is empty.
+The controller deduplicates useful observations and drops those resolved by the
+final diff. Summarize briefly with a next step; omit unsupported claims. Never
+dispatch a consolidation-only agent or re-investigate optional suggestions.
 
 ## 10. Finish
 
-Success means the implementation branch/worktree is complete, validated, and
-reviewed. Report a short final summary:
+Success means the implementation is complete and validated, selected reviews
+finished, and skipped coverage disclosed. Unresolved material regressions block
+completion unless the user explicitly accepts and is told the residual risk.
+Report a short final summary:
 
 ```text
 Plan: <path>
-Status: complete
+Status: <complete | blocked>
+Next action: <none | authorized fix/reversal owner | concrete scope/risk decision question>
 Units: <done/total>
-Unit reviews: <reviewed>/<total> (<deferred> deferred to final)
+Unit reviews: <reviewed>/<total> (<deferred> deferred to final; <skipped> skipped)
 Final validation: <passed>
 Final review: <passed | disabled by request>
 Fix rounds used: <N>
-Out of scope: <material findings left for later | none>
-Deferred findings: <consolidated report | none>
+Unresolved material blockers: <evidence and scope/risk decision needed | none>
+Optional observations: <short useful summary | none>
 Branch: <branch>
 Worktree: <path>
 Head: <sha>
 ```
 
-Always show the consolidated deferred-findings report in the chat. When the run
-is tied to a PR or issue, offer to post it there as a comment; post only when
-the user asked for it or confirms.
+For a blocked run, fill `Next action` with a bounded authorized fix/reversal or
+a concrete scope/risk decision question. Logging the finding alone is not a next
+action. Do not ask for permission already granted.
+
+Disclose skipped review coverage, unresolved material blockers and any explicitly
+accepted residual risk. Never equate an out-of-scope log entry with a resolved
+regression. When useful observations exist, include their short summary in chat.
+Post it to a PR or issue only when the user requests or confirms that action.
 
 Do not merge, push, create a PR, or remove the integration worktree unless the
 user explicitly requests that action.

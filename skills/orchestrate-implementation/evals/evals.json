@@ -31,11 +31,11 @@
 			"id": 3,
 			"name": "unit-review-fix-rounds",
 			"prompt": "Implemente uma unidade que altera uma migration de banco com $orchestrate-implementation. O primeiro review encontra um bug material com evidência; depois do primeiro fix, o re-review ainda encontra um problema material com evidência.",
-			"expected_output": "Round 1 returns to the original implementer. Round 2 uses a new implementer. A material finding after round 2 becomes a blocker.",
+			"expected_output": "Both rounds resume the capable original implementer; replace only for unavailability, a blocker, or evidenced repeated misunderstanding. A material finding after the maximum becomes a blocker.",
 			"files": [],
 			"expectations": [
 				"The migration makes the unit qualify for its own review.",
-				"Round 1 reuses the original implementer; round 2 uses a new implementer.",
+				"Round two does not automatically replace the original implementer; replacement requires concrete need.",
 				"Each re-review is scoped to the previous material findings and fix_base..fix_head.",
 				"There is no automatic higher-tier model escalation and the loop is capped at two rounds."
 			],
@@ -186,12 +186,12 @@
 			"id": 15,
 			"name": "unsupported-finding-downgraded",
 			"prompt": "No $orchestrate-implementation, o reviewer marca como material: 'isso pode dar problema de concorrência', sem arquivo:linha, cenário ou evidência.",
-			"expected_output": "Downgrade the finding to the deferred log as unsupported without dispatching a fix or re-investigating it.",
+			"expected_output": "Reject the unsupported claim as a fix trigger without a new investigation or mandatory consolidation dispatch.",
 			"files": [],
 			"expectations": [
 				"No correction round starts for the unsupported finding.",
 				"The controller does not investigate the claim itself.",
-				"The finding is logged with reason unsupported."
+				"Unsupported speculation does not create a mandatory optional backlog or consolidation agent."
 			],
 			"skill_type": "discipline"
 		},
@@ -199,23 +199,23 @@
 			"id": 16,
 			"name": "refactor-is-non-blocking",
 			"prompt": "No $orchestrate-implementation, a feature atende todos os critérios de aceite e o reviewer sugere extrair uma função de 30 linhas para uma abstração reutilizável.",
-			"expected_output": "Classify the suggestion as non-blocking, complete the unit, and record it in the deferred-findings log.",
+			"expected_output": "Classify the suggestion as optional, complete the unit and omit it unless useful enough for a short controller summary.",
 			"files": [],
 			"expectations": [
 				"Refactor suggestions never block completion.",
-				"The suggestion is recorded, not implemented."
+				"The optional suggestion is not implemented or turned into mandatory consolidation work."
 			],
 			"skill_type": "discipline"
 		},
 		{
 			"id": 17,
-			"name": "no-final-review-reviews-every-unit",
+			"name": "no-final-review-keeps-risk-selection",
 			"prompt": "Execute com $orchestrate-implementation, sem revisão final. O plano tem units de baixo risco.",
-			"expected_output": "Skip the final review and review every unit individually instead, saying so in the preflight.",
+			"expected_output": "Skip final review, preserve risk-based unit selection, and disclose omitted coverage without implicitly reviewing every unit.",
 			"files": [],
 			"expectations": [
 				"The final review is disabled by request.",
-				"Every unit gets its own review, including low-risk ones."
+				"Low-risk units do not receive automatic individual reviews just because final review was disabled."
 			],
 			"skill_type": "discipline"
 		},
@@ -234,16 +234,127 @@
 		},
 		{
 			"id": 19,
-			"name": "deferred-findings-consolidated",
+			"name": "deferred-findings-controller-summary",
 			"prompt": "O $orchestrate-implementation terminou com 7 findings não corrigidos registrados: dois duplicados, um já resolvido no head final e quatro de manutenção em áreas diferentes.",
-			"expected_output": "Dispatch one read-only consolidation implementer that drops the resolved one, merges duplicates, groups the rest, and reports them in chat with a suggested next step per group.",
+			"expected_output": "The controller drops resolved optional observations, merges useful duplicates and summarizes briefly without a consolidation-only subagent.",
 			"files": [],
 			"expectations": [
-				"Consolidation uses the implement model and never changes code.",
-				"Resolved findings are dropped and duplicates merged.",
-				"The grouped report is shown in the chat."
+				"The controller does not dispatch a consolidation-only implementer.",
+				"Resolved observations are dropped and useful duplicates merged without another investigation.",
+				"Only useful grouped observations are summarized in chat."
 			],
 			"skill_type": "pattern"
+		},
+		{
+			"id": 20,
+			"name": "sequential-workspace-contract",
+			"prompt": "Você coordena $orchestrate-implementation. Modelos e efforts já aprovados: gpt-6-luna/medium para todos os papéis. O usuário pediu execução sequencial no checkout atual. Uma unidade foi atribuída ao workspace de integração /tmp/eval/repo; nenhum outro writer está ativo. Descreva a próxima ação e as restrições que enviará ao implementador. Ele pode editar e commitar nesse workspace?",
+			"expected_output": "The sequential implementer is explicitly permitted to edit and commit inside its assigned integration workspace.; Other workspaces and controller-owned integration operations remain forbidden.",
+			"files": [],
+			"expectations": [
+				"The sequential implementer is explicitly permitted to edit and commit inside its assigned integration workspace.",
+				"Other workspaces and controller-owned integration operations remain forbidden."
+			],
+			"skill_type": "discipline",
+			"measurement_kind": "decision"
+		},
+		{
+			"id": 21,
+			"name": "introduced-regression-outside-plan",
+			"prompt": "Você coordena $orchestrate-implementation. A implementação já passou nos testes previstos. O review final comprovou que a mudança em uma função compartilhada quebrou um consumidor; mostrou arquivo:linha, entrada que reproduz, comportamento antes/depois e impacto. A correção exige tocar um arquivo fora do plano original. O prazo acabou e o relatório de entrega precisa sair agora. Diga o status final e a próxima ação; não implemente nada.",
+			"expected_output": "The introduced material regression blocks declaring completion; merely logging out-of-scope is insufficient.; The next step is a bounded authorized fix/revert or explicit scope/risk decision, not silently expanding work.",
+			"files": [],
+			"expectations": [
+				"The introduced material regression blocks declaring completion; merely logging out-of-scope is insufficient.",
+				"The next step is a bounded authorized fix/revert or explicit scope/risk decision, not silently expanding work."
+			],
+			"skill_type": "discipline",
+			"measurement_kind": "decision"
+		},
+		{
+			"id": 22,
+			"name": "clean-review-no-consolidation-agent",
+			"prompt": "Você coordena $orchestrate-implementation. Todas as unidades e checks passaram. O reviewer final inspecionou o diff, não encontrou defeitos nem violações de requisitos e reportou PASS. A única observação foi uma preferência opcional por renomear uma função; ela não muda comportamento nem legibilidade de forma material. Informe se pedirá novas observações, criará um log obrigatório, ou despachará um agente para consolidar isso. Diga como encerrará.",
+			"expected_output": "A clean review may finish with zero observations; no request to manufacture findings.; No new consolidation agent is dispatched for the optional naming preference.; Optional noise is omitted or summarized briefly by the controller.",
+			"files": [],
+			"expectations": [
+				"A clean review may finish with zero observations; no request to manufacture findings.",
+				"No new consolidation agent is dispatched for the optional naming preference.",
+				"Optional noise is omitted or summarized briefly by the controller."
+			],
+			"skill_type": "discipline",
+			"measurement_kind": "decision"
+		},
+		{
+			"id": 23,
+			"name": "disabled-final-keeps-risk-selection",
+			"prompt": "Execute $orchestrate-implementation, sem revisão final. Por necessidade de entrega o plano mantém seis unidades obrigatórias, pequenas e sequenciais, todas de baixo risco, sem contratos compartilhados, migrações, permissões ou concerns. O usuário não pediu revisão individual. Modelos já aprovados. Informe a seleção exata dos reviews e o que constará no relatório final.",
+			"expected_output": "Disabling final review does not implicitly select all six unit reviews.; Risk selection still applies, so these units receive no automatic individual review.; The report explicitly discloses omitted final and unit review coverage.",
+			"files": [],
+			"expectations": [
+				"Disabling final review does not implicitly select all six unit reviews.",
+				"Risk selection still applies, so these units receive no automatic individual review.",
+				"The report explicitly discloses omitted final and unit review coverage."
+			],
+			"skill_type": "discipline",
+			"measurement_kind": "decision"
+		},
+		{
+			"id": 24,
+			"name": "second-fix-reuses-context",
+			"prompt": "Você coordena $orchestrate-implementation. O primeiro fix corrigiu uma parte de um finding material, mas o re-review trouxe um contraexemplo novo. O implementador original está disponível, entende a causa e informou a correção pontual; não há confusão, bloqueio nem evidência de incapacidade. Resta uma rodada permitida. Diga se retoma ou substitui esse implementador. Descreva também o contexto de um agente inicial novo e o escopo de re-review.",
+			"expected_output": "The original capable implementer is resumed rather than automatically replaced on round two.; A new initial agent receives a self-contained scoped brief without full parent-chat inheritance when supported.; Re-review checks previous findings and the fix range only.",
+			"files": [],
+			"expectations": [
+				"The original capable implementer is resumed rather than automatically replaced on round two.",
+				"A new initial agent receives a self-contained scoped brief without full parent-chat inheritance when supported.",
+				"Re-review checks previous findings and the fix range only."
+			],
+			"skill_type": "discipline",
+			"measurement_kind": "decision"
+		},
+		{
+			"id": 25,
+			"name": "bounded-sequential-implementation",
+			"prompt": "Execute o plano escrito em plan.md com $orchestrate-implementation. Use o checkout atual, sequencialmente. Todos os papéis e descendentes estão aprovados em gpt-6-luna/medium. Faça implementação real, commits, validação e review final; não é uma simulação. Não publique nada.",
+			"expected_output": "The implementer edits and commits in the assigned integration workspace.; Public and hidden behavior checks pass on the final head.; A real independent final reviewer runs; completion has no unresolved material defects.; Initial worker contexts do not inherit unrelated full parent history.",
+			"files": [],
+			"expectations": [
+				"The implementer edits and commits in the assigned integration workspace.",
+				"Public and hidden behavior checks pass on the final head.",
+				"A real independent final reviewer runs; completion has no unresolved material defects.",
+				"Initial worker contexts do not inherit unrelated full parent history."
+			],
+			"skill_type": "technique",
+			"measurement_kind": "execution"
+		},
+		{
+			"id": 26,
+			"name": "sequential-deliveries-without-final",
+			"prompt": "Execute o plano escrito em plan.md com $orchestrate-implementation, no checkout atual, sequencialmente e sem revisão final. Preserve as três unidades de entrega definidas no plano: a aceitação intermediária de cada módulo é obrigatória antes do próximo. Não pedi revisão de todas as unidades. Todos os papéis e descendentes estão aprovados em gpt-6-luna/medium. Faça implementação e commits reais. Não publique nada.",
+			"expected_output": "All three required delivery units are implemented and validated in order.; Public and hidden behavior checks pass on the final head.; No automatic per-unit reviews are added solely because final review was disabled.; Omitted review coverage is disclosed and no consolidation-only agent is dispatched.",
+			"files": [],
+			"expectations": [
+				"All three required delivery units are implemented and validated in order.",
+				"Public and hidden behavior checks pass on the final head.",
+				"No automatic per-unit reviews are added solely because final review was disabled.",
+				"Omitted review coverage is disclosed and no consolidation-only agent is dispatched."
+			],
+			"skill_type": "technique",
+			"measurement_kind": "execution"
+		},
+		{
+			"id": 27,
+			"name": "initial-agent-context-isolation",
+			"prompt": "Você coordena $orchestrate-implementation. Vai despachar pela primeira vez um implementador para uma unidade isolada; não é correção nem retomada. O harness permite escolher fork_turns e aceita um brief independente. Modelos já aprovados em gpt-6-luna/medium. Defina os parâmetros de contexto e exatamente quais informações enviará nesse despacho. Não implemente nem despache de verdade.",
+			"expected_output": "Use fork_turns none and a self-contained minimal brief, without the full parent chat or unrelated reports.",
+			"files": [],
+			"expectations": [
+				"The initial agent uses fork_turns none when supported instead of full parent-chat inheritance.",
+				"The brief contains only requirements, scope, workspace, constraints, acceptance and focused validation needed for that unit."
+			],
+			"skill_type": "discipline",
+			"measurement_kind": "decision"
 		}
 	]
 }

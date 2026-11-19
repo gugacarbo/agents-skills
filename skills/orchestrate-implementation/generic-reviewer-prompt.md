@@ -48,6 +48,12 @@ Subagent:
     Validation evidence:
     <VALIDATION_EVIDENCE>
 
+    Unit ranges and prior review status (for final review):
+    <UNIT_RANGES_AND_REVIEW_STATUS_OR_NONE>
+    Fully review deferred-to-final units. For passed units, check cross-unit
+    integration without repeating individual review unless new evidence points
+    to a material defect.
+
     For a scoped re-review, also use:
     Previous material findings:
     <PREVIOUS_FINDINGS>
@@ -84,8 +90,9 @@ Subagent:
     - actual versus expected behavior;
     - the evidence supporting it.
 
-    Do not block on speculative issues or preferences. Do not try to reach a
-    report with zero observations.
+    Do not block on speculative issues or preferences. Zero findings is valid.
+    Do not manufacture optional observations or report style preferences and
+    unrelated pre-existing issues. Mention only a few useful non-blocking items.
 
     Output:
     Verdict: PASS | CHANGES_REQUIRED

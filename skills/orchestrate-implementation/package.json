@@ -4,7 +4,7 @@
 	"private": true,
 	"description": "Development tooling for the orchestrate-implementation skill.",
 	"scripts": {
-		"test": "bun test tests/tests.test.ts",
-		"validate": "bun test tests/tests.test.ts && bun -e \"await Bun.file('evals/evals.json').json()\""
+		"test": "bun test tests/tests.test.ts && python3 -m unittest discover -s tests -p '*_test.py'",
+		"validate": "bun run test && bun -e \"await Bun.file('evals/evals.json').json()\""
 	}
 }

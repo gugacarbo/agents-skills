@@ -1,0 +1,5 @@
+# Three delivery units
+
+Implement the plan as three mandatory sequential delivery units. Preserve these unit boundaries; automated acceptance must pass before the next unit begins. Do not merge them. They are private helpers local to this bounded fixture and are not shared interfaces. Unit A adds `src/normalize.py`: `normalize_name(value)` trims whitespace, collapses internal whitespace, and rejects empty/non-string input with ValueError. Unit B depends on A and adds `src/slug.py`: `slugify(value)` normalizes through A then lowercases and replaces spaces with hyphens. Unit C depends on B and adds `src/labels.py`: `display_label(value)` returns exactly `{'name': normalized_name, 'slug': slug}`. Add focused tests for each unit. No external dependencies.
+
+Acceptance: `python3 -m unittest discover -v` passes. Use the existing checkout directly as explicitly requested. All units are mandatory and sequential. No final review is requested; follow the selected skill's review policy for the units.
