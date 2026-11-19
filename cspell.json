@@ -258,6 +258,8 @@
 		"killpg",
 		"lifecycles",
 		"nonoverlapping",
-		"unrun"
+		"unrun",
+		"commitar",
+		"nonblank"
 	]
 }
