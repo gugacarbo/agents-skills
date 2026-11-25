@@ -188,7 +188,7 @@ AGENTS_SKILLS_OWNER=meu-fork AGENTS_SKILLS_REF=v1.2.0 ./skills.sh install --glob
 O comando `./skills.sh install` copia as skills de `dist/skills/` diretamente
 para o destino escolhido. Nomes posicionais limitam a cópia às skills
 selecionadas. A pasta `skills/` é a fonte; o CI gera o pacote de distribuição ao publicar uma tag `v*`. Depois da instalação, o comando oferece instalar a mesma
-seleção para `~/.claude/skills`, `~/.gemini/skills` e `~/.codex/skills`; cada
+seleção para `~/.claude/skills`, `~/.gemini/skills`, `~/.gemini/config/skills` e `~/.codex/skills`; cada
 destino já usado como principal não entra na pergunta. Ao aceitar, o
 instalador pergunta se deve criar symlinks apontando para o destino principal
 (padrão); respondendo `n`, ele faz uma cópia independente que preserva skills
@@ -197,8 +197,13 @@ já existentes em cada destino.
 ## Distribuição por GitHub Releases
 
 `dist/` existe somente como saída local de build e não é versionado. O workflow
-`.github/workflows/release.yml` testa, gera e publica `agents-skills.tar.gz`
-quando uma tag `v*` é enviada. O pacote contém as skills prontas, o instalador,
+`.github/workflows/release.yml` dispara automaticamente em pushes na `main`
+que alteram arquivos distribuíveis (`skills/**`, `skills.sh`, `src/install.sh`,
+`src/update.sh`, `src/build.sh`, `scripts/package-release.sh` e `README.md`),
+calcula a próxima versão `vX.Y.Z` a partir dos Conventional Commits, testa, gera
+e publica `agents-skills.tar.gz` como Release `latest`. Também é possível
+disparar manualmente pelo `workflow_dispatch` (informando uma tag existente ou
+deixando em branco para incremento automático). O pacote contém as skills prontas, o instalador,
 o atualizador e o README da mesma versão; o consumidor não precisa de Bun.
 
 ```sh
