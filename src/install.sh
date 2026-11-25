@@ -366,6 +366,9 @@ secondary_destination_label() {
     */.claude/*)
       printf 'Claude'
       ;;
+    */.gemini/config/*)
+      printf 'Antigravity'
+      ;;
     */.gemini/*)
       printf 'Gemini'
       ;;
@@ -525,9 +528,11 @@ validate_selected_skills
 GLOBAL_TARGET=$(expand_path "~/.agents/skills")
 CLAUDE_TARGET=$(expand_path "~/.claude/skills")
 GEMINI_TARGET=$(expand_path "~/.gemini/skills")
+ANTIGRAVITY_TARGET=$(expand_path "~/.gemini/config/skills")
 CODEX_TARGET=$(expand_path "~/.codex/skills")
 SECONDARY_AGENT_TARGETS="$CLAUDE_TARGET
 $GEMINI_TARGET
+$ANTIGRAVITY_TARGET
 $CODEX_TARGET"
 CURRENT_DIR=$PWD
 CURRENT_DIR_NAME=${CURRENT_DIR##*/}

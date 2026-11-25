@@ -86,6 +86,7 @@ describe("skill installer", () => {
 			const home = join(temporaryRoot, "home");
 			const claudeTarget = join(home, ".claude", "skills");
 			const geminiTarget = join(home, ".gemini", "skills");
+			const antigravityTarget = join(home, ".gemini", "config", "skills");
 			const promptInput = join(temporaryRoot, "tty-input");
 			write(promptInput, "y\n\n");
 			const result = runInstaller(["--path", primary], {
@@ -103,11 +104,14 @@ describe("skill installer", () => {
 				`e em ${geminiTarget} (para uso pelo Gemini)`,
 			);
 			expect(result.output).toContain(
+				`e em ${antigravityTarget} (para uso pelo Antigravity)`,
+			);
+			expect(result.output).toContain(
 				`e em ${join(home, ".codex", "skills")} (para uso pelo Codex)`,
 			);
 			expect(result.output).toContain("Usar symlinks");
 
-			for (const target of [claudeTarget, geminiTarget]) {
+			for (const target of [claudeTarget, geminiTarget, antigravityTarget]) {
 				expectExists(join(target, fixtureSkill, "SKILL.md"));
 				expect(lstatSync(join(target, fixtureSkill)).isSymbolicLink()).toBe(
 					true,
@@ -128,6 +132,7 @@ describe("skill installer", () => {
 			const home = join(temporaryRoot, "home");
 			const claudeTarget = join(home, ".claude", "skills");
 			const geminiTarget = join(home, ".gemini", "skills");
+			const antigravityTarget = join(home, ".gemini", "config", "skills");
 			const codexTarget = join(home, ".codex", "skills");
 			const promptInput = join(temporaryRoot, "tty-input");
 			write(promptInput, "y\nn\n");
@@ -139,7 +144,12 @@ describe("skill installer", () => {
 			});
 			expectSuccess(result);
 
-			for (const target of [claudeTarget, geminiTarget, codexTarget]) {
+			for (const target of [
+				claudeTarget,
+				geminiTarget,
+				antigravityTarget,
+				codexTarget,
+			]) {
 				expectExists(join(target, fixtureSkill, "SKILL.md"));
 				expect(lstatSync(join(target, fixtureSkill)).isSymbolicLink()).toBe(
 					false,
@@ -220,6 +230,7 @@ describe("skill installer", () => {
 			const home = join(temporaryRoot, "home");
 			const claudeTarget = join(home, ".claude", "skills");
 			const geminiTarget = join(home, ".gemini", "skills");
+			const antigravityTarget = join(home, ".gemini", "config", "skills");
 			const codexTarget = join(home, ".codex", "skills");
 			const promptInput = join(temporaryRoot, "tty-input");
 			write(promptInput, "n\n");
@@ -231,7 +242,12 @@ describe("skill installer", () => {
 			});
 			expectSuccess(result);
 			expectExists(join(primary, fixtureSkill, "SKILL.md"));
-			for (const target of [claudeTarget, geminiTarget, codexTarget]) {
+			for (const target of [
+				claudeTarget,
+				geminiTarget,
+				antigravityTarget,
+				codexTarget,
+			]) {
 				expectAbsent(target);
 				expect(result.output).toContain(
 					`Instalação em ${target} não solicitada`,
@@ -262,6 +278,9 @@ describe("skill installer", () => {
 			);
 			expect(result.output).toContain(
 				`em ${join(home, ".gemini", "skills")} (para uso pelo Gemini)`,
+			);
+			expect(result.output).toContain(
+				`em ${join(home, ".gemini", "config", "skills")} (para uso pelo Antigravity)`,
 			);
 			expect(result.output).toContain(
 				`em ${join(home, ".codex", "skills")} (para uso pelo Codex)`,
